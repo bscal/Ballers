@@ -5,11 +5,15 @@ using TMPro;
 
 public class Debugger : MonoBehaviour
 {
-    TextMeshProUGUI title;
+    public static Debugger Instance { get; set; }
+
+TextMeshProUGUI title;
     TextMeshProUGUI[] lines = new TextMeshProUGUI[4];
 
     void Start()
     {
+        Instance = this;
+
         title = GameObject.Find("DebugTitle").GetComponent<TextMeshProUGUI>();
 
         for (int i = 0; i < 4; i++)
