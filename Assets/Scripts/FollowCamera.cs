@@ -9,8 +9,14 @@ public class FollowCamera : MonoBehaviour
 
     void Start()
     {
+        // Sets the camera behind the player with offset.
+        Vector3 pos = GameObject.Find("PlayerObject").transform.position;
+        pos.y = 6;
+        pos.z = 12;
+        transform.position = pos;
         offset = target.transform.position - transform.position;
     }
+
     void LateUpdate()
     {
         float desiredAngle = target.transform.eulerAngles.y;

@@ -4,35 +4,22 @@ using UnityEngine;
 
 public class PlayerAnimation : MonoBehaviour
 {
-    public WalkState State { get; set; }
-
+    private Player m_player;
     private Animator m_animator;
-    private Animation m_anim;
 
     // Start is called before the first frame update
     void Start()
     {
-        State = WalkState.IDLE;
-
+        m_player = GetComponent<Player>();
         m_animator = GetComponent<Animator>();
-        m_anim = GetComponent<Animation>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        m_animator.SetBool("isWalking", IsWalking());
-        m_animator.SetBool("isDribbling", Input.GetKey(KeyCode.G));
+        m_animator.SetBool("isDribbling", m_player.IsDribbling);
+        m_animator.SetBool("isSprinting", m_player.IsSprinting);
+        m_animator.SetBool("isWalking", m_player.IsWalking);
     }
 
-    private bool IsWalking()
-    {
-        return Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D);
-    }
-}
-
-public enum WalkState
-{
-    NONE,
-    IDLE
 }
