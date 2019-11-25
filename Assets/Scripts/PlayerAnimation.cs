@@ -19,7 +19,7 @@ public class PlayerAnimation : MonoBehaviour
     {
         m_animator.SetBool("isDribbling", m_player.IsDribbling);
         m_animator.SetBool("isSprinting", m_player.IsSprinting);
-        m_animator.SetBool("isWalking", m_player.IsWalking);
+        m_animator.SetBool("isWalking", m_player.IsMoving);
     }
 
 }
