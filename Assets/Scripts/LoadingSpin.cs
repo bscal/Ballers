@@ -10,7 +10,7 @@ public class LoadingSpin : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (spinner == null)
+        if (!spinner)
             print("LoadingSpin: Loading Spinner Image not found.");
         else
             spinner.transform.Rotate(0.0f, 0.0f, 1.0f);

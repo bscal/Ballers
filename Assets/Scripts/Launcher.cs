@@ -97,6 +97,34 @@ public class Launcher : MonoBehaviourPunCallbacks
     }
 
     /// <summary>
+    /// Called when entering a room (by creating or joining it). Called on all clients (including the Master Client).
+    /// </summary>
+    /// <remarks>
+    /// This method is commonly used to instantiate player characters.
+    /// If a match has to be started "actively", you can call an [PunRPC](@ref PhotonView.RPC) triggered by a user's button-press or a timer.
+    ///
+    /// When this is called, you can usually already access the existing players in the room via PhotonNetwork.PlayerList.
+    /// Also, all custom properties should be already available as Room.customProperties. Check Room..PlayerCount to find out if
+    /// enough players are in the room to start playing.
+    /// </remarks>
+    public override void OnJoinedRoom()
+    {
+        LogFeedback("<Color=Green>OnJoinedRoom</Color> with " + PhotonNetwork.CurrentRoom.PlayerCount + " Player(s)");
+        Debug.Log("PUN/Launcher: OnJoinedRoom() called by PUN. Now this client is in a room.\nFrom here on, your game would be running.");
+
+        // #Critical: We only load if we are the first player, else we rely on  PhotonNetwork.AutomaticallySyncScene to sync our instance scene.
+        if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
+        {
+            Debug.Log("We load the 'Lobby' ");
+
+            // #Critical
+            // Load the Room Level. 
+            PhotonNetwork.LoadLevel("Lobby");
+
+        }
+    }
+
+    /// <summary>
     /// Called when a JoinRandom() call failed. The parameter provides ErrorCode and message.
     /// </summary>
     /// <remarks>
@@ -123,34 +151,6 @@ public class Launcher : MonoBehaviourPunCallbacks
         m_isConnecting = false;
         controlPanel.SetActive(true);
 
-    }
-
-    /// <summary>
-    /// Called when entering a room (by creating or joining it). Called on all clients (including the Master Client).
-    /// </summary>
-    /// <remarks>
-    /// This method is commonly used to instantiate player characters.
-    /// If a match has to be started "actively", you can call an [PunRPC](@ref PhotonView.RPC) triggered by a user's button-press or a timer.
-    ///
-    /// When this is called, you can usually already access the existing players in the room via PhotonNetwork.PlayerList.
-    /// Also, all custom properties should be already available as Room.customProperties. Check Room..PlayerCount to find out if
-    /// enough players are in the room to start playing.
-    /// </remarks>
-    public override void OnJoinedRoom()
-    {
-        LogFeedback("<Color=Green>OnJoinedRoom</Color> with " + PhotonNetwork.CurrentRoom.PlayerCount + " Player(s)");
-        Debug.Log("PUN/Launcher: OnJoinedRoom() called by PUN. Now this client is in a room.\nFrom here on, your game would be running.");
-
-        // #Critical: We only load if we are the first player, else we rely on  PhotonNetwork.AutomaticallySyncScene to sync our instance scene.
-        if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
-        {
-            Debug.Log("We load the 'Lobby' ");
-
-            // #Critical
-            // Load the Room Level. 
-            PhotonNetwork.LoadLevel("Lobby");
-
-        }
     }
 
     // Private Functions
