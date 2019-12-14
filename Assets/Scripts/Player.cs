@@ -1,8 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MLAPI;
+using MLAPI.Messaging;
 
-public class Player : MonoBehaviour
+public class Player : NetworkedBehaviour
 {
 
     public int id;
@@ -14,6 +16,11 @@ public class Player : MonoBehaviour
     public bool IsMoving { get; set; }         = false;
     public bool IsSprinting { get; set; }      = false;
 
+
+    public override void NetworkStart()
+    {
+
+    }
 
     // Start is called before the first frame update
     void Start()

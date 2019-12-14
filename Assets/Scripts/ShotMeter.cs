@@ -19,21 +19,40 @@ public class ShotMeter : MonoBehaviour
     public RawImage glow;
     
     private bool m_isActive = false;
+    private bool m_isShooting = false;
 
     private IEnumerator m_coroutine;
+
     // Start is called before the first frame update
     void Start()
     {
+        if (GameObject.Find("ShotMeter"))
+        {
+            meter       = GameObject.Find("ShotMeter");
+            background  = GameObject.Find("ShotMeterBG").GetComponent<RawImage>();
+            fill        = GameObject.Find("ShotMeterBar").GetComponent<RawImage>();
+            target      = GameObject.Find("ShotLine").GetComponent<Image>();
+            glow        = GameObject.Find("Glow").GetComponent<RawImage>();
+        }
+
         position = fill.rectTransform.sizeDelta;
         position.y = 0.0f;
         Reset();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.F))
+            m_isShooting = true;
+        else
+            m_isShooting = false;
+
+    }
+
+    void FixedUpdate()
     {
         Debugger.Instance.Print(string.Format("{0},{1},{2}", target.rectTransform.localPosition.y, fill.rectTransform.rect.height, target.rectTransform.localPosition.y - fill.rectTransform.rect.height), 3);
-        if (Input.GetKeyDown(KeyCode.F))
+        if (m_isShooting)
         {
             if (m_isActive)
             {

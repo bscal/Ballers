@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
 using TMPro;
+using MLAPI;
+using MLAPI.Spawning;
 
 public class BallHandling : MonoBehaviour
 {
     public GameObject text;
 
-    private GameObject m_playerObj;
+    private NetworkedObject m_playerObj;
     private Player m_player;
     private GameObject m_handAnimPoint;
     public GameObject m_left;
@@ -18,7 +20,7 @@ public class BallHandling : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        m_playerObj = GameObject.Find("PlayerObject");
+        m_playerObj = SpawnManager.GetLocalPlayerObject();
         m_player = m_playerObj.GetComponent<Player>();
         m_handAnimPoint = GameObject.Find("HandLAnimPos");
         m_left = GameObject.Find("HandL");

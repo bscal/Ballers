@@ -1,16 +1,20 @@
-﻿using System.Collections;
+﻿using MLAPI;
+using MLAPI.Spawning;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class FollowCamera : MonoBehaviour
 {
-    public GameObject target;
-    Vector3 offset;
+    public NetworkedObject target;
+
+    private Vector3 offset;
 
     void Start()
     {
         // Sets the camera behind the player with offset.
-        Vector3 pos = GameObject.Find("PlayerObject").transform.position;
+        target = SpawnManager.GetLocalPlayerObject();
+        Vector3 pos = SpawnManager.GetLocalPlayerObject().transform.position;
         pos.y = 6;
         pos.z = 12;
         transform.position = pos;
