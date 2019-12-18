@@ -3,7 +3,7 @@ using TMPro;
 using MLAPI;
 using MLAPI.Spawning;
 
-public class BallHandling : MonoBehaviour
+public class BallHandling : NetworkedBehaviour
 {
     public GameObject text;
 
@@ -18,7 +18,7 @@ public class BallHandling : MonoBehaviour
     private BallState m_state;
 
     // Start is called before the first frame update
-    void Start()
+    public override void NetworkStart()
     {
         m_playerObj = SpawnManager.GetLocalPlayerObject();
         m_player = m_playerObj.GetComponent<Player>();

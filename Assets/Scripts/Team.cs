@@ -5,10 +5,8 @@ public class Team
 {
 
     public int[] players;
-
-    public int points   = 0;
-    public int fouls    = 0;
-
+    public int points = 0;
+    public int fouls = 0;
 
     public Team(int t_size)
     {

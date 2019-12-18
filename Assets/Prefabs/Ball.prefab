@@ -95,6 +95,7 @@ GameObject:
   - component: {fileID: 6110922978709442019}
   - component: {fileID: 6110922978709442021}
   - component: {fileID: 1914631757}
+  - component: {fileID: 1483954994}
   m_Layer: 0
   m_Name: Ball
   m_TagString: PicaVoxelVolume
@@ -191,7 +192,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/ball.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 16362
+  thisInstanceId: -3250
   Undone: 1
 --- !u!114 &6110922978709442021
 MonoBehaviour:
@@ -206,7 +207,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   text: {fileID: 0}
-  mesh: {fileID: 0}
   m_left: {fileID: 0}
   m_right: {fileID: 0}
 --- !u!54 &1914631757
@@ -225,6 +225,23 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1483954994
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6110922978709442016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 209037615, guid: 01701b64234b4d523d8045142cbc73fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  NetworkedInstanceId: 0
+  PrefabHash: 1226112138290912118
+  PrefabHashGenerator: Ball
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
 --- !u!1 &6110922978746903064
 GameObject:
   m_ObjectHideFlags: 0
