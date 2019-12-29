@@ -1,5 +1,35 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2252065615339527030
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6883874001793591111}
+  m_Layer: 0
+  m_Name: HandLAnimPos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6883874001793591111
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2252065615339527030}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.2999999, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4134976720305878225}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2343604838423674999
 GameObject:
   m_ObjectHideFlags: 0
@@ -2721,7 +2751,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4134976719273105623}
   m_Layer: 0
-  m_Name: HandR
+  m_Name: HandL
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2751,7 +2781,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4134976719341457420}
   m_Layer: 0
-  m_Name: HandL
+  m_Name: HandR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2782,7 +2812,7 @@ GameObject:
   - component: {fileID: 4134976719516205984}
   - component: {fileID: 4134976719516205919}
   m_Layer: 0
-  m_Name: LowerArmL
+  m_Name: LowerArmR
   m_TagString: PicaVoxelVolume
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2879,7 +2909,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Arm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 275844
+  thisInstanceId: 35410
   Undone: 1
 --- !u!1 &4134976719560664162
 GameObject:
@@ -2987,7 +3017,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Leg.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 275850
+  thisInstanceId: 35416
   Undone: 1
 --- !u!1 &4134976719731898826
 GameObject:
@@ -3095,7 +3125,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/UpperBody.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 275856
+  thisInstanceId: 35422
   Undone: 1
 --- !u!1 &4134976719774805981
 GameObject:
@@ -3108,7 +3138,7 @@ GameObject:
   - component: {fileID: 4134976719774805980}
   - component: {fileID: 4134976719774805979}
   m_Layer: 0
-  m_Name: UpperArmR
+  m_Name: UpperArmL
   m_TagString: PicaVoxelVolume
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3203,7 +3233,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Arm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 275862
+  thisInstanceId: 35428
   Undone: 1
 --- !u!1 &4134976719809551987
 GameObject:
@@ -3311,7 +3341,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Foot.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 275868
+  thisInstanceId: 35434
   Undone: 1
 --- !u!1 &4134976719819052329
 GameObject:
@@ -3419,7 +3449,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Leg.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 275874
+  thisInstanceId: 35440
   Undone: 1
 --- !u!1 &4134976719902799366
 GameObject:
@@ -3527,7 +3557,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Foot.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 275880
+  thisInstanceId: 35446
   Undone: 1
 --- !u!1 &4134976720071227199
 GameObject:
@@ -3635,7 +3665,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Thigh.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 275886
+  thisInstanceId: 35452
   Undone: 1
 --- !u!1 &4134976720086236962
 GameObject:
@@ -3692,7 +3722,7 @@ GameObject:
   - component: {fileID: 4134976720305878225}
   - component: {fileID: 4134976720305878224}
   m_Layer: 0
-  m_Name: LowerArmR
+  m_Name: LowerArmL
   m_TagString: PicaVoxelVolume
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3712,6 +3742,7 @@ Transform:
   - {fileID: 2343604840359496178}
   - {fileID: 2343604838659817429}
   - {fileID: 4134976719273105623}
+  - {fileID: 6883874001793591111}
   m_Father: {fileID: 4134976720484254762}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3788,7 +3819,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Arm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 275898
+  thisInstanceId: 35464
   Undone: 1
 --- !u!1 &4134976720375009957
 GameObject:
@@ -3801,7 +3832,7 @@ GameObject:
   - component: {fileID: 4134976720375009956}
   - component: {fileID: 4134976720375009955}
   m_Layer: 0
-  m_Name: UpperArmL
+  m_Name: UpperArmR
   m_TagString: PicaVoxelVolume
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3896,7 +3927,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Arm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 275904
+  thisInstanceId: 35470
   Undone: 1
 --- !u!1 &4134976720426634522
 GameObject:
@@ -3908,7 +3939,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4134976720426634521}
   m_Layer: 0
-  m_Name: HandLAnimPos
+  m_Name: HandRAnimPos
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3922,7 +3953,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4134976720426634522}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.3, z: 0}
+  m_LocalPosition: {x: 0, y: -0.2999999, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4134976719516205984}
@@ -3944,6 +3975,7 @@ GameObject:
   - component: {fileID: 2149591573505646334}
   - component: {fileID: 1705429200}
   - component: {fileID: 4134976720462683666}
+  - component: {fileID: -7543476189314254859}
   m_Layer: 0
   m_Name: PlayerObject
   m_TagString: Untagged
@@ -3992,6 +4024,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 0
   username: test
+  isRightHanded: 1
+  isDribbling: 0
+  isMoving: 0
+  isSprinting: 0
 --- !u!114 &1705429195
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4111,6 +4147,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9809e9acbdff3b34b949bb366e59a0db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!65 &-7543476189314254859
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4134976720462683669}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.6, y: 1.7, z: 0.2}
+  m_Center: {x: 0, y: 0.95, z: 0}
 --- !u!1 &4134976720484254763
 GameObject:
   m_ObjectHideFlags: 0
@@ -4121,7 +4170,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4134976720484254762}
   m_Layer: 0
-  m_Name: ArmR
+  m_Name: ArmL
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4341,7 +4390,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Thigh.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 275934
+  thisInstanceId: 35500
   Undone: 1
 --- !u!1 &4134976720887705975
 GameObject:
@@ -4484,7 +4533,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/LowerBody.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 275944
+  thisInstanceId: 35510
   Undone: 1
 --- !u!1 &4134976721038996714
 GameObject:
@@ -4496,7 +4545,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4134976721038996713}
   m_Layer: 0
-  m_Name: ArmL
+  m_Name: ArmR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4688,7 +4737,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Head.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 275962
+  thisInstanceId: 35528
   Undone: 1
 --- !u!1 &4919408756640952425
 GameObject:

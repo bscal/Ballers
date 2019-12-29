@@ -19,14 +19,14 @@ public class PlayerControls : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        m_player.IsMoving = IsMoving();
-        m_player.IsSprinting = Input.GetKey(KeyCode.LeftShift);
+        m_player.isMoving = IsMoving();
+        m_player.isSprinting = Input.GetKey(KeyCode.LeftShift);
 
         m_animator.SetBool("isJumping", Input.GetKey(KeyCode.Space));
         m_animator.SetBool("isShooting", Input.GetKey(KeyCode.Y));
-        m_animator.SetBool("isDribbling", m_player.IsDribbling);
-        m_animator.SetBool("isSprinting", m_player.IsSprinting);
-        m_animator.SetBool("isWalking", m_player.IsMoving);
+        m_animator.SetBool("isDribbling", m_player.isDribbling);
+        m_animator.SetBool("isSprinting", m_player.isSprinting);
+        m_animator.SetBool("isWalking", m_player.isMoving);
     }
     private bool IsMoving()
     {

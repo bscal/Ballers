@@ -43,7 +43,7 @@ public class GameStateManager : NetworkedBehaviour
     private Text m_UIShotClock;
 
     private GameManager m_gameManager;
-    private bool m_isOvertime = false;
+    private byte m_OvertimeCount = 0;
     private bool m_shotclockOff = false;
 
     private void Start()
@@ -127,14 +127,14 @@ public class GameStateManager : NetworkedBehaviour
 
             if (m_gameManager.GetScoreDifference() == 0)
             {
-                m_isOvertime = true;
+                m_OvertimeCount++;
             }
             // End of regulation
 
         }
         else
         {
-            InGameTime.Value = (m_isOvertime) ? Mathf.Round(OVERTIME_LENGTH) : Mathf.Round(QUARTER_LENGTH);
+            InGameTime.Value = (m_OvertimeCount > 0) ? Mathf.Round(OVERTIME_LENGTH) : Mathf.Round(QUARTER_LENGTH);
             m_gameManager.EndQuarter();
         }
     }
@@ -143,7 +143,7 @@ public class GameStateManager : NetworkedBehaviour
     {
         m_UIHomeScore.text = m_gameManager.TeamHome.points.ToString();
         m_UIAwayScore.text = m_gameManager.TeamAway.points.ToString();
-        m_UIQuarter.text = Quarter.Value.ToString();
+        m_UIQuarter.text = (m_OvertimeCount > 0) ? "OT" + m_OvertimeCount : Quarter.Value.ToString();
         m_UIClock.text = string.Format("{0}:{1}", Mathf.Floor(InGameTime.Value / 60), Mathf.RoundToInt(InGameTime.Value % 60));
         if (m_shotclockOff)
             m_UIShotClock.text = "";
