@@ -1,5 +1,8 @@
 # PicaVoxel is a bought asset from unity store
-Assets/PicaVoxel/
+Assets/PicaVoxel/*
+Assets/PicaVoxel/PicaVoxel/*
+!Assets/PicaVoxel/PicaVoxel/
+!Assets/PicaVoxel/PicaVoxel/MeshStore/
 Assets/Photon/
 Api Documentation HTML/
 Api Documentation HTML.meta
