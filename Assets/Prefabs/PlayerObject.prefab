@@ -2357,7 +2357,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Arm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 79762
+  thisInstanceId: 109724
   Undone: 1
 --- !u!1 &4134976719560664162
 GameObject:
@@ -2465,7 +2465,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Leg.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 79768
+  thisInstanceId: 109730
   Undone: 1
 --- !u!1 &4134976719731898826
 GameObject:
@@ -2573,7 +2573,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/UpperBody.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 79774
+  thisInstanceId: 109736
   Undone: 1
 --- !u!1 &4134976719774805981
 GameObject:
@@ -2681,7 +2681,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Arm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 79780
+  thisInstanceId: 109742
   Undone: 1
 --- !u!1 &4134976719809551987
 GameObject:
@@ -2789,7 +2789,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Foot.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 79786
+  thisInstanceId: 109748
   Undone: 1
 --- !u!1 &4134976719819052329
 GameObject:
@@ -2897,7 +2897,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Leg.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 79792
+  thisInstanceId: 109754
   Undone: 1
 --- !u!1 &4134976719902799366
 GameObject:
@@ -3005,7 +3005,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Foot.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 79798
+  thisInstanceId: 109760
   Undone: 1
 --- !u!1 &4134976720071227199
 GameObject:
@@ -3113,7 +3113,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Thigh.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 79804
+  thisInstanceId: 109766
   Undone: 1
 --- !u!1 &4134976720086236962
 GameObject:
@@ -3267,7 +3267,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Arm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 79816
+  thisInstanceId: 109778
   Undone: 1
 --- !u!1 &4134976720375009957
 GameObject:
@@ -3375,7 +3375,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Arm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 79822
+  thisInstanceId: 109784
   Undone: 1
 --- !u!1 &4134976720426634522
 GameObject:
@@ -3439,7 +3439,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4134976720462683669}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.35, z: 0}
   m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_Children:
   - {fileID: 8404727998025206397}
@@ -3746,7 +3746,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Thigh.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 79852
+  thisInstanceId: 109804
   Undone: 1
 --- !u!1 &4134976720887705975
 GameObject:
@@ -3889,7 +3889,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/LowerBody.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 79862
+  thisInstanceId: 109814
   Undone: 1
 --- !u!1 &4134976721038996714
 GameObject:
@@ -4093,7 +4093,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Head.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 79880
+  thisInstanceId: 109832
   Undone: 1
 --- !u!1 &4440466946179586523
 GameObject:
@@ -4495,7 +4495,7 @@ MeshRenderer:
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
   m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
+  m_SelectedEditorRenderState: 2
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89

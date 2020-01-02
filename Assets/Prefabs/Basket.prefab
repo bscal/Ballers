@@ -842,7 +842,7 @@ MonoBehaviour:
   ImportedFrom: 0
   ImportedFile: 
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 72888
+  thisInstanceId: 174544
   Undone: 0
 --- !u!1 &1655402237990821391
 GameObject:
@@ -899,7 +899,7 @@ GameObject:
   - component: {fileID: 1655402238250666443}
   - component: {fileID: 1655402238250666440}
   m_Layer: 0
-  m_Name: basketL
+  m_Name: Basket
   m_TagString: PicaVoxelVolume
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -913,7 +913,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1655402238250666441}
   m_LocalRotation: {x: 0, y: -1, z: 0, w: 0}
-  m_LocalPosition: {x: 15.75, y: 3.45, z: -5.6}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1655402239282955206}
@@ -995,7 +995,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/basketL.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 72948
+  thisInstanceId: 174554
   Undone: 0
 --- !u!1 &1655402238845789721
 GameObject:
@@ -2049,7 +2049,7 @@ MeshRenderer:
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
   m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
+  m_SelectedEditorRenderState: 2
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89

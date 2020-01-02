@@ -1,20 +1,37 @@
-﻿using System;
+﻿using MLAPI;
+using MLAPI.Spawning;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+public class GameManager : NetworkedBehaviour
 {
+    public Team TeamHome { get; private set; }
+    public Team TeamAway { get; private set; }
+
+    public GameObject ball;
 
     private Dictionary<int, Player> m_playersByID = new Dictionary<int, Player>();
     private GameStateManager m_gameState;
-    public Team TeamHome { get; private set; }
-    public Team TeamAway { get; private set; }
+    [SerializeField]
+    private GameObject m_ballPrefab;
+    private Vector3 m_centerCourt;
+
+    public override void NetworkStart()
+    {
+        if (ball == null)
+        {
+            ball = Instantiate(m_ballPrefab, new Vector3(1, 3, 1), Quaternion.identity);
+            ball.GetComponent<NetworkedObject>().Spawn();
+        }
+    }
 
     // Start is called before the first frame update
     void Start()
     {
         m_gameState = GetComponent<GameStateManager>();
+        m_centerCourt = GameObject.Find("CenterCourt").transform.position;
         TeamHome = new Team(5);
         TeamAway = new Team(5);
     }
