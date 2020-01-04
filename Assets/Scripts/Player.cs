@@ -6,6 +6,7 @@ using MLAPI.Messaging;
 using MLAPI.NetworkedVar.Collections;
 using MLAPI.NetworkedVar;
 using MLAPI.Prototyping;
+using System;
 
 public class Player : NetworkedBehaviour
 {
@@ -35,8 +36,9 @@ public class Player : NetworkedBehaviour
     public override void NetworkStart()
     {
         id = username.GetHashCode();
-        
+
         //leftHand.Value = transform.Find("HandLAnimPos").gameObject;
+        GameManager.AddPlayer(this, NetworkedObject);
     }
 
     // Update is called once per frame
@@ -44,6 +46,15 @@ public class Player : NetworkedBehaviour
     {
         rightHand.Value = transform.Find("Skeleton/Body/ArmR/LowerArmR/HandRAnimPos").transform.position;
         Debugger.Instance.Print(string.Format("D:{0}, W:{1}, S:{2}", isDribbling, isMoving, isSprinting), 0);
+    }
+
+    public void OnStartGame()
+    {
+    }
+
+    internal void OnShoot()
+    {
+        GameManager.GetBallHandling().OnShoot(this);
     }
 
 }

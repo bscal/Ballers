@@ -30,25 +30,23 @@ public class BallHandling : NetworkedBehaviour
     private NetworkedVarULong playerLastTouched = new NetworkedVarULong(settings, 5);
     private NetworkedVarULong playerLastPossesion = new NetworkedVarULong(settings, 5);
 
+    private GameManager m_gameManager;
     private NetworkedObject m_netPlayer;
     private NetworkedObject m_netBall;
     private GameObject m_ball;
     private Rigidbody m_body;
     private BallState m_state;
 
+    private bool m_topCollision;
+
+    float count = 0.0f;
+    Vector3 point;
+
     private Dictionary<ulong, float> m_playerDistances = new Dictionary<ulong, float>();
 
-    //private NetworkedObject m_playerWithBall;
-    //private NetworkedObject m_playerLastTouched;
-    //private NetworkedObject m_playerLastPossesion;
-
-    // Start is called before the first frame update
     public override void NetworkStart()
     {
-        if (IsServer)
-        {
-        }
-
+        m_gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         m_playerObj = SpawnManager.GetLocalPlayerObject();
         m_player = m_playerObj.GetComponent<Player>();
         m_handAnimPoint = GameObject.Find("HandLAnimPos");
@@ -59,14 +57,23 @@ public class BallHandling : NetworkedBehaviour
         m_body = gameObject.GetComponent<Rigidbody>();
         m_body.AddForce(new Vector3(1, 1, 1), ForceMode.Impulse);
         m_state = BallState.LOOSE;
-       // m_body.AddExplosionForce(5.0f, new Vector3(0, .5f, -1), 10);
     }
 
-    // Update is called once per frame
     void Update()
     {
-        //m_body.AddExplosionForce(5.0f, new Vector3(0,.5f,-1), 10);
         Debugger.Instance.Print(string.Format("1:{0} 2:{1} bs:{2}", playerWithBall.Value, playerLastPossesion.Value, m_state), 2);
+        if (Input.GetKeyDown(KeyCode.J))
+        {
+            m_ball.transform.position = GameObject.Find("Rim").gameObject.transform.position + new Vector3(0, 5);
+        }
+        if (count < 1.0f)
+        {
+            count += 1.0f * Time.deltaTime;
+
+            Vector3 m1 = Vector3.Lerp(m_ball.transform.position, point, count);
+            Vector3 m2 = Vector3.Lerp(point, m_gameManager.m_basketLeft.transform.position, count);
+            m_ball.transform.position = Vector3.Lerp(m1, m2, count);
+        }
     }
 
     // FixedUpdate is called 50x per frame
@@ -110,6 +117,32 @@ public class BallHandling : NetworkedBehaviour
         {
             m_ball.transform.position = m_player.rightHand.Value;
         }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (IsServer)
+        {
+            if (other.gameObject.name == "HitboxTop")
+                m_topCollision = true;
+
+            else if (m_topCollision && other.gameObject.name == "HitboxBot")
+            {
+                OnBasketScored();
+                m_gameManager.AddScore(other.GetComponentInParent<Basket>().isHome, 2);
+            }
+        }
+    }
+
+    private void OnBasketScored()
+    {
+        print("scored");
+    }
+
+    public void OnShoot(Player player)
+    {
+        count = 0.0f;
+        point = m_ball.transform.position + (m_gameManager.m_basketLeft.transform.position - m_ball.transform.position) / 2 + Vector3.up * 5.0f;
     }
 }
 

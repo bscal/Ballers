@@ -14,3 +14,9 @@ public class Team
     }
 
 }
+
+public enum TeamTag
+{
+    HOME,
+    AWAY
+}

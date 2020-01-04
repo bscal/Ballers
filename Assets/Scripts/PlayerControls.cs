@@ -12,7 +12,6 @@ public class PlayerControls : MonoBehaviour
    void Start()
    {
         m_player = GetComponent<Player>();
-        //m_animator = GetComponent<Animator>();
         m_animator = GetComponentInChildren<Animator>();
    }
 
@@ -22,8 +21,18 @@ public class PlayerControls : MonoBehaviour
         m_player.isMoving = IsMoving();
         m_player.isSprinting = Input.GetKey(KeyCode.LeftShift);
 
+        if (Input.GetKey(KeyCode.Y))
+        {
+            m_animator.SetBool("isShooting", true);
+            m_player.OnShoot();
+        }
+        else
+        {
+            m_animator.SetBool("isShooting", false);
+        }
+
         m_animator.SetBool("isJumping", Input.GetKey(KeyCode.Space));
-        m_animator.SetBool("isShooting", Input.GetKey(KeyCode.Y));
+        
         m_animator.SetBool("isDribbling", m_player.isDribbling);
         m_animator.SetBool("isSprinting", m_player.isSprinting);
         m_animator.SetBool("isWalking", m_player.isMoving);

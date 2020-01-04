@@ -51,7 +51,6 @@ public class GameStateManager : NetworkedBehaviour
         m_UIHomeName.text = "Home";
         m_UIAwayName.text = "Away";
         m_gameManager = GetComponent<GameManager>();
-        StartGame();
     }
 
     private void NetworkedStart()
@@ -107,7 +106,7 @@ public class GameStateManager : NetworkedBehaviour
 
     // Private Functions
 
-    private void StartGame()
+    public void OnStartGame()
     {
         InGameTime.Value = QUARTER_LENGTH;
         ShotClock.Value = SHOTCLOCK_LENGTH;
@@ -118,7 +117,12 @@ public class GameStateManager : NetworkedBehaviour
     private void EndQuarter()
     {
         Quarter.Value++;
-        if (Quarter.Value > 4)
+        if (Quarter.Value > 2)
+        {
+            EndHalf();
+        }
+
+        else if (Quarter.Value > 4)
         {
             if (Quarter.Value >= byte.MaxValue)
             {
@@ -137,6 +141,11 @@ public class GameStateManager : NetworkedBehaviour
             InGameTime.Value = (m_OvertimeCount > 0) ? Mathf.Round(OVERTIME_LENGTH) : Mathf.Round(QUARTER_LENGTH);
             m_gameManager.EndQuarter();
         }
+    }
+
+    private void EndHalf()
+    {
+        m_gameManager.EndHalf();
     }
 
     private void UpdateUI()
