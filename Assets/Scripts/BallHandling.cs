@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using MLAPI.Connection;
 using System.Linq;
 using MLAPI.NetworkedVar;
+using System.Collections;
 
 public class BallHandling : NetworkedBehaviour
 {
@@ -39,9 +40,6 @@ public class BallHandling : NetworkedBehaviour
 
     private bool m_topCollision;
 
-    float count = 0.0f;
-    Vector3 point;
-
     private Dictionary<ulong, float> m_playerDistances = new Dictionary<ulong, float>();
 
     public override void NetworkStart()
@@ -62,18 +60,6 @@ public class BallHandling : NetworkedBehaviour
     void Update()
     {
         Debugger.Instance.Print(string.Format("1:{0} 2:{1} bs:{2}", playerWithBall.Value, playerLastPossesion.Value, m_state), 2);
-        if (Input.GetKeyDown(KeyCode.J))
-        {
-            m_ball.transform.position = GameObject.Find("Rim").gameObject.transform.position + new Vector3(0, 5);
-        }
-        if (count < 1.0f)
-        {
-            count += 1.0f * Time.deltaTime;
-
-            Vector3 m1 = Vector3.Lerp(m_ball.transform.position, point, count);
-            Vector3 m2 = Vector3.Lerp(point, m_gameManager.m_basketLeft.transform.position, count);
-            m_ball.transform.position = Vector3.Lerp(m1, m2, count);
-        }
     }
 
     // FixedUpdate is called 50x per frame
@@ -117,6 +103,10 @@ public class BallHandling : NetworkedBehaviour
         {
             m_ball.transform.position = m_player.rightHand.Value;
         }
+
+        else if (m_state == BallState.SHOT)
+        {
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -139,10 +129,30 @@ public class BallHandling : NetworkedBehaviour
         print("scored");
     }
 
+    private IEnumerator FollowArc(Vector3 start, Vector3 end, float height, float duration)
+    {
+        float startTime = Time.time;
+        float fracComplete = 0;
+        while (fracComplete < duration)
+        {
+            Vector3 center = (start + end) * 0.5F;
+            center -= Vector3.up * height;
+
+            Vector3 riseRelCenter = start - center;
+            Vector3 setRelCenter = end - center;
+
+            fracComplete = (Time.time - startTime) / duration;
+
+            transform.position = Vector3.Slerp(riseRelCenter, setRelCenter, fracComplete);
+            transform.position += center;
+            yield return null;
+        }
+    }
+
     public void OnShoot(Player player)
     {
-        count = 0.0f;
-        point = m_ball.transform.position + (m_gameManager.m_basketLeft.transform.position - m_ball.transform.position) / 2 + Vector3.up * 5.0f;
+        m_state = BallState.SHOT;
+        StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.m_basketLeft.netPos.position, 1.0f, 1.0f));
     }
 }
 
