@@ -23,7 +23,7 @@ public class FollowCamera : NetworkedBehaviour
 
     void LateUpdate()
     {
-        if (isActiveAndEnabled)
+        if (isActiveAndEnabled && IsServer && IsHost)
         {
             float desiredAngle = target.transform.eulerAngles.y;
             Quaternion rotation = Quaternion.Euler(0, desiredAngle, 0);

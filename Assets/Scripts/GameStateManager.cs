@@ -53,8 +53,10 @@ public class GameStateManager : NetworkedBehaviour
         m_gameManager = GetComponent<GameManager>();
     }
 
-    private void NetworkedStart()
+    public override void NetworkStart()
     {
+        MatchGameStateValue.Value = (byte)MatchGameState.PREGAME;
+        GameManager.Singleton.OnStartGame += OnStart;
     }
 
     private void Update()
@@ -106,12 +108,13 @@ public class GameStateManager : NetworkedBehaviour
 
     // Private Functions
 
-    public void OnStartGame()
+    public void OnStart()
     {
         InGameTime.Value = QUARTER_LENGTH;
         ShotClock.Value = SHOTCLOCK_LENGTH;
         Quarter.Value = 1;
         MatchGameStateValue.Value = (byte)MatchGameState.INPROGRESS;
+        print(1);
     }
 
     private void EndQuarter()

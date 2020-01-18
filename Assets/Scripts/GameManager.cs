@@ -7,6 +7,11 @@ using UnityEngine;
 
 public class GameManager : NetworkedBehaviour
 {
+
+    public static GameManager Singleton;
+
+    public event Action OnStartGame;
+
     public Team TeamHome { get; private set; }
     public Team TeamAway { get; private set; }
 
@@ -27,17 +32,14 @@ public class GameManager : NetworkedBehaviour
 
     public override void NetworkStart()
     {
-        if (m_ball == null)
-        {
-            m_ball = Instantiate(m_ballPrefab, new Vector3(1, 3, 1), Quaternion.identity);
-            m_ball.GetComponent<NetworkedObject>().Spawn();
-            m_ballhandling = m_ball.GetComponent<BallHandling>();
-        }
+        OnStartGame += OnStart;
     }
 
     // Start is called before the first frame update
     void Start()
     {
+        Singleton = this;
+
         m_basketLeft = GameObject.Find("BasketLeft").GetComponent<Basket>();
         //m_basketRight = GameObject.Find("BasketRight").GetComponent<Basket>();
         m_basketLeft.isHome = true;
@@ -51,18 +53,26 @@ public class GameManager : NetworkedBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!gameStarted)
-        {
-            OnStartGame();
-        }
     }
 
-    private void OnStartGame()
+    public void StartGame()
     {
-        m_gameState.OnStartGame();
-        foreach (Player p in m_players)
+        OnStartGame();
+        Debug.Log("Game Starting!");
+    }
+
+    private void OnStart()
+    {
+        if (m_ball == null)
         {
-            p.OnStartGame();
+            m_ball = Instantiate(m_ballPrefab, new Vector3(1, 3, 1), Quaternion.identity);
+            m_ball.GetComponent<NetworkedObject>().Spawn();
+            m_ballhandling = m_ball.GetComponent<BallHandling>();
+        }
+        else
+        {
+            m_ballhandling.StopBall();
+            m_ball.transform.position = new Vector3(1, 3, 1);
         }
     }
 
@@ -113,6 +123,18 @@ public class GameManager : NetworkedBehaviour
     public static BallHandling GetBallHandling()
     {
         return m_ballhandling;
+    }
+
+    public static Player GetPlayer()
+    {
+        m_playersByID.TryGetValue(NetworkingManager.Singleton.LocalClientId, out Player p);
+        return p;
+    }
+
+    public static Player GetPlayer(ulong id)
+    {
+        m_playersByID.TryGetValue(id, out Player p);
+        return p;
     }
 
 }

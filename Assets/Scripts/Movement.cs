@@ -1,7 +1,8 @@
-﻿using MLAPI.Spawning;
+﻿using MLAPI;
+using MLAPI.Spawning;
 using UnityEngine;
 
-public class Movement : MonoBehaviour
+public class Movement : NetworkedBehaviour
 {
     private float m_horizontal;
     private float m_vertical;
@@ -20,13 +21,14 @@ public class Movement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!IsOwner || IsServer && !IsHost)
+            return;
+
         m_horizontal = Input.GetAxis("Horizontal") * m_turningSpeed * Time.deltaTime;
         transform.Rotate(0, m_horizontal, 0);
 
         m_vertical =  Input.GetAxis("Vertical") * (m_player.isSprinting ? m_sprintSpeed : m_movementSpeed) * Time.deltaTime;
         transform.Translate(0, 0, -m_vertical);
-
-
     }
 
 }

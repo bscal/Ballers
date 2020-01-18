@@ -13,9 +13,6 @@ public class BallHandling : NetworkedBehaviour
 
     private NetworkedObject m_playerObj;
     private Player m_player;
-    private GameObject m_handAnimPoint;
-    public GameObject m_left;
-    public GameObject m_right;
 
     private static readonly NetworkedVarSettings settings = new NetworkedVarSettings()
     {
@@ -47,9 +44,6 @@ public class BallHandling : NetworkedBehaviour
         m_gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         m_playerObj = SpawnManager.GetLocalPlayerObject();
         m_player = m_playerObj.GetComponent<Player>();
-        m_handAnimPoint = GameObject.Find("HandLAnimPos");
-        m_left = GameObject.Find("HandL");
-        m_right = GameObject.Find("HandR");
 
         m_ball = NetworkedObject.gameObject;
         m_body = gameObject.GetComponent<Rigidbody>();
@@ -65,6 +59,9 @@ public class BallHandling : NetworkedBehaviour
     // FixedUpdate is called 50x per frame
     void FixedUpdate()
     {
+        if (!IsOwner || !IsServer)
+            return;
+
         foreach (KeyValuePair<ulong, NetworkedClient> pair in NetworkingManager.Singleton.ConnectedClients)
         {
             float dist = Vector3.Distance(m_ball.transform.position, pair.Value.PlayerObject.transform.position);
@@ -147,6 +144,11 @@ public class BallHandling : NetworkedBehaviour
             transform.position += center;
             yield return null;
         }
+    }
+
+    public void StopBall()
+    {
+        m_body.velocity = Vector3.zero;
     }
 
     public void OnShoot(Player player)

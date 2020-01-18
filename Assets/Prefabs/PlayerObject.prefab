@@ -1738,6 +1738,37 @@ MonoBehaviour:
   AssetGuid: 60d246c1-ec16-4d71-a1b3-352fe9af8040
   bserializedVoxels: 1f8b0800000000000400ecbd07601c499625262f6dca7b7f4af54ad7e074a10880601324d8904010ecc188cde692ec1d69472329ab2a81ca6556655d661640cced9dbcf7de7befbdf7de7befbdf7ba3b9d4e27f7dfff3f5c6664016cf6ce4adac99e2180aac81f3f7e7c1f3f227ecd3fe8cf3eff35feefdbfffbff040000ffffb1a3d2de30000000
   HasDeserialized: 1
+--- !u!1 &2353904238926996809
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6548087434246423596}
+  m_Layer: 0
+  m_Name: Calf
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6548087434246423596
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2353904238926996809}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 4134976719819052328}
+  m_Father: {fileID: 2022515617656900771}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3154340706528750959
 GameObject:
   m_ObjectHideFlags: 0
@@ -2357,7 +2388,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Arm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 78304
+  thisInstanceId: 112204
   Undone: 1
 --- !u!1 &4134976719560664162
 GameObject:
@@ -2465,7 +2496,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Leg.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 78310
+  thisInstanceId: 112210
   Undone: 1
 --- !u!1 &4134976719731898826
 GameObject:
@@ -2573,7 +2604,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/UpperBody.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 78316
+  thisInstanceId: 112216
   Undone: 1
 --- !u!1 &4134976719774805981
 GameObject:
@@ -2681,7 +2712,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Arm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 78322
+  thisInstanceId: 112222
   Undone: 1
 --- !u!1 &4134976719809551987
 GameObject:
@@ -2714,7 +2745,7 @@ Transform:
   - {fileID: 2343604839396608373}
   - {fileID: 2343604840342524280}
   m_Father: {fileID: 2022515617656900771}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4134976719809551985
 MonoBehaviour:
@@ -2789,7 +2820,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Foot.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 78328
+  thisInstanceId: 112228
   Undone: 1
 --- !u!1 &4134976719819052329
 GameObject:
@@ -2821,7 +2852,7 @@ Transform:
   m_Children:
   - {fileID: 2343604839572536634}
   - {fileID: 2343604839966647870}
-  m_Father: {fileID: 2022515617656900771}
+  m_Father: {fileID: 6548087434246423596}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4134976719819052327
@@ -2897,7 +2928,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Leg.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 78334
+  thisInstanceId: 112234
   Undone: 1
 --- !u!1 &4134976719902799366
 GameObject:
@@ -3005,7 +3036,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Foot.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 78340
+  thisInstanceId: 112240
   Undone: 1
 --- !u!1 &4134976720071227199
 GameObject:
@@ -3113,7 +3144,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Thigh.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 78346
+  thisInstanceId: 112246
   Undone: 1
 --- !u!1 &4134976720086236962
 GameObject:
@@ -3267,7 +3298,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Arm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 78358
+  thisInstanceId: 112258
   Undone: 1
 --- !u!1 &4134976720375009957
 GameObject:
@@ -3375,7 +3406,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Arm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 78364
+  thisInstanceId: 112264
   Undone: 1
 --- !u!1 &4134976720426634522
 GameObject:
@@ -3424,6 +3455,8 @@ GameObject:
   - component: {fileID: 1705429200}
   - component: {fileID: 4134976720462683666}
   - component: {fileID: -7543476189314254859}
+  - component: {fileID: 5441574990467231953}
+  - component: {fileID: 390075970689659002}
   m_Layer: 0
   m_Name: PlayerObject
   m_TagString: Untagged
@@ -3439,8 +3472,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4134976720462683669}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.35, z: 0}
-  m_LocalScale: {x: 1.8, y: 2, z: 1.8}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children:
   - {fileID: 8404727998025206397}
   m_Father: {fileID: 0}
@@ -3476,6 +3509,7 @@ MonoBehaviour:
   isDribbling: 0
   isMoving: 0
   isSprinting: 0
+  isInsideThree: 0
 --- !u!114 &1705429195
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3606,8 +3640,36 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.6, y: 1.7, z: 0.2}
-  m_Center: {x: 0, y: 0.95, z: 0}
+  m_Size: {x: 0.6, y: 0, z: 0.2}
+  m_Center: {x: 0, y: 0.1, z: 0}
+--- !u!114 &5441574990467231953
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4134976720462683669}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7724af11beaa5a644a8dd0862e949d8e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!54 &390075970689659002
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4134976720462683669}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &4134976720484254763
 GameObject:
   m_ObjectHideFlags: 0
@@ -3746,7 +3808,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Thigh.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 78384
+  thisInstanceId: 112284
   Undone: 1
 --- !u!1 &4134976720887705975
 GameObject:
@@ -3772,8 +3834,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4134976720887705975}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.46666667, z: 0}
-  m_LocalScale: {x: 0.66666675, y: 0.66666675, z: 0.66666675}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4134976721209847303}
   - {fileID: 4134976719731898825}
@@ -3889,7 +3951,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/LowerBody.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 78394
+  thisInstanceId: 112294
   Undone: 1
 --- !u!1 &4134976721038996714
 GameObject:
@@ -3947,8 +4009,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4134976721074836869}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.10000007, y: 0.46666667, z: 0}
-  m_LocalScale: {x: 0.66666675, y: 0.6666668, z: 0.6666668}
+  m_LocalPosition: {x: 0.15, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4134976720071227198}
   - {fileID: 2022515617656900771}
@@ -3979,8 +4041,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4134976721087627553}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.10000007, y: 0.46666667, z: 0}
-  m_LocalScale: {x: 0.66666675, y: 0.66666687, z: 0.66666687}
+  m_LocalPosition: {x: -0.15, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4134976720854840539}
   - {fileID: 8842686716577164746}
@@ -4093,7 +4155,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/Player/Model/Head.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 78412
+  thisInstanceId: 112312
   Undone: 1
 --- !u!1 &4440466946179586523
 GameObject:
@@ -4213,7 +4275,7 @@ Transform:
   m_GameObject: {fileID: 4919408756640952425}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4134976721087627552}
   - {fileID: 4134976721074836868}
@@ -4851,8 +4913,8 @@ Transform:
   m_LocalPosition: {x: 0.0499998, y: -0.2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 4134976719819052328}
   - {fileID: 4134976719809551986}
+  - {fileID: 6548087434246423596}
   m_Father: {fileID: 4134976721074836868}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

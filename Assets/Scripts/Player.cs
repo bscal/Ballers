@@ -27,29 +27,39 @@ public class Player : NetworkedBehaviour
     public bool isDribbling = false;
     public bool isMoving = false;
     public bool isSprinting = false;
+    public bool isInsideThree = false;
 
-    public NetworkedVar<Vector3> rightHand = new NetworkedVar<Vector3>();
-    public NetworkedVar<GameObject> leftHand = new NetworkedVar<GameObject>();
+    public NetworkedVar<Vector3> rightHand = new NetworkedVar<Vector3>(settings);
+    public NetworkedVar<GameObject> leftHand = new NetworkedVar<GameObject>(settings);
 
-    public NetworkedDictionary<string, int> skills = new NetworkedDictionary<string, int>();
+    public NetworkedDictionary<string, int> skills = new NetworkedDictionary<string, int>(settings);
 
     public override void NetworkStart()
     {
-        id = username.GetHashCode();
+        GameManager.Singleton.OnStartGame += StartGame;
 
-        //leftHand.Value = transform.Find("HandLAnimPos").gameObject;
-        GameManager.AddPlayer(this, NetworkedObject);
+        if (IsServer)
+        {
+            username = "Server";
+        }
+        else
+        {
+            GameManager.AddPlayer(this, NetworkedObject);
+            rightHand.Value = GameObject.Find("right hand").transform.position;
+        }
+        id = username.GetHashCode();
     }
 
     // Update is called once per frame
     void Update()
     {
-        rightHand.Value = transform.Find("Skeleton/Body/ArmR/LowerArmR/HandRAnimPos").transform.position;
         Debugger.Instance.Print(string.Format("D:{0}, W:{1}, S:{2}", isDribbling, isMoving, isSprinting), 0);
+        Debugger.Instance.Print(string.Format("2pt:{0}", isInsideThree), 3);
     }
 
-    public void OnStartGame()
+    public void StartGame()
     {
+
     }
 
     internal void OnShoot()
