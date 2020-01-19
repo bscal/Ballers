@@ -38,7 +38,7 @@ public class Player : NetworkedBehaviour
     {
         GameManager.Singleton.OnStartGame += StartGame;
 
-        if (IsServer)
+        if (IsServer && !IsHost)
         {
             username = "Server";
         }

@@ -1,25 +1,22 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using MLAPI;
-using MLAPI.Connection;
+﻿using UnityEngine;
 
 public class ThreePointCollision : MonoBehaviour
 {
-    public void OnTriggerEnter(Collider other)
+
+    private static string PLAYER_TAG = "Player";
+
+    private void OnTriggerStay(Collider other)
     {
-        if (other.gameObject.name == "3pt Lines" && !GameManager.GetPlayer().isInsideThree)
+        if (other.gameObject.tag == PLAYER_TAG)
         {
-            print(1);
             GameManager.GetPlayer().isInsideThree = true;
         }
     }
 
-    public void OnTriggerExit(Collider other)
+    private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.name == "3pt Lines" && GameManager.GetPlayer().isInsideThree)
+        if (other.gameObject.tag == PLAYER_TAG)
         {
-            print(2);
             GameManager.GetPlayer().isInsideThree = false;
         }
     }

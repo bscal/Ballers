@@ -847,7 +847,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/upperarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 187612
+  thisInstanceId: 133036
   Undone: 1
 --- !u!1 &839673004282485492
 GameObject:
@@ -994,7 +994,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/foot.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 186558
+  thisInstanceId: 131982
   Undone: 1
 --- !u!1 &855668793950629865
 GameObject:
@@ -4837,7 +4837,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/upperchest.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 187314
+  thisInstanceId: 132736
   Undone: 1
 --- !u!1 &3081997840589424983
 GameObject:
@@ -5128,7 +5128,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/calf.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 186476
+  thisInstanceId: 131902
   Undone: 1
 --- !u!1 &3249661851278890336
 GameObject:
@@ -6227,7 +6227,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/leg.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 187320
+  thisInstanceId: 132742
   Undone: 1
 --- !u!1 &3916156810308084338
 GameObject:
@@ -7298,7 +7298,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/lowerchest.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 186864
+  thisInstanceId: 132288
   Undone: 1
 --- !u!1 &4601289110702898129
 GameObject:
@@ -8502,7 +8502,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/calf.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 187590
+  thisInstanceId: 133014
   Undone: 1
 --- !u!1 &5325683939739797947
 GameObject:
@@ -9061,7 +9061,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/leg.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 186518
+  thisInstanceId: 131944
   Undone: 1
 --- !u!1 &5647321667379715171
 GameObject:
@@ -9221,7 +9221,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/lowerarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 186926
+  thisInstanceId: 132350
   Undone: 1
 --- !u!1 &5690431781121862110
 GameObject:
@@ -9999,7 +9999,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/lowerarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 187038
+  thisInstanceId: 132462
   Undone: 1
 --- !u!1 &5965997991029536111
 GameObject:
@@ -10527,7 +10527,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/head.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 186524
+  thisInstanceId: 131950
   Undone: 1
 --- !u!1 &6166792760984548341
 GameObject:
@@ -11810,7 +11810,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/upperarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 187554
+  thisInstanceId: 132978
   Undone: 1
 --- !u!1 &6927265981159084006
 GameObject:
@@ -13079,7 +13079,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/foot.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 186616
+  thisInstanceId: 132040
   Undone: 1
 --- !u!1 &7765132884196620524
 GameObject:
@@ -14490,9 +14490,10 @@ GameObject:
   - component: {fileID: 5179076237109872503}
   - component: {fileID: 8400331195150798432}
   - component: {fileID: 5179076237109872492}
+  - component: {fileID: 5977831723216924839}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -14523,8 +14524,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.6, y: 0, z: 0.2}
-  m_Center: {x: 0, y: 0.1, z: 0}
+  m_Size: {x: 1, y: 3.7768326, z: 1}
+  m_Center: {x: 0, y: 2.1679935, z: 0}
 --- !u!114 &7447245464667065532
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14653,3 +14654,19 @@ MonoBehaviour:
   fill: {fileID: 0}
   target: {fileID: 0}
   glow: {fileID: 0}
+--- !u!54 &5977831723216924839
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9132637102776717737}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0

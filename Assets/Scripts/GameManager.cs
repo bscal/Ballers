@@ -30,6 +30,11 @@ public class GameManager : NetworkedBehaviour
     public Basket m_basketLeft;
     private Basket m_basketRight;
 
+    void Awake()
+    {
+        Singleton = this;
+    }
+
     public override void NetworkStart()
     {
         OnStartGame += OnStart;
@@ -38,8 +43,6 @@ public class GameManager : NetworkedBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Singleton = this;
-
         m_basketLeft = GameObject.Find("BasketLeft").GetComponent<Basket>();
         //m_basketRight = GameObject.Find("BasketRight").GetComponent<Basket>();
         m_basketLeft.isHome = true;
