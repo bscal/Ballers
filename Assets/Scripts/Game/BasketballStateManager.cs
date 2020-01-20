@@ -4,8 +4,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 
-public class GameStateManager : NetworkedBehaviour
+public class BasketballStateManager : NetworkedBehaviour
 {
+
+    // Static
 
     private static readonly NetworkedVarSettings STATE_SETTINGS = new NetworkedVarSettings()
     {
@@ -21,11 +23,21 @@ public class GameStateManager : NetworkedBehaviour
     private const float OVERTIME_LENGTH         = QUARTER_LENGTH / 2.0f;
     private const float SHOTCLOCK_LENGTH        = 24.0f;
 
+    // Public Actions
+
+    public event Action OnMatchStarted;
+    public event Action OnQuarterEnd;
+    public event Action OnHalfEnd;
+    public event Action OnMatchEnd;
+
+    // Public
+
     public NetworkedVarFloat InGameTime = new NetworkedVarFloat(STATE_SETTINGS);
     public NetworkedVarFloat ShotClock = new NetworkedVarFloat(STATE_SETTINGS);
-    public NetworkedVarByte GameStateValue = new NetworkedVarByte(STATE_SETTINGS);
     public NetworkedVarByte MatchGameStateValue = new NetworkedVarByte(STATE_SETTINGS);
     public NetworkedVarByte Quarter = new NetworkedVarByte(STATE_SETTINGS);
+
+    // Private
 
     [SerializeField]
     private Text m_UIHomeName;
@@ -55,16 +67,18 @@ public class GameStateManager : NetworkedBehaviour
 
     public override void NetworkStart()
     {
-        MatchGameStateValue.Value = (byte)MatchGameState.PREGAME;
+        MatchGameStateValue.Value = (byte)EMatchState.PREGAME;
         GameManager.Singleton.OnStartGame += OnStart;
     }
 
     private void Update()
     {
-        if (MatchGameStateValue.Value == (byte)MatchGameState.INPROGRESS)
+        if (IsServer)
         {
-            if (IsServer)
+            if (MatchGameStateValue.Value == (byte)EMatchState.INPROGRESS)
+            {
                 IncrementTime(Time.deltaTime);
+            }
         }
 
         UpdateUI();
@@ -72,6 +86,9 @@ public class GameStateManager : NetworkedBehaviour
 
     internal void IncrementTime(float deltaTime)
     {
+        if (MatchGameStateValue.Value != (byte)EMatchState.INPROGRESS || MatchGameStateValue.Value != (byte)EMatchState.INBOUND)
+            return;
+
         m_shotclockOff = InGameTime.Value - ShotClock.Value < 0.00f;
 
         if (!m_shotclockOff && ShotClock.Value < 0.00f)
@@ -96,14 +113,9 @@ public class GameStateManager : NetworkedBehaviour
 
     // Public Functions
 
-    public void SetMatchGameState(MatchGameState state)
+    public void SetMatchGameState(EMatchState state)
     {
         MatchGameStateValue.Value = (byte)state;
-    }
-
-    public void SetGameState(GameState state)
-    {
-        GameStateValue.Value = (byte)state;
     }
 
     // Private Functions
@@ -113,8 +125,7 @@ public class GameStateManager : NetworkedBehaviour
         InGameTime.Value = QUARTER_LENGTH;
         ShotClock.Value = SHOTCLOCK_LENGTH;
         Quarter.Value = 1;
-        MatchGameStateValue.Value = (byte)MatchGameState.INPROGRESS;
-        print(1);
+        MatchGameStateValue.Value = (byte)EMatchState.INPROGRESS;
     }
 
     private void EndQuarter()
@@ -137,18 +148,19 @@ public class GameStateManager : NetworkedBehaviour
                 m_OvertimeCount++;
             }
             // End of regulation
+            OnMatchEnd();
 
         }
         else
         {
             InGameTime.Value = (m_OvertimeCount > 0) ? Mathf.Round(OVERTIME_LENGTH) : Mathf.Round(QUARTER_LENGTH);
-            m_gameManager.EndQuarter();
+            OnQuarterEnd();
         }
     }
 
     private void EndHalf()
     {
-        m_gameManager.EndHalf();
+        OnHalfEnd();
     }
 
     private void UpdateUI()
@@ -162,28 +174,4 @@ public class GameStateManager : NetworkedBehaviour
         else
             m_UIShotClock.text = (ShotClock.Value > 1.0f) ? ShotClock.Value.ToString("F0") : ShotClock.Value.ToString("F1");
     }
-}
-
-// GameState is the overall state of the game.
-// Progress of the game loading -> pregrame -> starting
-// Not related to the match time.
-public enum GameState : byte
-{
-    NONE,
-    PREGAME,
-    STARTED,
-    PAUSED,
-    FINISHING,
-    ENDED
-}
-
-// The state of the in game match. Is the ball in play, being inbounded, foul called.
-public enum MatchGameState : byte
-{
-    NONE,
-    PREGAME,
-    INPROGRESS,
-    INBOUND,
-    FOUL,
-    ENDED
 }

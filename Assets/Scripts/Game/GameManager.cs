@@ -12,48 +12,55 @@ public class GameManager : NetworkedBehaviour
 
     public event Action OnStartGame;
 
-    public Team TeamHome { get; private set; }
-    public Team TeamAway { get; private set; }
-
-    public bool gameStarted = false;
-
     private static GameObject m_ball;
     private static BallHandling m_ballhandling;
     private static List<Player> m_players = new List<Player>();
     private static Dictionary<ulong, Player> m_playersByID = new Dictionary<ulong, Player>();
 
-    private GameStateManager m_gameState;
+    public Team TeamHome { get; private set; }
+    public Team TeamAway { get; private set; }
+
+    public int teamSize = 5;
+    public bool gameStarted = false;
+    public Basket basketLeft;
+    public Basket basketRight;
+    public Vector3 centerCourt;
+    public List<Vector3> inboundPositions;
+    public Vector3[] teamInboundPos = new Vector3[2];
+    public Vector3[] freethrowPos = new Vector3[2];
+
+    private BasketballStateManager m_gameState;
+
     [SerializeField]
     private GameObject m_ballPrefab;
-    private Vector3 m_centerCourt;
 
-    public Basket m_basketLeft;
-    private Basket m_basketRight;
+
 
     void Awake()
     {
         Singleton = this;
+
+        m_gameState = GetComponent<BasketballStateManager>();
+
+        basketLeft = GameObject.Find("BasketLeft").GetComponent<Basket>();
+        basketRight = GameObject.Find("BasketRight").GetComponent<Basket>();
+        basketLeft.isHome = true;
+        basketRight.isHome = false;
+
+        centerCourt = GameObject.Find("CenterCourt").transform.position;
+
+        TeamHome = new Team(0, teamSize);
+        TeamAway = new Team(1, teamSize);
+    }
+    void Start()
+    {
+        m_gameState.OnHalfEnd += EndHalf;
     }
 
     public override void NetworkStart()
     {
-        OnStartGame += OnStart;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        m_basketLeft = GameObject.Find("BasketLeft").GetComponent<Basket>();
-        //m_basketRight = GameObject.Find("BasketRight").GetComponent<Basket>();
-        m_basketLeft.isHome = true;
-        //m_basketRight.isHome = false;
-        m_gameState = GetComponent<GameStateManager>();
-        m_centerCourt = GameObject.Find("CenterCourt").transform.position;
-        TeamHome = new Team(5);
-        TeamAway = new Team(5);
-    }
-
-    // Update is called once per frame
     void Update()
     {
     }
@@ -61,11 +68,7 @@ public class GameManager : NetworkedBehaviour
     public void StartGame()
     {
         OnStartGame();
-        Debug.Log("Game Starting!");
-    }
 
-    private void OnStart()
-    {
         if (m_ball == null)
         {
             m_ball = Instantiate(m_ballPrefab, new Vector3(1, 3, 1), Quaternion.identity);
@@ -77,16 +80,16 @@ public class GameManager : NetworkedBehaviour
             m_ballhandling.StopBall();
             m_ball.transform.position = new Vector3(1, 3, 1);
         }
-    }
 
-    internal void EndQuarter()
-    {
+        Debug.Log("Game Starting!");
     }
 
     internal void EndHalf()
     {
-        m_basketLeft.isHome = !m_basketLeft.isHome;
-        m_basketRight.isHome = !m_basketRight.isHome;
+        basketLeft.isHome = !basketLeft.isHome;
+        basketRight.isHome = !basketRight.isHome;
+        TeamHome.id = 1;
+        TeamAway.id = 0;
     }
 
     /// <summary> Returns size 2 int array. index 0 = home, 1 = away </summary>

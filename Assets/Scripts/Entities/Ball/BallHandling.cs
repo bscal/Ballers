@@ -154,7 +154,7 @@ public class BallHandling : NetworkedBehaviour
     public void OnShoot(Player player)
     {
         m_state = BallState.SHOT;
-        StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.m_basketLeft.netPos.position, 1.0f, 1.0f));
+        StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.basketLeft.netPos.position, 1.0f, 1.0f));
     }
 }
 
