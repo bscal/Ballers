@@ -2371,9 +2371,7 @@ MonoBehaviour:
     InternalValue: 0
   ShotClock:
     InternalValue: 0
-  GameStateValue:
-    InternalValue: 0
-  MatchGameStateValue:
+  MatchStateValue:
     InternalValue: 0
   Quarter:
     InternalValue: 0
@@ -2413,10 +2411,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6add316473b8fd549b327880334fa0af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  teamSize: 5
   gameStarted: 0
+  basketLeft: {fileID: 0}
+  basketRight: {fileID: 0}
+  centerCourt: {x: 0, y: 0, z: 0}
+  inboundPositions: []
+  teamInboundPos:
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  freethrowPos:
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
   m_ballPrefab: {fileID: 6110922978709442016, guid: e80ef21f686ff8145bc5e5a29b1d0b23,
     type: 3}
-  m_basketLeft: {fileID: 0}
 --- !u!114 &1132911719
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2961,7 +2969,9 @@ MonoBehaviour:
   ServerListenPort: 7777
   ServerWebsocketListenPort: 8887
   SupportWebsocket: 0
-  Channels: []
+  Channels:
+  - Name: main
+    Type: 3
   UseMLAPIRelay: 0
   MLAPIRelayAddress: 184.72.104.138
   MLAPIRelayPort: 8888
@@ -3035,8 +3045,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1ae184a0d814c64f910762761b8afa8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hostServer: 1
-  host: 71.225.55.252
+  hostServer: 0
+  host: 127.0.0.1
   port: 7777
 --- !u!4 &1611199777
 Transform:

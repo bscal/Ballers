@@ -34,7 +34,7 @@ public class BasketballStateManager : NetworkedBehaviour
 
     public NetworkedVarFloat InGameTime = new NetworkedVarFloat(STATE_SETTINGS);
     public NetworkedVarFloat ShotClock = new NetworkedVarFloat(STATE_SETTINGS);
-    public NetworkedVarByte MatchGameStateValue = new NetworkedVarByte(STATE_SETTINGS);
+    public NetworkedVarByte MatchStateValue = new NetworkedVarByte(STATE_SETTINGS);
     public NetworkedVarByte Quarter = new NetworkedVarByte(STATE_SETTINGS);
 
     // Private
@@ -67,7 +67,7 @@ public class BasketballStateManager : NetworkedBehaviour
 
     public override void NetworkStart()
     {
-        MatchGameStateValue.Value = (byte)EMatchState.PREGAME;
+        MatchStateValue.Value = (byte)EMatchState.PREGAME;
         GameManager.Singleton.OnStartGame += OnStart;
     }
 
@@ -75,7 +75,7 @@ public class BasketballStateManager : NetworkedBehaviour
     {
         if (IsServer)
         {
-            if (MatchGameStateValue.Value == (byte)EMatchState.INPROGRESS)
+            if (MatchStateValue.Value == (byte)EMatchState.INPROGRESS)
             {
                 IncrementTime(Time.deltaTime);
             }
@@ -86,7 +86,7 @@ public class BasketballStateManager : NetworkedBehaviour
 
     internal void IncrementTime(float deltaTime)
     {
-        if (MatchGameStateValue.Value != (byte)EMatchState.INPROGRESS || MatchGameStateValue.Value != (byte)EMatchState.INBOUND)
+        if (MatchStateValue.Value != (byte)EMatchState.INPROGRESS || MatchStateValue.Value != (byte)EMatchState.INBOUND)
             return;
 
         m_shotclockOff = InGameTime.Value - ShotClock.Value < 0.00f;
@@ -115,7 +115,7 @@ public class BasketballStateManager : NetworkedBehaviour
 
     public void SetMatchGameState(EMatchState state)
     {
-        MatchGameStateValue.Value = (byte)state;
+        MatchStateValue.Value = (byte)state;
     }
 
     // Private Functions
@@ -125,7 +125,7 @@ public class BasketballStateManager : NetworkedBehaviour
         InGameTime.Value = QUARTER_LENGTH;
         ShotClock.Value = SHOTCLOCK_LENGTH;
         Quarter.Value = 1;
-        MatchGameStateValue.Value = (byte)EMatchState.INPROGRESS;
+        MatchStateValue.Value = (byte)EMatchState.INPROGRESS;
     }
 
     private void EndQuarter()

@@ -4,12 +4,13 @@ using UnityEngine;
 using MLAPI;
 using MLAPI.Spawning;
 using MLAPI.Transports.UNET;
+using MLAPI.Transports.Tasks;
 
 public class NetworkLobby : MonoBehaviour
 {
 
     public bool hostServer = true;
-    public string host = "159.89.46.131";
+    public string host = "";
     public int port = 7777;
 
     // Start is called before the first frame update
@@ -23,14 +24,14 @@ public class NetworkLobby : MonoBehaviour
         {
             NetworkingManager.Singleton.OnServerStarted += OnServerReady;
             NetworkingManager.Singleton.StartHost();
-            Debug.Log("Starting in server mode.");
+            Debug.Log(string.Format("Starting in server mode. Address {0}:{1}", host, port));
         }
         else
         {
             NetworkingManager.Singleton.GetComponent<UnetTransport>().ConnectAddress = host;
             NetworkingManager.Singleton.GetComponent<UnetTransport>().ConnectPort = port;
             NetworkingManager.Singleton.StartClient();
-            Debug.Log("Starting in client mode.");
+            Debug.Log(string.Format("Starting in client mode. Address {0}:{1}", host, port));
         }
     }
 

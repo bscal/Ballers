@@ -1,18 +1,16 @@
 ﻿using UnityEngine;
 using MLAPI;
-using MLAPI.Spawning;
-using System.Collections.Generic;
 using MLAPI.Connection;
-using System.Linq;
 using MLAPI.NetworkedVar;
+using MLAPI.Spawning;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 public class BallHandling : NetworkedBehaviour
 {
-    public GameObject text;
-
-    private NetworkedObject m_playerObj;
-    private Player m_player;
+    public event Action OnShotTaken;
 
     private static readonly NetworkedVarSettings settings = new NetworkedVarSettings()
     {
@@ -29,8 +27,8 @@ public class BallHandling : NetworkedBehaviour
     private NetworkedVarULong playerLastPossesion = new NetworkedVarULong(settings, 5);
 
     private GameManager m_gameManager;
-    private NetworkedObject m_netPlayer;
-    private NetworkedObject m_netBall;
+    private NetworkedObject m_playerObj;
+    private Player m_player;
     private GameObject m_ball;
     private Rigidbody m_body;
     private BallState m_state;
@@ -110,13 +108,14 @@ public class BallHandling : NetworkedBehaviour
     {
         if (IsServer)
         {
-            if (other.gameObject.name == "HitboxTop")
+            if (other.gameObject.name == "Hitbox Top")
                 m_topCollision = true;
 
-            else if (m_topCollision && other.gameObject.name == "HitboxBot")
+
+            if (m_topCollision && other.gameObject.name == "Hitbox Bot")
             {
                 OnBasketScored();
-                m_gameManager.AddScore(other.GetComponentInParent<Basket>().isHome, 2);
+                m_gameManager.AddScore(other.GetComponentInParent<Basket>().id, 2);
             }
         }
     }
@@ -154,7 +153,7 @@ public class BallHandling : NetworkedBehaviour
     public void OnShoot(Player player)
     {
         m_state = BallState.SHOT;
-        StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.basketLeft.netPos.position, 1.0f, 1.0f));
+        StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.baskets[0].netPos.position, 1.0f, 1.0f));
     }
 }
 

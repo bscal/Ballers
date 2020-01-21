@@ -22,8 +22,9 @@ public class GameManager : NetworkedBehaviour
 
     public int teamSize = 5;
     public bool gameStarted = false;
-    public Basket basketLeft;
-    public Basket basketRight;
+    public bool lastShotMade = false;
+
+    public Basket[] baskets = new Basket[2];
     public Vector3 centerCourt;
     public List<Vector3> inboundPositions;
     public Vector3[] teamInboundPos = new Vector3[2];
@@ -42,10 +43,10 @@ public class GameManager : NetworkedBehaviour
 
         m_gameState = GetComponent<BasketballStateManager>();
 
-        basketLeft = GameObject.Find("BasketLeft").GetComponent<Basket>();
-        basketRight = GameObject.Find("BasketRight").GetComponent<Basket>();
-        basketLeft.isHome = true;
-        basketRight.isHome = false;
+        baskets[0] = GameObject.Find("BasketLeft").GetComponent<Basket>();
+        baskets[1] = GameObject.Find("BasketRight").GetComponent<Basket>();
+        baskets[0].id = 0;
+        baskets[1].id = 1;
 
         centerCourt = GameObject.Find("CenterCourt").transform.position;
 
@@ -86,8 +87,6 @@ public class GameManager : NetworkedBehaviour
 
     internal void EndHalf()
     {
-        basketLeft.isHome = !basketLeft.isHome;
-        basketRight.isHome = !basketRight.isHome;
         TeamHome.id = 1;
         TeamAway.id = 0;
     }
@@ -107,9 +106,9 @@ public class GameManager : NetworkedBehaviour
         return TeamHome.points - TeamAway.points;
     }
 
-    public void AddScore(bool isHome, int points)
+    public void AddScore(uint id, int points)
     {
-        if (isHome)
+        if (id == 0)
             TeamHome.points += points;
         else
             TeamAway.points += points;

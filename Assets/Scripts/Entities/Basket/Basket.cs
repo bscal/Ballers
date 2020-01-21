@@ -2,7 +2,8 @@
 
 public class Basket : MonoBehaviour
 {
-    public bool isHome;
+
+    public uint id = 0;
     public Transform netPos;
 
     private void Start()
