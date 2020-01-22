@@ -16,6 +16,7 @@ public class GameManager : NetworkedBehaviour
     private static BallHandling m_ballhandling;
     private static List<Player> m_players = new List<Player>();
     private static Dictionary<ulong, Player> m_playersByID = new Dictionary<ulong, Player>();
+    private static Dictionary<ulong, uint> m_playersByTeam = new Dictionary<ulong, uint>();
 
     public Team TeamHome { get; private set; }
     public Team TeamAway { get; private set; }
@@ -34,8 +35,6 @@ public class GameManager : NetworkedBehaviour
 
     [SerializeField]
     private GameObject m_ballPrefab;
-
-
 
     void Awake()
     {
@@ -70,16 +69,19 @@ public class GameManager : NetworkedBehaviour
     {
         OnStartGame();
 
-        if (m_ball == null)
+        if (IsServer)
         {
-            m_ball = Instantiate(m_ballPrefab, new Vector3(1, 3, 1), Quaternion.identity);
-            m_ball.GetComponent<NetworkedObject>().Spawn();
-            m_ballhandling = m_ball.GetComponent<BallHandling>();
-        }
-        else
-        {
-            m_ballhandling.StopBall();
-            m_ball.transform.position = new Vector3(1, 3, 1);
+            if (m_ball == null)
+            {
+                m_ball = Instantiate(m_ballPrefab, new Vector3(1, 3, 1), Quaternion.identity);
+                m_ball.GetComponent<NetworkedObject>().Spawn();
+                m_ballhandling = m_ball.GetComponent<BallHandling>();
+            }
+            else
+            {
+                m_ballhandling.StopBall();
+                m_ball.transform.position = new Vector3(1, 3, 1);
+            }
         }
 
         Debug.Log("Game Starting!");
@@ -118,6 +120,7 @@ public class GameManager : NetworkedBehaviour
     {
         m_players.Add(p);
         m_playersByID.Add(netObj.OwnerClientId, p);
+        m_playersByTeam.Add(netObj.OwnerClientId, 0);
     }
 
     public static GameObject GetBall()

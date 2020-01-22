@@ -2696,7 +2696,7 @@ MonoBehaviour:
   ImportedFrom: 0
   ImportedFile: 
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 109110
+  thisInstanceId: 20002
   Undone: 1
 --- !u!1 &1623104314282294045
 GameObject:
@@ -3021,7 +3021,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/basketL.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 109136
+  thisInstanceId: 20028
   Undone: 1
 --- !u!114 &440430618588485820
 MonoBehaviour:
@@ -4016,7 +4016,7 @@ Cloth:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1623104314979600070}
-  m_Enabled: 0
+  m_Enabled: 1
   m_StretchingStiffness: 1
   m_BendingStiffness: 0
   m_UseTethers: 1

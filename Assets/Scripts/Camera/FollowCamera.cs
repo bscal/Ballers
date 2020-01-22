@@ -12,6 +12,11 @@ public class FollowCamera : NetworkedBehaviour
 
     public override void NetworkStart()
     {
+        if (!IsOwner || IsServer && !IsHost)
+        {
+            enabled = false;
+            return;
+        }
         // Sets the camera behind the player with offset.
         target = SpawnManager.GetLocalPlayerObject();
         Vector3 pos = target.transform.position;
@@ -23,12 +28,9 @@ public class FollowCamera : NetworkedBehaviour
 
     void LateUpdate()
     {
-        if (isActiveAndEnabled && IsServer && IsHost)
-        {
-            float desiredAngle = target.transform.eulerAngles.y;
-            Quaternion rotation = Quaternion.Euler(0, desiredAngle, 0);
-            transform.position = target.transform.position - (rotation * offset);
-            transform.LookAt(target.transform);
-        }
+        float desiredAngle = target.transform.eulerAngles.y;
+        Quaternion rotation = Quaternion.Euler(0, desiredAngle, 0);
+        transform.position = target.transform.position - (rotation * offset);
+        transform.LookAt(target.transform);
     }
 }

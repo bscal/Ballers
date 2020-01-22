@@ -32,10 +32,10 @@ public class BasketballStateManager : NetworkedBehaviour
 
     // Public
 
-    public NetworkedVarFloat InGameTime = new NetworkedVarFloat(STATE_SETTINGS);
-    public NetworkedVarFloat ShotClock = new NetworkedVarFloat(STATE_SETTINGS);
-    public NetworkedVarByte MatchStateValue = new NetworkedVarByte(STATE_SETTINGS);
-    public NetworkedVarByte Quarter = new NetworkedVarByte(STATE_SETTINGS);
+    public NetworkedVarFloat InGameTime;
+    public NetworkedVarFloat ShotClock;
+    public NetworkedVarByte MatchStateValue;
+    public NetworkedVarByte Quarter;
 
     // Private
 
@@ -67,8 +67,16 @@ public class BasketballStateManager : NetworkedBehaviour
 
     public override void NetworkStart()
     {
-        MatchStateValue.Value = (byte)EMatchState.PREGAME;
-        GameManager.Singleton.OnStartGame += OnStart;
+        if (IsServer)
+        {
+            InGameTime = new NetworkedVarFloat(STATE_SETTINGS);
+            ShotClock = new NetworkedVarFloat(STATE_SETTINGS);
+            MatchStateValue = new NetworkedVarByte(STATE_SETTINGS);
+            Quarter = new NetworkedVarByte(STATE_SETTINGS);
+
+            MatchStateValue.Value = (byte)EMatchState.PREGAME;
+            GameManager.Singleton.OnStartGame += OnStart;
+        }
     }
 
     private void Update()

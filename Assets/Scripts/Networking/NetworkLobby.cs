@@ -42,7 +42,7 @@ public class NetworkLobby : MonoBehaviour
         bool approve = true;
         bool createPlayerObject = true;
 
-        ulong? prefabHash = SpawnManager.GetPrefabHashFromGenerator("MyPrefabHashGenerator"); // The prefab hash. Use null to use the default player prefab
+        ulong? prefabHash = SpawnManager.GetPrefabHashFromGenerator(null); // The prefab hash. Use null to use the default player prefab
 
         //If approve is true, the connection gets added. If it's false. The client gets disconnected
         callback(createPlayerObject, prefabHash, approve, Vector3.zero, Quaternion.identity);

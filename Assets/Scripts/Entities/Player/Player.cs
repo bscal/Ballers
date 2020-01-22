@@ -22,6 +22,7 @@ public class Player : NetworkedBehaviour
 
     public int id;
     public string username = "test";
+    public uint teamID;
 
     public bool isRightHanded = true;
     public bool isDribbling = false;
@@ -29,13 +30,28 @@ public class Player : NetworkedBehaviour
     public bool isSprinting = false;
     public bool isInsideThree = false;
 
-    public NetworkedVar<Vector3> rightHand = new NetworkedVar<Vector3>(settings);
-    public NetworkedVar<GameObject> leftHand = new NetworkedVar<GameObject>(settings);
+    public NetworkedVar<Vector3> rightHand;
+    public NetworkedVar<Vector3> leftHand;
+    public NetworkedDictionary<string, int> skills;
 
-    public NetworkedDictionary<string, int> skills = new NetworkedDictionary<string, int>(settings);
+    private void Awake()
+    {
+        if (!IsOwner)
+            return;
+
+        rightHand = new NetworkedVar<Vector3>(settings);
+        leftHand = new NetworkedVar<Vector3>(settings);
+        skills = new NetworkedDictionary<string, int>(settings);
+
+
+        //TEAMID
+    }
 
     public override void NetworkStart()
     {
+        if (!IsOwner)
+            return;
+
         GameManager.Singleton.OnStartGame += StartGame;
 
         if (IsServer && !IsHost)
@@ -50,9 +66,11 @@ public class Player : NetworkedBehaviour
         id = username.GetHashCode();
     }
 
-    // Update is called once per frame
     void Update()
     {
+        if (!IsOwner)
+            return;
+
         Debugger.Instance.Print(string.Format("D:{0}, W:{1}, S:{2}", isDribbling, isMoving, isSprinting), 0);
         Debugger.Instance.Print(string.Format("2pt:{0}", isInsideThree), 3);
     }

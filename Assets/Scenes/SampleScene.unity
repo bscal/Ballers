@@ -2413,8 +2413,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   teamSize: 5
   gameStarted: 0
-  basketLeft: {fileID: 0}
-  basketRight: {fileID: 0}
+  lastShotMade: 0
+  baskets:
+  - {fileID: 0}
+  - {fileID: 0}
   centerCourt: {x: 0, y: 0, z: 0}
   inboundPositions: []
   teamInboundPos:
@@ -3045,7 +3047,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1ae184a0d814c64f910762761b8afa8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hostServer: 0
+  hostServer: 1
   host: 127.0.0.1
   port: 7777
 --- !u!4 &1611199777

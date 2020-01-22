@@ -22,9 +22,9 @@ public class BallHandling : NetworkedBehaviour
         WritePermissionCallback = null // Only used when write permission is "Custom"
     };
 
-    private NetworkedVarULong playerWithBall = new NetworkedVarULong(settings, 5);
-    private NetworkedVarULong playerLastTouched = new NetworkedVarULong(settings, 5);
-    private NetworkedVarULong playerLastPossesion = new NetworkedVarULong(settings, 5);
+    private NetworkedVarULong playerWithBall;
+    private NetworkedVarULong playerLastTouched;
+    private NetworkedVarULong playerLastPossesion;
 
     private GameManager m_gameManager;
     private NetworkedObject m_playerObj;
@@ -35,14 +35,23 @@ public class BallHandling : NetworkedBehaviour
 
     private bool m_topCollision;
 
-    private Dictionary<ulong, float> m_playerDistances = new Dictionary<ulong, float>();
+    private Dictionary<ulong, float> m_playerDistances;
 
     public override void NetworkStart()
     {
+        if (!IsServer)
+        {
+            return;
+        }
+
+        playerWithBall = new NetworkedVarULong(settings, 5);
+        playerLastTouched = new NetworkedVarULong(settings, 5);
+        playerLastPossesion = new NetworkedVarULong(settings, 5);
+        m_playerDistances = new Dictionary<ulong, float>();
+
         m_gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         m_playerObj = SpawnManager.GetLocalPlayerObject();
         m_player = m_playerObj.GetComponent<Player>();
-
         m_ball = NetworkedObject.gameObject;
         m_body = gameObject.GetComponent<Rigidbody>();
         m_body.AddForce(new Vector3(1, 1, 1), ForceMode.Impulse);
@@ -153,7 +162,7 @@ public class BallHandling : NetworkedBehaviour
     public void OnShoot(Player player)
     {
         m_state = BallState.SHOT;
-        StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.baskets[0].netPos.position, 1.0f, 1.0f));
+        StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.baskets[player.teamID].netPos.position, 1.0f, 1.0f));
     }
 }
 
