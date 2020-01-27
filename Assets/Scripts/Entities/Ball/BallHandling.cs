@@ -10,7 +10,14 @@ using System.Linq;
 
 public class BallHandling : NetworkedBehaviour
 {
-    public event Action OnShotTaken;
+
+    public static BallHandling Singleton;
+
+    public event Action<Player> ShotMade;
+    public event Action<Player> ShotMissed;
+
+    public event Action<BallState> BallStateChange;
+    public event Action<int> BallPossesionChange;
 
     private static readonly NetworkedVarSettings settings = new NetworkedVarSettings()
     {
@@ -33,10 +40,19 @@ public class BallHandling : NetworkedBehaviour
     private Rigidbody m_body;
     private BallState m_state;
 
+    private bool m_ballShot = false;
     private bool m_topCollision;
 
     private Dictionary<ulong, float> m_playerDistances;
 
+    void Start()
+    {
+        Singleton = this;
+        if (IsServer)
+        {
+            
+        }
+    }
     public override void NetworkStart()
     {
         if (!IsServer)
@@ -61,6 +77,14 @@ public class BallHandling : NetworkedBehaviour
     void Update()
     {
         Debugger.Instance.Print(string.Format("1:{0} 2:{1} bs:{2}", playerWithBall.Value, playerLastPossesion.Value, m_state), 2);
+
+        if (IsServer)
+        {
+            if (m_ballShot && m_state != BallState.SHOT)
+            {
+                ShotMissed(GameManager.GetPlayer(playerLastTouched.Value));
+            }
+        }
     }
 
     // FixedUpdate is called 50x per frame
@@ -113,6 +137,13 @@ public class BallHandling : NetworkedBehaviour
         }
     }
 
+    public void RegisterPlayers()
+    {
+        GameManager.GetPlayers().ForEach((p) => {
+            
+        });
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (IsServer)
@@ -123,6 +154,7 @@ public class BallHandling : NetworkedBehaviour
 
             if (m_topCollision && other.gameObject.name == "Hitbox Bot")
             {
+                ShotMade(GameManager.GetPlayer(playerLastTouched.Value));
                 OnBasketScored();
                 m_gameManager.AddScore(other.GetComponentInParent<Basket>().id, 2);
             }

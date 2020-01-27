@@ -10,6 +10,7 @@ Assets/Bearded Man Studios Inc/
 Logs/
 Assets/Logs/
 Assets/Logs.meta
+bin/
 
 # Unity Generated
 [Tt]emp/
@@ -32,6 +33,7 @@ obj/
 *.pidb
 *.booproj
 *.svd
+.vs/
 
 # OS Generated
 desktop.ini

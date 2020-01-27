@@ -10,7 +10,8 @@ public class GameManager : NetworkedBehaviour
 
     public static GameManager Singleton;
 
-    public event Action OnStartGame;
+    public event Action Pregame;
+    public event Action GameStarted;
 
     private static GameObject m_ball;
     private static BallHandling m_ballhandling;
@@ -54,6 +55,7 @@ public class GameManager : NetworkedBehaviour
     }
     void Start()
     {
+        NetworkingManager.Singleton.OnClientConnectedCallback += OnConnected;
         m_gameState.OnHalfEnd += EndHalf;
     }
 
@@ -63,11 +65,20 @@ public class GameManager : NetworkedBehaviour
 
     void Update()
     {
+        if (IsServer)
+        {
+
+        }
+    }
+
+    private void StartPregame()
+    {
+
     }
 
     public void StartGame()
     {
-        OnStartGame();
+        StartGame();
 
         if (IsServer)
         {
@@ -145,4 +156,18 @@ public class GameManager : NetworkedBehaviour
         return p;
     }
 
+    public static List<Player> GetPlayers()
+    {
+        return m_players;
+    }
+
+    public static Dictionary<ulong, uint> GetPlayersByTeam()
+    {
+        return m_playersByTeam;
+    }
+
+    private void OnConnected(ulong client)
+    {
+        
+    }
 }

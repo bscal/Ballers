@@ -27,8 +27,8 @@ public class PlayerControls : NetworkedBehaviour
 
         if (Input.GetKey(KeyCode.Y))
         {
+            m_player.ShootBall();
             m_animator.SetBool("isShooting", true);
-            m_player.OnShoot();
         }
         else
         {

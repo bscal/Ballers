@@ -75,7 +75,7 @@ public class BasketballStateManager : NetworkedBehaviour
             Quarter = new NetworkedVarByte(STATE_SETTINGS);
 
             MatchStateValue.Value = (byte)EMatchState.PREGAME;
-            GameManager.Singleton.OnStartGame += OnStart;
+            GameManager.Singleton.GameStarted += OnGameStarted;
         }
     }
 
@@ -128,7 +128,7 @@ public class BasketballStateManager : NetworkedBehaviour
 
     // Private Functions
 
-    public void OnStart()
+    public void OnGameStarted()
     {
         InGameTime.Value = QUARTER_LENGTH;
         ShotClock.Value = SHOTCLOCK_LENGTH;

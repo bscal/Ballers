@@ -11,6 +11,8 @@ using System;
 public class Player : NetworkedBehaviour
 {
 
+    public event Action<Player> Shoot;
+
     private static readonly NetworkedVarSettings settings = new NetworkedVarSettings() {
         SendChannel = "PlayerChannel", // The var value will be synced over this channel
         ReadPermission = NetworkedVarPermission.Everyone, // The var values will be synced to everyone
@@ -52,7 +54,7 @@ public class Player : NetworkedBehaviour
         if (!IsOwner)
             return;
 
-        GameManager.Singleton.OnStartGame += StartGame;
+        GameManager.Singleton.GameStarted += OnGameStarted;
 
         if (IsServer && !IsHost)
         {
@@ -75,14 +77,14 @@ public class Player : NetworkedBehaviour
         Debugger.Instance.Print(string.Format("2pt:{0}", isInsideThree), 3);
     }
 
-    public void StartGame()
+    internal void ShootBall()
     {
-
+        Shoot(this);
     }
 
-    internal void OnShoot()
+    private void OnGameStarted()
     {
-        GameManager.GetBallHandling().OnShoot(this);
+
     }
 
 }
