@@ -23,7 +23,6 @@ public class GameManager : NetworkedBehaviour
     public Team TeamAway { get; private set; }
 
     public int teamSize = 5;
-    public bool gameStarted = false;
     public bool lastShotMade = false;
 
     public Basket[] baskets = new Basket[2];
@@ -33,9 +32,12 @@ public class GameManager : NetworkedBehaviour
     public Vector3[] freethrowPos = new Vector3[2];
 
     private BasketballStateManager m_gameState;
+    private float m_pregameTime = 0;
 
     [SerializeField]
     private GameObject m_ballPrefab;
+
+    private bool HasGameStarted { get; set; }
 
     void Awake()
     {
@@ -67,7 +69,14 @@ public class GameManager : NetworkedBehaviour
     {
         if (IsServer)
         {
-
+            if (!HasGameStarted)
+            {
+                m_pregameTime += Time.deltaTime;
+                if (m_pregameTime > 30.0 * 1000.0)
+                {
+                    HasGameStarted = true;
+                }
+            }
         }
     }
 

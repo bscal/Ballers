@@ -2412,7 +2412,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   teamSize: 5
-  gameStarted: 0
   lastShotMade: 0
   baskets:
   - {fileID: 0}
