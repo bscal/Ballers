@@ -2,16 +2,24 @@
 using MLAPI;
 using MLAPI.Connection;
 using MLAPI.NetworkedVar;
+using MLAPI.Messaging;
 using MLAPI.Spawning;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
+public enum BallState
+{
+    NONE,
+    LOOSE,
+    HELD,
+    SHOT
+}
+
+
 public class BallHandling : NetworkedBehaviour
 {
-
-    public static BallHandling Singleton;
 
     public event Action<Player> ShotMade;
     public event Action<Player> ShotMissed;
@@ -47,12 +55,8 @@ public class BallHandling : NetworkedBehaviour
 
     void Start()
     {
-        Singleton = this;
-        if (IsServer)
-        {
-            
-        }
     }
+
     public override void NetworkStart()
     {
         if (!IsServer)
@@ -137,12 +141,35 @@ public class BallHandling : NetworkedBehaviour
         }
     }
 
+    // RPCs
+    [ServerRPC]
+    private void OnShoot(ulong pid)
+    {
+        Player player = GameManager.GetPlayer(pid);
+        playerLastTouched.Value = pid;
+        m_state = BallState.SHOT;
+        StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.baskets[player.teamID].netPos.position, 1.0f, 1.0f));
+    }
+
+    // Public Functions
+    public void StopBall()
+    {
+        m_body.velocity = Vector3.zero;
+    }
+
+    public void ShootBall(ulong pid)
+    {
+        InvokeServerRpc(OnShoot, pid);
+    }
+
     public void RegisterPlayers()
     {
         GameManager.GetPlayers().ForEach((p) => {
-            
+
         });
     }
+
+    // Private Functions
 
     private void OnTriggerEnter(Collider other)
     {
@@ -154,7 +181,7 @@ public class BallHandling : NetworkedBehaviour
 
             if (m_topCollision && other.gameObject.name == "Hitbox Bot")
             {
-                ShotMade(GameManager.GetPlayer(playerLastTouched.Value));
+                ShotMade?.Invoke(GameManager.GetPlayer(playerLastTouched.Value));
                 OnBasketScored();
                 m_gameManager.AddScore(other.GetComponentInParent<Basket>().id, 2);
             }
@@ -186,22 +213,4 @@ public class BallHandling : NetworkedBehaviour
         }
     }
 
-    public void StopBall()
-    {
-        m_body.velocity = Vector3.zero;
-    }
-
-    public void OnShoot(Player player)
-    {
-        m_state = BallState.SHOT;
-        StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.baskets[player.teamID].netPos.position, 1.0f, 1.0f));
-    }
-}
-
-public enum BallState
-{
-    NONE,
-    LOOSE,
-    HELD,
-    SHOT
 }

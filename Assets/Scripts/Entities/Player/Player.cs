@@ -62,7 +62,7 @@ public class Player : NetworkedBehaviour
         }
         else
         {
-            GameManager.AddPlayer(this, NetworkedObject);
+            GameManager.AddPlayer(NetworkedObject);
             rightHand.Value = GameObject.Find("right hand").transform.position;
         }
         id = username.GetHashCode();
@@ -77,9 +77,9 @@ public class Player : NetworkedBehaviour
         Debugger.Instance.Print(string.Format("2pt:{0}", isInsideThree), 3);
     }
 
-    internal void ShootBall()
+    public void ShootBall()
     {
-        Shoot(this);
+        GameManager.GetBallHandling().ShootBall(OwnerClientId);
     }
 
     private void OnGameStarted()

@@ -1,4 +1,5 @@
 ﻿using MLAPI;
+using MLAPI.Messaging;
 using MLAPI.Spawning;
 using System;
 using System.Collections;
@@ -80,14 +81,9 @@ public class GameManager : NetworkedBehaviour
         }
     }
 
-    private void StartPregame()
-    {
-
-    }
-
     public void StartGame()
     {
-        StartGame();
+        GameStarted();
 
         if (IsServer)
         {
@@ -107,7 +103,61 @@ public class GameManager : NetworkedBehaviour
         Debug.Log("Game Starting!");
     }
 
-    internal void EndHalf()
+    [ServerRPC]
+    private void RegisterPlayerServer(ulong pid)
+    {
+        NetworkedObject netObj = SpawnManager.GetPlayerObject(pid);
+
+        if (netObj.IsOwnedByServer) return;
+
+        AddPlayer(netObj);
+    }
+
+    [ClientRPC]
+    private void RegisterPlayerClient(ulong pid)
+    {
+        NetworkedObject netObj = SpawnManager.GetPlayerObject(pid);
+
+        if (netObj.IsOwnedByServer) return;
+
+        AddPlayer(netObj);
+    }
+
+    [ServerRPC]
+    private void UnRegisterPlayerServer(ulong pid)
+    {
+        NetworkedObject netObj = SpawnManager.GetPlayerObject(pid);
+
+        if (netObj.IsOwnedByServer) return;
+
+        RemovePlayer(netObj);
+    }
+
+    [ClientRPC]
+    private void UnRegisterPlayerClient(ulong pid)
+    {
+        NetworkedObject netObj = SpawnManager.GetPlayerObject(pid);
+
+        if (netObj.IsOwnedByServer) return;
+
+        RemovePlayer(netObj);
+    }
+
+    // Registers existing players to newly connected client
+    [ClientRPC]
+    private void RegisterOtherPlayer(ulong[] pids)
+    {
+        for (int i = 0; i < pids.Length; i++)
+        {
+            NetworkedObject netObj = SpawnManager.GetPlayerObject(pids[i]);
+
+            if (netObj.IsOwnedByServer || netObj.IsLocalPlayer) return;
+
+            AddPlayer(netObj);
+        }
+    }
+
+    public void EndHalf()
     {
         TeamHome.id = 1;
         TeamAway.id = 0;
@@ -136,11 +186,36 @@ public class GameManager : NetworkedBehaviour
             TeamAway.points += points;
     }
 
-    public static void AddPlayer(Player p, NetworkedObject netObj)
+    public static void AddPlayer(NetworkedObject netObj)
     {
+        print("Adding player " + netObj.OwnerClientId + " " + netObj.NetworkId);
+        Player p = netObj.gameObject.GetComponent<Player>();
+
+        if (m_players.Contains(p))
+        {
+            Debug.Log("GameManager: Attempted to re registered player. Skipping.");
+            return;
+        }
+
         m_players.Add(p);
         m_playersByID.Add(netObj.OwnerClientId, p);
         m_playersByTeam.Add(netObj.OwnerClientId, 0);
+    }
+
+    public static void RemovePlayer(NetworkedObject netObj)
+    {
+        print("Removing player " + netObj.OwnerClientId + " " + netObj.NetworkId);
+        m_playersByID.TryGetValue(netObj.OwnerClientId, out Player p);
+
+        if (p == null)
+        {
+            Debug.LogError("GameManager: Attempted to remove non registered/null player.");
+            return;
+        }
+
+        m_players.Remove(p);
+        m_playersByID.Remove(netObj.OwnerClientId);
+        m_playersByTeam.Remove(netObj.OwnerClientId);
     }
 
     public static GameObject GetBall()
@@ -177,6 +252,19 @@ public class GameManager : NetworkedBehaviour
 
     private void OnConnected(ulong client)
     {
-        
+
+    }
+
+    private void InitLocalPlayer(ulong pid)
+    {
+        // Registers player to server
+        InvokeServerRpc(RegisterPlayerServer, pid);
+        // Registers players to all connected clients.
+        InvokeClientRpcOnEveryoneExcept(RegisterPlayerClient, pid, pid);
+    }
+
+    private void StartPregame()
+    {
+
     }
 }
