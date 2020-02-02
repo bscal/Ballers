@@ -17,6 +17,7 @@ public class FollowCamera : NetworkedBehaviour
             enabled = false;
             return;
         }
+
         // Sets the camera behind the player with offset.
         target = SpawnManager.GetLocalPlayerObject();
         Vector3 pos = target.transform.position;

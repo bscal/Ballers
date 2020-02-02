@@ -218,6 +218,11 @@ public class GameManager : NetworkedBehaviour
         m_playersByTeam.Remove(netObj.OwnerClientId);
     }
 
+    public bool GetIsServer()
+    {
+        return IsServer;
+    }
+
     public static GameObject GetBall()
     {
         return m_ball;

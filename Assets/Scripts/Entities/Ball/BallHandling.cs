@@ -133,7 +133,7 @@ public class BallHandling : NetworkedBehaviour
 
         else if (m_state == BallState.HELD)
         {
-            m_ball.transform.position = m_player.rightHand.Value;
+            m_ball.transform.position = m_player.GetLeftHand();
         }
 
         else if (m_state == BallState.SHOT)

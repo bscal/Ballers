@@ -9,11 +9,17 @@ using MLAPI.Transports.Tasks;
 public class NetworkLobby : MonoBehaviour
 {
 
+    private static NetworkEvents m_networkEvents;
+
     public bool hostServer = true;
     public string host = "";
     public int port = 7777;
 
-    // Start is called before the first frame update
+    private void Awake()
+    {
+        m_networkEvents = GameObject.Find("NetworkManager").GetComponent<NetworkEvents>();
+    }
+
     void Start()
     {
         NetworkingManager.Singleton.ConnectionApprovalCallback += ApprovalCheck;
@@ -62,5 +68,15 @@ public class NetworkLobby : MonoBehaviour
     void OnServerReady()
     {
         Debug.Log("Server Started");
+    }
+
+    bool OnEvent()
+    {
+        return false;
+    }
+
+    public static NetworkEvents GetNetworkEvents()
+    {
+        return m_networkEvents;
     }
 }

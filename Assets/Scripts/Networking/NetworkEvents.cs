@@ -1,19 +1,50 @@
 ﻿using MLAPI;
-using System.Collections;
+using MLAPI.Messaging;
+using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class NetworkEvents : NetworkedBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+
+    private Dictionary<string, Func<bool>> m_eventTable;
+
+    public void RegisterEvent(string name, Func<bool> func)
     {
-        
+        m_eventTable.Add(name, func);
     }
 
-    // Update is called once per frame
-    void Update()
+    public void UnregisterEvent(string name)
     {
-        
+        m_eventTable.Remove(name);
     }
+
+    public void CallEventServer(string eventName)
+    {
+        InvokeServerRpc(EventServer, eventName);
+    }
+
+    public void CallEventAllClients(string eventName)
+    {
+        InvokeClientRpcOnEveryone(EventClient, eventName);
+    }
+
+    public void CallEventOnClient(ulong id, string eventName)
+    {
+        InvokeClientRpcOnClient(EventClient, id, eventName);
+    }
+
+    [ServerRPC]
+    private void EventServer(string eventName)
+    {
+        m_eventTable.TryGetValue(eventName, out var e);
+        if (e != null) e.Invoke();
+    }
+
+    [ClientRPC]
+    private void EventClient(string eventName)
+    {
+        m_eventTable.TryGetValue(eventName, out var e);
+        if (e != null) e.Invoke();
+    }
+
 }

@@ -22,8 +22,18 @@ public class Player : NetworkedBehaviour
         WritePermissionCallback = null // Only used when write permission is "Custom"
     };
 
+    [Header("User Ids")]
     public int id;
     public string username = "test";
+    [Header("CPU or Dummy Controls")]
+    public bool isDummy = false;
+
+    [Header("Screen Hitbox")]
+    public GameObject m_screenHitboxes;
+    public BoxCollider m_screenCollider;
+    public BoxCollider m_hardScreenCollider;
+
+    [Header("Player Data")]
     public uint teamID;
 
     public bool isRightHanded = true;
@@ -31,22 +41,16 @@ public class Player : NetworkedBehaviour
     public bool isMoving = false;
     public bool isSprinting = false;
     public bool isInsideThree = false;
+    public bool isScreening = false;
+    public bool isHardScreening = false;
 
-    public NetworkedVar<Vector3> rightHand;
-    public NetworkedVar<Vector3> leftHand;
-    public NetworkedDictionary<string, int> skills;
+    private Vector3 m_rightHand;
+    private Vector3 m_leftHand;
 
     private void Awake()
     {
         if (!IsOwner)
             return;
-
-        rightHand = new NetworkedVar<Vector3>(settings);
-        leftHand = new NetworkedVar<Vector3>(settings);
-        skills = new NetworkedDictionary<string, int>(settings);
-
-
-        //TEAMID
     }
 
     public override void NetworkStart()
@@ -62,15 +66,17 @@ public class Player : NetworkedBehaviour
         }
         else
         {
-            GameManager.AddPlayer(NetworkedObject);
-            rightHand.Value = GameObject.Find("right hand").transform.position;
+            if (!isDummy)
+                GameManager.AddPlayer(NetworkedObject);
+            m_rightHand = GameObject.Find("right hand").transform.position;
+            m_leftHand = GameObject.Find("left hand").transform.position;
         }
         id = username.GetHashCode();
     }
 
     void Update()
     {
-        if (!IsOwner)
+        if (!IsOwner || isDummy)
             return;
 
         Debugger.Instance.Print(string.Format("D:{0}, W:{1}, S:{2}", isDribbling, isMoving, isSprinting), 0);
@@ -80,6 +86,21 @@ public class Player : NetworkedBehaviour
     public void ShootBall()
     {
         GameManager.GetBallHandling().ShootBall(OwnerClientId);
+    }
+
+    public float Dist(Vector3 other)
+    {
+        return Vector3.Distance(gameObject.transform.position, other);
+    }
+
+    public Vector3 GetLeftHand()
+    {
+        return m_leftHand;
+    }
+
+    public Vector3 GetRightHand()
+    {
+        return m_rightHand;
     }
 
     private void OnGameStarted()
