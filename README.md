@@ -1,5 +1,5 @@
 ## Ballers
-Unity version 2019.2.18f1 3D Game.
+Unity version 2019.3.0f6 3D Game.
 
 Ballers is a 3D multiplayer basketball simulation with the goal of being competitive and skill based.
 
