@@ -40,6 +40,7 @@ public class NetworkEvents : NetworkedBehaviour
         if (e != null) e.Invoke();
     }
 
+
     [ClientRPC]
     private void EventClient(string eventName)
     {

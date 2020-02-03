@@ -11,7 +11,11 @@ using System;
 public class Player : NetworkedBehaviour
 {
 
+    // Local Player Events
+    //  These are not synced over the network and only used by local client.
+    public event Action<Player> PreShoot;
     public event Action<Player> Shoot;
+    public event Action<Player> Release;
 
     private static readonly NetworkedVarSettings settings = new NetworkedVarSettings() {
         SendChannel = "PlayerChannel", // The var value will be synced over this channel
@@ -85,6 +89,7 @@ public class Player : NetworkedBehaviour
 
     public void ShootBall()
     {
+        Shoot(this);
         GameManager.GetBallHandling().ShootBall(OwnerClientId);
     }
 

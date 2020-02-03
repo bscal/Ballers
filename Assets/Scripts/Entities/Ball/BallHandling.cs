@@ -37,9 +37,14 @@ public class BallHandling : NetworkedBehaviour
         WritePermissionCallback = null // Only used when write permission is "Custom"
     };
 
-    private NetworkedVarULong playerWithBall;
-    private NetworkedVarULong playerLastTouched;
-    private NetworkedVarULong playerLastPossesion;
+    private NetworkedVarULong m_playerWithBall;
+    public ulong PlayerWithBall { get { return m_playerWithBall.Value; } set { m_playerWithBall.Value = (value); } }
+
+    private NetworkedVarULong m_playerLastTouched;
+    public ulong PlayerLastTouched { get { return m_playerLastTouched.Value; } set { m_playerLastTouched.Value = (value); } }
+
+    private NetworkedVarULong m_playerLastPossesion;
+    public ulong PlayerLastPossesion { get { return m_playerLastPossesion.Value; } set { m_playerLastPossesion.Value = (value); } }
 
     private GameManager m_gameManager;
     private NetworkedObject m_playerObj;
@@ -64,9 +69,9 @@ public class BallHandling : NetworkedBehaviour
             return;
         }
 
-        playerWithBall = new NetworkedVarULong(settings, 5);
-        playerLastTouched = new NetworkedVarULong(settings, 5);
-        playerLastPossesion = new NetworkedVarULong(settings, 5);
+        m_playerWithBall = new NetworkedVarULong(settings, 5);
+        m_playerLastTouched = new NetworkedVarULong(settings, 5);
+        m_playerLastPossesion = new NetworkedVarULong(settings, 5);
         m_playerDistances = new Dictionary<ulong, float>();
 
         m_gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
@@ -80,13 +85,13 @@ public class BallHandling : NetworkedBehaviour
 
     void Update()
     {
-        Debugger.Instance.Print(string.Format("1:{0} 2:{1} bs:{2}", playerWithBall.Value, playerLastPossesion.Value, m_state), 2);
+        Debugger.Instance.Print(string.Format("1:{0} 2:{1} bs:{2}", m_playerWithBall.Value, m_playerLastPossesion.Value, m_state), 2);
 
         if (IsServer)
         {
             if (m_ballShot && m_state != BallState.SHOT)
             {
-                ShotMissed(GameManager.GetPlayer(playerLastTouched.Value));
+                ShotMissed(GameManager.GetPlayer(PlayerLastTouched));
             }
         }
     }
@@ -104,7 +109,7 @@ public class BallHandling : NetworkedBehaviour
 
             if (pair.Value.PlayerObject.GetComponent<BoxCollider>().bounds.Intersects(m_ball.GetComponentInChildren<SphereCollider>().bounds))
             {
-                playerLastPossesion.Value = pair.Key;
+                PlayerLastPossesion = pair.Key;
             }
         }
 
@@ -118,12 +123,12 @@ public class BallHandling : NetworkedBehaviour
                 {
                     m_state = BallState.HELD;
 
-                    playerWithBall.Value = pair.Key;
+                    PlayerWithBall = pair.Key;
 
                     // Stops old player from dribbling
                     m_player.isDribbling = false;
 
-                    m_player = SpawnManager.GetPlayerObject(playerWithBall.Value).gameObject.GetComponent<Player>();
+                    m_player = SpawnManager.GetPlayerObject(PlayerWithBall).gameObject.GetComponent<Player>();
 
                     // Sets new player to dribble
                     m_player.isDribbling = true;
@@ -146,7 +151,7 @@ public class BallHandling : NetworkedBehaviour
     private void OnShoot(ulong pid)
     {
         Player player = GameManager.GetPlayer(pid);
-        playerLastTouched.Value = pid;
+        PlayerLastTouched = pid;
         m_state = BallState.SHOT;
         StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.baskets[player.teamID].netPos.position, 1.0f, 1.0f));
     }
@@ -181,7 +186,7 @@ public class BallHandling : NetworkedBehaviour
 
             if (m_topCollision && other.gameObject.name == "Hitbox Bot")
             {
-                ShotMade?.Invoke(GameManager.GetPlayer(playerLastTouched.Value));
+                ShotMade?.Invoke(GameManager.GetPlayer(PlayerLastTouched));
                 OnBasketScored();
                 m_gameManager.AddScore(other.GetComponentInParent<Basket>().id, 2);
             }

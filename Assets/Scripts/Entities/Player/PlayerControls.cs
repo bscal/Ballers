@@ -10,6 +10,7 @@ public class PlayerControls : NetworkedBehaviour
     private Animator m_animator;
 
     private bool m_shootCooldown = false;
+    private bool m_jumpCooldown = false;
 
     // Start is called before the first frame update
    void Start()
@@ -27,22 +28,28 @@ public class PlayerControls : NetworkedBehaviour
         m_player.isMoving = IsMoving();
         m_player.isSprinting = Input.GetKey(KeyCode.LeftShift);
 
+        //
+        // === Input Handling of Shooting ===
+        //
         if (Input.GetKey(KeyCode.Y) && !m_shootCooldown)
         {
             m_player.ShootBall();
-            m_animator.SetBool("isShooting", true);
+            m_animator.SetTrigger("Shoot");
+            //m_animator.SetTrigger("Pump");
             StartCoroutine(WaitShoot(0.2f));
         }
-        else
+
+        if (Input.GetKey(KeyCode.Space) && !m_jumpCooldown)
         {
-            m_animator.SetBool("isShooting", false);
+            m_animator.SetTrigger("Jump");
+            StartCoroutine(WaitJump(1.5f));
         }
 
-        m_animator.SetBool("isJumping", Input.GetKey(KeyCode.Space));
-        
         m_animator.SetBool("isDribbling", m_player.isDribbling);
         m_animator.SetBool("isSprinting", m_player.isSprinting);
         m_animator.SetBool("isWalking", m_player.isMoving);
+
+        
     }
     private bool IsMoving()
     {
@@ -55,4 +62,13 @@ public class PlayerControls : NetworkedBehaviour
         yield return new WaitForSeconds(delay);
         m_shootCooldown = false;
     }
+
+    private IEnumerator WaitJump(float delay)
+    {
+        m_jumpCooldown = true;
+        yield return new WaitForSeconds(delay);
+        m_jumpCooldown = false;
+    }
+
+
 }

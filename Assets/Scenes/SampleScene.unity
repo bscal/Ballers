@@ -1385,7 +1385,7 @@ GameObject:
   - component: {fileID: 939306642}
   - component: {fileID: 939306641}
   m_Layer: 5
-  m_Name: Panel
+  m_Name: DebugPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1461,12 +1461,12 @@ PrefabInstance:
     - target: {fileID: 3505132411742522886, guid: f6bd57d38be5dd24c987e956f6756928,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 3505132411742522886, guid: f6bd57d38be5dd24c987e956f6756928,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -100
       objectReference: {fileID: 0}
     - target: {fileID: 3505132411742522886, guid: f6bd57d38be5dd24c987e956f6756928,
         type: 3}

@@ -1,4 +1,5 @@
 ﻿using MLAPI;
+using MLAPI.Spawning;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,7 +8,7 @@ using UnityEngine.UI;
 public class ShotMeter : MonoBehaviour
 {
 
-    float speed = 300.0f;
+    float speed = 400.0f;
     
     public float height;
     public Vector2 position;
@@ -19,8 +20,8 @@ public class ShotMeter : MonoBehaviour
     public Image target;
     public RawImage glow;
     
-    private bool m_isActive = false;
     private bool m_isShooting = false;
+    private RectTransform m_rectTrans;
 
     private IEnumerator m_coroutine;
 
@@ -40,60 +41,32 @@ public class ShotMeter : MonoBehaviour
             fill        = GameObject.Find("ShotMeterBar").GetComponent<RawImage>();
             target      = GameObject.Find("ShotLine").GetComponent<Image>();
             glow        = GameObject.Find("Glow").GetComponent<RawImage>();
+            m_rectTrans = fill.rectTransform;
         }
+
+        SpawnManager.GetLocalPlayerObject().GetComponent<Player>().Shoot += OnShoot;
 
         position = fill.rectTransform.sizeDelta;
         position.y = 0.0f;
+
         Reset();
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F))
-            m_isShooting = true;
-        else
-            m_isShooting = false;
-
-    }
-
-    void FixedUpdate()
-    {
-        Debugger.Instance.Print(string.Format("{0},{1},{2}", target.rectTransform.localPosition.y, fill.rectTransform.rect.height, target.rectTransform.localPosition.y - fill.rectTransform.rect.height), 3);
         if (m_isShooting)
         {
-            if (m_isActive)
-            {
-                m_isActive = false;
-                float dist = Mathf.Abs(target.rectTransform.localPosition.y - fill.rectTransform.rect.height);
-                print(dist);
+            RectTransformExtensions.SetHeight(m_rectTrans, RectTransformExtensions.GetHeight(m_rectTrans) + (speed * Time.deltaTime));
 
-                if (dist < .5)
-                {
-                    glow.gameObject.SetActive(true);
-                }
-
-                StartCoroutine(Hide(3.0f));
-            }
-            else
+            // Overflowed bar => Failed shot + disable
+            if (RectTransformExtensions.GetHeight(m_rectTrans) >= height)
             {
-                target.rectTransform.localPosition = GetBarPosition(1);
-                fill.rectTransform.sizeDelta = position;
-                meter.SetActive(true);
-                m_isActive = true;
+                StopShooting();
+                StartCoroutine(Hide(1.0f));
+                print("failed");
             }
         }
 
-        if (m_isActive)
-        {
-            fill.rectTransform.sizeDelta = fill.rectTransform.sizeDelta + Vector2.up * (speed * Time.deltaTime);
-        }
-
-        if (m_isActive && fill.rectTransform.rect.height >= height)
-        {
-            m_isActive = false;
-            StartCoroutine(Hide(1.0f));
-            print("failed");
-        }
     }
 
     /// <summary>
@@ -101,8 +74,9 @@ public class ShotMeter : MonoBehaviour
     /// 
     /// </summary>
     /// <param name="t_p">The player</param>
-    public void OnShot(Player t_p)
+    public void OnShoot(Player t_p)
     {
+
         // When a player takes a shot
 
         // Random speed ?
@@ -110,10 +84,29 @@ public class ShotMeter : MonoBehaviour
         // Set speed
 
         // Random target location?
-        
+
         // Random start location?
 
-        // Skill 
+        // Skill
+
+        target.rectTransform.localPosition = GetBarPosition(1);
+        RectTransformExtensions.SetHeight(m_rectTrans, 0.0f);
+        meter.SetActive(true);
+        m_isShooting = true;
+        StartCoroutine(ShootingTimeout());
+    }
+
+    public void OnRelease()
+    {
+        float dist = Mathf.Abs(target.rectTransform.localPosition.y - fill.rectTransform.rect.height);
+
+        if (dist < .5)
+        {
+            glow.gameObject.SetActive(true);
+            StartCoroutine(Hide(3.0f));
+        }
+
+        StopShooting();
     }
 
     public Vector3 GetBarPosition(int t_rating)
@@ -125,8 +118,19 @@ public class ShotMeter : MonoBehaviour
 
     IEnumerator Hide(float t_wait)
     {
-        yield return new WaitForSecondsRealtime(t_wait);
+        yield return new WaitForSeconds(t_wait);
         Reset();
+    }
+
+    IEnumerator ShootingTimeout()
+    {
+        yield return new WaitForSeconds(3.0f);
+        StopShooting();
+    }
+
+    public void StopShooting()
+    {
+        m_isShooting = false;
     }
 
     private void Reset()
