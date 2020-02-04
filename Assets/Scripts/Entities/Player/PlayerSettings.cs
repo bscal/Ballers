@@ -1,27 +1,53 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerSettings : MonoBehaviour
 {
 
-    public Camera main;
-    public Camera side;
+    private const int FOCUS_CAM     = 0;
+    private const int SIDE_CAM      = 1;
+    private const int FOLLOW_CAM    = 2;
 
-    // Start is called before the first frame update
+    public Camera follow;
+    public Camera side;
+    public Camera focus;
+
+    private Dropdown m_dropdown;
+
     void Start()
     {
-        main.enabled = true;
-        side.enabled = false;
+        m_dropdown = GameObject.Find("Camera Dropdown").GetComponent<Dropdown>();
+        m_dropdown.onValueChanged.AddListener(delegate { OnCameraChanged(m_dropdown.value); });
+
+        // Sets default camera
+        OnCameraChanged(FOCUS_CAM);
     }
 
-    // Update is called once per frame
-    void Update()
+    void Update() {}
+
+    public void OnCameraChanged(int id)
     {
-        if (Input.GetKeyDown(KeyCode.U))
+        print(id);
+        focus.enabled = false;
+        follow.enabled = false;
+        side.enabled = false;
+
+        switch (id)
         {
-            main.enabled = !main.enabled;
-            side.enabled = !side.enabled;
+            case FOCUS_CAM:
+                focus.enabled = true;
+                break;
+            case SIDE_CAM:
+                side.enabled = true;
+                break;
+            case FOLLOW_CAM:
+                follow.enabled = true;
+                break;
+            default:
+                focus.enabled = true;
+                break;
         }
     }
 }

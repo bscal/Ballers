@@ -26,6 +26,7 @@ public class GameManager : NetworkedBehaviour
     public int teamSize = 5;
     public bool lastShotMade = false;
 
+    public int possession = 0;
     public Basket[] baskets = new Basket[2];
     public Vector3 centerCourt;
     public List<Vector3> inboundPositions;
