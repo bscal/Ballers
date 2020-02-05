@@ -11,3 +11,4 @@ Uses 3D voxel graphics.
 
 * PixaVoxel (Paid Voxel Library in the Unity store)                 Link --> http://picavoxel.com/index.html
 * MLAPI (Networking Library. Included as dll from their installer)  Link --> https://github.com/MidLevel/MLAPI
+* InputManager (Custom input manager for Unity)                     Link --> https://github.com/daemon3000/InputManager
