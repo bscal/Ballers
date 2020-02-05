@@ -29,7 +29,6 @@ public class PlayerSettings : MonoBehaviour
 
     public void OnCameraChanged(int id)
     {
-        print(id);
         focus.enabled = false;
         follow.enabled = false;
         side.enabled = false;
