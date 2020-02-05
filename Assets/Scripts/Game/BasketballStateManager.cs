@@ -62,7 +62,7 @@ public class BasketballStateManager : NetworkedBehaviour
     {
         m_UIHomeName.text = "Home";
         m_UIAwayName.text = "Away";
-        m_gameManager = GetComponent<GameManager>();
+        m_gameManager = GetComponent<GameManager>(); 
     }
 
     public override void NetworkStart()
