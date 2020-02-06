@@ -14,9 +14,9 @@ public enum BallState
     NONE,
     LOOSE,
     HELD,
+    PASS,
     SHOT
 }
-
 
 public class BallHandling : NetworkedBehaviour
 {
@@ -48,7 +48,7 @@ public class BallHandling : NetworkedBehaviour
 
     private GameManager m_gameManager;
     private NetworkedObject m_playerObj;
-    private Player m_player;
+    private Player m_currentPlayer;
     private GameObject m_ball;
     private Rigidbody m_body;
     private BallState m_state;
@@ -76,7 +76,7 @@ public class BallHandling : NetworkedBehaviour
 
         m_gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         m_playerObj = SpawnManager.GetLocalPlayerObject();
-        m_player = m_playerObj.GetComponent<Player>();
+        m_currentPlayer = m_playerObj.GetComponent<Player>();
         m_ball = NetworkedObject.gameObject;
         m_body = gameObject.GetComponent<Rigidbody>();
         m_body.AddForce(new Vector3(1, 1, 1), ForceMode.Impulse);
@@ -126,19 +126,23 @@ public class BallHandling : NetworkedBehaviour
                     PlayerWithBall = pair.Key;
 
                     // Stops old player from dribbling
-                    m_player.isDribbling = false;
+                    m_currentPlayer.isDribbling = false;
 
-                    m_player = SpawnManager.GetPlayerObject(PlayerWithBall).gameObject.GetComponent<Player>();
+                    m_currentPlayer = GameManager.GetPlayer(PlayerWithBall);
 
                     // Sets new player to dribble
-                    m_player.isDribbling = true;
+                    m_currentPlayer.isDribbling = true;
                 }
             }
         }
 
         else if (m_state == BallState.HELD)
         {
-            m_ball.transform.position = m_player.GetLeftHand();
+            m_currentPlayer = GameManager.GetPlayer(PlayerWithBall);
+            if (m_currentPlayer.IsBallInLeftHand)
+                m_ball.transform.position = m_currentPlayer.GetLeftHand().transform.position;
+            else
+                m_ball.transform.position = m_currentPlayer.GetRightHand().transform.position;
         }
 
         else if (m_state == BallState.SHOT)
@@ -165,6 +169,12 @@ public class BallHandling : NetworkedBehaviour
     public void ShootBall(ulong pid)
     {
         InvokeServerRpc(OnShoot, pid);
+    }
+
+    private void SetBallHandler(ulong id)
+    {
+        PlayerWithBall = id;
+        m_currentPlayer = GameManager.GetPlayer(PlayerWithBall);
     }
 
     public void RegisterPlayers()
@@ -216,6 +226,7 @@ public class BallHandling : NetworkedBehaviour
             transform.position += center;
             yield return null;
         }
+        m_state = BallState.LOOSE;
     }
 
 }

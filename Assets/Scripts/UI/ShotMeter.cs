@@ -45,6 +45,7 @@ public class ShotMeter : MonoBehaviour
         }
 
         SpawnManager.GetLocalPlayerObject().GetComponent<Player>().Shoot += OnShoot;
+        SpawnManager.GetLocalPlayerObject().GetComponent<Player>().Release += OnRelease;
 
         position = fill.rectTransform.sizeDelta;
         position.y = 0.0f;
@@ -96,17 +97,17 @@ public class ShotMeter : MonoBehaviour
         StartCoroutine(ShootingTimeout());
     }
 
-    public void OnRelease()
+    public void OnRelease(Player player)
     {
         float dist = Mathf.Abs(target.rectTransform.localPosition.y - fill.rectTransform.rect.height);
 
         if (dist < .5)
         {
             glow.gameObject.SetActive(true);
-            StartCoroutine(Hide(3.0f));
         }
 
         StopShooting();
+        StartCoroutine(Hide(3.0f));
     }
 
     public Vector3 GetBarPosition(int t_rating)

@@ -31,8 +31,18 @@ public class PlayerControls : NetworkedBehaviour
         //
         // === Input Handling of Shooting ===
         //
-        if (Input.GetKey(KeyCode.Y) && !m_shootCooldown)
+        if (Input.GetKey(KeyCode.Y))
         {
+            if (m_player.isShooting)
+            {
+                m_player.ReleaseBall();
+                return;
+            }
+            else if (m_shootCooldown)
+            {
+                return;
+            }
+
             m_player.ShootBall();
             m_animator.SetTrigger("Shoot");
             //m_animator.SetTrigger("Pump");

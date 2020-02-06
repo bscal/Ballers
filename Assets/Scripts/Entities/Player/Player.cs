@@ -47,9 +47,12 @@ public class Player : NetworkedBehaviour
     public bool isInsideThree = false;
     public bool isScreening = false;
     public bool isHardScreening = false;
+    public bool isShooting = false;
 
-    private Vector3 m_rightHand;
-    private Vector3 m_leftHand;
+    public bool IsBallInLeftHand = false;
+
+    private GameObject m_rightHand;
+    private GameObject m_leftHand;
 
     private void Awake()
     {
@@ -72,8 +75,8 @@ public class Player : NetworkedBehaviour
         {
             if (!isDummy)
                 GameManager.AddPlayer(NetworkedObject);
-            m_rightHand = GameObject.Find("right hand").transform.position;
-            m_leftHand = GameObject.Find("left hand").transform.position;
+            m_rightHand = GameObject.Find("right arm/forearm/hand");
+            m_leftHand = GameObject.Find("left arm/forearm/hand");
         }
         id = username.GetHashCode();
     }
@@ -89,8 +92,16 @@ public class Player : NetworkedBehaviour
 
     public void ShootBall()
     {
+        isShooting = true;
         Shoot(this);
         GameManager.GetBallHandling().ShootBall(OwnerClientId);
+    }
+
+    public void ReleaseBall()
+    {
+        isShooting = false;
+        print("released");
+        Release(this);
     }
 
     public float Dist(Vector3 other)
@@ -98,12 +109,12 @@ public class Player : NetworkedBehaviour
         return Vector3.Distance(gameObject.transform.position, other);
     }
 
-    public Vector3 GetLeftHand()
+    public GameObject GetLeftHand()
     {
         return m_leftHand;
     }
 
-    public Vector3 GetRightHand()
+    public GameObject GetRightHand()
     {
         return m_rightHand;
     }
