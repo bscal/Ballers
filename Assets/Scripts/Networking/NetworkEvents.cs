@@ -2,49 +2,78 @@
 using MLAPI.Messaging;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
+
+public enum NetworkEvent
+{
+    UNKNOWN,
+    GAME_START,
+}
 
 public class NetworkEvents : NetworkedBehaviour
 {
 
-    private Dictionary<string, Func<bool>> m_eventTable;
+    public static NetworkEvents Singleton { get; private set; }
 
-    public void RegisterEvent(string name, Func<bool> func)
+    private Dictionary<NetworkEvent, Action> m_eventTable = new Dictionary<NetworkEvent, Action>();
+
+    void Awake()
     {
-        m_eventTable.Add(name, func);
+        Singleton = this;
     }
 
-    public void UnregisterEvent(string name)
+    public void RegisterEvent(NetworkEvent eName, Action eAction)
     {
-        m_eventTable.Remove(name);
+        Debug.Assert(eName != 0, "Name is null");
+        Debug.Assert(eAction != null, "Event is null");
+        m_eventTable.Add(eName, eAction);
     }
 
-    public void CallEventServer(string eventName)
+    public void UnregisterEvent(NetworkEvent eName)
     {
-        InvokeServerRpc(EventServer, eventName);
+        m_eventTable.Remove(eName);
     }
 
-    public void CallEventAllClients(string eventName)
+    public Action GetEventAction(NetworkEvent eName)
     {
-        InvokeClientRpcOnEveryone(EventClient, eventName);
+        m_eventTable.TryGetValue(eName, out Action eAction);
+        return eAction;
     }
 
-    public void CallEventOnClient(ulong id, string eventName)
+    public void CallEventServer(NetworkEvent eName)
     {
-        InvokeClientRpcOnClient(EventClient, id, eventName);
+        Debug.Assert(eName != 0, "Name is null");
+        InvokeServerRpc(EventServer, eName);
+    }
+
+    public void CallEventAllClients(NetworkEvent eName)
+    {
+        Debug.Assert(eName != 0, "Name is null");
+        InvokeClientRpcOnEveryone(EventClient, eName);
+    }
+
+    public void CallEventOnClient(ulong id, NetworkEvent eName)
+    {
+        Debug.Assert(eName != 0, "Name is null");
+        InvokeClientRpcOnClient(EventClient, id, eName);
     }
 
     [ServerRPC]
-    private void EventServer(string eventName)
+    private void EventServer(NetworkEvent eName)
     {
-        m_eventTable.TryGetValue(eventName, out var e);
+        Debug.Assert(eName != 0, "Name is null");
+        m_eventTable.TryGetValue(eName, out var e);
+        Debug.Assert(e != null, "Event is null");
         if (e != null) e.Invoke();
     }
 
 
     [ClientRPC]
-    private void EventClient(string eventName)
+    private void EventClient(NetworkEvent eName)
     {
-        m_eventTable.TryGetValue(eventName, out var e);
+        Debug.Assert(eName != 0, "Name is null");
+        m_eventTable.TryGetValue(eName, out var e);
+        Debug.Assert(e != null, "Event is null");
         if (e != null) e.Invoke();
     }
 

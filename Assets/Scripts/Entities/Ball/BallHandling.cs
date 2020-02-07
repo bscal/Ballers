@@ -15,17 +15,21 @@ public enum BallState
     LOOSE,
     HELD,
     PASS,
+    JUMPBALL,
     SHOT
 }
 
 public class BallHandling : NetworkedBehaviour
 {
 
+    // =================================== Events ===================================
+
     public event Action<Player> ShotMade;
     public event Action<Player> ShotMissed;
-
     public event Action<BallState> BallStateChange;
     public event Action<int> BallPossesionChange;
+
+    // =================================== Networking Variables ===================================
 
     private static readonly NetworkedVarSettings settings = new NetworkedVarSettings()
     {
@@ -46,6 +50,12 @@ public class BallHandling : NetworkedBehaviour
     private NetworkedVarULong m_playerLastPossesion;
     public ulong PlayerLastPossesion { get { return m_playerLastPossesion.Value; } set { m_playerLastPossesion.Value = (value); } }
 
+    // =================================== Public Varibles ===================================
+
+    public int Possession { get { return (m_state == BallState.JUMPBALL || m_currentPlayer == null) ? -1 : m_currentPlayer.teamID; } }
+
+    // =================================== Private Varibles ===================================
+
     private GameManager m_gameManager;
     private NetworkedObject m_playerObj;
     private Player m_currentPlayer;
@@ -57,6 +67,8 @@ public class BallHandling : NetworkedBehaviour
     private bool m_topCollision;
 
     private Dictionary<ulong, float> m_playerDistances;
+
+    // =================================== Functions ===================================
 
     void Start()
     {
@@ -150,7 +162,7 @@ public class BallHandling : NetworkedBehaviour
         }
     }
 
-    // RPCs
+    // =================================== RPCs ===================================
     [ServerRPC]
     private void OnShoot(ulong pid)
     {
@@ -160,7 +172,16 @@ public class BallHandling : NetworkedBehaviour
         StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.baskets[player.teamID].netPos.position, 1.0f, 1.0f));
     }
 
-    // Public Functions
+    [ServerRPC]
+    private void OnRelease(ulong pid)
+    {
+        Player player = GameManager.GetPlayer(pid);
+        PlayerLastTouched = pid;
+        m_state = BallState.SHOT;
+        StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.baskets[player.teamID].netPos.position, 1.0f, 1.0f));
+    }
+
+    // =================================== Public Functions ===================================
     public void StopBall()
     {
         m_body.velocity = Vector3.zero;
@@ -184,7 +205,7 @@ public class BallHandling : NetworkedBehaviour
         });
     }
 
-    // Private Functions
+    // =================================== Private Functions ===================================
 
     private void OnTriggerEnter(Collider other)
     {

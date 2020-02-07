@@ -28,6 +28,8 @@ public class ShotMeter : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        
+
         if (!GetComponent<NetworkedObject>().IsLocalPlayer)
         {
             enabled = false;

@@ -6,15 +6,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum TeamType
+{
+    NONE = -1,
+    HOME = 0,
+    AWAY = 1
+}
+
 public class GameManager : NetworkedBehaviour
 {
 
-    public static GameManager Singleton;
+    public static GameManager Singleton { get; private set; }
 
     public event Action Pregame;
     public event Action GameStarted;
 
-    private static GameObject m_ball;
     private static BallHandling m_ballhandling;
     private static List<Player> m_players = new List<Player>();
     private static Dictionary<ulong, Player> m_playersByID = new Dictionary<ulong, Player>();
@@ -22,11 +28,11 @@ public class GameManager : NetworkedBehaviour
 
     public Team TeamHome { get; private set; }
     public Team TeamAway { get; private set; }
+    public bool HasStarted { get; private set; }
 
     public int teamSize = 5;
     public bool lastShotMade = false;
-
-    public int possession = 0;
+    public GameObject ball;
     public Basket[] baskets = new Basket[2];
     public Vector3 centerCourt;
     public List<Vector3> inboundPositions;
@@ -38,8 +44,6 @@ public class GameManager : NetworkedBehaviour
 
     [SerializeField]
     private GameObject m_ballPrefab;
-
-    private bool HasGameStarted { get; set; }
 
     void Awake()
     {
@@ -60,23 +64,31 @@ public class GameManager : NetworkedBehaviour
     void Start()
     {
         NetworkingManager.Singleton.OnClientConnectedCallback += OnConnected;
+        
         m_gameState.OnHalfEnd += EndHalf;
     }
 
     public override void NetworkStart()
     {
+        if (IsServer)
+        {
+            ball = Instantiate(m_ballPrefab, new Vector3(1, 3, 1), Quaternion.identity);
+            ball.GetComponent<NetworkedObject>().Spawn();
+            m_ballhandling = ball.GetComponent<BallHandling>();
+            ball.SetActive(false);
+        }
     }
 
     void Update()
     {
         if (IsServer)
         {
-            if (!HasGameStarted)
+            if (!HasStarted)
             {
                 m_pregameTime += Time.deltaTime;
                 if (m_pregameTime > 30.0 * 1000.0)
                 {
-                    HasGameStarted = true;
+                    HasStarted = true;
                 }
             }
         }
@@ -84,20 +96,21 @@ public class GameManager : NetworkedBehaviour
 
     public void StartGame()
     {
-        GameStarted();
+        //GameStarted();
+
+        NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, GameStarted);
+        NetworkEvents.Singleton.GetEventAction(NetworkEvent.GAME_START).Invoke();
 
         if (IsServer)
         {
-            if (m_ball == null)
+            if (!ball.activeSelf)
             {
-                m_ball = Instantiate(m_ballPrefab, new Vector3(1, 3, 1), Quaternion.identity);
-                m_ball.GetComponent<NetworkedObject>().Spawn();
-                m_ballhandling = m_ball.GetComponent<BallHandling>();
+                ball.SetActive(true);
             }
             else
             {
                 m_ballhandling.StopBall();
-                m_ball.transform.position = new Vector3(1, 3, 1);
+                ball.transform.position = new Vector3(1, 3, 1);
             }
         }
 
@@ -222,11 +235,6 @@ public class GameManager : NetworkedBehaviour
     public bool GetIsServer()
     {
         return IsServer;
-    }
-
-    public static GameObject GetBall()
-    {
-        return m_ball;
     }
 
     public static BallHandling GetBallHandling()

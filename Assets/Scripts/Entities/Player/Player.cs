@@ -38,7 +38,7 @@ public class Player : NetworkedBehaviour
     public BoxCollider m_hardScreenCollider;
 
     [Header("Player Data")]
-    public uint teamID;
+    public int teamID;
 
     public bool isRightHanded = true;
     public bool isDribbling = false;
@@ -54,12 +54,6 @@ public class Player : NetworkedBehaviour
     private GameObject m_rightHand;
     private GameObject m_leftHand;
 
-    private void Awake()
-    {
-        if (!IsOwner)
-            return;
-    }
-
     public override void NetworkStart()
     {
         if (!IsOwner)
@@ -71,10 +65,12 @@ public class Player : NetworkedBehaviour
         {
             username = "Server";
         }
+
         else
         {
             if (!isDummy)
                 GameManager.AddPlayer(NetworkedObject);
+
             m_rightHand = GameObject.Find("right arm/forearm/hand");
             m_leftHand = GameObject.Find("left arm/forearm/hand");
         }
@@ -92,16 +88,16 @@ public class Player : NetworkedBehaviour
 
     public void ShootBall()
     {
-        isShooting = true;
         Shoot(this);
+        isShooting = true;
         GameManager.GetBallHandling().ShootBall(OwnerClientId);
     }
 
     public void ReleaseBall()
     {
+        Release(this);
         isShooting = false;
         print("released");
-        Release(this);
     }
 
     public float Dist(Vector3 other)

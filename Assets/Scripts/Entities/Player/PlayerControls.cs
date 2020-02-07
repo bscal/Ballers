@@ -25,6 +25,11 @@ public class PlayerControls : NetworkedBehaviour
         if (!IsOwner || IsServer && !IsHost)
             return;
 
+        if (GameManager.Singleton.HasStarted)
+        {
+
+        }
+
         m_player.isMoving = IsMoving();
         m_player.isSprinting = Input.GetKey(KeyCode.LeftShift);
 
