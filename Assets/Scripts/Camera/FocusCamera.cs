@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FocusCamera : NetworkedBehaviour
+public class FocusCamera : MonoBehaviour
 {
 
     public Camera cam;
@@ -16,14 +16,13 @@ public class FocusCamera : NetworkedBehaviour
     private bool m_isRotating = false;
     private int m_lastPossession = -1;
 
-    public override void NetworkStart()
+    void Start()
     {
-        if (!IsOwner || IsServer && !IsHost)
+        if (NetworkingManager.Singleton.IsServer && !NetworkingManager.Singleton.IsHost)
         {
-            enabled = false;
-            return;
+            Destroy(this);
         }
-        player = SpawnManager.GetLocalPlayerObject().gameObject;
+
         ball = GameObject.Find("Ball");
     }
 
@@ -32,7 +31,7 @@ public class FocusCamera : NetworkedBehaviour
         // Check if player is null
         if (player == null)
         {
-            player = SpawnManager.GetLocalPlayerObject().gameObject;
+            player = SpawnManager.GetLocalPlayerObject()?.gameObject;
             return;
         }
 

@@ -4,34 +4,44 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FollowCamera : NetworkedBehaviour
+public class FollowCamera : MonoBehaviour
 {
-    public NetworkedObject target;
+    public GameObject target;
 
     private Vector3 offset;
 
-    public override void NetworkStart()
+    void Start()
     {
-        if (!IsOwner || IsServer && !IsHost)
+        if (NetworkingManager.Singleton.IsServer && !NetworkingManager.Singleton.IsHost)
         {
-            enabled = false;
-            return;
+            Destroy(this);
+        }
+    }
+
+    void LateUpdate()
+    {
+        // Check if player is null
+        if (target == null)
+        {
+            NetworkedObject netPlayer = SpawnManager.GetLocalPlayerObject();
+            if (!netPlayer) return;
+
+            target = netPlayer.gameObject;
+            SetPositions(); 
         }
 
-        // Sets the camera behind the player with offset.
-        target = SpawnManager.GetLocalPlayerObject();
+        float desiredAngle = target.transform.eulerAngles.y;
+        Quaternion rotation = Quaternion.Euler(0, desiredAngle, 0);
+        transform.position = target.transform.position - (rotation * offset);
+        transform.LookAt(target.transform);
+    }
+
+    private void SetPositions()
+    {
         Vector3 pos = target.transform.position;
         pos.y = 6;
         pos.z = 12;
         transform.position = pos;
         offset = target.transform.position - transform.position;
-    }
-
-    void LateUpdate()
-    {
-        float desiredAngle = target.transform.eulerAngles.y;
-        Quaternion rotation = Quaternion.Euler(0, desiredAngle, 0);
-        transform.position = target.transform.position - (rotation * offset);
-        transform.LookAt(target.transform);
     }
 }
