@@ -64,7 +64,7 @@ public class GameManager : NetworkedBehaviour
     void Start()
     {
         NetworkingManager.Singleton.OnClientConnectedCallback += OnConnected;
-        
+
         m_gameState.OnHalfEnd += EndHalf;
     }
 
@@ -76,6 +76,10 @@ public class GameManager : NetworkedBehaviour
             ball.GetComponent<NetworkedObject>().Spawn();
             m_ballhandling = ball.GetComponent<BallHandling>();
             ball.SetActive(false);
+        }
+        if (IsClient)
+        {
+            NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, this, OnStartGame);
         }
     }
 
@@ -96,23 +100,27 @@ public class GameManager : NetworkedBehaviour
 
     public void StartGame()
     {
-        //GameStarted();
-
-        NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, GameStarted);
-        NetworkEvents.Singleton.GetEventAction(NetworkEvent.GAME_START).Invoke();
-
-        if (IsServer)
+        if (IsClient)
         {
-            if (!ball.activeSelf)
-            {
-                ball.SetActive(true);
-            }
-            else
-            {
-                m_ballhandling.StopBall();
-                ball.transform.position = new Vector3(1, 3, 1);
-            }
+            NetworkEvents.Singleton.CallEventServer(NetworkEvent.GAME_START);
         }
+        else if (IsServer)
+        {
+            NetworkEvents.Singleton.CallEventAllClients(NetworkEvent.GAME_START);
+        }
+    }
+
+    public void OnStartGame()
+    {
+        print(1);
+        GameStarted();
+
+
+        if (!ball.activeSelf)
+            ball.SetActive(true);
+
+        m_ballhandling.StopBall();
+        ball.transform.position = new Vector3(1, 3, 1);
 
         Debug.Log("Game Starting!");
     }
@@ -279,6 +287,6 @@ public class GameManager : NetworkedBehaviour
 
     private void StartPregame()
     {
-
+        print(1);
     }
 }

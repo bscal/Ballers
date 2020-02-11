@@ -59,21 +59,26 @@ public class Player : NetworkedBehaviour
         if (!IsOwner)
             return;
 
-        GameManager.Singleton.GameStarted += OnGameStarted;
-
-        if (IsServer && !IsHost)
+        if (!isDummy)
         {
-            username = "Server";
+            GameManager.AddPlayer(NetworkedObject);
+
+            if (IsClient)
+            {
+                //NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, this, OnGameStarted);
+                GameManager.Singleton.GameStarted += OnGameStarted;
+            }
+            if (IsServer && !IsHost)
+            {
+                username = "Server";
+            }
+            else
+            {
+                m_rightHand = GameObject.Find("right arm/forearm/hand");
+                m_leftHand = GameObject.Find("left arm/forearm/hand");
+            }
         }
 
-        else
-        {
-            if (!isDummy)
-                GameManager.AddPlayer(NetworkedObject);
-
-            m_rightHand = GameObject.Find("right arm/forearm/hand");
-            m_leftHand = GameObject.Find("left arm/forearm/hand");
-        }
         id = username.GetHashCode();
     }
 
@@ -89,6 +94,7 @@ public class Player : NetworkedBehaviour
     public void ShootBall()
     {
         Shoot(this);
+        NetworkEvents.Singleton.CallEventServer(NetworkEvent.PLAYER_SHOOT);
         isShooting = true;
         GameManager.GetBallHandling().ShootBall(OwnerClientId);
     }
@@ -96,6 +102,7 @@ public class Player : NetworkedBehaviour
     public void ReleaseBall()
     {
         Release(this);
+        NetworkEvents.Singleton.CallEventServer(NetworkEvent.PLAYER_RELEASE);
         isShooting = false;
         print("released");
     }
@@ -117,7 +124,7 @@ public class Player : NetworkedBehaviour
 
     private void OnGameStarted()
     {
-
+        print("called");
     }
 
 }
