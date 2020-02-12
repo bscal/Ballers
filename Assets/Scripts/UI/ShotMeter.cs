@@ -8,9 +8,12 @@ using UnityEngine.UI;
 public class ShotMeter : MonoBehaviour
 {
 
-    float speed = 400.0f;
+    private const float BASE_SPEED = 50.0f;
+
+    float speed = BASE_SPEED;
     
     public float height;
+    public float targetHeight;
     public Vector2 position;
     public Vector3 targetPos = Vector3.zero;
 
@@ -45,7 +48,7 @@ public class ShotMeter : MonoBehaviour
             m_rectTrans = fill.rectTransform;
         }
 
-        SpawnManager.GetLocalPlayerObject().GetComponent<Player>().Shoot += OnShoot;
+        //SpawnManager.GetLocalPlayerObject().GetComponent<Player>().Shoot += OnShoot;
         SpawnManager.GetLocalPlayerObject().GetComponent<Player>().Release += OnRelease;
 
         //NetworkEvents.Singleton.RegisterEvent(NetworkEvent.PLAYER_SHOOT, this, OnShoot);
@@ -53,6 +56,9 @@ public class ShotMeter : MonoBehaviour
 
         position = fill.rectTransform.sizeDelta;
         position.y = 0.0f;
+
+        height = background.rectTransform.GetHeight();
+        targetHeight = height * .8f;
 
         Reset();
     }
@@ -74,36 +80,22 @@ public class ShotMeter : MonoBehaviour
 
     }
 
-    /// <summary>
-    /// When a player takes a shot that requires the shotmeter.
-    /// 
-    /// </summary>
-    /// <param name="t_p">The player</param>
-    public void OnShoot(Player t_p)
+    public void OnShoot(Player p, float speedMod, float start, float end)
     {
+        speed = BASE_SPEED * speedMod;
 
-        // When a player takes a shot
+        RectTransformExtensions.SetHeight(m_rectTrans, 0.0f + start);
 
-        // Random speed ?
-        // What speed ?
-        // Set speed
-
-        // Random target location?
-
-        // Random start location?
-
-        // Skill
-
-        target.rectTransform.localPosition = GetBarPosition(1);
-        RectTransformExtensions.SetHeight(m_rectTrans, 0.0f);
+        target.rectTransform.localPosition = GetBarPosition(end);
+        
         meter.SetActive(true);
         m_isShooting = true;
-        StartCoroutine(ShootingTimeout());
+        //StartCoroutine(ShootingTimeout());
     }
 
     public void OnRelease(Player player)
     {
-        float dist = Mathf.Abs(target.rectTransform.localPosition.y - fill.rectTransform.rect.height);
+        float dist = Mathf.Abs(target.rectTransform.localPosition.y - targetHeight);
 
         if (dist < .5)
         {
@@ -114,10 +106,10 @@ public class ShotMeter : MonoBehaviour
         StartCoroutine(Hide(3.0f));
     }
 
-    public Vector3 GetBarPosition(int t_rating)
+    public Vector3 GetBarPosition(float t_height)
     {
         Vector3 pos = targetPos;
-        pos.y = target.rectTransform.localPosition.y + (height * .8f);
+        pos.y = targetHeight + t_height;
         return pos;
     }
 

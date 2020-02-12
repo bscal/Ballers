@@ -53,6 +53,7 @@ public class Player : NetworkedBehaviour
 
     private GameObject m_rightHand;
     private GameObject m_leftHand;
+    private ShotMeter m_shotmeter;
 
     public override void NetworkStart()
     {
@@ -76,6 +77,7 @@ public class Player : NetworkedBehaviour
             {
                 m_rightHand = GameObject.Find("right arm/forearm/hand");
                 m_leftHand = GameObject.Find("left arm/forearm/hand");
+                m_shotmeter = GetComponent<ShotMeter>();
             }
         }
 
@@ -93,18 +95,33 @@ public class Player : NetworkedBehaviour
 
     public void ShootBall()
     {
-        Shoot(this);
-        NetworkEvents.Singleton.CallEventServer(NetworkEvent.PLAYER_SHOOT);
-        isShooting = true;
-        GameManager.GetBallHandling().ShootBall(OwnerClientId);
+        //Shoot(this);
+        //NetworkEvents.Singleton.CallEventServer(NetworkEvent.PLAYER_SHOOT);
+        InvokeServerRpc(ServerShootBall, OwnerClientId);  
     }
 
     public void ReleaseBall()
     {
-        Release(this);
-        NetworkEvents.Singleton.CallEventServer(NetworkEvent.PLAYER_RELEASE);
+        Release?.Invoke(this);
+        //NetworkEvents.Singleton.CallEventServer(NetworkEvent.PLAYER_RELEASE);
         isShooting = false;
         print("released");
+    }
+
+    [ServerRPC]
+    public void ServerShootBall(ulong id)
+    {
+        float speed = UnityEngine.Random.Range(3, 6);
+
+        InvokeClientRpcOnClient(ClientShootBall, id, speed, 0f, 0f);
+    }
+
+    [ClientRPC]
+    public void ClientShootBall(float speed, float start, float end)
+    {
+        isShooting = true;
+        GameManager.GetBallHandling().ShootBall(OwnerClientId);
+        m_shotmeter.OnShoot(this, speed, start, end);
     }
 
     public float Dist(Vector3 other)

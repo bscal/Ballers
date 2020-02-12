@@ -38,20 +38,20 @@ public class PlayerControls : NetworkedBehaviour
         //
         if (Input.GetKey(KeyCode.Y))
         {
-            if (m_player.isShooting)
+            if (m_shootCooldown)
             {
-                m_player.ReleaseBall();
                 return;
             }
-            else if (m_shootCooldown)
+            else if (m_player.isShooting)
             {
+                m_player.ReleaseBall();
+                StartCoroutine(WaitShoot(0.25f));
                 return;
             }
 
             m_player.ShootBall();
             m_animator.SetTrigger("Shoot");
-            //m_animator.SetTrigger("Pump");
-            StartCoroutine(WaitShoot(0.2f));
+            StartCoroutine(WaitShoot(0.20f));
         }
 
         if (Input.GetKey(KeyCode.Space) && !m_jumpCooldown)
