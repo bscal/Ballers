@@ -55,6 +55,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -204,7 +205,7 @@ Transform:
   m_GameObject: {fileID: 6110922978709442016}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.72, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_Children:
   - {fileID: 272434331958918574}
   m_Father: {fileID: 0}
@@ -222,9 +223,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c9c86107cb3f0c4299af8034d06c2c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  text: {fileID: 0}
-  m_left: {fileID: 0}
-  m_right: {fileID: 0}
 --- !u!54 &1914631757
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -470,5 +468,5 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/ball.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 30504
+  thisInstanceId: 67154
   Undone: 1

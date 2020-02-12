@@ -6,20 +6,25 @@ using UnityEngine;
 public class PlayerControls : NetworkedBehaviour
 {
 
+    private const float MAX_TIME = 3.0f;
+    private const float timeToCountAsHeldDown = 0.3f;
+    private float pressTimer = 0;
+
     private Player m_player;
     private Animator m_animator;
 
     private bool m_shootCooldown = false;
     private bool m_jumpCooldown = false;
 
-    // Start is called before the first frame update
+    private Coroutine m_ShotInput;
+
    void Start()
    {
         m_player = GetComponent<Player>();
         m_animator = GetComponentInChildren<Animator>();
+        m_ShotInput = StartCoroutine(ShotInput());
    }
 
-    // Update is called once per frame
     void Update()
     {
         if (!IsOwner || IsServer && !IsHost)
@@ -32,27 +37,6 @@ public class PlayerControls : NetworkedBehaviour
 
         m_player.isMoving = IsMoving();
         m_player.isSprinting = Input.GetKey(KeyCode.LeftShift);
-
-        //
-        // === Input Handling of Shooting ===
-        //
-        if (Input.GetKey(KeyCode.Y))
-        {
-            if (m_shootCooldown)
-            {
-                return;
-            }
-            else if (m_player.isShooting)
-            {
-                m_player.ReleaseBall();
-                StartCoroutine(WaitShoot(0.25f));
-                return;
-            }
-
-            m_player.ShootBall();
-            m_animator.SetTrigger("Shoot");
-            StartCoroutine(WaitShoot(0.20f));
-        }
 
         if (Input.GetKey(KeyCode.Space) && !m_jumpCooldown)
         {
@@ -84,6 +68,110 @@ public class PlayerControls : NetworkedBehaviour
         yield return new WaitForSeconds(delay);
         m_jumpCooldown = false;
     }
+
+
+    IEnumerator ShotInput()
+    {
+        while (true)
+        {
+            if (m_shootCooldown || m_player.isShooting) yield return new WaitForSeconds(0.1f);
+
+            //Check when the key is pressed
+            if (Input.GetKeyDown(KeyCode.Y))
+            {
+                //Continue to check if it is still heldown and keep counting the how long
+                while (Input.GetKey(KeyCode.Y))
+                {
+                    //Start incrementing timer
+                    pressTimer += Time.deltaTime;
+
+                    //Check if this counts as being "Held Down"
+                    if (pressTimer > timeToCountAsHeldDown)
+                    {
+                        //It a "key held down", call the OnKeyHeldDown function and wait for it to return
+                        yield return OnKeyHeldDown();
+                        //No need to continue checking for Input.GetKey(KeyCode.D). Break out of this while loop
+                        break;
+                    }
+
+                    //Wait for a frame
+                    yield return null;
+                }
+            }
+
+
+            //Check if key is released 
+            if (Input.GetKeyUp(KeyCode.Y))
+            {
+                //Check if we have not not reached the timer then it is only a key press
+                if (pressTimer < timeToCountAsHeldDown)
+                {
+                    //It just a key press, call the OnKeyPressedOnly function and wait for it to return
+                    yield return OnKeyPressedOnly();
+                }
+
+                //Reset timer to 0 for the next key press
+                pressTimer = 0f;
+            }
+
+            //Wait for a frame
+            yield return null;
+        }
+    }
+
+    IEnumerator OnKeyPressedOnly()
+    {
+        Debug.Log("key was only Pressed");
+
+        Pumpfake();
+
+        yield return null;
+    }
+
+
+    IEnumerator OnKeyHeldDown()
+    {
+        Debug.LogWarning("key is Held Down");
+
+        StartShot();
+
+        //Move 1 unit every frame until edge detection is reached!
+        while (pressTimer < MAX_TIME)
+        {
+            if (!Input.GetKey(KeyCode.Y)) break;
+
+            //Start incrementing timer
+            pressTimer += Time.deltaTime;
+
+            //Wait for a frame
+            yield return null;
+        }
+
+        StopShot();
+        pressTimer = 0f;
+        yield return null;
+    }
+
+    void Pumpfake()
+    {
+        m_animator.SetTrigger("Pumpfake");
+        StartCoroutine(WaitShoot(0.20f));
+    }
+
+    void StartShot()
+    {
+        m_player.ShootBall();
+        m_animator.SetTrigger("Shoot");
+        StartCoroutine(WaitShoot(0.20f));
+    }
+
+    void StopShot()
+    {
+        m_player.ReleaseBall();
+        StartCoroutine(WaitShoot(0.20f));
+    }
+
+
 
 
 }

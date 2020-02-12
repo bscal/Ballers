@@ -50,10 +50,12 @@ public class Player : NetworkedBehaviour
     public bool isShooting = false;
 
     public bool IsBallInLeftHand = false;
+    public bool HasBall { get { return GameManager.GetBallHandling().PlayerWithBall == OwnerClientId; } }
 
     private GameObject m_rightHand;
     private GameObject m_leftHand;
     private ShotMeter m_shotmeter;
+    private Animator m_animator;
 
     public override void NetworkStart()
     {
@@ -78,6 +80,7 @@ public class Player : NetworkedBehaviour
                 m_rightHand = GameObject.Find("right arm/forearm/hand");
                 m_leftHand = GameObject.Find("left arm/forearm/hand");
                 m_shotmeter = GetComponent<ShotMeter>();
+                m_animator = GetComponentInChildren<Animator>();
             }
         }
 
@@ -89,12 +92,15 @@ public class Player : NetworkedBehaviour
         if (!IsOwner || isDummy)
             return;
 
+        m_animator.SetBool("hasBall", HasBall);
+
         Debugger.Instance.Print(string.Format("D:{0}, W:{1}, S:{2}", isDribbling, isMoving, isSprinting), 0);
         Debugger.Instance.Print(string.Format("2pt:{0}", isInsideThree), 3);
     }
 
     public void ShootBall()
     {
+        isShooting = true;
         //Shoot(this);
         //NetworkEvents.Singleton.CallEventServer(NetworkEvent.PLAYER_SHOOT);
         InvokeServerRpc(ServerShootBall, OwnerClientId);  
@@ -102,9 +108,9 @@ public class Player : NetworkedBehaviour
 
     public void ReleaseBall()
     {
+        isShooting = false;
         Release?.Invoke(this);
         //NetworkEvents.Singleton.CallEventServer(NetworkEvent.PLAYER_RELEASE);
-        isShooting = false;
         print("released");
     }
 

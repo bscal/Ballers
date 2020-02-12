@@ -127,6 +127,7 @@ public class BallHandling : NetworkedBehaviour
 
         if (m_state == BallState.LOOSE)
         {
+            m_body.isKinematic = false;
             var pairs = from pair in m_playerDistances orderby pair.Value descending select pair;
 
             foreach (KeyValuePair<ulong, float> pair in pairs)
@@ -151,6 +152,7 @@ public class BallHandling : NetworkedBehaviour
         else if (m_state == BallState.HELD)
         {
             m_currentPlayer = GameManager.GetPlayer(PlayerWithBall);
+            m_body.isKinematic = true;
             if (m_currentPlayer.IsBallInLeftHand)
                 m_ball.transform.position = m_currentPlayer.GetLeftHand().transform.position;
             else
@@ -159,6 +161,7 @@ public class BallHandling : NetworkedBehaviour
 
         else if (m_state == BallState.SHOT)
         {
+            m_body.isKinematic = false;
         }
     }
 
