@@ -48,6 +48,9 @@ public class ShotMeter : MonoBehaviour
         SpawnManager.GetLocalPlayerObject().GetComponent<Player>().Shoot += OnShoot;
         SpawnManager.GetLocalPlayerObject().GetComponent<Player>().Release += OnRelease;
 
+        //NetworkEvents.Singleton.RegisterEvent(NetworkEvent.PLAYER_SHOOT, this, OnShoot);
+        //NetworkEvents.Singleton.RegisterEvent(NetworkEvent.PLAYER_RELEASE, this, OnRelease);
+
         position = fill.rectTransform.sizeDelta;
         position.y = 0.0f;
 

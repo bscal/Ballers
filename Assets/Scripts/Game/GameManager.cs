@@ -61,6 +61,7 @@ public class GameManager : NetworkedBehaviour
         TeamHome = new Team(0, teamSize);
         TeamAway = new Team(1, teamSize);
     }
+
     void Start()
     {
         NetworkingManager.Singleton.OnClientConnectedCallback += OnConnected;
@@ -70,16 +71,16 @@ public class GameManager : NetworkedBehaviour
 
     public override void NetworkStart()
     {
+        if (IsClient)
+        {
+            NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, this, OnStartGame);
+        }
         if (IsServer)
         {
             ball = Instantiate(m_ballPrefab, new Vector3(1, 3, 1), Quaternion.identity);
             ball.GetComponent<NetworkedObject>().Spawn();
             m_ballhandling = ball.GetComponent<BallHandling>();
             ball.SetActive(false);
-        }
-        if (IsClient)
-        {
-            NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, this, OnStartGame);
         }
     }
 
@@ -112,7 +113,6 @@ public class GameManager : NetworkedBehaviour
 
     public void OnStartGame()
     {
-        print(1);
         GameStarted();
 
 
