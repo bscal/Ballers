@@ -54,7 +54,7 @@ public class FocusCamera : MonoBehaviour
         }
 
         float dist = Vector3.Distance(basket.transform.position, player.transform.position) * .8f;
-        target.Set(0, 10, (GameManager.GetBallHandling().Possession == 0) ? dist : -dist);
+        target.Set(0, 10, (GameManager.GetBallHandling().Possession == 0) ? -dist : dist);
         cam.transform.position = Vector3.Lerp(cam.transform.position, target, 1.5f * Time.deltaTime);
         target = player.transform.position + basket.transform.position + ((ball != null) ? ball.transform.position : Vector3.zero);
     }

@@ -172,7 +172,6 @@ public class BallHandling : NetworkedBehaviour
         Player player = GameManager.GetPlayer(pid);
         PlayerLastTouched = pid;
         m_state = BallState.SHOT;
-        StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.baskets[player.teamID].netPos.position, 1.0f, 1.0f));
     }
 
     [ServerRPC]
@@ -193,6 +192,12 @@ public class BallHandling : NetworkedBehaviour
     public void ShootBall(ulong pid)
     {
         InvokeServerRpc(OnShoot, pid);
+    }
+
+    public void BallFollowArc()
+    {
+        Player player = GameManager.GetPlayer(PlayerLastTouched);
+        StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.baskets[player.teamID].netPos.position, 1.0f, 1.0f));
     }
 
     private void SetBallHandler(ulong id)

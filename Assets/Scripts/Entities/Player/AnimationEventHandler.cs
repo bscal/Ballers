@@ -21,6 +21,6 @@ public class AnimationEventHandler : MonoBehaviour
 
     public void ShootAnimationHighest(int seconds)
     {
-        print("Highest Anim " + seconds);
+        GameManager.GetBallHandling().BallFollowArc();
     }
 }
