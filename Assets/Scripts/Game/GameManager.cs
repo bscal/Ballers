@@ -26,16 +26,20 @@ public class GameManager : NetworkedBehaviour
     private static Dictionary<ulong, Player> m_playersByID = new Dictionary<ulong, Player>();
     private static Dictionary<ulong, uint> m_playersByTeam = new Dictionary<ulong, uint>();
 
-    public Team TeamHome { get; private set; }
-    public Team TeamAway { get; private set; }
+    public static Player BallHandler { get { return GetPlayer(m_ballhandling.PlayerWithBall); } }
+
+
+    public Team TeamHome { get { return teams[0]; }}
+    public Team TeamAway { get { return teams[1]; } }
     public bool HasStarted { get; private set; }
 
     public int teamSize = 5;
     public bool lastShotMade = false;
     public GameObject ball;
-    public Basket[] baskets = new Basket[2];
     public Vector3 centerCourt;
     public List<Vector3> inboundPositions;
+    public Team[] teams = new Team[2];
+    public Basket[] baskets = new Basket[2];
     public Vector3[] teamInboundPos = new Vector3[2];
     public Vector3[] freethrowPos = new Vector3[2];
 
@@ -58,8 +62,8 @@ public class GameManager : NetworkedBehaviour
 
         centerCourt = GameObject.Find("CenterCourt").transform.position;
 
-        TeamHome = new Team(0, teamSize);
-        TeamAway = new Team(1, teamSize);
+        teams[0] = new Team(0, teamSize);
+        teams[1] = new Team(1, teamSize);
     }
 
     void Start()

@@ -12,6 +12,8 @@ public class Movement : MonoBehaviour
 
     private Player m_player;
     private GameObject m_parent;
+    private Vector3 m_targetDirection;
+    private bool m_skipRotate = false;
 
     private readonly float m_movementSpeed  = 8.0f;
     private readonly float m_sprintSpeed    = 16.0f;
@@ -31,6 +33,21 @@ public class Movement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        if (m_player.HasBall || GameManager.GetBallHandling().Possession == m_player.teamID)
+        {
+            m_targetDirection = GameManager.Singleton.baskets[GameManager.GetBallHandling().Possession].gameObject.transform.position - m_parent.transform.position;
+        }
+        else if (m_player.Assignment)
+        {
+            m_targetDirection = m_player.Assignment.transform.position - m_parent.transform.position;
+        }
+        else
+        {
+            m_skipRotate = true;
+        }
+
+
         if (m_player.isMoving)
         {
             m_horizontal = Input.GetAxis("Horizontal") * m_turningSpeed * Time.deltaTime;
@@ -39,18 +56,16 @@ public class Movement : MonoBehaviour
             m_vertical = Input.GetAxis("Vertical") * (m_player.isSprinting ? m_sprintSpeed : m_movementSpeed) * Time.deltaTime;
             m_parent.transform.Translate(0, 0, m_vertical);
         }
-        else
+        else if (!m_skipRotate)
         {
-            // Determine which direction to rotate towards
-            Vector3 targetDirection = GameManager.Singleton.baskets[GameManager.GetBallHandling().Possession].gameObject.transform.position - m_parent.transform.position;
-
             // Rotate the forward vector towards the target direction by one step
-            Vector3 newDirection = Vector3.RotateTowards(m_parent.transform.forward, targetDirection, AUTO_TURN_SPEED * Time.deltaTime, 0.0f);
+            Vector3 newDirection = Vector3.RotateTowards(m_parent.transform.forward, m_targetDirection, AUTO_TURN_SPEED * Time.deltaTime, 0.0f);
 
             // Calculate a rotation a step closer to the target and applies rotation to this object
             m_parent.transform.rotation = Quaternion.LookRotation(newDirection);
 
         }
+        m_skipRotate = false;
     }
 
 }

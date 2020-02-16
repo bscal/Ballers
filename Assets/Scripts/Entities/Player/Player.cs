@@ -31,6 +31,7 @@ public class Player : NetworkedBehaviour
     public string username = "test";
     [Header("CPU or Dummy Controls")]
     public bool isDummy = false;
+    public int position = 3;
 
     [Header("Screen Hitbox")]
     public GameObject m_screenHitboxes;
@@ -48,9 +49,17 @@ public class Player : NetworkedBehaviour
     public bool isScreening = false;
     public bool isHardScreening = false;
     public bool isShooting = false;
+    public bool isHelping = false;
 
     public bool IsBallInLeftHand = false;
     public bool HasBall { get { return GameManager.GetBallHandling().PlayerWithBall == OwnerClientId; } }
+
+    public Player Assignment { get
+        {
+            if (isHelping) return GameManager.BallHandler;
+
+            else return GetNearestEnemy();
+        } }
 
     private GameObject m_rightHand;
     private GameObject m_leftHand;
@@ -132,7 +141,7 @@ public class Player : NetworkedBehaviour
 
     public float Dist(Vector3 other)
     {
-        return Vector3.Distance(gameObject.transform.position, other);
+        return Vector3.Distance(transform.position, other);
     }
 
     public GameObject GetLeftHand()
@@ -148,6 +157,33 @@ public class Player : NetworkedBehaviour
     private void OnGameStarted()
     {
         print("called");
+    }
+
+    private Player GetPlayerByPosition(Team team, int position)
+    {
+        return (team.players[position]) ? team.players[position] : team.players[0];
+    }
+
+
+    private Player GetNearestEnemy()
+    {
+        Player shortestPlayer = null;
+        float shortestDist = 0;
+
+        Team enemyTeam = GameManager.Singleton.teams[teamID ^ 1];
+        for (int i = 0; i < GameManager.Singleton.teamSize; i++)
+        {
+            Player p = enemyTeam.players[i];
+            float dist = Vector3.Distance(transform.position, p.transform.position);
+            if (dist < shortestDist)
+            {
+                shortestPlayer = p;
+                shortestDist = dist;
+            }
+            
+        }
+
+        return shortestPlayer;
     }
 
 }
