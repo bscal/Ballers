@@ -174,6 +174,7 @@ public class Player : NetworkedBehaviour
         for (int i = 0; i < GameManager.Singleton.teamSize; i++)
         {
             Player p = enemyTeam.players[i];
+            if (!p) continue;
             float dist = Vector3.Distance(transform.position, p.transform.position);
             if (dist < shortestDist)
             {

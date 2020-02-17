@@ -33,10 +33,11 @@ public class Movement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        int possesion = GameManager.GetBallHandling().Possession;
 
-        if (m_player.HasBall || GameManager.GetBallHandling().Possession == m_player.teamID)
+        if (m_player.HasBall && possesion == -1)
         {
-            m_targetDirection = GameManager.Singleton.baskets[GameManager.GetBallHandling().Possession].gameObject.transform.position - m_parent.transform.position;
+            m_targetDirection = GameManager.Singleton.baskets[possesion].gameObject.transform.position - m_parent.transform.position;
         }
         else if (m_player.Assignment)
         {

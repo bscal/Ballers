@@ -37,9 +37,9 @@ public class FocusCamera : MonoBehaviour
 
         // Check if there is a check of possession
         // If there is sets the new basket and to rotate
-        if (m_lastPossession != GameManager.GetBallHandling().Possession)
+        if (m_lastPossession != GameManager.GetBallHandling().PossessionOrHome)
         {
-            basket = GameManager.Singleton.baskets[GameManager.GetBallHandling().Possession].gameObject;
+            basket = GameManager.Singleton.baskets[GameManager.GetBallHandling().PossessionOrHome].gameObject;
             m_isRotating = true;
         }
 

@@ -6,6 +6,7 @@ TagManager:
   tags:
   - PicaVoxelVolume
   - Dummy
+  - Inbound
   layers:
   - Default
   - TransparentFX

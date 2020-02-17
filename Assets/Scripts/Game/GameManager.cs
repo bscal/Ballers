@@ -29,7 +29,7 @@ public class GameManager : NetworkedBehaviour
     public static Player BallHandler { get { return GetPlayer(m_ballhandling.PlayerWithBall); } }
 
 
-    public Team TeamHome { get { return teams[0]; }}
+    public Team TeamHome { get { return teams[0]; } }
     public Team TeamAway { get { return teams[1]; } }
     public bool HasStarted { get; private set; }
 
@@ -40,8 +40,8 @@ public class GameManager : NetworkedBehaviour
     public List<Vector3> inboundPositions;
     public Team[] teams = new Team[2];
     public Basket[] baskets = new Basket[2];
-    public Vector3[] teamInboundPos = new Vector3[2];
     public Vector3[] freethrowPos = new Vector3[2];
+    public GameObject[] inbounds;
 
     private BasketballStateManager m_gameState;
     private float m_pregameTime = 0;
@@ -64,6 +64,8 @@ public class GameManager : NetworkedBehaviour
 
         teams[0] = new Team(0, teamSize);
         teams[1] = new Team(1, teamSize);
+
+        inbounds = GameObject.FindGameObjectsWithTag("Inbound");
     }
 
     void Start()
@@ -202,6 +204,32 @@ public class GameManager : NetworkedBehaviour
     public int GetScoreDifference()
     {
         return TeamHome.points - TeamAway.points;
+    }
+
+    public GameObject GetClosestInbound(Vector3 pos)
+    {
+        float closestDist = 0f;
+        int index = 0;
+
+        for (int i = 0; i < inbounds.Length; i++)
+        {
+            GameObject inbound = inbounds[i];
+
+            float dist = Vector3.Distance(pos, inbound.transform.position);
+
+            if (dist < closestDist)
+            {
+                closestDist = dist;
+                index = i;
+            }
+        }
+
+        return inbounds[index];
+    }
+
+    public void ChangePossession()
+    {
+        m_ballhandling.ChangePossession(m_ballhandling.OtherTeam(), false);
     }
 
     public void AddScore(uint id, int points)
