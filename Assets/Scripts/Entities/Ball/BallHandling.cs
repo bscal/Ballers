@@ -152,15 +152,7 @@ public class BallHandling : NetworkedBehaviour
                 {
                     m_state = BallState.HELD;
 
-                    PlayerWithBall = pair.Key;
-
-                    // Stops old player from dribbling
-                    m_currentPlayer.isDribbling = false;
-
-                    m_currentPlayer = GameManager.GetPlayer(PlayerWithBall);
-
-                    // Sets new player to dribble
-                    m_currentPlayer.isDribbling = true;
+                    ChangeBallHandler(pair.Key);
                 }
             }
         }
@@ -168,6 +160,7 @@ public class BallHandling : NetworkedBehaviour
         else if (m_state == BallState.HELD)
         {
             m_currentPlayer = GameManager.GetPlayer(PlayerWithBall);
+            ChangePossession(m_currentPlayer.teamID, false, false);
             if (!m_currentPlayer) return;
             m_body.isKinematic = true;
             if (m_currentPlayer.IsBallInLeftHand)
@@ -179,11 +172,7 @@ public class BallHandling : NetworkedBehaviour
         else if (m_state == BallState.SHOT)
         {
             m_body.isKinematic = false;
-        }
-
-        if (m_lastState != m_state)
-        {
-            ChangePossession(0, false);
+            if (m_currentPlayer) ChangeBallHandler(NO_PLAYER);
         }
     }
 
@@ -289,8 +278,14 @@ public class BallHandling : NetworkedBehaviour
     private void ChangeBallHandler(ulong newPlayer)
     {
         PlayerLastPossesion = PlayerWithBall;
+        if (m_currentPlayer) m_currentPlayer.isDribbling = false;
         PlayerWithBall = newPlayer;
         m_currentPlayer = (newPlayer == NO_PLAYER) ? null : GameManager.GetPlayer(newPlayer);
+        if (m_currentPlayer)
+        {
+            m_currentPlayer.isDribbling = true;
+            if (Possession != m_currentPlayer.teamID) Possession = m_currentPlayer.teamID;
+        }
     }
 
     private void SetupInbound(int team, GameObject inbound)
@@ -302,11 +297,11 @@ public class BallHandling : NetworkedBehaviour
         // Setup Inbound Coroutine
     }
 
-    public void ChangePossession(int team, bool inbound)
+    public void ChangePossession(int team, bool inbound, bool loose)
     {
         GameObject inboundObj = GameManager.Singleton.GetClosestInbound(m_ball.transform.position);
 
-        ChangeBallHandler(NO_PLAYER);
+        //ChangeBallHandler(NO_PLAYER);
 
         Possession = team;
 
@@ -316,9 +311,9 @@ public class BallHandling : NetworkedBehaviour
 
             SetupInbound(team, inboundObj);
         }
-        else
+        else if (loose)
         {
-            m_state = BallState.HELD;
+            m_state = BallState.LOOSE;
         }
 
 

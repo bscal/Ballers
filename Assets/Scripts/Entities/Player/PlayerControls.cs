@@ -36,6 +36,9 @@ public class PlayerControls : NetworkedBehaviour
         }
 
         m_player.isMoving = IsMoving();
+        m_player.isShiftLeft = Input.GetKey(KeyCode.A);
+        m_player.isShiftRight = Input.GetKey(KeyCode.D);
+        m_player.isShiftBack = Input.GetKey(KeyCode.S);
         m_player.isSprinting = Input.GetKey(KeyCode.LeftShift);
 
         if (Input.GetKey(KeyCode.Space) && !m_jumpCooldown)

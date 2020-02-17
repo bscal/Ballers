@@ -35,7 +35,7 @@ public class Movement : MonoBehaviour
     {
         int possesion = GameManager.GetBallHandling().Possession;
 
-        if (m_player.HasBall && possesion == -1)
+        if (m_player.HasBall && possesion != -1)
         {
             m_targetDirection = GameManager.Singleton.baskets[possesion].gameObject.transform.position - m_parent.transform.position;
         }
@@ -45,19 +45,37 @@ public class Movement : MonoBehaviour
         }
         else
         {
-            m_skipRotate = true;
+            //m_skipRotate = true;
         }
 
 
         if (m_player.isMoving)
         {
-            m_horizontal = Input.GetAxis("Horizontal") * m_turningSpeed * Time.deltaTime;
-            m_parent.transform.Rotate(0, m_horizontal, 0);
+            if (m_player.isSprinting)
+            {
+                m_horizontal = Input.GetAxis("Horizontal") * m_turningSpeed * Time.deltaTime;
+                m_parent.transform.Rotate(0, m_horizontal, 0);
 
-            m_vertical = Input.GetAxis("Vertical") * (m_player.isSprinting ? m_sprintSpeed : m_movementSpeed) * Time.deltaTime;
-            m_parent.transform.Translate(0, 0, m_vertical);
+                m_vertical = Input.GetAxis("Vertical") * (m_player.isSprinting ? m_sprintSpeed : m_movementSpeed) * Time.deltaTime;
+                m_parent.transform.Translate(0, 0, m_vertical);
+            }
+
+            if (m_player.isShiftLeft)
+            {
+                m_parent.transform.Translate(-m_parent.transform.right * Time.deltaTime);
+            }
+            else if (m_player.isShiftRight)
+            {
+                m_parent.transform.Translate(m_parent.transform.right * Time.deltaTime);
+            }
+            else if (m_player.isShiftBack)
+            {
+                m_parent.transform.Translate(-m_parent.transform.forward * Time.deltaTime);
+            }
+
+
         }
-        else if (!m_skipRotate)
+        if (!m_skipRotate)
         {
             // Rotate the forward vector towards the target direction by one step
             Vector3 newDirection = Vector3.RotateTowards(m_parent.transform.forward, m_targetDirection, AUTO_TURN_SPEED * Time.deltaTime, 0.0f);

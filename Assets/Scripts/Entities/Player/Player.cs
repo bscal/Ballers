@@ -44,6 +44,9 @@ public class Player : NetworkedBehaviour
     public bool isRightHanded = true;
     public bool isDribbling = false;
     public bool isMoving = false;
+    public bool isShiftLeft = false;
+    public bool isShiftRight = false;
+    public bool isShiftBack = false;
     public bool isSprinting = false;
     public bool isInsideThree = false;
     public bool isScreening = false;

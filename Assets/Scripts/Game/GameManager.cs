@@ -229,7 +229,7 @@ public class GameManager : NetworkedBehaviour
 
     public void ChangePossession()
     {
-        m_ballhandling.ChangePossession(m_ballhandling.OtherTeam(), false);
+        m_ballhandling.ChangePossession(m_ballhandling.OtherTeam(), false, true);
     }
 
     public void AddScore(uint id, int points)
