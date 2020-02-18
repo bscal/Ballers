@@ -178,19 +178,18 @@ public class BallHandling : NetworkedBehaviour
 
     // =================================== RPCs ===================================
     [ServerRPC]
-    private void OnShoot(ulong pid)
+    public void OnShoot(ulong pid)
     {
         Player player = GameManager.GetPlayer(pid);
         PlayerLastTouched = pid;
-        m_state = BallState.SHOT;
     }
 
     [ServerRPC]
-    private void OnRelease(ulong pid)
+    public void OnRelease(ulong pid)
     {
+        m_state = BallState.SHOT;
         Player player = GameManager.GetPlayer(pid);
         PlayerLastTouched = pid;
-        m_state = BallState.SHOT;
         StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.baskets[player.teamID].netPos.position, 1.0f, 1.0f));
     }
 

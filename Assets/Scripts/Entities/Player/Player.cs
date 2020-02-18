@@ -122,6 +122,7 @@ public class Player : NetworkedBehaviour
     {
         isShooting = false;
         Release?.Invoke(this);
+        GameManager.GetBallHandling().InvokeServerRpc(GameManager.GetBallHandling().OnRelease, OwnerClientId);
         //NetworkEvents.Singleton.CallEventServer(NetworkEvent.PLAYER_RELEASE);
         print("released");
     }

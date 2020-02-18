@@ -33,7 +33,7 @@ public class Movement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        int possesion = GameManager.GetBallHandling().Possession;
+        int possesion = GameManager.GetBallHandling().PossessionOrHome;
 
         if (m_player.HasBall && possesion != -1)
         {
@@ -45,7 +45,7 @@ public class Movement : MonoBehaviour
         }
         else
         {
-            //m_skipRotate = true;
+            m_targetDirection = GameManager.Singleton.baskets[possesion].gameObject.transform.position - m_parent.transform.position;
         }
 
 
@@ -55,25 +55,22 @@ public class Movement : MonoBehaviour
             {
                 m_horizontal = Input.GetAxis("Horizontal") * m_turningSpeed * Time.deltaTime;
                 m_parent.transform.Rotate(0, m_horizontal, 0);
-
-                m_vertical = Input.GetAxis("Vertical") * (m_player.isSprinting ? m_sprintSpeed : m_movementSpeed) * Time.deltaTime;
-                m_parent.transform.Translate(0, 0, m_vertical);
+                m_vertical = Input.GetAxis("Vertical") * m_sprintSpeed * Time.deltaTime;
+                m_skipRotate = true;
             }
-
-            if (m_player.isShiftLeft)
+            else
             {
-                m_parent.transform.Translate(-m_parent.transform.right * Time.deltaTime);
+                m_vertical = Input.GetAxis("Vertical") * m_movementSpeed * Time.deltaTime;
+                if (m_player.isShiftLeft)
+                {
+                    m_parent.transform.Translate(-m_parent.transform.right * m_movementSpeed * Time.deltaTime);
+                }
+                else if (m_player.isShiftRight)
+                {
+                    m_parent.transform.Translate(m_parent.transform.right * m_movementSpeed * Time.deltaTime);
+                }
             }
-            else if (m_player.isShiftRight)
-            {
-                m_parent.transform.Translate(m_parent.transform.right * Time.deltaTime);
-            }
-            else if (m_player.isShiftBack)
-            {
-                m_parent.transform.Translate(-m_parent.transform.forward * Time.deltaTime);
-            }
-
-
+            m_parent.transform.Translate(0, 0, m_vertical);
         }
         if (!m_skipRotate)
         {
