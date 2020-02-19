@@ -7,6 +7,8 @@ public class Movement : MonoBehaviour
 
     public const float AUTO_TURN_SPEED = 3.0f;
 
+    public Animator animator;
+
     private float m_horizontal;
     private float m_vertical;
 
@@ -56,23 +58,15 @@ public class Movement : MonoBehaviour
                 m_horizontal = Input.GetAxis("Horizontal") * m_turningSpeed * Time.deltaTime;
                 m_parent.transform.Rotate(0, m_horizontal, 0);
                 m_vertical = Input.GetAxis("Vertical") * m_sprintSpeed * Time.deltaTime;
-                m_skipRotate = true;
             }
             else
             {
+                Strafe();
                 m_vertical = Input.GetAxis("Vertical") * m_movementSpeed * Time.deltaTime;
-                if (m_player.isShiftLeft)
-                {
-                    m_parent.transform.Translate(-m_parent.transform.right * m_movementSpeed * Time.deltaTime);
-                }
-                else if (m_player.isShiftRight)
-                {
-                    m_parent.transform.Translate(m_parent.transform.right * m_movementSpeed * Time.deltaTime);
-                }
             }
             m_parent.transform.Translate(0, 0, m_vertical);
         }
-        if (!m_skipRotate)
+        else if (!m_skipRotate)
         {
             // Rotate the forward vector towards the target direction by one step
             Vector3 newDirection = Vector3.RotateTowards(m_parent.transform.forward, m_targetDirection, AUTO_TURN_SPEED * Time.deltaTime, 0.0f);
@@ -84,4 +78,19 @@ public class Movement : MonoBehaviour
         m_skipRotate = false;
     }
 
+    private void Strafe()
+    {
+        if ((Input.GetAxis("Horizontal")) > 0)
+        {
+            //animator.CrossFade("strafeRight");
+            Vector3 strafe = m_parent.transform.TransformDirection(Vector3.right) * Input.GetAxis("Horizontal") * m_movementSpeed * Time.deltaTime;
+            m_parent.transform.Translate(strafe);
+        }
+        else if ((Input.GetAxis("Horizontal")) < 0)
+        {
+            //animator.CrossFade("strafeLeft");
+            Vector3 strafe = m_parent.transform.TransformDirection(Vector3.right) * Input.GetAxis("Horizontal") * m_movementSpeed * Time.deltaTime;
+            m_parent.transform.Translate(strafe);
+        }
+    }
 }
