@@ -51,7 +51,7 @@ public class PlayerControls : NetworkedBehaviour
         m_animator.SetBool("isSprinting", m_player.isSprinting);
         m_animator.SetBool("isWalking", m_player.isMoving);
 
-        
+        if (Input.GetKey(KeyCode.U)) m_animator.SetTrigger("Crossover");
     }
     private bool IsMoving()
     {
@@ -171,6 +171,7 @@ public class PlayerControls : NetworkedBehaviour
     void StopShot()
     {
         m_player.ReleaseBall();
+        m_animator.ResetTrigger("Shoot");
         StartCoroutine(WaitShoot(0.20f));
     }
 

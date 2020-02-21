@@ -105,6 +105,7 @@ public class Player : NetworkedBehaviour
             return;
 
         m_animator.SetBool("hasBall", HasBall);
+        m_animator.SetBool("hasBallInLeft", IsBallInLeftHand);
 
         Debugger.Instance.Print(string.Format("D:{0}, W:{1}, S:{2}", isDribbling, isMoving, isSprinting), 0);
         Debugger.Instance.Print(string.Format("2pt:{0}", isInsideThree), 3);

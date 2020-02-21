@@ -8,19 +8,17 @@ public class AnimationEventHandler : MonoBehaviour
     public Player player;
     public PlayerControls pControls;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     public void ShootAnimationHighest(int seconds)
     {
         GameManager.GetBallHandling().BallFollowArc();
+    }
+
+    public void OnCrossover(int tooLeft)
+    {
+        
+        if (player.HasBall)
+        {
+            player.IsBallInLeftHand = tooLeft != 0;
+        }
     }
 }

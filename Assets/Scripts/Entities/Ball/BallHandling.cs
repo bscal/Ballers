@@ -283,6 +283,7 @@ public class BallHandling : NetworkedBehaviour
         if (m_currentPlayer)
         {
             m_currentPlayer.isDribbling = true;
+            m_currentPlayer.IsBallInLeftHand = !m_currentPlayer.isRightHanded;
             if (Possession != m_currentPlayer.teamID) Possession = m_currentPlayer.teamID;
         }
     }
