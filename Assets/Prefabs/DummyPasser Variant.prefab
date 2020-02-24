@@ -1,0 +1,161 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &2494156334134515769
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4110052157769740621}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c87b5bdad190ed4dbe31af11b06e5a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_type: 2
+--- !u!1001 &2787342978223317998
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 41239092470292398, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: thisInstanceId
+      value: -10578
+      objectReference: {fileID: 0}
+    - target: {fileID: 184597185524020853, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: thisInstanceId
+      value: -10524
+      objectReference: {fileID: 0}
+    - target: {fileID: 426778094110816427, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: thisInstanceId
+      value: -10554
+      objectReference: {fileID: 0}
+    - target: {fileID: 2280922590721561250, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2280922590721561250, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2280922590721561250, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2280922590721561250, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2280922590721561250, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2280922590721561250, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2280922590721561250, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2280922590721561250, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2280922590721561250, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2280922590721561250, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2280922590721561250, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2280922590721561251, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: m_Name
+      value: DummyPasser Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 2749262081171495279, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: m_type
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3328045694680375329, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: thisInstanceId
+      value: -10572
+      objectReference: {fileID: 0}
+    - target: {fileID: 3344084886984555305, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: thisInstanceId
+      value: -10562
+      objectReference: {fileID: 0}
+    - target: {fileID: 5049578473206457069, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: thisInstanceId
+      value: -10432
+      objectReference: {fileID: 0}
+    - target: {fileID: 5363789990984275387, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: thisInstanceId
+      value: -10500
+      objectReference: {fileID: 0}
+    - target: {fileID: 6323646922754979503, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: thisInstanceId
+      value: -10494
+      objectReference: {fileID: 0}
+    - target: {fileID: 7499168651439523823, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: thisInstanceId
+      value: -10454
+      objectReference: {fileID: 0}
+    - target: {fileID: 7855757416678508352, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: thisInstanceId
+      value: -10584
+      objectReference: {fileID: 0}
+    - target: {fileID: 7861656807467096698, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: thisInstanceId
+      value: -10586
+      objectReference: {fileID: 0}
+    - target: {fileID: 8063663346194243602, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: thisInstanceId
+      value: -10428
+      objectReference: {fileID: 0}
+    - target: {fileID: 8310549677105023302, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: thisInstanceId
+      value: -10532
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 2749262081171495279, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1, type: 3}
+  m_SourcePrefab: {fileID: 100100000, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1, type: 3}
+--- !u!1 &4110052157769740621 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2280922590721561251, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+    type: 3}
+  m_PrefabInstance: {fileID: 2787342978223317998}
+  m_PrefabAsset: {fileID: 0}

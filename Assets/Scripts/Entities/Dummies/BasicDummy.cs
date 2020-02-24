@@ -8,7 +8,8 @@ public class BasicDummy : MonoBehaviour
     public enum DummyType
     {
         BASIC,
-        SCREENER
+        SCREENER,
+        PASSER
     }
 
     [Header("Dummy Type")]
@@ -39,6 +40,7 @@ public class BasicDummy : MonoBehaviour
 
     void Update()
     {
-        
+
     }
+
 }

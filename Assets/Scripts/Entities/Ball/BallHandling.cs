@@ -21,11 +21,21 @@ public enum BallState
     DEAD_BALL
 }
 
+public enum PassType
+{
+    CHESS,
+    BOUNCE,
+    LOP,
+    FLASHY,
+    ALLEY_OOP
+}
+
 public class BallHandling : NetworkedBehaviour
 {
     // =================================== Constants ===================================
 
     private const ulong NO_PLAYER = ulong.MaxValue;
+    private const ulong DUMMY_PLAYER = ulong.MaxValue - 1;
 
     // =================================== Events ===================================
 
@@ -214,6 +224,102 @@ public class BallHandling : NetworkedBehaviour
     public int OtherTeam()
     {
         return Possession ^ 1;
+    }
+
+    public void TryPassBall(Player passer, Player target, PassType type)
+    {
+        if (!passer.HasBall) return;
+        print("passing");
+        InvokeServerRpc(PassBallServer, passer, target, type);
+    }
+
+    public void TryPassBall(ulong passerPid, ulong targetPid, PassType type)
+    {
+
+        InvokeServerRpc(PassBallServer, passerPid, targetPid, type);
+    }
+
+    [ServerRPC]
+    public void PassBallServer(ulong passerPid, ulong targetPid, PassType type)
+    {
+        Player passer = GameManager.GetPlayer(passerPid);
+        Player target = GameManager.GetPlayer(targetPid);
+        Vector3 position = target.transform.position;
+
+        InvokeClientRpcOnClient(PassBallClient, targetPid, passerPid, position, type);
+
+        StartCoroutine(Pass(passer, target, passerPid, targetPid, position, false, 2.0f));
+    }
+
+    [ServerRPC]
+    public void PassBallServer(Player passer, Player target, PassType type)
+    {
+        print("passing2");
+        Vector3 position = target.transform.position;
+
+        ulong passerPid = NO_PLAYER;
+        ulong targetPid = NO_PLAYER;
+
+        if (!passer.isDummy)
+        {
+            passerPid = passer.OwnerClientId;
+        }
+
+        if (!target.isDummy)
+        {
+            targetPid = target.OwnerClientId;
+            InvokeClientRpcOnClient(PassBallClient, target.OwnerClientId, NO_PLAYER, position, type);
+        }
+
+        StartCoroutine(Pass(passer, target, passerPid, targetPid, position, false, 2.0f));
+    }
+
+    [ClientRPC]
+    public void PassBallClient(ulong passerPid, Vector3 pos, PassType type)
+    {
+        Player passer = GameManager.GetPlayer(passerPid);
+        print("passing4");
+    }
+
+    private IEnumerator Pass(Player passer, Player target, ulong passerPid, ulong targetPid, Vector3 pos, bool halfPos, float speed)
+    {
+        print("passing3");
+        // Keep a note of the time the movement started.
+        float startTime = Time.time;
+
+        // Calculate the journey length.
+        float journeyLength = Vector3.Distance(m_ball.transform.position, pos);
+
+        float fractionOfJourney = 0;
+
+        m_state = BallState.PASS;
+        while (fractionOfJourney < journeyLength)
+        {
+            // Distance moved equals elapsed time times speed..
+            float distCovered = (Time.time - startTime) * speed;
+
+            // Fraction of journey completed equals current distance divided by total distance.
+            fractionOfJourney = distCovered / journeyLength;
+
+            // Set our position as a fraction of the distance between the markers.
+            transform.position = Vector3.Lerp(m_ball.transform.position, pos, Time.time * speed);
+
+            yield return null;
+        }
+
+        Player p = (Player)target;
+        m_state = BallState.HELD;
+
+        if (p.isDummy)
+        {
+            m_currentPlayer = p;
+            StartCoroutine(p.GetComponent<PassingDummy>().ThrowPass(passerPid));
+        }
+
+        else
+            ChangeBallHandler(p.NetworkId);
+        
+
     }
 
     private void SetBallHandler(ulong id)

@@ -47,6 +47,13 @@ public class PlayerControls : NetworkedBehaviour
             StartCoroutine(WaitJump(1.5f));
         }
 
+        if (Input.GetKey(KeyCode.Alpha1))
+        {
+            Player dummy = GameObject.Find("DummyPasser").GetComponent<Player>();
+            GameManager.GetBallHandling().TryPassBall(m_player, dummy, PassType.CHESS);
+        }
+        
+
         m_animator.SetBool("isDribbling", m_player.isDribbling);
         m_animator.SetBool("isSprinting", m_player.isSprinting);
         m_animator.SetBool("isWalking", m_player.isMoving);
