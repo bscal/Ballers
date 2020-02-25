@@ -14400,6 +14400,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: DummyScreener
       objectReference: {fileID: 0}
+    - target: {fileID: 2280922590721561251, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 615ecccb0af19bc4f9b4dc5ded5e5ba1, type: 3}
 --- !u!1001 &1623104314084641418
@@ -23686,7 +23691,7 @@ PrefabInstance:
     - target: {fileID: 4110052157769740620, guid: 04db91ebe1bc7224e9d5161fcbfbd52c,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 3.62
       objectReference: {fileID: 0}
     - target: {fileID: 4110052157769740620, guid: 04db91ebe1bc7224e9d5161fcbfbd52c,
         type: 3}

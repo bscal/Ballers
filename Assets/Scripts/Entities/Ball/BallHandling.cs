@@ -34,8 +34,8 @@ public class BallHandling : NetworkedBehaviour
 {
     // =================================== Constants ===================================
 
-    private const ulong NO_PLAYER = ulong.MaxValue;
-    private const ulong DUMMY_PLAYER = ulong.MaxValue - 1;
+    public const ulong NO_PLAYER = ulong.MaxValue;
+    public const ulong DUMMY_PLAYER = ulong.MaxValue - 1;
 
     // =================================== Events ===================================
 
@@ -169,9 +169,11 @@ public class BallHandling : NetworkedBehaviour
 
         else if (m_state == BallState.HELD)
         {
+            
             m_currentPlayer = GameManager.GetPlayer(PlayerWithBall);
-            ChangePossession(m_currentPlayer.teamID, false, false);
             if (!m_currentPlayer) return;
+
+            ChangePossession(m_currentPlayer.teamID, false, false);  
             m_body.isKinematic = true;
             if (m_currentPlayer.IsBallInLeftHand)
                 m_ball.transform.position = m_currentPlayer.GetLeftHand().transform.position;
@@ -226,8 +228,11 @@ public class BallHandling : NetworkedBehaviour
         return Possession ^ 1;
     }
 
+    // =================================== Passing ===================================
+
     public void TryPassBall(Player passer, Player target, PassType type)
     {
+        print("passing?");
         if (!passer.HasBall) return;
         print("passing");
         InvokeServerRpc(PassBallServer, passer, target, type);
@@ -255,7 +260,8 @@ public class BallHandling : NetworkedBehaviour
     public void PassBallServer(Player passer, Player target, PassType type)
     {
         print("passing2");
-        Vector3 position = target.transform.position;
+
+        Vector3 position = target.RightHand;
 
         ulong passerPid = NO_PLAYER;
         ulong targetPid = NO_PLAYER;
@@ -270,8 +276,11 @@ public class BallHandling : NetworkedBehaviour
             targetPid = target.OwnerClientId;
             InvokeClientRpcOnClient(PassBallClient, target.OwnerClientId, NO_PLAYER, position, type);
         }
-
-        StartCoroutine(Pass(passer, target, passerPid, targetPid, position, false, 2.0f));
+        else
+        {
+        }
+        ChangeBallHandler(NO_PLAYER);
+        StartCoroutine(Pass(passer, target, passerPid, targetPid, position, false, 12.0f));
     }
 
     [ClientRPC]
@@ -289,11 +298,13 @@ public class BallHandling : NetworkedBehaviour
 
         // Calculate the journey length.
         float journeyLength = Vector3.Distance(m_ball.transform.position, pos);
+        Vector3 start = m_ball.transform.position;
 
         float fractionOfJourney = 0;
 
         m_state = BallState.PASS;
-        while (fractionOfJourney < journeyLength)
+
+        while (fractionOfJourney < 1.0f)
         {
             // Distance moved equals elapsed time times speed..
             float distCovered = (Time.time - startTime) * speed;
@@ -302,24 +313,27 @@ public class BallHandling : NetworkedBehaviour
             fractionOfJourney = distCovered / journeyLength;
 
             // Set our position as a fraction of the distance between the markers.
-            transform.position = Vector3.Lerp(m_ball.transform.position, pos, Time.time * speed);
+            m_ball.transform.position = Vector3.Lerp(m_ball.transform.position, pos, fractionOfJourney);
 
             yield return null;
         }
 
-        Player p = (Player)target;
-        m_state = BallState.HELD;
+        print("passing5");
+        print(target);
 
-        if (p.isDummy)
+        if (target.isDummy)
         {
-            m_currentPlayer = p;
-            StartCoroutine(p.GetComponent<PassingDummy>().ThrowPass(passerPid));
+            m_currentPlayer = target;
+            target.isDribbling = true;
+            ChangeBallHandler(DUMMY_PLAYER);
+            StartCoroutine(target.GetComponent<PassingDummy>().ThrowPass(passerPid));
+        }
+        else
+        {
+            ChangeBallHandler(targetPid);
         }
 
-        else
-            ChangeBallHandler(p.NetworkId);
-        
-
+        m_state = BallState.HELD;
     }
 
     private void SetBallHandler(ulong id)
@@ -382,6 +396,12 @@ public class BallHandling : NetworkedBehaviour
 
     private void ChangeBallHandler(ulong newPlayer)
     {
+        if (newPlayer == DUMMY_PLAYER)
+        {
+            PlayerWithBall = DUMMY_PLAYER;
+            return;
+        }
+
         PlayerLastPossesion = PlayerWithBall;
         if (m_currentPlayer) m_currentPlayer.isDribbling = false;
         PlayerWithBall = newPlayer;

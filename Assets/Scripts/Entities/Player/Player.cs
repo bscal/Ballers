@@ -57,7 +57,14 @@ public class Player : NetworkedBehaviour
     public bool isHelping = false;
 
     public bool IsBallInLeftHand = false;
-    public bool HasBall { get { return GameManager.GetBallHandling().PlayerWithBall == OwnerClientId; } }
+    public bool HasBall 
+    { get 
+        { 
+            return GameManager.GetBallHandling().PlayerWithBall == OwnerClientId || isDummy && GameManager.GetBallHandling().PlayerWithBall == BallHandling.DUMMY_PLAYER;
+        }
+    }
+    public Vector3 RightHand { get { return m_rightHand.transform.position; } }
+    public Vector3 LeftHand { get { return m_leftHand.transform.position; } }
 
     public Player Assignment { get
         {
@@ -66,7 +73,9 @@ public class Player : NetworkedBehaviour
             else return GetNearestEnemy();
         } }
 
+    [SerializeField]
     private GameObject m_rightHand;
+    [SerializeField]
     private GameObject m_leftHand;
     private ShotMeter m_shotmeter;
     private Animator m_animator;
@@ -91,12 +100,12 @@ public class Player : NetworkedBehaviour
             }
             else
             {
-                m_rightHand = GameObject.Find("right arm/forearm/hand");
-                m_leftHand = GameObject.Find("left arm/forearm/hand");
                 m_shotmeter = GetComponent<ShotMeter>();
                 m_animator = GetComponentInChildren<Animator>();
             }
         }
+        m_rightHand = transform.Find("root/body/right arm/forearm/hand").gameObject;
+        m_leftHand = transform.Find("root/body/left arm/forearm/hand").gameObject;
 
         id = username.GetHashCode();
     }
