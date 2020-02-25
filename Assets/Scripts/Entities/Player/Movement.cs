@@ -35,6 +35,8 @@ public class Movement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (m_player.isMovementFrozen) return;
+
         int possesion = GameManager.GetBallHandling().PossessionOrHome;
 
         if (m_player.HasBall && possesion != -1)

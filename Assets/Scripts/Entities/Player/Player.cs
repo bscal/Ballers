@@ -34,6 +34,7 @@ public class Player : NetworkedBehaviour
     [Header("CPU or Dummy Controls")]
     public bool isDummy = false;
     public int position = 3;
+    public float height = 2.35f;
 
     [Header("Screen Hitbox")]
     public GameObject m_screenHitboxes;
@@ -55,6 +56,7 @@ public class Player : NetworkedBehaviour
     public bool isHardScreening = false;
     public bool isShooting = false;
     public bool isHelping = false;
+    public bool isMovementFrozen = false;
 
     public bool IsBallInLeftHand = false;
     public bool HasBall 
@@ -65,6 +67,7 @@ public class Player : NetworkedBehaviour
     }
     public Vector3 RightHand { get { return m_rightHand.transform.position; } }
     public Vector3 LeftHand { get { return m_leftHand.transform.position; } }
+    public Vector3 CenterPos { get { return m_center.transform.position; } }
 
     public Player Assignment { get
         {
@@ -77,6 +80,7 @@ public class Player : NetworkedBehaviour
     private GameObject m_rightHand;
     [SerializeField]
     private GameObject m_leftHand;
+    private GameObject m_center;
     private ShotMeter m_shotmeter;
     private Animator m_animator;
 
@@ -93,19 +97,21 @@ public class Player : NetworkedBehaviour
             {
                 //NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, this, OnGameStarted);
                 GameManager.Singleton.GameStarted += OnGameStarted;
-            }
-            if (IsServer && !IsHost)
-            {
-                username = "Server";
-            }
-            else
-            {
                 m_shotmeter = GetComponent<ShotMeter>();
-                m_animator = GetComponentInChildren<Animator>();
             }
         }
-        m_rightHand = transform.Find("root/body/right arm/forearm/hand").gameObject;
-        m_leftHand = transform.Find("root/body/left arm/forearm/hand").gameObject;
+
+        if (IsServer && !IsHost)
+        {
+            username = "Server";
+        }
+        else
+        {
+            m_rightHand = transform.Find("root/body/right arm/forearm/hand").gameObject;
+            m_leftHand = transform.Find("root/body/left arm/forearm/hand").gameObject;
+            m_center = transform.Find("Center").gameObject;
+            m_animator = GetComponentInChildren<Animator>();
+        }
 
         id = username.GetHashCode();
     }
@@ -120,6 +126,8 @@ public class Player : NetworkedBehaviour
 
         Debugger.Instance.Print(string.Format("D:{0}, W:{1}, S:{2}", isDribbling, isMoving, isSprinting), 0);
         Debugger.Instance.Print(string.Format("2pt:{0}", isInsideThree), 3);
+
+        GameObject.Find("Cube").transform.position = transform.position + transform.forward * 3 + transform.up * 3;
     }
 
     public void ShootBall()

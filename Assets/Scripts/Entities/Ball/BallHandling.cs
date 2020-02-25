@@ -65,6 +65,9 @@ public class BallHandling : NetworkedBehaviour
     private NetworkedVarULong m_playerLastPossesion;
     public ulong PlayerLastPossesion { get { return m_playerLastPossesion.Value; } set { m_playerLastPossesion.Value = (value); } }
 
+    private NetworkedVarByte m_state;
+    public BallState State { get { return (BallState) Enum.ToObject(typeof(BallState), m_state.Value); } set { m_state.Value = (byte)value; } }
+
     private NetworkedVarSByte m_possession;
     public int Possession { get { return m_possession.Value; } set { if (value < -1 || value > 1) value = -1; m_possession.Value = (sbyte)value; } }
     public int PossessionOrHome { get { return (Possession == -1) ? 0 : Possession; } }
@@ -84,8 +87,8 @@ public class BallHandling : NetworkedBehaviour
     private Player m_currentPlayer;
     private GameObject m_ball;
     private Rigidbody m_body;
-    private BallState m_state;
     private BallState m_lastState;
+    private Coroutine m_passCoroutine;
 
     private bool m_ballShot = false;
     private bool m_topCollision;
@@ -108,6 +111,7 @@ public class BallHandling : NetworkedBehaviour
         m_playerWithBall = new NetworkedVarULong(settings, 0);
         m_playerLastTouched = new NetworkedVarULong(settings, 0);
         m_playerLastPossesion = new NetworkedVarULong(settings, 0);
+        m_state = new NetworkedVarByte(settings, 0);
         m_possession = new NetworkedVarSByte(settings, -1);
         m_playerDistances = new Dictionary<ulong, float>();
 
@@ -117,20 +121,22 @@ public class BallHandling : NetworkedBehaviour
         m_ball = NetworkedObject.gameObject;
         m_body = gameObject.GetComponent<Rigidbody>();
         m_body.AddForce(new Vector3(1, 1, 1), ForceMode.Impulse);
-        m_state = BallState.LOOSE;
+        State = BallState.LOOSE;
     }
 
     void Update()
     {
-        Debugger.Instance.Print(string.Format("1:{0} 2:{1} bs:{2}", m_playerWithBall.Value, m_playerLastPossesion.Value, m_state), 2);
+        Debugger.Instance.Print(string.Format("1:{0} 2:{1} bs:{2}", m_playerWithBall.Value, m_playerLastPossesion.Value, State), 2);
 
         if (IsServer)
         {
-            if (m_ballShot && m_state != BallState.SHOT)
+            if (m_ballShot && State != BallState.SHOT)
             {
                 ShotMissed(GameManager.GetPlayer(PlayerLastTouched));
             }
         }
+
+        
     }
 
     // FixedUpdate is called 50x per frame
@@ -150,7 +156,7 @@ public class BallHandling : NetworkedBehaviour
             }
         }
 
-        if (m_state == BallState.LOOSE)
+        if (State == BallState.LOOSE)
         {
             
             m_body.isKinematic = false;
@@ -160,14 +166,14 @@ public class BallHandling : NetworkedBehaviour
             {
                 if (pair.Value < 1.5f)
                 {
-                    m_state = BallState.HELD;
+                    State = BallState.HELD;
 
                     ChangeBallHandler(pair.Key);
                 }
             }
         }
 
-        else if (m_state == BallState.HELD)
+        else if (State == BallState.HELD)
         {
             
             m_currentPlayer = GameManager.GetPlayer(PlayerWithBall);
@@ -181,7 +187,7 @@ public class BallHandling : NetworkedBehaviour
                 m_ball.transform.position = m_currentPlayer.GetRightHand().transform.position;
         }
 
-        else if (m_state == BallState.SHOT)
+        else if (State == BallState.SHOT)
         {
             m_body.isKinematic = false;
             if (m_currentPlayer) ChangeBallHandler(NO_PLAYER);
@@ -199,7 +205,7 @@ public class BallHandling : NetworkedBehaviour
     [ServerRPC]
     public void OnRelease(ulong pid)
     {
-        m_state = BallState.SHOT;
+        State = BallState.SHOT;
         Player player = GameManager.GetPlayer(pid);
         PlayerLastTouched = pid;
         StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.baskets[player.teamID].netPos.position, 1.0f, 1.0f));
@@ -232,9 +238,7 @@ public class BallHandling : NetworkedBehaviour
 
     public void TryPassBall(Player passer, Player target, PassType type)
     {
-        print("passing?");
         if (!passer.HasBall) return;
-        print("passing");
         InvokeServerRpc(PassBallServer, passer, target, type);
     }
 
@@ -247,21 +251,21 @@ public class BallHandling : NetworkedBehaviour
     [ServerRPC]
     public void PassBallServer(ulong passerPid, ulong targetPid, PassType type)
     {
+        State = BallState.PASS;
         Player passer = GameManager.GetPlayer(passerPid);
         Player target = GameManager.GetPlayer(targetPid);
-        Vector3 position = target.transform.position;
+        Vector3 position = GetPassPosition(target, 1);
 
         InvokeClientRpcOnClient(PassBallClient, targetPid, passerPid, position, type);
-
+        ChangeBallHandler(targetPid);
         StartCoroutine(Pass(passer, target, passerPid, targetPid, position, false, 2.0f));
     }
 
     [ServerRPC]
     public void PassBallServer(Player passer, Player target, PassType type)
     {
-        print("passing2");
-
-        Vector3 position = target.RightHand;
+        State = BallState.PASS;
+        Vector3 position = GetPassPosition(target, 1);
 
         ulong passerPid = NO_PLAYER;
         ulong targetPid = NO_PLAYER;
@@ -274,25 +278,22 @@ public class BallHandling : NetworkedBehaviour
         if (!target.isDummy)
         {
             targetPid = target.OwnerClientId;
-            InvokeClientRpcOnClient(PassBallClient, target.OwnerClientId, NO_PLAYER, position, type);
-        }
-        else
-        {
+            InvokeClientRpcOnClient(PassBallClient, targetPid, passerPid, position, type);
         }
         ChangeBallHandler(NO_PLAYER);
-        StartCoroutine(Pass(passer, target, passerPid, targetPid, position, false, 12.0f));
+        m_passCoroutine = StartCoroutine(Pass(passer, target, passerPid, targetPid, position, false, 12.0f));
     }
 
     [ClientRPC]
     public void PassBallClient(ulong passerPid, Vector3 pos, PassType type)
     {
         Player passer = GameManager.GetPlayer(passerPid);
-        print("passing4");
+
+        StartCoroutine(AutoCatchPass(GameManager.GetPlayer(), pos));
     }
 
     private IEnumerator Pass(Player passer, Player target, ulong passerPid, ulong targetPid, Vector3 pos, bool halfPos, float speed)
     {
-        print("passing3");
         // Keep a note of the time the movement started.
         float startTime = Time.time;
 
@@ -301,8 +302,6 @@ public class BallHandling : NetworkedBehaviour
         Vector3 start = m_ball.transform.position;
 
         float fractionOfJourney = 0;
-
-        m_state = BallState.PASS;
 
         while (fractionOfJourney < 1.0f)
         {
@@ -318,9 +317,6 @@ public class BallHandling : NetworkedBehaviour
             yield return null;
         }
 
-        print("passing5");
-        print(target);
-
         if (target.isDummy)
         {
             m_currentPlayer = target;
@@ -333,23 +329,53 @@ public class BallHandling : NetworkedBehaviour
             ChangeBallHandler(targetPid);
         }
 
-        m_state = BallState.HELD;
+        State = BallState.HELD;
     }
+
+    private Vector3 GetPassPosition(Player target, int skill)
+    {
+        Vector3 pos;
+
+        if (target.isSprinting)
+            pos = target.CenterPos + target.transform.forward * 5;
+        else if (target.isMoving)
+            pos = target.CenterPos + target.transform.forward * 2;
+        else
+            pos = target.CenterPos + target.transform.forward;
+
+        print(pos);
+        print(target.CenterPos);
+        print(target.transform.forward);
+
+        return pos;
+    }
+
+    private IEnumerator AutoCatchPass(Player target, Vector3 pos)
+    {
+        Vector3 truePos = pos - new Vector3(0, target.height, 0);
+
+        while (State == BallState.PASS)
+        {
+            float dist = Vector3.Distance(target.CenterPos, pos);
+
+            if (dist > .2)
+            {
+                target.transform.position = Vector3.Lerp(target.transform.position, truePos, Time.deltaTime * 6.0f);
+                target.isMovementFrozen = true;
+            }
+
+            yield return null;
+        }
+        target.isMovementFrozen = false;
+    }
+
+    // =================================== Private Functions ===================================
 
     private void SetBallHandler(ulong id)
     {
         PlayerWithBall = id;
         m_currentPlayer = GameManager.GetPlayer(PlayerWithBall);
     }
-
-    public void RegisterPlayers()
-    {
-        GameManager.GetPlayers().ForEach((p) => {
-
-        });
-    }
-
-    // =================================== Private Functions ===================================
 
     private void OnTriggerEnter(Collider other)
     {
@@ -391,7 +417,7 @@ public class BallHandling : NetworkedBehaviour
             transform.position += center;
             yield return null;
         }
-        m_state = BallState.LOOSE;
+        State = BallState.LOOSE;
     }
 
     private void ChangeBallHandler(ulong newPlayer)
@@ -433,13 +459,13 @@ public class BallHandling : NetworkedBehaviour
 
         if (inbound)
         {
-            m_state = BallState.INBOUND;
+            State = BallState.INBOUND;
 
             SetupInbound(team, inboundObj);
         }
         else if (loose)
         {
-            m_state = BallState.LOOSE;
+            State = BallState.LOOSE;
         }
 
 
