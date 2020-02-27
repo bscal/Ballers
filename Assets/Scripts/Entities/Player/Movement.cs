@@ -9,6 +9,8 @@ public class Movement : MonoBehaviour
 
     public Animator animator;
 
+    public bool isEnabled = true;
+
     private float m_horizontal;
     private float m_vertical;
     private float m_strafe;
@@ -36,7 +38,7 @@ public class Movement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (m_player.isMovementFrozen) return;
+        if (m_player.isMovementFrozen || !isEnabled) return;
 
         int possesion = GameManager.GetBallHandling().PossessionOrHome;
 
