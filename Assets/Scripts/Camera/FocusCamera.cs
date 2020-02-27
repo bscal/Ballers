@@ -47,9 +47,8 @@ public class FocusCamera : MonoBehaviour
         {
             float step = 400.0f * Time.deltaTime;
             Vector3 v = basket.transform.rotation.eulerAngles;
-            v.x = 25f;
-            basket.transform.eulerAngles = v;
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, basket.transform.rotation, step);
+            //basket.transform.eulerAngles = v;
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.Euler(v.x + 25f, v.y, v.z), step);
             if (transform.rotation == basket.transform.rotation) m_isRotating = false;
         }
 
