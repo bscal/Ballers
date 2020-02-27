@@ -11,6 +11,7 @@ public class Movement : MonoBehaviour
 
     private float m_horizontal;
     private float m_vertical;
+    private float m_strafe;
 
     private Player m_player;
     private GameObject m_parent;
@@ -57,16 +58,25 @@ public class Movement : MonoBehaviour
         {
             if (m_player.isSprinting)
             {
-                m_horizontal = Input.GetAxis("Horizontal") * m_turningSpeed * Time.deltaTime;
-                m_parent.transform.Rotate(0, m_horizontal, 0);
-                m_vertical = Input.GetAxis("Vertical") * m_sprintSpeed * Time.deltaTime;
+                m_horizontal = Input.GetAxis("Horizontal") * (m_turningSpeed * Time.deltaTime);
+                m_parent.transform.Rotate(0f, m_horizontal, 0f);
+                m_vertical = Input.GetAxis("Vertical") * (m_sprintSpeed * Time.deltaTime);
+                m_strafe = 0f;
             }
             else
             {
-                Strafe();
-                m_vertical = Input.GetAxis("Vertical") * m_movementSpeed * Time.deltaTime;
+                m_vertical = Input.GetAxis("Vertical") * (m_movementSpeed * Time.deltaTime);
+                m_strafe = Input.GetAxis("Horizontal") * (m_movementSpeed * Time.deltaTime);
+                if (Input.GetAxis("Horizontal") > 0)
+                {
+                    //animator.CrossFade("strafeRight");
+                }
+                else if (Input.GetAxis("Horizontal") < 0)
+                {
+                    //animator.CrossFade("strafeLeft");
+                }
             }
-            m_parent.transform.Translate(0, 0, m_vertical);
+            m_parent.transform.Translate(m_strafe, 0.0f, m_vertical);
         }
         else if (!m_skipRotate)
         {
@@ -82,17 +92,6 @@ public class Movement : MonoBehaviour
 
     private void Strafe()
     {
-        if ((Input.GetAxis("Horizontal")) > 0)
-        {
-            //animator.CrossFade("strafeRight");
-            Vector3 strafe = m_parent.transform.TransformDirection(Vector3.right) * Input.GetAxis("Horizontal") * m_movementSpeed * Time.deltaTime;
-            m_parent.transform.Translate(strafe);
-        }
-        else if ((Input.GetAxis("Horizontal")) < 0)
-        {
-            //animator.CrossFade("strafeLeft");
-            Vector3 strafe = m_parent.transform.TransformDirection(Vector3.right) * Input.GetAxis("Horizontal") * m_movementSpeed * Time.deltaTime;
-            m_parent.transform.Translate(strafe);
-        }
+
     }
 }

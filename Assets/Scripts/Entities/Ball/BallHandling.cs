@@ -74,11 +74,9 @@ public class BallHandling : NetworkedBehaviour
 
     // =================================== Public Varibles ===================================
 
-
-
-    //get { return (m_state == BallState.JUMPBALL || m_currentPlayer == null) ? -1 : m_currentPlayer.teamID; } }
-
-
+    public float pass_speed = 6.0f;
+    public float walk_offset = 2.5f;
+    public float sprint_offset = 6.0f;
 
     // =================================== Private Varibles ===================================
 
@@ -258,7 +256,7 @@ public class BallHandling : NetworkedBehaviour
 
         InvokeClientRpcOnClient(PassBallClient, targetPid, passerPid, position, type);
         ChangeBallHandler(targetPid);
-        StartCoroutine(Pass(passer, target, passerPid, targetPid, position, false, 2.0f));
+        StartCoroutine(Pass(passer, target, passerPid, targetPid, position, false, pass_speed));
     }
 
     [ServerRPC]
@@ -281,7 +279,7 @@ public class BallHandling : NetworkedBehaviour
             InvokeClientRpcOnClient(PassBallClient, targetPid, passerPid, position, type);
         }
         ChangeBallHandler(NO_PLAYER);
-        m_passCoroutine = StartCoroutine(Pass(passer, target, passerPid, targetPid, position, false, 12.0f));
+        m_passCoroutine = StartCoroutine(Pass(passer, target, passerPid, targetPid, position, false, pass_speed));
     }
 
     [ClientRPC]
@@ -299,7 +297,6 @@ public class BallHandling : NetworkedBehaviour
 
         // Calculate the journey length.
         float journeyLength = Vector3.Distance(m_ball.transform.position, pos);
-        Vector3 start = m_ball.transform.position;
 
         float fractionOfJourney = 0;
 
@@ -337,15 +334,11 @@ public class BallHandling : NetworkedBehaviour
         Vector3 pos;
 
         if (target.isSprinting)
-            pos = target.CenterPos + target.transform.forward * 5;
+            pos = target.CenterPos + target.transform.forward * sprint_offset;
         else if (target.isMoving)
-            pos = target.CenterPos + target.transform.forward * 2;
+            pos = target.CenterPos + target.transform.forward * walk_offset;
         else
             pos = target.CenterPos + target.transform.forward;
-
-        print(pos);
-        print(target.CenterPos);
-        print(target.transform.forward);
 
         return pos;
     }
@@ -357,11 +350,10 @@ public class BallHandling : NetworkedBehaviour
         while (State == BallState.PASS)
         {
             float dist = Vector3.Distance(target.CenterPos, pos);
-
+            target.isMovementFrozen = true;
             if (dist > .2)
             {
                 target.transform.position = Vector3.Lerp(target.transform.position, truePos, Time.deltaTime * 6.0f);
-                target.isMovementFrozen = true;
             }
 
             yield return null;
