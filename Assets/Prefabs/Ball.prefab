@@ -223,6 +223,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c9c86107cb3f0c4299af8034d06c2c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pass_speed: 6
+  walk_offset: 2.5
+  sprint_offset: 6
 --- !u!54 &1914631757
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -468,5 +471,5 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/ball.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 67154
+  thisInstanceId: 125410
   Undone: 1

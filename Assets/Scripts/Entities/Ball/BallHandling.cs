@@ -92,11 +92,13 @@ public class BallHandling : NetworkedBehaviour
     private bool m_topCollision;
 
     private Dictionary<ulong, float> m_playerDistances;
+    private IOrderedEnumerable<KeyValuePair<ulong, float>> m_pairs;
 
     // =================================== Functions ===================================
 
     void Start()
     {
+        StartCoroutine(UpdatePlayerDistances());
     }
 
     public override void NetworkStart()
@@ -143,24 +145,12 @@ public class BallHandling : NetworkedBehaviour
         if (!IsOwner || !IsServer)
             return;
 
-        foreach (KeyValuePair<ulong, NetworkedClient> pair in NetworkingManager.Singleton.ConnectedClients)
-        {
-            float dist = Vector3.Distance(m_ball.transform.position, pair.Value.PlayerObject.transform.position);
-            m_playerDistances[pair.Key] = dist;
-
-            if (pair.Value.PlayerObject.GetComponent<BoxCollider>().bounds.Intersects(m_ball.GetComponentInChildren<SphereCollider>().bounds))
-            {
-                PlayerLastPossesion = pair.Key;
-            }
-        }
-
+        // ============ Loose ball ============
         if (State == BallState.LOOSE)
         {
-            
             m_body.isKinematic = false;
-            var pairs = from pair in m_playerDistances orderby pair.Value descending select pair;
 
-            foreach (KeyValuePair<ulong, float> pair in pairs)
+            foreach (KeyValuePair<ulong, float> pair in m_pairs)
             {
                 if (pair.Value < 1.5f)
                 {
@@ -170,24 +160,26 @@ public class BallHandling : NetworkedBehaviour
                 }
             }
         }
-
+        // ============ ball held ============
         else if (State == BallState.HELD)
         {
-            
             m_currentPlayer = GameManager.GetPlayer(PlayerWithBall);
             if (!m_currentPlayer) return;
 
             ChangePossession(m_currentPlayer.teamID, false, false);  
+
             m_body.isKinematic = true;
+
             if (m_currentPlayer.IsBallInLeftHand)
                 m_ball.transform.position = m_currentPlayer.GetLeftHand().transform.position;
             else
                 m_ball.transform.position = m_currentPlayer.GetRightHand().transform.position;
         }
-
+        // ============ ball shoot ============
         else if (State == BallState.SHOT)
         {
             m_body.isKinematic = false;
+            m_body.AddRelativeTorque(Vector3.forward * 10);
             if (m_currentPlayer) ChangeBallHandler(NO_PLAYER);
         }
     }
@@ -196,17 +188,19 @@ public class BallHandling : NetworkedBehaviour
     [ServerRPC]
     public void OnShoot(ulong pid)
     {
-        Player player = GameManager.GetPlayer(pid);
         PlayerLastTouched = pid;
     }
 
     [ServerRPC]
     public void OnRelease(ulong pid)
     {
-        State = BallState.SHOT;
-        Player player = GameManager.GetPlayer(pid);
         PlayerLastTouched = pid;
-        StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.baskets[player.teamID].netPos.position, 1.0f, 1.0f));
+    }
+
+    [ServerRPC]
+    public void OnAnimationRelease()
+    {
+        BallFollowArc();
     }
 
     // =================================== Public Functions ===================================
@@ -223,6 +217,10 @@ public class BallHandling : NetworkedBehaviour
     public void BallFollowArc()
     {
         Player player = GameManager.GetPlayer(PlayerLastTouched);
+
+        State = BallState.SHOT;
+        m_body.isKinematic = false;
+
         StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.baskets[player.teamID].netPos.position, 1.0f, 1.0f));
     }
 
@@ -361,7 +359,32 @@ public class BallHandling : NetworkedBehaviour
         target.isMovementFrozen = false;
     }
 
+    // =================================== End Passing ===================================
+
     // =================================== Private Functions ===================================
+
+    private IEnumerator UpdatePlayerDistances()
+    {
+        for (; ; )
+        {
+            // ============ Lists Closest Players ============
+            foreach (KeyValuePair<ulong, NetworkedClient> pair in NetworkingManager.Singleton.ConnectedClients)
+            {
+                float dist = Vector3.Distance(m_ball.transform.position, pair.Value.PlayerObject.transform.position);
+                m_playerDistances[pair.Key] = dist;
+
+                if (pair.Value.PlayerObject.GetComponent<BoxCollider>().bounds.Intersects(m_ball.GetComponentInChildren<SphereCollider>().bounds))
+                {
+                    PlayerLastPossesion = pair.Key;
+                }
+            }
+
+            // ============ Sorts Closest Players ============
+            m_pairs = from pair in m_playerDistances orderby pair.Value descending select pair;
+
+            yield return new WaitForSeconds(.1f);
+        }
+    }
 
     private void SetBallHandler(ulong id)
     {
