@@ -44,6 +44,7 @@ public class GameManager : NetworkedBehaviour
     public GameObject[] inbounds;
 
     private BasketballStateManager m_gameState;
+    private ShotManager m_shotManager;
     private float m_pregameTime = 0;
 
     [SerializeField]
@@ -54,6 +55,7 @@ public class GameManager : NetworkedBehaviour
         Singleton = this;
 
         m_gameState = GetComponent<BasketballStateManager>();
+        m_shotManager = GetComponent<ShotManager>();
 
         baskets[0] = GameObject.Find("BasketLeft").GetComponent<Basket>();
         baskets[1] = GameObject.Find("BasketRight").GetComponent<Basket>();
@@ -275,6 +277,11 @@ public class GameManager : NetworkedBehaviour
     public bool GetIsServer()
     {
         return IsServer;
+    }
+
+    public ShotManager GetShotManager()
+    {
+        return m_shotManager;
     }
 
     public static BallHandling GetBallHandling()

@@ -133,9 +133,7 @@ public class Player : NetworkedBehaviour
     public void ShootBall()
     {
         isShooting = true;
-        //Shoot(this);
-        //NetworkEvents.Singleton.CallEventServer(NetworkEvent.PLAYER_SHOOT);
-        InvokeServerRpc(ServerShootBall, OwnerClientId);  
+        InvokeServerRpc(ServerShootBall, OwnerClientId, m_shotmeter.targetHeight);
     }
 
     public void ReleaseBall()
@@ -143,23 +141,25 @@ public class Player : NetworkedBehaviour
         isShooting = false;
         Release?.Invoke(this);
         GameManager.GetBallHandling().InvokeServerRpc(GameManager.GetBallHandling().OnRelease, OwnerClientId);
-        //NetworkEvents.Singleton.CallEventServer(NetworkEvent.PLAYER_RELEASE);
         print("released");
     }
 
     [ServerRPC]
-    public void ServerShootBall(ulong id)
+    public void ServerShootBall(ulong id, float targetHeight)
     {
         float speed = UnityEngine.Random.Range(3, 6);
-
-        InvokeClientRpcOnClient(ClientShootBall, id, speed, 0f, 0f);
+        float startOffset = 0f;
+        float endOffset = 0f;
+        InvokeClientRpcOnClient(ClientShootBall, id, speed, startOffset, endOffset);
+        GameManager.Singleton.GetShotManager().OnShoot(id, speed, targetHeight, startOffset, endOffset);
+        GameManager.GetBallHandling().OnShoot(id, speed, targetHeight, startOffset, endOffset);
+        //GameManager.GetBallHandling().ShootBall(id, speed, height, startOffset, endOffset);
     }
 
     [ClientRPC]
     public void ClientShootBall(float speed, float start, float end)
     {
         isShooting = true;
-        GameManager.GetBallHandling().ShootBall(OwnerClientId);
         m_shotmeter.OnShoot(this, speed, start, end);
     }
 

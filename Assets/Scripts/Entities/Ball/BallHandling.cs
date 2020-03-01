@@ -86,7 +86,7 @@ public class BallHandling : NetworkedBehaviour
     private GameObject m_ball;
     private Rigidbody m_body;
     private BallState m_lastState;
-    private Coroutine m_passCoroutine;
+    private ShotManager m_shotManager;
 
     private bool m_ballShot = false;
     private bool m_topCollision;
@@ -115,7 +115,10 @@ public class BallHandling : NetworkedBehaviour
         m_possession = new NetworkedVarSByte(settings, -1);
         m_playerDistances = new Dictionary<ulong, float>();
 
-        m_gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+
+        GameObject gamemanager = GameObject.Find("GameManager");
+        m_gameManager = gamemanager.GetComponent<GameManager>();
+        m_shotManager = gamemanager.GetComponent<ShotManager>();
         m_playerObj = SpawnManager.GetLocalPlayerObject();
         m_currentPlayer = m_playerObj.GetComponent<Player>();
         m_ball = NetworkedObject.gameObject;
@@ -186,7 +189,7 @@ public class BallHandling : NetworkedBehaviour
 
     // =================================== RPCs ===================================
     [ServerRPC]
-    public void OnShoot(ulong pid)
+    public void OnShoot(ulong pid, float speed, float height, float startOffset, float endOffset)
     {
         PlayerLastTouched = pid;
     }
@@ -195,6 +198,7 @@ public class BallHandling : NetworkedBehaviour
     public void OnRelease(ulong pid)
     {
         PlayerLastTouched = pid;
+        m_shotManager.OnRelease(pid);
     }
 
     [ServerRPC]
@@ -207,11 +211,6 @@ public class BallHandling : NetworkedBehaviour
     public void StopBall()
     {
         m_body.velocity = Vector3.zero;
-    }
-
-    public void ShootBall(ulong pid)
-    {
-        InvokeServerRpc(OnShoot, pid);
     }
 
     public void BallFollowArc()
@@ -277,7 +276,7 @@ public class BallHandling : NetworkedBehaviour
             InvokeClientRpcOnClient(PassBallClient, targetPid, passerPid, position, type);
         }
         ChangeBallHandler(NO_PLAYER);
-        m_passCoroutine = StartCoroutine(Pass(passer, target, passerPid, targetPid, position, false, pass_speed));
+        StartCoroutine(Pass(passer, target, passerPid, targetPid, position, false, pass_speed));
     }
 
     [ClientRPC]

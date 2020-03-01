@@ -8,12 +8,12 @@ using UnityEngine.UI;
 public class ShotMeter : MonoBehaviour
 {
 
-    private const float BASE_SPEED = 50.0f;
+    public const float BASE_SPEED = 50.0f;
 
     float speed = BASE_SPEED;
-    
+
     public float height;
-    public float targetHeight;
+    public float targetHeight { get; set; }
     public Vector2 position;
     public Vector3 targetPos = Vector3.zero;
 
@@ -80,13 +80,13 @@ public class ShotMeter : MonoBehaviour
 
     }
 
-    public void OnShoot(Player p, float speedMod, float start, float end)
+    public void OnShoot(Player p, float speedMod, float startOffset, float endOffset)
     {
         speed = BASE_SPEED * speedMod;
 
-        RectTransformExtensions.SetHeight(m_rectTrans, 0.0f + start);
+        RectTransformExtensions.SetHeight(m_rectTrans, 0.0f + startOffset);
 
-        target.rectTransform.localPosition = GetBarPosition(end);
+        target.rectTransform.localPosition = GetBarPosition(endOffset);
         
         meter.SetActive(true);
         m_isShooting = true;
@@ -95,13 +95,13 @@ public class ShotMeter : MonoBehaviour
 
     public void OnRelease(Player player)
     {
-        float dist = Mathf.Abs(target.rectTransform.localPosition.y - targetHeight);
+        float dist = Mathf.Abs(RectTransformExtensions.GetHeight(m_rectTrans) - targetHeight);
 
         if (dist < .5)
         {
             glow.gameObject.SetActive(true);
         }
-
+        print("dist " + dist);
         StopShooting();
         StartCoroutine(Hide(3.0f));
     }
