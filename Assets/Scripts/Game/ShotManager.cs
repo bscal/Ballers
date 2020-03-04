@@ -33,6 +33,10 @@ public class ShotManager : MonoBehaviour
         print(speed);
         print(height);
         print(dist);
+
+        // TODO handle shots chances
+        // TODO if made handle inbound
+        // TODO if miss handle rebound physics
     }
 
     private IEnumerator ShotQuality(ulong player, float speed, float height, float startOffset, float endOffset)

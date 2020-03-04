@@ -12,6 +12,10 @@ Assets/Logs/
 Assets/Logs.meta
 bin/
 
+Assets/Plugins
+Assets/Plugins/Steamworks.NET
+Assets/Editor/Steamworks.NET
+
 # Unity Generated
 [Tt]emp/
 [Ll]ibrary/
