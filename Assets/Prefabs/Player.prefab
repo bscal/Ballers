@@ -943,7 +943,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/upperarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 241532
+  thisInstanceId: 58634
   Undone: 1
 --- !u!1 &839673004282485492
 GameObject:
@@ -1090,7 +1090,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/foot.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 240450
+  thisInstanceId: 57552
   Undone: 1
 --- !u!1 &855668793950629865
 GameObject:
@@ -4969,7 +4969,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/upperchest.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 241220
+  thisInstanceId: 58322
   Undone: 1
 --- !u!1 &2938245477022681954
 GameObject:
@@ -5296,7 +5296,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/calf.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 240368
+  thisInstanceId: 57470
   Undone: 1
 --- !u!1 &3249661851278890336
 GameObject:
@@ -6405,7 +6405,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/leg.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 241228
+  thisInstanceId: 58330
   Undone: 1
 --- !u!1 &3916156810308084338
 GameObject:
@@ -7485,7 +7485,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/lowerchest.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 240760
+  thisInstanceId: 57862
   Undone: 1
 --- !u!1 &4601289110702898129
 GameObject:
@@ -8842,7 +8842,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/calf.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 241510
+  thisInstanceId: 58612
   Undone: 1
 --- !u!1 &5325683939739797947
 GameObject:
@@ -9405,7 +9405,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/leg.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 240412
+  thisInstanceId: 57514
   Undone: 1
 --- !u!1 &5647321667379715171
 GameObject:
@@ -9565,7 +9565,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/lowerarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 240824
+  thisInstanceId: 57926
   Undone: 1
 --- !u!1 &5690431781121862110
 GameObject:
@@ -10349,7 +10349,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/lowerarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 240940
+  thisInstanceId: 58042
   Undone: 1
 --- !u!1 &5965997991029536111
 GameObject:
@@ -10881,7 +10881,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/head.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 240418
+  thisInstanceId: 57520
   Undone: 1
 --- !u!1 &6166792760984548341
 GameObject:
@@ -12221,7 +12221,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/upperarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 241474
+  thisInstanceId: 58576
   Undone: 1
 --- !u!1 &6927265981159084006
 GameObject:
@@ -13500,7 +13500,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/foot.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 240508
+  thisInstanceId: 57610
   Undone: 1
 --- !u!1 &7765132884196620524
 GameObject:
@@ -14967,13 +14967,14 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9132637102776717737}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.05}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 5109841824685337752}
   - {fileID: 3863859046329800920}
   - {fileID: 8930579776218710583}
   - {fileID: 8003162249519811356}
+  - {fileID: 326869951745823471}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -15157,3 +15158,78 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f75eec2c88bd25f4f92b76326b606f45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1001 &8577995694887777996
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 7864292228048945127}
+    m_Modifications:
+    - target: {fileID: 5033113463472543280, guid: ad298dd70b2db5943b0936dced78b6b5,
+        type: 3}
+      propertyPath: m_Name
+      value: player_cirlce
+      objectReference: {fileID: 0}
+    - target: {fileID: 8323338067705504803, guid: ad298dd70b2db5943b0936dced78b6b5,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8323338067705504803, guid: ad298dd70b2db5943b0936dced78b6b5,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8323338067705504803, guid: ad298dd70b2db5943b0936dced78b6b5,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8323338067705504803, guid: ad298dd70b2db5943b0936dced78b6b5,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8323338067705504803, guid: ad298dd70b2db5943b0936dced78b6b5,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8323338067705504803, guid: ad298dd70b2db5943b0936dced78b6b5,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8323338067705504803, guid: ad298dd70b2db5943b0936dced78b6b5,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8323338067705504803, guid: ad298dd70b2db5943b0936dced78b6b5,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8323338067705504803, guid: ad298dd70b2db5943b0936dced78b6b5,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8323338067705504803, guid: ad298dd70b2db5943b0936dced78b6b5,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8323338067705504803, guid: ad298dd70b2db5943b0936dced78b6b5,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ad298dd70b2db5943b0936dced78b6b5, type: 3}
+--- !u!4 &326869951745823471 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8323338067705504803, guid: ad298dd70b2db5943b0936dced78b6b5,
+    type: 3}
+  m_PrefabInstance: {fileID: 8577995694887777996}
+  m_PrefabAsset: {fileID: 0}
