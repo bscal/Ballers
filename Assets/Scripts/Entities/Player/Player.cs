@@ -210,4 +210,9 @@ public class Player : NetworkedBehaviour
 
         return shortestPlayer;
     }
+
+    public void ChangeHand()
+    {
+        IsBallInLeftHand = !IsBallInLeftHand;
+    }
 }

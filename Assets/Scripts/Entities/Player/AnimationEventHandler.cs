@@ -15,10 +15,9 @@ public class AnimationEventHandler : MonoBehaviour
 
     public void OnCrossover(int tooLeft)
     {
-        
         if (player.HasBall)
         {
-            player.IsBallInLeftHand = tooLeft != 0;
+            player.IsBallInLeftHand = !player.IsBallInLeftHand;
         }
     }
 }

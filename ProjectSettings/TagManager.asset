@@ -7,6 +7,7 @@ TagManager:
   - PicaVoxelVolume
   - Dummy
   - Inbound
+  - Not Mirrorable
   layers:
   - Default
   - TransparentFX
