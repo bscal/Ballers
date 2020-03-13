@@ -68,6 +68,8 @@ public class Player : NetworkedBehaviour
     public Vector3 RightHand { get { return m_rightHand.transform.position; } }
     public Vector3 LeftHand { get { return m_leftHand.transform.position; } }
     public Vector3 CenterPos { get { return m_center.transform.position; } }
+    public Transform OwnBasket { get { return GameManager.Singleton.baskets[teamID].transform; } }
+    public bool OnLeftSide { get { return transform.position.x < 0; } }
 
     public Player Assignment { get
         {
