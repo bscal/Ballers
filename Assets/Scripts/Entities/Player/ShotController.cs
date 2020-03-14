@@ -13,28 +13,28 @@ public class ShotController : MonoBehaviour
     void Start()
     {
         m_player = GetComponentInChildren<Player>();
+
+        m_player.Shoot += OnShoot;
     }
 
-    void Update()
+    private void OnShoot(Player p)
     {
-        if (m_player.HasBall)
+        float f = Quaternion.Angle(transform.rotation, m_player.LookRotation);
+        m_distFromBasket = Vector3.Distance(transform.position, m_player.OwnBasket.position);
+        if (f > 45)
         {
-            m_distFromBasket = Vector3.Distance(transform.position, m_player.OwnBasket.position);
-            m_angleFromBasket = Quaternion.Angle(transform.rotation, m_player.OwnBasket.rotation);
-
-
-
-
-            if (m_player.isSprinting)
+            if (f > 125)
             {
-
+                print("fade");
             }
-            else if (m_player.isMoving)
+            else
             {
-
+                print("side");
             }
         }
-
-        Debugger.Instance.Print(string.Format("Dist: {0}, Angle:{1}, left: {2}", m_distFromBasket, m_angleFromBasket, m_player.OnLeftSide), 3);
+        else
+        {
+            print("front");
+        }
     }
 }

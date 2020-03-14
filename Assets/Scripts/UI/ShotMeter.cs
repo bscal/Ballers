@@ -101,7 +101,6 @@ public class ShotMeter : MonoBehaviour
         {
             glow.gameObject.SetActive(true);
         }
-        print("dist " + dist);
         StopShooting();
         StartCoroutine(Hide(3.0f));
     }

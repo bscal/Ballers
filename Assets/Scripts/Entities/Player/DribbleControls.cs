@@ -132,8 +132,6 @@ public class DribbleControls : MonoBehaviour
 
         KeyCombo crossL = new KeyCombo(KeyCode.A, true, false, false, false, false, false);
         KeyCombo crossR = new KeyCombo(KeyCode.D, true, false, false, false, false, false);
-        print(crossL.GetHashCode());
-        print(crossR.GetHashCode());
 
         KeyCombo jab = new KeyCombo();
         jab.key = KeyCode.W;
@@ -199,7 +197,6 @@ public class DribbleControls : MonoBehaviour
         // combo timer timeout
         if (m_comboTimer > m_endTime)
         {
-            print(m_combo.Count);
             HandleCombo();
             Cleanup();
         }
@@ -276,7 +273,6 @@ public class DribbleControls : MonoBehaviour
 
     private void HandleCombo()
     {
-        print(m_comboMove);
         foreach (var c in m_comboMove)
         {
             print(c.GetHashCode());

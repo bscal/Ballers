@@ -27,7 +27,8 @@ public class GameManager : NetworkedBehaviour
     private static Dictionary<ulong, uint> m_playersByTeam = new Dictionary<ulong, uint>();
 
     public static Player BallHandler { get { return GetPlayer(m_ballhandling.PlayerWithBall); } }
-
+    public static Basket CurrentBasket { get { return Singleton.baskets[m_ballhandling.PossessionOrHome]; } }
+    public static int Possession { get { return m_ballhandling.PossessionOrHome; } }
 
     public Team TeamHome { get { return teams[0]; } }
     public Team TeamAway { get { return teams[1]; } }

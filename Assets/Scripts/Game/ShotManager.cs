@@ -29,11 +29,6 @@ public class ShotManager : MonoBehaviour
 
     private void HandleShot(ulong player,float speed, float height, float dist)
     {
-        print(player);
-        print(speed);
-        print(height);
-        print(dist);
-
         // TODO handle shots chances
         // TODO if made handle inbound
         // TODO if miss handle rebound physics

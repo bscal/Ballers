@@ -131,7 +131,6 @@ public class PlayerControls : NetworkedBehaviour
 
     IEnumerator OnKeyPressedOnly()
     {
-        Debug.Log("key was only Pressed");
 
         Pumpfake();
 
@@ -141,7 +140,6 @@ public class PlayerControls : NetworkedBehaviour
 
     IEnumerator OnKeyHeldDown()
     {
-        Debug.LogWarning("key is Held Down");
 
         StartShot();
 

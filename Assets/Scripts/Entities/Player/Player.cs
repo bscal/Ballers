@@ -70,6 +70,22 @@ public class Player : NetworkedBehaviour
     public Vector3 CenterPos { get { return m_center.transform.position; } }
     public Transform OwnBasket { get { return GameManager.Singleton.baskets[teamID].transform; } }
     public bool OnLeftSide { get { return transform.position.x < 0; } }
+    private Vector3 m_lookTarget;
+    public Vector3 LookTarget
+    {
+        get
+        {
+            if (OnOffense())
+            {
+                return m_lookTarget;
+            }
+            else
+            {
+                return Vector3.zero;
+            }
+        }
+    }
+    public Quaternion LookRotation { get { return Quaternion.LookRotation(m_lookTarget); } }
 
     public Player Assignment { get
         {
@@ -130,6 +146,8 @@ public class Player : NetworkedBehaviour
         Debugger.Instance.Print(string.Format("2pt:{0}", isInsideThree), 3);
 
         GameObject.Find("Cube").transform.position = transform.position + transform.forward * 3 + transform.up * 3;
+
+        m_lookTarget = GameManager.Singleton.baskets[GameManager.Possession].gameObject.transform.position - transform.position;
     }
 
     public void ShootBall()
@@ -163,11 +181,17 @@ public class Player : NetworkedBehaviour
     {
         isShooting = true;
         m_shotmeter.OnShoot(this, speed, start, end);
+        Shoot?.Invoke(this);
     }
 
     public float Dist(Vector3 other)
     {
         return Vector3.Distance(transform.position, other);
+    }
+
+    public bool OnOffense()
+    {
+        return GameManager.Possession == teamID;
     }
 
     public GameObject GetLeftHand()
