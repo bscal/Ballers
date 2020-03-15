@@ -36,9 +36,6 @@ public class PlayerControls : NetworkedBehaviour
         }
 
         m_player.isMoving = IsMoving();
-        m_player.isShiftLeft = Input.GetKey(KeyCode.A);
-        m_player.isShiftRight = Input.GetKey(KeyCode.D);
-        m_player.isShiftBack = Input.GetKey(KeyCode.S);
         m_player.isSprinting = Input.GetKey(KeyCode.LeftShift);
 
         if (Input.GetKey(KeyCode.Space) && !m_jumpCooldown)
@@ -62,7 +59,7 @@ public class PlayerControls : NetworkedBehaviour
     }
     private bool IsMoving()
     {
-        return Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D);
+        return Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow);
     }
 
     private IEnumerator WaitShoot(float delay)

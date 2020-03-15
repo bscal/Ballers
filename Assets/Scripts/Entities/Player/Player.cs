@@ -15,7 +15,6 @@ public class Player : NetworkedBehaviour
 
     // Local Player Events
     //  These are not synced over the network and only used by local client.
-    public event Action<Player> PreShoot;
     public event Action<Player> Shoot;
     public event Action<Player> Release;
 
@@ -47,9 +46,6 @@ public class Player : NetworkedBehaviour
     public bool isRightHanded = true;
     public bool isDribbling = false;
     public bool isMoving = false;
-    public bool isShiftLeft = false;
-    public bool isShiftRight = false;
-    public bool isShiftBack = false;
     public bool isSprinting = false;
     public bool isInsideThree = false;
     public bool isScreening = false;
@@ -59,9 +55,9 @@ public class Player : NetworkedBehaviour
     public bool isMovementFrozen = false;
 
     public bool IsBallInLeftHand = false;
-    public bool HasBall 
-    { get 
-        { 
+    public bool HasBall
+    { get
+        {
             return GameManager.GetBallHandling().PlayerWithBall == OwnerClientId || isDummy && GameManager.GetBallHandling().PlayerWithBall == BallHandling.DUMMY_PLAYER;
         }
     }
@@ -70,14 +66,14 @@ public class Player : NetworkedBehaviour
     public Vector3 CenterPos { get { return m_center.transform.position; } }
     public Transform OwnBasket { get { return GameManager.Singleton.baskets[teamID].transform; } }
     public bool OnLeftSide { get { return transform.position.x < 0; } }
-    private Vector3 m_lookTarget;
+    private Vector3 m_target;
     public Vector3 LookTarget
     {
         get
         {
             if (OnOffense())
             {
-                return m_lookTarget;
+                return m_target;
             }
             else
             {
@@ -85,7 +81,8 @@ public class Player : NetworkedBehaviour
             }
         }
     }
-    public Quaternion LookRotation { get { return Quaternion.LookRotation(m_lookTarget); } }
+    public Quaternion LookRotation { get { return Quaternion.LookRotation(m_target); } }
+    public float DistanceFromTarget { get { return Vector3.Distance(transform.position, m_target); } }
 
     public Player Assignment { get
         {
@@ -147,7 +144,7 @@ public class Player : NetworkedBehaviour
 
         GameObject.Find("Cube").transform.position = transform.position + transform.forward * 3 + transform.up * 3;
 
-        m_lookTarget = GameManager.Singleton.baskets[GameManager.Possession].gameObject.transform.position - transform.position;
+        m_target = GameManager.Singleton.baskets[GameManager.Possession].gameObject.transform.position - transform.position;
     }
 
     public void ShootBall()
