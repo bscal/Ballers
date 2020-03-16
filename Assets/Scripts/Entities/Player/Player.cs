@@ -167,17 +167,19 @@ public class Player : NetworkedBehaviour
         float speed = UnityEngine.Random.Range(3, 6);
         float startOffset = 0f;
         float endOffset = 0f;
-        InvokeClientRpcOnClient(ClientShootBall, id, speed, startOffset, endOffset);
-        GameManager.Singleton.GetShotManager().OnShoot(id, speed, targetHeight, startOffset, endOffset);
+        float bonusHeight = UnityEngine.Random.Range(0, 4);
+
+        InvokeClientRpcOnClient(ClientShootBall, id, speed, bonusHeight, startOffset, endOffset);
+        GameManager.Singleton.GetShotManager().OnShoot(id, speed, targetHeight, bonusHeight, startOffset, endOffset);
         GameManager.GetBallHandling().OnShoot(id, speed, targetHeight, startOffset, endOffset);
         //GameManager.GetBallHandling().ShootBall(id, speed, height, startOffset, endOffset);
     }
 
     [ClientRPC]
-    public void ClientShootBall(float speed, float start, float end)
+    public void ClientShootBall(float speed, float bonusHeight, float start, float end)
     {
         isShooting = true;
-        m_shotmeter.OnShoot(this, speed, start, end);
+        m_shotmeter.OnShoot(this, speed, bonusHeight ,start, end);
         Shoot?.Invoke(this);
     }
 

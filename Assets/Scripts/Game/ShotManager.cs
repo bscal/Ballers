@@ -5,9 +5,17 @@ using MLAPI;
 
 public class ShotManager : MonoBehaviour
 {
-    private const float MAX_DISTANCE = 30.0f;
+
+    // =================================== Private Varibles ===================================
 
     private bool m_isShot = false;
+    private float m_speed;
+    private float m_targetHeight;
+    private float m_targetBonusHeight;
+    private float m_startOffset;
+    private float m_endOffset;
+
+    // =================================== MonoBehaviour Functions ===================================
 
     void Start()
     {
@@ -17,10 +25,19 @@ public class ShotManager : MonoBehaviour
         }
     }
 
-    public void OnShoot(ulong player, float speed, float targetHeight, float startOffset, float endOffset)
+    // =================================== Public Functions ===================================
+
+    public void OnShoot(ulong player, float speed, float targetHeight, float bonusHeight, float startOffset, float endOffset)
     {
+        if (!NetworkingManager.Singleton.IsServer) return;
+
         m_isShot = true;
-        StartCoroutine(ShotQuality(player, speed, targetHeight, startOffset, endOffset));
+        m_speed = speed;
+        m_targetHeight = targetHeight;
+        m_targetBonusHeight = bonusHeight;
+        m_startOffset = startOffset;
+        m_endOffset = endOffset;
+        StartCoroutine(ShotQuality(player));
     }
 
     public void OnRelease(ulong player)
@@ -28,13 +45,15 @@ public class ShotManager : MonoBehaviour
         m_isShot = false;
     }
 
-    private void HandleShot(ulong player,float speed, float targetHeight, float meterOffset)
+    // =================================== Private Functions ===================================
+
+    private void HandleShot(ulong player, float releaseDist)
     {
         Player p = GameManager.GetPlayer(player);
 
         float d = Vector3.Distance(p.transform.position, p.LookTarget);
 
-        print("shot: " + meterOffset);
+        print("shot: " + releaseDist);
         print("dist: " + d);
 
         // TODO handle shots chances
@@ -42,24 +61,20 @@ public class ShotManager : MonoBehaviour
         // TODO if miss handle rebound physics
     }
 
-    private IEnumerator ShotQuality(ulong player, float speed, float targetHeight, float startOffset, float endOffset)
+    /// <summary>Server handling of shot quality<br></br>
+    /// Used delta time and speed increment to determine where player's target should be</summary>
+    private IEnumerator ShotQuality(ulong player)
     {
         yield return null;
         float timer = 0.0f;
-        float increment = ShotMeter.BASE_SPEED * speed;
+        float increment = ShotMeter.BASE_SPEED * m_speed;
         while (m_isShot)
         {
             timer += increment * Time.deltaTime;
             yield return null;
         }
 
-        float dist = Mathf.Abs(targetHeight - timer + endOffset - startOffset);
-        HandleShot(player, speed, targetHeight, dist);
-    }
-
-    public void HandleRebound()
-    {
-
+        HandleShot(player, Mathf.Abs(m_targetHeight - timer + m_endOffset - m_startOffset));
     }
 
 }

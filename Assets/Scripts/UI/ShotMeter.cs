@@ -8,8 +8,9 @@ using UnityEngine.UI;
 public class ShotMeter : MonoBehaviour
 {
     public const float BASE_SPEED = 50.0f;
-    public static float MAX_HEIGHT { get; private set; }
+    public const float BASE_TARGET = 3.0f;
 
+    public static float MAX_HEIGHT { get; private set; }
 
     float speed = BASE_SPEED;
 
@@ -83,7 +84,7 @@ public class ShotMeter : MonoBehaviour
 
     }
 
-    public void OnShoot(Player p, float speedMod, float startOffset, float endOffset)
+    public void OnShoot(Player p, float speedMod, float targetSize, float startOffset, float endOffset)
     {
         speed = BASE_SPEED * speedMod;
         m_startOffset = startOffset;
@@ -92,6 +93,7 @@ public class ShotMeter : MonoBehaviour
         RectTransformExtensions.SetHeight(m_rectTrans, 0.0f);
 
         target.rectTransform.localPosition = GetBarPosition(endOffset);
+        RectTransformExtensions.SetHeight(target.rectTransform, BASE_TARGET + targetSize);
         
         meter.SetActive(true);
         m_isShooting = true;
