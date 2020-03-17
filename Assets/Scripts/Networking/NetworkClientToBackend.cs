@@ -14,6 +14,8 @@ public class NetworkClientToBackend : MonoBehaviour
 
         print("trying to log in...");
         StartCoroutine(Login(SteamUser.GetSteamID().m_SteamID));
+        PlayerManager.Singleton.FetchPlayerAllStats(SteamUser.GetSteamID().m_SteamID, 0);
+        PlayerManager.Singleton.StartCoroutine(PlayerManager.Singleton.AddCharacter(SteamUser.GetSteamID().m_SteamID, 0));
 
         if (SteamManager.Initialized)
         {
@@ -41,7 +43,6 @@ public class NetworkClientToBackend : MonoBehaviour
                 byte[] results = webRequest.downloadHandler.data;
 
                 string data = webRequest.downloadHandler.text;
-                print(data);
                 var userData = JsonConvert.DeserializeObject<List<UserData>>(data);
                 print(userData[0].created);
                 
@@ -60,6 +61,10 @@ public struct UserData
     public DateTime created;
     [JsonProperty("last_login")]
     public DateTime lastLogin;
+    [JsonProperty("last_char")]
+    public int lastChar;
+    [JsonProperty("char_index")]
+    public int charIndex;
 
     public override bool Equals(object obj)
     {
