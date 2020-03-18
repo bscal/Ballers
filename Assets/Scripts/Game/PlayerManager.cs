@@ -1,5 +1,6 @@
 ﻿using MLAPI;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -57,15 +58,26 @@ public class PlayerManager : NetworkedBehaviour
         return 0;
     }
 
-    public void FetchPlayerAllStats(ulong steamid, int cid)
+    public IEnumerator FetchEveryPlayersStats(ulong[] steamids, int[] cids, float timeout, System.Action<CharacterData[]> callback = null)
     {
-        CharacterData cData;
-        StartCoroutine(FetchCharacterFromServer(steamid, cid, result => { cData = result; }));
-    }
+        CharacterData[] cData = new CharacterData[steamids.Length];
+        int callbacksReturned = 0;
+        float timer = 0;
 
-    public CharacterData[] FetchEveryPlayersStats(ulong[] steamids, int[] cids)
-    {
-        return null;
+        for (int i = 0; i < steamids.Length; i++)
+        {
+            StartCoroutine(FetchCharacterFromServer(steamids[i], cids[i], result => { cData[i] = result; callbacksReturned++; }));
+        }
+
+        while (callbacksReturned < steamids.Length)
+        {
+            yield return new WaitForSeconds(.2f);
+
+            timer += .2f;
+            if (timeout > 0 && timeout > timer) break;
+        }
+
+        callback.Invoke(cData);
     }
 
     public IEnumerator AddCharacter(ulong steamid, int cid)
@@ -88,12 +100,33 @@ public class PlayerManager : NetworkedBehaviour
             }
             else
             {
-                Debug.Log("Form upload complete!");
+                Debug.Log("Form upload complete! Creating character");
             }
         }
     }
 
-    private IEnumerator FetchCharacterFromServer(ulong steamid, int cid, System.Action<CharacterData> callback = null)
+    public IEnumerator DeleteCharacter(ulong steamid, int cid)
+    {
+        WWWForm form = new WWWForm();
+        form.AddField("steamid", steamid.ToString());
+        form.AddField("cid", cid);
+
+        using (UnityWebRequest www = UnityWebRequest.Post("bscal.me:9090/character/delete", form))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.isNetworkError || www.isHttpError)
+            {
+                Debug.Log(www.error);
+            }
+            else
+            {
+                Debug.Log("Form upload complete! Deleting Character");
+            }
+        }
+    }
+
+    public IEnumerator FetchCharacterFromServer(ulong steamid, int cid, System.Action<CharacterData> callback = null)
     {
         print(string.Format("Fetching player {0} ; cid {1}...", steamid, cid));
         using (UnityWebRequest webRequest = UnityWebRequest.Get(string.Format("bscal.me:9090/character/{0}/{1}", steamid, cid)))
@@ -111,9 +144,20 @@ public class PlayerManager : NetworkedBehaviour
                 byte[] results = webRequest.downloadHandler.data;
 
                 string data = webRequest.downloadHandler.text;
-                var charData = JsonConvert.DeserializeObject<List<CharacterData>>(data);
-                print(charData[0].cid);
-                if (callback != null) callback.Invoke(charData[0]);
+
+                CharacterData cData = new CharacterData();
+
+                //var cData = JsonConvert.DeserializeObject<List<CharacterData>>(data);
+                
+
+                JArray array = JArray.Parse(data);
+                foreach (JObject obj in array.Children<JObject>())
+                {
+                    JsonConvert.PopulateObject(obj.ToString(), cData);
+                }
+
+                print(cData.cid);
+                if (callback != null) callback.Invoke(cData);
             }
         }
     }
@@ -133,5 +177,8 @@ public class CharacterData
     public int wingspan;
     [JsonProperty("weight")]
     public int weight;
+    [JsonProperty("three_shooting")]
+    public int threeShooting;
+
 }
 

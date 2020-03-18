@@ -122,7 +122,7 @@ public class GameManager : NetworkedBehaviour
 
     public void OnStartGame()
     {
-        GameStarted();
+        GameStarted?.Invoke();
 
 
         if (!ball.activeSelf)

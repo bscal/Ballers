@@ -9,13 +9,19 @@ using UnityEngine.Networking;
 
 public class NetworkClientToBackend : MonoBehaviour
 {
+
+    private PlayerManager m_playerManager;
+
     void Start()
     {
+        m_playerManager = PlayerManager.Singleton;
 
-        print("trying to log in...");
+        print("Trying to log in...");
         StartCoroutine(Login(SteamUser.GetSteamID().m_SteamID));
-        PlayerManager.Singleton.FetchPlayerAllStats(SteamUser.GetSteamID().m_SteamID, 0);
-        PlayerManager.Singleton.StartCoroutine(PlayerManager.Singleton.AddCharacter(SteamUser.GetSteamID().m_SteamID, 0));
+        m_playerManager.StartCoroutine(m_playerManager.FetchCharacterFromServer(SteamUser.GetSteamID().m_SteamID, 0, (result) => {
+            print(result);
+        }));
+        //m_playerManager.StartCoroutine(m_playerManager.AddCharacter(SteamUser.GetSteamID().m_SteamID, 0));
 
         if (SteamManager.Initialized)
         {

@@ -94,10 +94,10 @@ public class BasketballStateManager : NetworkedBehaviour
 
     internal void IncrementTime(float deltaTime)
     {
-        if (MatchStateValue.Value != (byte)EMatchState.INPROGRESS || MatchStateValue.Value != (byte)EMatchState.INBOUND)
+        if (MatchStateValue.Value != (byte)EMatchState.INPROGRESS)
             return;
 
-        m_shotclockOff = InGameTime.Value - ShotClock.Value < 0.00f;
+        m_shotclockOff = (InGameTime.Value - ShotClock.Value) < 0.00f;
 
         if (!m_shotclockOff && ShotClock.Value < 0.00f)
         {
