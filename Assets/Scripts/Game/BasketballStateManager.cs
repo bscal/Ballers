@@ -32,10 +32,17 @@ public class BasketballStateManager : NetworkedBehaviour
 
     // Public
 
-    public NetworkedVarFloat InGameTime;
-    public NetworkedVarFloat ShotClock;
-    public NetworkedVarByte MatchStateValue;
-    public NetworkedVarByte Quarter;
+    private NetworkedVarFloat m_inGameTime;
+    public float InGameTime { get { return m_inGameTime.Value; } set { m_inGameTime.Value = value; } }
+
+    private NetworkedVarFloat m_shotClock;
+    public float ShotClock { get { return m_shotClock.Value; } set { m_shotClock.Value = (byte)value; } }
+
+    public NetworkedVarByte m_state;
+    public EMatchState MatchStateValue { get { return (EMatchState)Enum.ToObject(typeof(EMatchState), m_state.Value); } set { m_state.Value = (byte)value; } }
+    
+    private NetworkedVarByte m_quarter;
+    public byte Quarter { get { return m_quarter.Value; } set { m_quarter.Value = value; } }
 
     // Private
 
@@ -62,19 +69,19 @@ public class BasketballStateManager : NetworkedBehaviour
     {
         m_UIHomeName.text = "Home";
         m_UIAwayName.text = "Away";
-        m_gameManager = GetComponent<GameManager>(); 
+        m_gameManager = GameManager.Singleton;
     }
 
     public override void NetworkStart()
     {
         if (IsServer)
         {
-            InGameTime = new NetworkedVarFloat(STATE_SETTINGS);
-            ShotClock = new NetworkedVarFloat(STATE_SETTINGS);
-            MatchStateValue = new NetworkedVarByte(STATE_SETTINGS);
-            Quarter = new NetworkedVarByte(STATE_SETTINGS);
+            m_inGameTime = new NetworkedVarFloat(STATE_SETTINGS);
+            m_shotClock = new NetworkedVarFloat(STATE_SETTINGS);
+            m_state = new NetworkedVarByte(STATE_SETTINGS);
+            m_quarter = new NetworkedVarByte(STATE_SETTINGS);
 
-            MatchStateValue.Value = (byte)EMatchState.PREGAME;
+            MatchStateValue = EMatchState.PREGAME;
             GameManager.Singleton.GameStarted += OnGameStarted;
         }
     }
@@ -83,7 +90,7 @@ public class BasketballStateManager : NetworkedBehaviour
     {
         if (IsServer)
         {
-            if (MatchStateValue.Value == (byte)EMatchState.INPROGRESS)
+            if (MatchStateValue == EMatchState.INPROGRESS)
             {
                 IncrementTime(Time.deltaTime);
             }
@@ -94,28 +101,28 @@ public class BasketballStateManager : NetworkedBehaviour
 
     internal void IncrementTime(float deltaTime)
     {
-        if (MatchStateValue.Value != (byte)EMatchState.INPROGRESS)
+        if (MatchStateValue != EMatchState.INPROGRESS)
             return;
 
-        m_shotclockOff = (InGameTime.Value - ShotClock.Value) < 0.00f;
+        m_shotclockOff = (InGameTime - ShotClock) < 0.00f;
 
-        if (!m_shotclockOff && ShotClock.Value < 0.00f)
+        if (!m_shotclockOff && ShotClock < 0.00f)
         {
             //ShotClock violation
         }
         else
         {
-            ShotClock.Value -= deltaTime;
+            ShotClock -= deltaTime;
         }
 
-        if (InGameTime.Value < 0.00f)
+        if (InGameTime < 0.00f)
         {
             // End of quarter
             EndQuarter();
         }
         else
         {
-            InGameTime.Value -= deltaTime;
+            InGameTime -= deltaTime;
         }
     }
 
@@ -123,30 +130,30 @@ public class BasketballStateManager : NetworkedBehaviour
 
     public void SetMatchGameState(EMatchState state)
     {
-        MatchStateValue.Value = (byte)state;
+        MatchStateValue = state;
     }
 
     // Private Functions
 
     public void OnGameStarted()
     {
-        InGameTime.Value = QUARTER_LENGTH;
-        ShotClock.Value = SHOTCLOCK_LENGTH;
-        Quarter.Value = 1;
-        MatchStateValue.Value = (byte)EMatchState.INPROGRESS;
+        InGameTime = QUARTER_LENGTH;
+        ShotClock = SHOTCLOCK_LENGTH;
+        Quarter = 1;
+        MatchStateValue = EMatchState.INPROGRESS;
     }
 
     private void EndQuarter()
     {
-        Quarter.Value++;
-        if (Quarter.Value > 2)
+        Quarter++;
+        if (Quarter > 2)
         {
             EndHalf();
         }
 
-        else if (Quarter.Value > 4)
+        else if (Quarter > 4)
         {
-            if (Quarter.Value >= byte.MaxValue)
+            if (Quarter >= byte.MaxValue)
             {
                 //End Game
             }
@@ -161,7 +168,7 @@ public class BasketballStateManager : NetworkedBehaviour
         }
         else
         {
-            InGameTime.Value = (m_OvertimeCount > 0) ? Mathf.Round(OVERTIME_LENGTH) : Mathf.Round(QUARTER_LENGTH);
+            InGameTime = (m_OvertimeCount > 0) ? Mathf.Round(OVERTIME_LENGTH) : Mathf.Round(QUARTER_LENGTH);
             OnQuarterEnd();
         }
     }
@@ -175,11 +182,11 @@ public class BasketballStateManager : NetworkedBehaviour
     {
         m_UIHomeScore.text = m_gameManager.TeamHome.points.ToString();
         m_UIAwayScore.text = m_gameManager.TeamAway.points.ToString();
-        m_UIQuarter.text = (m_OvertimeCount > 0) ? "OT" + m_OvertimeCount : Quarter.Value.ToString();
-        m_UIClock.text = string.Format("{0}:{1}", Mathf.Floor(InGameTime.Value / 60), Mathf.RoundToInt(InGameTime.Value % 60));
+        m_UIQuarter.text = (m_OvertimeCount > 0) ? "OT" + m_OvertimeCount : Quarter.ToString();
+        m_UIClock.text = string.Format("{0}:{1}", Mathf.Floor(InGameTime / 60), Mathf.RoundToInt(InGameTime % 60));
         if (m_shotclockOff)
             m_UIShotClock.text = "";
         else
-            m_UIShotClock.text = (ShotClock.Value > 1.0f) ? ShotClock.Value.ToString("F0") : ShotClock.Value.ToString("F1");
+            m_UIShotClock.text = (ShotClock > 1.0f) ? ShotClock.ToString("F0") : ShotClock.ToString("F1");
     }
 }

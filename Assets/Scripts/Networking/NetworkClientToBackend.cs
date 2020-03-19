@@ -15,25 +15,33 @@ public class NetworkClientToBackend : MonoBehaviour
     void Start()
     {
         m_playerManager = PlayerManager.Singleton;
-
-        print("Trying to log in...");
-        StartCoroutine(Login(SteamUser.GetSteamID().m_SteamID));
-        m_playerManager.StartCoroutine(m_playerManager.FetchCharacterFromServer(SteamUser.GetSteamID().m_SteamID, 0, (result) => {
-            print(result);
-        }));
+        
         //m_playerManager.StartCoroutine(m_playerManager.AddCharacter(SteamUser.GetSteamID().m_SteamID, 0));
 
         if (SteamManager.Initialized)
         {
             string name = SteamFriends.GetPersonaName();
             print(name);
-
             print(SteamUser.GetSteamID());
         }
     }
 
+    public IEnumerator Load(GameSetup setup)
+    {
+        setup.clientLoading = true;
+
+        yield return Login(SteamUser.GetSteamID().m_SteamID);
+
+        yield return m_playerManager.FetchCharacterFromServer(SteamUser.GetSteamID().m_SteamID, 0, (result) => {
+            print(result);
+        });
+
+        setup.clientLoading = false;
+    }
+
     public IEnumerator Login(ulong steamid)
     {
+        print("Trying to log in...");
         using (UnityWebRequest webRequest = UnityWebRequest.Get("bscal.me:9090/login/" + steamid))
         {
             yield return webRequest.SendWebRequest();
@@ -51,9 +59,6 @@ public class NetworkClientToBackend : MonoBehaviour
                 string data = webRequest.downloadHandler.text;
                 var userData = JsonConvert.DeserializeObject<List<UserData>>(data);
                 print(userData[0].created);
-                
-
-
             }
         }
     }
