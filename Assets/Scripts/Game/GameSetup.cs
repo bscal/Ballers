@@ -19,7 +19,16 @@ public class GameSetup : MonoBehaviour
     {
 
         m_loadingScreen = GameObject.Find("Loading Screen");
+
+        if (!m_loadingScreen)
+        {
+            enabled = false;
+            return;
+        }
+
         m_loadingScreen.SetActive(true);
+
+        m_loadingScreen.GetComponent<Image>().enabled = true;
 
         m_text = m_loadingScreen.GetComponentInChildren<Text>();
 
