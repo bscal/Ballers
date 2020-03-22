@@ -8,16 +8,15 @@ public class GameSetup : MonoBehaviour
     private const string DEFAULT_LOADING_MSG = "Loading...";
     private const string NETWORK_LOADING_MSG = "Logging you in...";
 
-    public bool clientLoading = false;
+    public bool hasClientLoaded = false;
 
     private GameObject m_loadingScreen;
+    private Image m_image;
     private Text m_text;
-
-    private NetworkClientToBackend m_clientToBackend;
+    private bool m_nothingToLoad = false;
 
     private void Start()
     {
-
         m_loadingScreen = GameObject.Find("Loading Screen");
 
         if (!m_loadingScreen)
@@ -26,42 +25,27 @@ public class GameSetup : MonoBehaviour
             return;
         }
 
-        m_loadingScreen.SetActive(true);
-
-        m_loadingScreen.GetComponent<Image>().enabled = true;
+        m_image = m_loadingScreen.GetComponent<Image>();
+        m_image.enabled = true;
 
         m_text = m_loadingScreen.GetComponentInChildren<Text>();
-
-        m_clientToBackend = GameObject.Find("NetworkClient").GetComponent<NetworkClientToBackend>();
-
-        if (SteamManager.Initialized)
-        {
-            StartCoroutine(m_clientToBackend.Load(this));
-        }
     }
 
     void Update()
     {
-        if (clientLoading)
+        if (m_nothingToLoad) return;
+
+        if (!hasClientLoaded)
         {
-            m_loadingScreen.SetActive(true);
+            SetLoadingText(NETWORK_LOADING_MSG);
         }
-        else if (m_loadingScreen.activeSelf)
+        else
         {
-            m_loadingScreen.SetActive(false);
+            SetLoadingText(DEFAULT_LOADING_MSG);
         }
 
-        if (m_loadingScreen.activeSelf)
-        {
-            if (clientLoading)
-            {
-                SetLoadingText(NETWORK_LOADING_MSG);
-            }
-            else
-            {
-                SetLoadingText(DEFAULT_LOADING_MSG);
-            }
-        }
+        m_loadingScreen.SetActive(false);
+        m_nothingToLoad = true;
     }
 
     public void SetLoadingText(string text)

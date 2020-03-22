@@ -13520,7 +13520,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 284d1c9a54ccbdc4480240e77dcb42b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clientLoading: 0
+  hasClientLoaded: 0
 --- !u!1 &1146487999
 GameObject:
   m_ObjectHideFlags: 0
@@ -15945,6 +15945,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1932394272}
   - component: {fileID: 1932394271}
+  - component: {fileID: 1932394273}
+  - component: {fileID: 1932394274}
   m_Layer: 0
   m_Name: NetworkClient
   m_TagString: Untagged
@@ -15972,12 +15974,42 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1932394270}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -7.6311975, y: 4.337279, z: 16.779194}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1932394273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1932394270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cb9efc37c15f5b468c9d6cfc6173ab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  status: 0
+--- !u!114 &1932394274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1932394270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 209037615, guid: 01701b64234b4d523d8045142cbc73fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  NetworkedInstanceId: 0
+  PrefabHash: 15517995822364298696
+  PrefabHashGenerator: NetworkClient
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
 --- !u!1 &1972078931
 GameObject:
   m_ObjectHideFlags: 0
@@ -25803,7 +25835,7 @@ PrefabInstance:
     - target: {fileID: 3476559746939348646, guid: c34e9b0664a272d49bbab8fde9aff7f9,
         type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3476559746939348647, guid: c34e9b0664a272d49bbab8fde9aff7f9,
         type: 3}
@@ -25918,7 +25950,7 @@ PrefabInstance:
     - target: {fileID: 3476559746939348664, guid: c34e9b0664a272d49bbab8fde9aff7f9,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c34e9b0664a272d49bbab8fde9aff7f9, type: 3}
