@@ -136,7 +136,7 @@ public class BackendManager : MonoBehaviour
         }
     }
 
-    public IEnumerator FetchAllCharacters(ulong steamid, Action<List<CharacterData>, string> callback)
+    public static IEnumerator FetchAllCharacters(ulong steamid, Action<List<CharacterData>, string> callback)
     {
         using (UnityWebRequest webRequest = UnityWebRequest.Get(string.Format("bscal.me:9090/character/{0}/all", steamid)))
         {
@@ -152,14 +152,18 @@ public class BackendManager : MonoBehaviour
                 string data = webRequest.downloadHandler.text;
                 Debug.Log("Web Received: " + data);
 
-                JArray array = JArray.Parse(data);
-                int count = int.Parse(array[0].ToString());
+                JToken tokens = JArray.Parse(data);
+                int count = int.Parse(tokens[0].ToString());
+                JArray character = (JArray)tokens[1];
+                JArray characterStats = (JArray)tokens[2];
 
                 List<CharacterData> dataList = new List<CharacterData>(count);
-                var objs = array.Children<JObject>();
-                for (int i = 1; i < count; i++)
+                for (int i = 0; i < count; i++)
                 {
-                    dataList.Add(JsonConvert.DeserializeObject<CharacterData>(objs[i].ToString()));
+                    CharacterData cData = new CharacterData();
+                    JsonConvert.PopulateObject(character[i].ToString(), cData);
+                    JsonConvert.PopulateObject(characterStats[i].ToString(), cData);
+                    dataList.Add(cData);
                 }
 
                 callback?.Invoke(dataList, "Ok");
@@ -167,27 +171,16 @@ public class BackendManager : MonoBehaviour
         }
     }
 
-    public IEnumerator FetchEveryPlayersStats(ulong[] steamids, int[] cids, float timeout, Action<CharacterData[]> callback)
+    public static IEnumerator FetchEveryPlayers(ulong[] steamids, int[] cids, float timeout, Action<CharacterData[]> callback)
     {
         CharacterData[] cData = new CharacterData[steamids.Length];
-        int callbacksReturned = 0;
-        float timer = 0;
 
         for (int i = 0; i < steamids.Length; i++)
         {
-            StartCoroutine(FetchCharacterFromServer(steamids[i], cids[i], (result, err) => {
+            yield return FetchCharacterFromServer(steamids[i], cids[i], (result, err) => {
                 if (result == null) return;
                 cData[i] = result;
-                callbacksReturned++;
-            }));
-        }
-
-        while (callbacksReturned < steamids.Length)
-        {
-            yield return new WaitForSeconds(.2f);
-
-            timer += .2f;
-            if (timeout > 0 && timeout > timer) break;
+            });
         }
 
         callback?.Invoke(cData);

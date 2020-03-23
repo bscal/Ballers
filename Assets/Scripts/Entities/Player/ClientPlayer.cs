@@ -43,6 +43,8 @@ public class ClientPlayer : NetworkedBehaviour
 
         yield return BackendManager.FetchCharacterFromServer(SteamId, Cid, FetchCharacterCallback);
 
+        yield return BackendManager.FetchAllCharacters(SteamId, FetchAllCharacterCallback);
+
         yield return null;
 
         m_gameSetup.hasClientLoaded = true;
@@ -60,6 +62,12 @@ public class ClientPlayer : NetworkedBehaviour
     {
         CharData = cData;
         UserData.lastChar = cData.cid;
+    }
+
+    private void FetchAllCharacterCallback(List<CharacterData> cData, string err)
+    {
+        print(cData.Count);
+        print(cData[0]);
     }
 
     public void ChangeCharacter(int cid)
