@@ -10,8 +10,23 @@ public class ClientPlayer : NetworkedBehaviour
 
     public int Cid { get { return (UserData != null) ? UserData.lastChar : 0; } }
     public UserData UserData { get; private set; }
-    public CharacterData CharData { get; private set; }
+    public CharacterData CharData
+    { 
+        get {
+            characterStats.TryGetValue(Cid, out CharacterData cData);
+            return cData;
+        }
+        private set
+        {
+            characterStats.Add(Cid, value);
+        }
+    }
     public ulong SteamId { get; private set; }
+
+    // This is cached character data. Can be used server or client side.
+    // Primarily for non essential or non gameplay tasks. ie. character selection menu
+    public Dictionary<int, CharacterData> characterStats = new Dictionary<int, CharacterData>();
+    public float lastCharacterUpdate;
 
     private GameSetup m_gameSetup;
 
@@ -52,6 +67,11 @@ public class ClientPlayer : NetworkedBehaviour
         print("Finished loading client");
     }
 
+    public IEnumerator ReLoadCharacters()
+    {
+        yield return BackendManager.FetchAllCharacters(SteamId, FetchAllCharacterCallback);
+    }
+
     // Logins to server
     private void LoginCallback(UserData uData, string err)
     {
@@ -67,7 +87,11 @@ public class ClientPlayer : NetworkedBehaviour
     private void FetchAllCharacterCallback(List<CharacterData> cData, string err)
     {
         print(cData.Count);
-        print(cData[0]);
+        foreach (CharacterData c in cData)
+        {
+            characterStats[c.cid] = c;
+        }
+        lastCharacterUpdate = Time.time;
     }
 
     public void ChangeCharacter(int cid)

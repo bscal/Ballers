@@ -10,8 +10,8 @@ public class TabButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
 {
     public TabManager tabManager;
 
-    public event Action<TabButton> Select;
-    public event Action<TabButton> Deselect;
+    public event Action Select;
+    public event Action Deselect;
 
     public Image background;
     public Text text;
@@ -40,11 +40,11 @@ public class TabButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
 
     public void OnSelect()
     {
-        Select?.Invoke(this);
+        Select?.Invoke();
     }
 
     public void OnDeselect()
     {
-        Deselect?.Invoke(this);
+        Deselect?.Invoke();
     }
 }
