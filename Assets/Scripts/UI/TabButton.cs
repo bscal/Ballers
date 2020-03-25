@@ -4,17 +4,20 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(Image))]
 public class TabButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     public TabManager tabManager;
 
-    public event Action Select;
-    public event Action Deselect;
-
+    //public UnityEvent<TabButton> Select;
+    public TabCallback callbacks;
     public Image background;
     public Text text;
+    public Selector data;
+
+    public bool noText = false;
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -36,15 +39,18 @@ public class TabButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         background = GetComponent<Image>();
         text = GetComponentInChildren<Text>();
         tabManager.Subscribe(this);
+        data = GetComponent<Selector>();
     }
 
     public void OnSelect()
     {
-        Select?.Invoke();
+        //Select?.Invoke();
+        callbacks?.OnSelect(this);
     }
 
     public void OnDeselect()
     {
-        Deselect?.Invoke();
+        //Deselect?.Invoke();
+        callbacks?.OnDeselect(this);
     }
 }

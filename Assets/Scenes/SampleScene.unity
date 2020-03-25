@@ -2205,6 +2205,8 @@ MonoBehaviour:
   tabManager: {fileID: 850339167}
   background: {fileID: 0}
   text: {fileID: 0}
+  data: {fileID: 0}
+  noText: 0
 --- !u!114 &811827548
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2465,6 +2467,7 @@ MonoBehaviour:
   textIdleColor: {r: 0.1764706, g: 0.20392157, b: 0.21176471, a: 1}
   textEnterColor: {r: 0.95, g: 0.95, b: 0.95, a: 1}
   textSelectedColor: {r: 0.95, g: 0.95, b: 0.95, a: 1}
+  borderEnabled: 0
   bodies:
   - {fileID: 352184696}
   - {fileID: 1192879873}
@@ -2561,8 +2564,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a136f532d3fe1d4aa7858ded30ecb3a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  selectorPanel: {fileID: 3711895577960843769}
-  selectorTab: {fileID: 1146487999}
+  selectorPanel: {fileID: 1146487999}
+  selectorTab: {fileID: 3711895577960843769}
+  characterButton: {fileID: 1407973894}
   Loading: 0
 --- !u!1 &854079769
 GameObject:
@@ -13698,6 +13702,7 @@ GameObject:
   - component: {fileID: 1146488003}
   - component: {fileID: 1146488002}
   - component: {fileID: 1146488001}
+  - component: {fileID: 1146488005}
   m_Layer: 5
   m_Name: Selecter
   m_TagString: Untagged
@@ -13806,6 +13811,26 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1146487999}
   m_CullTransparentMesh: 0
+--- !u!114 &1146488005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1146487999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2a0637671de9374e807d6ffaad25da9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  idleColor: {r: 0.39607844, g: 0.39607844, b: 0.39607844, a: 0.39607844}
+  enterColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.4}
+  selectedColor: {r: 0.1, g: 0.1, b: 0.1, a: 0.039215688}
+  textIdleColor: {r: 0, g: 0, b: 0, a: 0}
+  textEnterColor: {r: 0, g: 0, b: 0, a: 0}
+  textSelectedColor: {r: 0, g: 0, b: 0, a: 0}
+  borderEnabled: 0
+  bodies: []
 --- !u!1 &1161903382
 GameObject:
   m_ObjectHideFlags: 0
@@ -14552,6 +14577,8 @@ MonoBehaviour:
   tabManager: {fileID: 850339167}
   background: {fileID: 0}
   text: {fileID: 0}
+  data: {fileID: 0}
+  noText: 0
 --- !u!114 &1407973895
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26002,6 +26029,11 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3476559746939348646, guid: c34e9b0664a272d49bbab8fde9aff7f9,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3476559746939348647, guid: c34e9b0664a272d49bbab8fde9aff7f9,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -26189,17 +26221,17 @@ PrefabInstance:
     - target: {fileID: 3711895579005292873, guid: 234b7b99b1368c448ae3fb3658ec8108,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 68.5
       objectReference: {fileID: 0}
     - target: {fileID: 3711895579005292873, guid: 234b7b99b1368c448ae3fb3658ec8108,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -25
       objectReference: {fileID: 0}
     - target: {fileID: 3711895579005292873, guid: 234b7b99b1368c448ae3fb3658ec8108,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 137
       objectReference: {fileID: 0}
     - target: {fileID: 3711895579005292873, guid: 234b7b99b1368c448ae3fb3658ec8108,
         type: 3}
@@ -26214,7 +26246,7 @@ PrefabInstance:
     - target: {fileID: 3711895579005292873, guid: 234b7b99b1368c448ae3fb3658ec8108,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3711895579005292873, guid: 234b7b99b1368c448ae3fb3658ec8108,
         type: 3}
@@ -26224,7 +26256,7 @@ PrefabInstance:
     - target: {fileID: 3711895579005292873, guid: 234b7b99b1368c448ae3fb3658ec8108,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3711895579005292873, guid: 234b7b99b1368c448ae3fb3658ec8108,
         type: 3}
@@ -26236,6 +26268,11 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 5310185766377827862, guid: 234b7b99b1368c448ae3fb3658ec8108,
+        type: 3}
+      propertyPath: tabManager
+      value: 
+      objectReference: {fileID: 1146488005}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 234b7b99b1368c448ae3fb3658ec8108, type: 3}
 --- !u!1 &3711895577960843769 stripped

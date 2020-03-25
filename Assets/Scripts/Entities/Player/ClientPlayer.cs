@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class ClientPlayer : NetworkedBehaviour
 {
+    public static ClientPlayer Singleton { get; private set; }
+
     public int status = 0;
 
     public int Cid { get { return (UserData != null) ? UserData.lastChar : 0; } }
@@ -33,6 +35,7 @@ public class ClientPlayer : NetworkedBehaviour
     void Awake()
     {
         DontDestroyOnLoad(gameObject);
+        Singleton = this;
     }
 
     void Start()

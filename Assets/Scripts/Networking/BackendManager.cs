@@ -44,6 +44,9 @@ public class BackendManager : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddField("steamid", steamid.ToString());
         form.AddField("cid", cid);
+        form.AddField("first_name", "player");
+        form.AddField("last_name", "name");
+        form.AddField("class", 0);
         form.AddField("position", 3);
         form.AddField("height", 6 * 12 + 5);
         form.AddField("wingspan", 6 * 12 + 7);
@@ -207,6 +210,12 @@ public class CharacterData
     public ulong steamid;
     [JsonProperty("cid")]
     public int cid;
+    [JsonProperty("first_name")]
+    public string firstname;
+    [JsonProperty("last_name")]
+    public string lastname;
+    [JsonProperty("class")]
+    public PlayerClass pClass;
     [JsonProperty("position")]
     public int position;
     [JsonProperty("height")]

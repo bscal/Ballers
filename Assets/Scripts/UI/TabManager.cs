@@ -13,6 +13,8 @@ public class TabManager : MonoBehaviour
     public Color textEnterColor;
     public Color textSelectedColor;
 
+    public bool borderEnabled;
+
     private int m_index;
     private TabButton m_currentButton;
     private List<TabButton> m_tabButtons;
@@ -34,7 +36,7 @@ public class TabManager : MonoBehaviour
         ResetTabs();
         if (m_currentButton && button == m_currentButton) return;
         button.background.color = enterColor;
-        button.text.color = textEnterColor;
+        if (!button.noText) button.text.color = textEnterColor;
     }
 
     public void OnTabExit(TabButton button)
@@ -56,7 +58,7 @@ public class TabManager : MonoBehaviour
         }
 
         button.background.color = selectedColor;
-        button.text.color = textSelectedColor;
+        if (!button.noText) button.text.color = textSelectedColor;
     }
 
     private void ResetTabs()
@@ -65,7 +67,7 @@ public class TabManager : MonoBehaviour
         {
             if (m_currentButton && button == m_currentButton) continue;
             button.background.color = idleColor;
-            button.text.color = textIdleColor;
+            if (!button.noText) button.text.color = textIdleColor;
         }
     }
 
