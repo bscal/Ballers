@@ -88,12 +88,18 @@ public class BackendManager : MonoBehaviour
         }
     }
 
+    public static IEnumerator SaveCharacter(ClientPlayer cp)
+    {
+        yield return SaveCharacter(cp.SteamId, cp.Cid, cp.CharData);
+    }
+
     public static IEnumerator SaveCharacter(ulong steamid, int cid, CharacterData cData)
     {
         WWWForm form = new WWWForm();
         form.AddField("steamid", steamid.ToString());
         form.AddField("cid", cid);
-        form.AddField("json_data", JsonConvert.SerializeObject(cData));
+        form.AddField("character", JsonConvert.SerializeObject(cData));
+        form.AddField("stats", JsonConvert.SerializeObject(cData.stats));
 
         using (UnityWebRequest www = UnityWebRequest.Post("bscal.me:9090/character/save", form))
         {
@@ -127,12 +133,11 @@ public class BackendManager : MonoBehaviour
                 Debug.Log("Web Received: " + data);
 
                 CharacterData cData = new CharacterData();
+                CharacterStats sData = new CharacterStats();
 
                 JArray array = JArray.Parse(data);
-                foreach (JObject obj in array.Children<JObject>())
-                {
-                    JsonConvert.PopulateObject(obj.ToString(), cData);
-                }
+                JsonConvert.PopulateObject(array[0].ToString(), cData);
+                JsonConvert.PopulateObject(array[1].ToString(), sData);
 
                 callback?.Invoke(cData, "Ok");
             }
@@ -164,8 +169,10 @@ public class BackendManager : MonoBehaviour
                 for (int i = 0; i < count; i++)
                 {
                     CharacterData cData = new CharacterData();
+                    CharacterStats cStats = new CharacterStats();
                     JsonConvert.PopulateObject(character[i].ToString(), cData);
-                    JsonConvert.PopulateObject(characterStats[i].ToString(), cData);
+                    JsonConvert.PopulateObject(characterStats[i].ToString(), cStats);
+                    cData.stats = cStats;
                     dataList.Add(cData);
                 }
 
@@ -224,6 +231,12 @@ public class CharacterData
     public int wingspan;
     [JsonProperty("weight")]
     public int weight;
+    [JsonIgnore]
+    public CharacterStats stats;
+}
+
+public class CharacterStats
+{
     [JsonProperty("three_shooting")]
     public int threeShooting;
 }

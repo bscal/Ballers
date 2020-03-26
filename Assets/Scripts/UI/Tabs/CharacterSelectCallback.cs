@@ -26,5 +26,13 @@ public class CharacterSelectCallback : TabCallback
         m_charUi.height.text = CharacterUI.FormatHeight(cData.height);
         m_charUi.weight.text = CharacterUI.FormatWeight(cData.weight);
         m_charUi.wingspan.text = CharacterUI.FormatHeight(cData.wingspan);
+
+        m_charUi.Three.text = cData.stats.threeShooting.ToString();
     }
+
+    //private string GetStat(CharacterData cData, string key)
+    //{
+    //    cData.stats.TryGetValue(key, out int val);
+    //    return val.ToString();
+    //}
 }

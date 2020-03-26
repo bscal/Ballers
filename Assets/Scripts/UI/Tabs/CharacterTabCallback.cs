@@ -16,7 +16,6 @@ public class CharacterTabCallback : TabCallback
 
     public override void OnDeselect(TabButton tabButton)
     {
-        throw new System.NotImplementedException();
     }
 
     public override void OnSelect(TabButton tabButton)
@@ -49,5 +48,7 @@ public class CharacterTabCallback : TabCallback
         }
 
         Loading = false;
+
+        yield return BackendManager.SaveCharacter(m_player);
     }
 }
