@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class CharacterSelectCallback : TabCallback
 {
+    public Camera profileCam;
 
     private CharacterUI m_charUi;
     private ClientPlayer m_client;
@@ -28,6 +29,9 @@ public class CharacterSelectCallback : TabCallback
         m_charUi.wingspan.text = CharacterUI.FormatHeight(cData.wingspan);
 
         m_charUi.Three.text = cData.stats.threeShooting.ToString();
+
+
+        profileCam.gameObject.SetActive(true);
     }
 
     //private string GetStat(CharacterData cData, string key)
