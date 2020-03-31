@@ -2,9 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 using MLAPI;
+using MLAPI.NetworkedVar;
 
 public class ShotManager : MonoBehaviour
 {
+
+    private static readonly NetworkedVarSettings settings = new NetworkedVarSettings() {
+        SendChannel = "GameChannel",
+        ReadPermission = NetworkedVarPermission.Everyone,
+        SendTickrate = 0,
+        WritePermission = NetworkedVarPermission.ServerOnly,
+    };
+
+    public NetworkedShotData ShotData { get; private set; }
 
     // =================================== Private Varibles ===================================
 
@@ -14,11 +24,15 @@ public class ShotManager : MonoBehaviour
     private float m_targetBonusHeight;
     private float m_startOffset;
     private float m_endOffset;
+    private ShotType m_type;
+    private float m_releaseDist;
 
     // =================================== MonoBehaviour Functions ===================================
 
     void Start()
     {
+        ShotData = new NetworkedShotData(settings, new ShotData());
+
         if (NetworkingManager.Singleton.IsServer)
         {
 
@@ -27,9 +41,11 @@ public class ShotManager : MonoBehaviour
 
     // =================================== Public Functions ===================================
 
-    public void OnShoot(ulong player, float speed, float targetHeight, float bonusHeight, float startOffset, float endOffset)
+    public void OnShoot(ulong player, ShotType type, float speed, float targetHeight, float bonusHeight, float startOffset, float endOffset)
     {
         if (!NetworkingManager.Singleton.IsServer) return;
+
+        Player p = GameManager.GetPlayer(player);
 
         m_isShot = true;
         m_speed = speed;
@@ -37,7 +53,18 @@ public class ShotManager : MonoBehaviour
         m_targetBonusHeight = bonusHeight;
         m_startOffset = startOffset;
         m_endOffset = endOffset;
-        StartCoroutine(ShotQuality(player));
+        m_type = type;
+
+        float dist = Vector3.Distance(p.transform.position, p.LookTarget);
+        float angle = Quaternion.Angle(transform.rotation, p.LookRotation);
+
+        ShotData.Value.shooter = player;
+        ShotData.Value.position = p.transform.position;
+        ShotData.Value.distance = dist;
+        ShotData.Value.direction = GetShotDirection(angle);
+        ShotData.Value.type = m_type;
+
+        StartCoroutine(ShotQuality(p, player));
     }
 
     public void OnRelease(ulong player)
@@ -47,23 +74,14 @@ public class ShotManager : MonoBehaviour
 
     // =================================== Private Functions ===================================
 
-    private void HandleShot(ulong player, float releaseDist)
+    private void HandleShot(ulong player)
     {
-        Player p = GameManager.GetPlayer(player);
-
-        float d = Vector3.Distance(p.transform.position, p.LookTarget);
-
-        print("shot: " + releaseDist);
-        print("dist: " + d);
-
-        // TODO handle shots chances
-        // TODO if made handle inbound
-        // TODO if miss handle rebound physics
+        print("shot: " + m_releaseDist);
     }
 
     /// <summary>Server handling of shot quality<br></br>
     /// Used delta time and speed increment to determine where player's target should be</summary>
-    private IEnumerator ShotQuality(ulong player)
+    private IEnumerator ShotQuality(Player p, ulong player)
     {
         yield return null;
         float timer = 0.0f;
@@ -74,7 +92,32 @@ public class ShotManager : MonoBehaviour
             yield return null;
         }
 
-        HandleShot(player, Mathf.Abs(m_targetHeight - timer + m_endOffset - m_startOffset));
+        m_releaseDist = Mathf.Abs(m_targetHeight - timer + m_endOffset - m_startOffset);
+
+        p.InvokeClientRpcOnClient(p.ClientReleaseBall, player, m_releaseDist);
+        HandleShot(player);
+    }
+
+    private ShotDirection GetShotDirection(float angle)
+    {
+        if (angle > 45)
+        {
+            if (angle > 125)
+            {
+                print("fade");
+                return ShotDirection.BACK;
+            }
+            else
+            {
+                print("side");
+                return ShotDirection.SIDE;
+            }
+        }
+        else
+        {
+            print("front");
+            return ShotDirection.FRONT;
+        }
     }
 
 }

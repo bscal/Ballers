@@ -89,7 +89,6 @@ public class ClientPlayer : NetworkedBehaviour
 
     private void FetchAllCharacterCallback(List<CharacterData> cData, string err)
     {
-        print(cData.Count);
         foreach (CharacterData c in cData)
         {
             characterStats[c.cid] = c;

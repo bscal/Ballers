@@ -98,6 +98,8 @@ public class Player : NetworkedBehaviour
     private GameObject m_center;
     private ShotMeter m_shotmeter;
     private Animator m_animator;
+    private ShotController m_shotController;
+    private ShotManager m_shotManager;
 
     public override void NetworkStart()
     {
@@ -113,6 +115,7 @@ public class Player : NetworkedBehaviour
                 //NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, this, OnGameStarted);
                 GameManager.Singleton.GameStarted += OnGameStarted;
                 m_shotmeter = GetComponent<ShotMeter>();
+                m_shotController = GetComponent<ShotController>();
             }
         }
 
@@ -129,6 +132,7 @@ public class Player : NetworkedBehaviour
         }
 
         id = username.GetHashCode();
+        m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
     }
 
     void Update()
@@ -169,10 +173,9 @@ public class Player : NetworkedBehaviour
         float endOffset = 0f;
         float bonusHeight = UnityEngine.Random.Range(0, 4);
 
-        InvokeClientRpcOnClient(ClientShootBall, id, speed, bonusHeight, startOffset, endOffset);
-        GameManager.Singleton.GetShotManager().OnShoot(id, speed, targetHeight, bonusHeight, startOffset, endOffset);
+        GameManager.Singleton.GetShotManager().OnShoot(id, m_shotController.HandleShotAnimation(), speed, targetHeight, bonusHeight, startOffset, endOffset);
         GameManager.GetBallHandling().OnShoot(id, speed, targetHeight, startOffset, endOffset);
-        //GameManager.GetBallHandling().ShootBall(id, speed, height, startOffset, endOffset);
+        InvokeClientRpcOnClient(ClientShootBall, id, speed, bonusHeight, startOffset, endOffset);
     }
 
     [ClientRPC]
@@ -180,7 +183,14 @@ public class Player : NetworkedBehaviour
     {
         isShooting = true;
         m_shotmeter.OnShoot(this, speed, bonusHeight ,start, end);
-        Shoot?.Invoke(this);
+        m_shotController.HandleShotAnimation();
+        print(m_shotManager.ShotData.Value.type);
+    }
+
+    [ClientRPC]
+    public void ClientReleaseBall(float distance)
+    {
+        print(distance);
     }
 
     public float Dist(Vector3 other)
