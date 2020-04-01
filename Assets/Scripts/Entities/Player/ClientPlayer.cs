@@ -36,14 +36,19 @@ public class ClientPlayer : NetworkedBehaviour
     {
         DontDestroyOnLoad(gameObject);
         Singleton = this;
+        if (SteamManager.Initialized)
+        {
+            SteamId = SteamUser.GetSteamID().m_SteamID;
+            print(1);
+        }
     }
 
     void Start()
     {
-        if (SteamManager.Initialized)
-            SteamId = SteamUser.GetSteamID().m_SteamID;
+
 
         m_gameSetup = GameObject.Find("GameManager").GetComponent<GameSetup>();
+
         StartCoroutine(Load());
     }
 

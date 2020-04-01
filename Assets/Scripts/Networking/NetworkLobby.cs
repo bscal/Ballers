@@ -22,6 +22,7 @@ public class NetworkLobby : MonoBehaviour
 
     void Start()
     {
+        GetComponent<SteamP2PTransport.SteamP2PTransport>().ConnectToSteamID = ClientPlayer.Singleton.SteamId;
         NetworkingManager.Singleton.ConnectionApprovalCallback += ApprovalCheck;
         NetworkingManager.Singleton.OnClientConnectedCallback += OnConnected;
         NetworkingManager.Singleton.OnClientDisconnectCallback += OnDisconnected;
@@ -39,6 +40,8 @@ public class NetworkLobby : MonoBehaviour
             NetworkingManager.Singleton.StartClient();
             Debug.Log(string.Format("Starting in client mode. Address {0}:{1}", host, port));
         }
+
+        print(GetComponent<SteamP2PTransport.SteamP2PTransport>().PingInterval);
     }
 
     void ApprovalCheck(byte[] connectionData, ulong clientId, MLAPI.NetworkingManager.ConnectionApprovedDelegate callback)

@@ -53,8 +53,9 @@ public class Player : NetworkedBehaviour
     public bool isShooting = false;
     public bool isHelping = false;
     public bool isMovementFrozen = false;
-
     public bool IsBallInLeftHand = false;
+
+    public ClientPlayer ClientPlayer { get; private set; }
     public bool HasBall
     { get
         {
@@ -108,8 +109,6 @@ public class Player : NetworkedBehaviour
 
         if (!isDummy)
         {
-            GameManager.AddPlayer(NetworkedObject);
-
             if (IsClient)
             {
                 //NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, this, OnGameStarted);
@@ -215,7 +214,8 @@ public class Player : NetworkedBehaviour
 
     private void OnGameStarted()
     {
-        print("called");
+        print(1);
+        GameManager.Singleton.InitLocalPlayer(OwnerClientId);
     }
 
     private Player GetPlayerByPosition(Team team, int position)

@@ -25,6 +25,8 @@ public class GameManager : NetworkedBehaviour
     private static List<Player> m_players = new List<Player>();
     private static Dictionary<ulong, Player> m_playersByID = new Dictionary<ulong, Player>();
     private static Dictionary<ulong, uint> m_playersByTeam = new Dictionary<ulong, uint>();
+    private static Dictionary<ulong, ulong> m_playersBySteam = new Dictionary<ulong, ulong>();
+
 
     public static Player BallHandler { get { return GetPlayer(m_ballhandling.PlayerWithBall); } }
     public static Basket CurrentBasket { get { return Singleton.baskets[m_ballhandling.PossessionOrHome]; } }
@@ -135,27 +137,26 @@ public class GameManager : NetworkedBehaviour
     }
 
     [ServerRPC]
-    private void RegisterPlayerServer(ulong pid)
+    public static void RegisterPlayerServer(ulong pid, ulong steamid)
     {
+        print(3);
         NetworkedObject netObj = SpawnManager.GetPlayerObject(pid);
-
-        if (netObj.IsOwnedByServer) return;
-
-        AddPlayer(netObj);
+        AddPlayer(netObj, steamid);
     }
 
     [ClientRPC]
-    private void RegisterPlayerClient(ulong pid)
+    public void RegisterPlayerClient(ulong pid, ulong steamid)
     {
+        print(4);
         NetworkedObject netObj = SpawnManager.GetPlayerObject(pid);
 
         if (netObj.IsOwnedByServer) return;
 
-        AddPlayer(netObj);
+        AddPlayer(netObj, steamid);
     }
 
     [ServerRPC]
-    private void UnRegisterPlayerServer(ulong pid)
+    public void UnRegisterPlayerServer(ulong pid)
     {
         NetworkedObject netObj = SpawnManager.GetPlayerObject(pid);
 
@@ -165,7 +166,7 @@ public class GameManager : NetworkedBehaviour
     }
 
     [ClientRPC]
-    private void UnRegisterPlayerClient(ulong pid)
+    public void UnRegisterPlayerClient(ulong pid)
     {
         NetworkedObject netObj = SpawnManager.GetPlayerObject(pid);
 
@@ -176,7 +177,7 @@ public class GameManager : NetworkedBehaviour
 
     // Registers existing players to newly connected client
     [ClientRPC]
-    private void RegisterOtherPlayer(ulong[] pids)
+    public void RegisterOtherPlayer(ulong[] pids, uint[] teamids, ulong[] steamids)
     {
         for (int i = 0; i < pids.Length; i++)
         {
@@ -184,7 +185,7 @@ public class GameManager : NetworkedBehaviour
 
             if (netObj.IsOwnedByServer || netObj.IsLocalPlayer) return;
 
-            AddPlayer(netObj);
+            AddPlayer(netObj, teamids[i], steamids[i]);
         }
     }
 
@@ -243,9 +244,14 @@ public class GameManager : NetworkedBehaviour
             TeamAway.points += points;
     }
 
-    public static void AddPlayer(NetworkedObject netObj)
+    public static void AddPlayer(NetworkedObject netObj, ulong steamid)
     {
-        print("Adding player " + netObj.OwnerClientId + " " + netObj.NetworkId);
+        AddPlayer(netObj, 0, steamid);
+    }
+
+    public static void AddPlayer(NetworkedObject netObj, uint teamid, ulong steamid)
+    {
+        print("Adding player " + netObj.OwnerClientId + " " + netObj.NetworkId + " " + steamid);
         Player p = netObj.gameObject.GetComponent<Player>();
 
         if (m_players.Contains(p))
@@ -256,7 +262,8 @@ public class GameManager : NetworkedBehaviour
 
         m_players.Add(p);
         m_playersByID.Add(netObj.OwnerClientId, p);
-        m_playersByTeam.Add(netObj.OwnerClientId, 0);
+        m_playersByTeam.Add(netObj.OwnerClientId, teamid);
+        m_playersBySteam.Add(netObj.OwnerClientId, steamid);
     }
 
     public static void RemovePlayer(NetworkedObject netObj)
@@ -273,6 +280,7 @@ public class GameManager : NetworkedBehaviour
         m_players.Remove(p);
         m_playersByID.Remove(netObj.OwnerClientId);
         m_playersByTeam.Remove(netObj.OwnerClientId);
+        m_playersBySteam.Remove(netObj.OwnerClientId);
     }
 
     public bool GetIsServer()
@@ -317,12 +325,13 @@ public class GameManager : NetworkedBehaviour
 
     }
 
-    private void InitLocalPlayer(ulong pid)
+    public void InitLocalPlayer(ulong pid)
     {
+        print(2);
         // Registers player to server
-        InvokeServerRpc(RegisterPlayerServer, pid);
+        InvokeServerRpc(RegisterPlayerServer, pid, ClientPlayer.Singleton.SteamId);
         // Registers players to all connected clients.
-        InvokeClientRpcOnEveryoneExcept(RegisterPlayerClient, pid, pid);
+        InvokeClientRpcOnEveryoneExcept(RegisterPlayerClient, pid, pid, ClientPlayer.Singleton.SteamId);
     }
 
     private void StartPregame()
