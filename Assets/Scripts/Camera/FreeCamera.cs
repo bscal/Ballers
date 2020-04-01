@@ -34,8 +34,6 @@ public class FreeCamera : MonoBehaviour
 
         if (m_camera.enabled)
         {
-            m_movement.isEnabled = false;
-
             m_horizontal = Input.GetAxis("Horizontal") * (turnspeed * Time.deltaTime);
             transform.Rotate(0f, m_horizontal, 0f);
             m_vertical = Input.GetAxis("Vertical") * (speed * Time.deltaTime);
@@ -46,7 +44,7 @@ public class FreeCamera : MonoBehaviour
             else if (Input.GetKey(KeyCode.LeftShift))
                 transform.Translate(0.0f, -upSpeed * Time.deltaTime, 0.0f);
         }
-        else 
-            m_movement.isEnabled = true;
+        else if (!m_movement)
+            m_movement.isEnabled = false;
     }
 }

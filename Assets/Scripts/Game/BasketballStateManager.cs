@@ -42,7 +42,7 @@ public class BasketballStateManager : NetworkedBehaviour
     public EMatchState MatchStateValue { get { return (EMatchState)Enum.ToObject(typeof(EMatchState), m_state.Value); } set { m_state.Value = (byte)value; } }
     
     private NetworkedVarByte m_quarter;
-    public byte Quarter { get { return m_quarter.Value; } set { m_quarter.Value = value; } }
+    public int Quarter { get { return m_quarter.Value; } set { m_quarter.Value = (byte)value; } }
 
     // Private
 
@@ -74,13 +74,12 @@ public class BasketballStateManager : NetworkedBehaviour
 
     public override void NetworkStart()
     {
+        m_inGameTime = new NetworkedVarFloat(STATE_SETTINGS);
+        m_shotClock = new NetworkedVarFloat(STATE_SETTINGS);
+        m_state = new NetworkedVarByte(STATE_SETTINGS);
+        m_quarter = new NetworkedVarByte(STATE_SETTINGS);
         if (IsServer)
         {
-            m_inGameTime = new NetworkedVarFloat(STATE_SETTINGS);
-            m_shotClock = new NetworkedVarFloat(STATE_SETTINGS);
-            m_state = new NetworkedVarByte(STATE_SETTINGS);
-            m_quarter = new NetworkedVarByte(STATE_SETTINGS);
-
             MatchStateValue = EMatchState.PREGAME;
             GameManager.Singleton.GameStarted += OnGameStarted;
         }
