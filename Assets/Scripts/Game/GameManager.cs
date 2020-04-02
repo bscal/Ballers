@@ -137,11 +137,15 @@ public class GameManager : NetworkedBehaviour
     }
 
     [ServerRPC]
-    public static void RegisterPlayerServer(ulong pid, ulong steamid)
+    public void RegisterPlayerServer(ulong pid, ulong steamid)
     {
-        print(3);
+        // Checks if already registered on server
+        if (m_playersByID.TryGetValue(pid, out Player p)) 
+            return; // Already registered
+
         NetworkedObject netObj = SpawnManager.GetPlayerObject(pid);
         AddPlayer(netObj, steamid);
+        InvokeClientRpcOnEveryoneExcept(RegisterPlayerClient, pid, pid, steamid);
     }
 
     [ClientRPC]
@@ -327,11 +331,9 @@ public class GameManager : NetworkedBehaviour
 
     public void InitLocalPlayer(ulong pid)
     {
-        print(2);
+        AddPlayer(SpawnManager.GetLocalPlayerObject(), ClientPlayer.Singleton.SteamId);
         // Registers player to server
         InvokeServerRpc(RegisterPlayerServer, pid, ClientPlayer.Singleton.SteamId);
-        // Registers players to all connected clients.
-        InvokeClientRpcOnEveryoneExcept(RegisterPlayerClient, pid, pid, ClientPlayer.Singleton.SteamId);
     }
 
     private void StartPregame()

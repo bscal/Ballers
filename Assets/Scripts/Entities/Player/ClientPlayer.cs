@@ -31,24 +31,21 @@ public class ClientPlayer : NetworkedBehaviour
     public float lastCharacterUpdate;
 
     private GameSetup m_gameSetup;
+    private SteamP2PTransport.SteamP2PTransport m_transport;
 
     void Awake()
     {
         DontDestroyOnLoad(gameObject);
         Singleton = this;
         if (SteamManager.Initialized)
-        {
             SteamId = SteamUser.GetSteamID().m_SteamID;
-            print(1);
-        }
     }
 
     void Start()
     {
-
-
         m_gameSetup = GameObject.Find("GameManager").GetComponent<GameSetup>();
-
+        m_transport = GameObject.Find("NetworkManager").GetComponent<SteamP2PTransport.SteamP2PTransport>();
+        print(m_transport.GetCurrentRtt(OwnerClientId));
         StartCoroutine(Load());
     }
 

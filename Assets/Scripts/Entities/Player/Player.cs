@@ -102,21 +102,25 @@ public class Player : NetworkedBehaviour
     private ShotController m_shotController;
     private ShotManager m_shotManager;
 
-    public override void NetworkStart()
+    private void Start()
     {
-        if (!IsOwner)
-            return;
-
         if (!isDummy)
         {
             if (IsClient)
             {
+                GameManager.Singleton.InitLocalPlayer(OwnerClientId);
                 //NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, this, OnGameStarted);
                 GameManager.Singleton.GameStarted += OnGameStarted;
                 m_shotmeter = GetComponent<ShotMeter>();
                 m_shotController = GetComponent<ShotController>();
             }
         }
+    }
+
+    public override void NetworkStart()
+    {
+        if (!IsOwner)
+            return;
 
         if (IsServer && !IsHost)
         {
@@ -214,8 +218,6 @@ public class Player : NetworkedBehaviour
 
     private void OnGameStarted()
     {
-        print(1);
-        GameManager.Singleton.InitLocalPlayer(OwnerClientId);
     }
 
     private Player GetPlayerByPosition(Team team, int position)

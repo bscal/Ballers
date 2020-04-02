@@ -15,6 +15,8 @@ public class NetworkLobby : MonoBehaviour
     public string host = "";
     public int port = 7777;
 
+    private SteamP2PTransport.SteamP2PTransport m_p2PTransport;
+
     private void Awake()
     {
         m_networkEvents = GameObject.Find("NetworkManager").GetComponent<NetworkEvents>();
@@ -22,7 +24,9 @@ public class NetworkLobby : MonoBehaviour
 
     void Start()
     {
-        GetComponent<SteamP2PTransport.SteamP2PTransport>().ConnectToSteamID = ClientPlayer.Singleton.SteamId;
+        m_p2PTransport = GetComponent<SteamP2PTransport.SteamP2PTransport>();
+        m_p2PTransport.ConnectToSteamID = ClientPlayer.Singleton.SteamId;
+
         NetworkingManager.Singleton.ConnectionApprovalCallback += ApprovalCheck;
         NetworkingManager.Singleton.OnClientConnectedCallback += OnConnected;
         NetworkingManager.Singleton.OnClientDisconnectCallback += OnDisconnected;
@@ -30,7 +34,7 @@ public class NetworkLobby : MonoBehaviour
         if (hostServer)
         {
             NetworkingManager.Singleton.OnServerStarted += OnServerReady;
-            NetworkingManager.Singleton.StartHost();
+            SocketTasks task = NetworkingManager.Singleton.StartHost();
             Debug.Log(string.Format("Starting in server mode. Address {0}:{1}", host, port));
         }
         else
@@ -40,8 +44,6 @@ public class NetworkLobby : MonoBehaviour
             NetworkingManager.Singleton.StartClient();
             Debug.Log(string.Format("Starting in client mode. Address {0}:{1}", host, port));
         }
-
-        print(GetComponent<SteamP2PTransport.SteamP2PTransport>().PingInterval);
     }
 
     void ApprovalCheck(byte[] connectionData, ulong clientId, MLAPI.NetworkingManager.ConnectionApprovedDelegate callback)

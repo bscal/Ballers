@@ -7,7 +7,7 @@ public class ThreePointCollision : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.gameObject.tag == PLAYER_TAG)
+        if (other.gameObject.CompareTag(PLAYER_TAG))
         {
             GameManager.GetPlayer().isInsideThree = true;
         }
@@ -15,7 +15,7 @@ public class ThreePointCollision : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.tag == PLAYER_TAG)
+        if (other.gameObject.CompareTag(PLAYER_TAG))
         {
             GameManager.GetPlayer().isInsideThree = false;
         }

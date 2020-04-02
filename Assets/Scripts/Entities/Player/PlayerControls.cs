@@ -12,17 +12,17 @@ public class PlayerControls : NetworkedBehaviour
 
     private Player m_player;
     private Animator m_animator;
+    private GameObject m_menu;
 
     private bool m_shootCooldown = false;
     private bool m_jumpCooldown = false;
-
-    private Coroutine m_ShotInput;
 
    void Start()
    {
         m_player = GetComponent<Player>();
         m_animator = GetComponentInChildren<Animator>();
-        m_ShotInput = StartCoroutine(ShotInput());
+        m_menu = GameObject.Find("Menu Panel");
+        StartCoroutine(ShotInput());
    }
 
     void Update()
@@ -49,7 +49,9 @@ public class PlayerControls : NetworkedBehaviour
             Player dummy = GameObject.Find("DummyPasser").GetComponent<Player>();
             GameManager.GetBallHandling().TryPassBall(m_player, dummy, PassType.CHESS);
         }
-        
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+            m_menu.SetActive(!m_menu.activeSelf);
 
         m_animator.SetBool("isDribbling", m_player.isDribbling);
         m_animator.SetBool("isSprinting", m_player.isSprinting);
