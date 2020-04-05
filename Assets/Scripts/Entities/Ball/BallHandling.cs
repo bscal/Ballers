@@ -173,7 +173,7 @@ public class BallHandling : NetworkedBehaviour
 
             m_body.isKinematic = true;
 
-            if (m_currentPlayer.IsBallInLeftHand)
+            if (m_currentPlayer.isBallInLeftHand)
                 m_ball.transform.position = m_currentPlayer.GetLeftHand().transform.position;
             else
                 m_ball.transform.position = m_currentPlayer.GetRightHand().transform.position;
@@ -449,7 +449,7 @@ public class BallHandling : NetworkedBehaviour
         if (m_currentPlayer)
         {
             m_currentPlayer.isDribbling = true;
-            m_currentPlayer.IsBallInLeftHand = !m_currentPlayer.isRightHanded;
+            m_currentPlayer.isBallInLeftHand = !m_currentPlayer.isRightHanded;
             if (Possession != m_currentPlayer.teamID) Possession = m_currentPlayer.teamID;
         }
     }

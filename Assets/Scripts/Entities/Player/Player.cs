@@ -9,8 +9,9 @@ using MLAPI.Prototyping;
 using System;
 using MLAPI.Serialization;
 using System.IO;
+using MLAPI.Serialization.Pooled;
 
-public class Player : NetworkedBehaviour
+public class Player : NetworkedBehaviour, IBitWritable
 {
 
     // Local Player Events
@@ -53,7 +54,7 @@ public class Player : NetworkedBehaviour
     public bool isShooting = false;
     public bool isHelping = false;
     public bool isMovementFrozen = false;
-    public bool IsBallInLeftHand = false;
+    public bool isBallInLeftHand = false;
 
     public ClientPlayer ClientPlayer { get; private set; }
     public bool HasBall
@@ -72,23 +73,14 @@ public class Player : NetworkedBehaviour
     {
         get
         {
-            if (OnOffense())
-            {
-                return m_target;
-            }
-            else
-            {
-                return Vector3.zero;
-            }
+            return m_target;
         }
     }
     public Quaternion LookRotation { get { return Quaternion.LookRotation(m_target); } }
     public float DistanceFromTarget { get { return Vector3.Distance(transform.position, m_target); } }
-
     public Player Assignment { get
         {
             if (isHelping) return GameManager.BallHandler;
-
             else return GetNearestEnemy();
         } }
 
@@ -144,14 +136,14 @@ public class Player : NetworkedBehaviour
             return;
 
         m_animator.SetBool("hasBall", HasBall);
-        m_animator.SetBool("hasBallInLeft", IsBallInLeftHand);
+        m_animator.SetBool("hasBallInLeft", isBallInLeftHand);
 
-        Debugger.Instance.Print(string.Format("D:{0}, W:{1}, S:{2}", isDribbling, isMoving, isSprinting), 0);
+        Debugger.Instance.Print(string.Format("{0} : {1}", transform.position.ToString(), Vector3.Distance(transform.position, LookTarget)), 0);
         Debugger.Instance.Print(string.Format("2pt:{0}", isInsideThree), 3);
 
         GameObject.Find("Cube").transform.position = transform.position + transform.forward * 3 + transform.up * 3;
 
-        m_target = GameManager.Singleton.baskets[GameManager.Possession].gameObject.transform.position - transform.position;
+        m_target = GameManager.Singleton.baskets[GameManager.Possession].gameObject.transform.position;
     }
 
     public void ShootBall()
@@ -165,7 +157,6 @@ public class Player : NetworkedBehaviour
         isShooting = false;
         Release?.Invoke(this);
         GameManager.GetBallHandling().InvokeServerRpc(GameManager.GetBallHandling().OnRelease, OwnerClientId);
-        print("released");
     }
 
     [ServerRPC]
@@ -176,24 +167,41 @@ public class Player : NetworkedBehaviour
         float endOffset = 0f;
         float bonusHeight = UnityEngine.Random.Range(0, 4);
 
-        GameManager.Singleton.GetShotManager().OnShoot(id, m_shotController.HandleShotAnimation(), speed, targetHeight, bonusHeight, startOffset, endOffset);
+        GameManager.Singleton.GetShotManager().OnShoot(id, this, speed, targetHeight, bonusHeight, startOffset, endOffset);
         GameManager.GetBallHandling().OnShoot(id, speed, targetHeight, startOffset, endOffset);
-        InvokeClientRpcOnClient(ClientShootBall, id, speed, bonusHeight, startOffset, endOffset);
     }
 
     [ClientRPC]
-    public void ClientShootBall(float speed, float bonusHeight, float start, float end)
+    public void ClientShootBall(ShotType type, bool leftHanded, float speed, float bonusHeight, float start, float end)
     {
         isShooting = true;
         m_shotmeter.OnShoot(this, speed, bonusHeight ,start, end);
-        m_shotController.HandleShotAnimation();
-        print(m_shotManager.ShotData.Value.type);
+        PlayAnimationForType(type, leftHanded);
     }
 
     [ClientRPC]
     public void ClientReleaseBall(float distance)
     {
-        print(distance);
+    }
+
+    /// <summary>
+    /// Plays an animation given the type and hand.
+    /// </summary>
+    public void PlayAnimationForType(ShotType type, bool leftHanded)
+    {
+        switch (type)
+        {
+            case ShotType.SHOT:
+                m_animator.Play("Shoot");
+                break;
+            case ShotType.LAYUP:
+                if (leftHanded) m_animator.Play("LayupL");
+                else m_animator.Play("Layup");
+                break;
+            default:
+                break;
+        }
+
     }
 
     public float Dist(Vector3 other)
@@ -250,6 +258,44 @@ public class Player : NetworkedBehaviour
 
     public void ChangeHand()
     {
-        IsBallInLeftHand = !IsBallInLeftHand;
+        isBallInLeftHand = !isBallInLeftHand;
+    }
+
+    public void Read(Stream stream)
+    {
+        using (PooledBitReader reader = PooledBitReader.Get(stream))
+        {
+            isRightHanded =         reader.ReadBool();
+            isDribbling =           reader.ReadBool();
+            isMoving =              reader.ReadBool();
+            isSprinting =           reader.ReadBool();
+            isInsideThree =         reader.ReadBool();
+            isScreening =           reader.ReadBool();
+            isHardScreening =       reader.ReadBool();
+            isShooting =            reader.ReadBool();
+            isHelping =             reader.ReadBool();
+            isMovementFrozen =      reader.ReadBool();
+            isBallInLeftHand =      reader.ReadBool();
+            m_target =              reader.ReadVector3Packed();
+        }
+    }
+
+    public void Write(Stream stream)
+    {
+        using (PooledBitWriter writer = PooledBitWriter.Get(stream))
+        {
+            writer.WriteBool(isRightHanded);
+            writer.WriteBool(isDribbling);
+            writer.WriteBool(isMoving);
+            writer.WriteBool(isSprinting);
+            writer.WriteBool(isInsideThree);
+            writer.WriteBool(isScreening);
+            writer.WriteBool(isHardScreening);
+            writer.WriteBool(isShooting);
+            writer.WriteBool(isHelping);
+            writer.WriteBool(isMovementFrozen);
+            writer.WriteBool(isBallInLeftHand);
+            writer.WriteVector3Packed(m_target);
+        }
     }
 }

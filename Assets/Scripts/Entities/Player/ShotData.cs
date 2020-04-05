@@ -19,6 +19,7 @@ public class ShotData
     public Vector3 position;
     public float distance;
     public float contest;
+    public bool leftHanded;
 }
 
 /// <summary>

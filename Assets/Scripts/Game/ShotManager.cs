@@ -24,15 +24,19 @@ public class ShotManager : MonoBehaviour
     private float m_targetBonusHeight;
     private float m_startOffset;
     private float m_endOffset;
+    private bool m_leftHanded;
     private ShotType m_type;
+    private ShotDirection m_direction;
     private float m_releaseDist;
+
+    private ShotController m_shotController;
 
     // =================================== MonoBehaviour Functions ===================================
 
     void Start()
     {
         ShotData = new NetworkedShotData(settings, new ShotData());
-
+        m_shotController = GetComponent<ShotController>();
         if (NetworkingManager.Singleton.IsServer)
         {
 
@@ -41,11 +45,12 @@ public class ShotManager : MonoBehaviour
 
     // =================================== Public Functions ===================================
 
-    public void OnShoot(ulong player, ShotType type, float speed, float targetHeight, float bonusHeight, float startOffset, float endOffset)
+    public void OnShoot(ulong pid, Player p, float speed, float targetHeight, float bonusHeight, float startOffset, float endOffset)
     {
         if (!NetworkingManager.Singleton.IsServer) return;
 
-        Player p = GameManager.GetPlayer(player);
+        float dist = Vector3.Distance(p.transform.position, p.LookTarget);
+        float angle = Quaternion.Angle(transform.rotation, p.LookRotation);
 
         m_isShot = true;
         m_speed = speed;
@@ -53,18 +58,23 @@ public class ShotManager : MonoBehaviour
         m_targetBonusHeight = bonusHeight;
         m_startOffset = startOffset;
         m_endOffset = endOffset;
-        m_type = type;
+        m_leftHanded = p.isBallInLeftHand;
+        m_direction = GetShotDirection(angle);
+        m_type = m_shotController.GetTypeOfShot(p, dist, m_direction);
 
-        float dist = Vector3.Distance(p.transform.position, p.LookTarget);
-        float angle = Quaternion.Angle(transform.rotation, p.LookRotation);
+        Debug.LogFormat("{0} : {1}", p.transform.position, p.LookTarget);
+        Debug.LogFormat("{0} : {1} : {2}", m_type, dist, m_direction);
 
-        ShotData.Value.shooter = player;
+        ShotData.Value.shooter = pid;
         ShotData.Value.position = p.transform.position;
         ShotData.Value.distance = dist;
-        ShotData.Value.direction = GetShotDirection(angle);
+        ShotData.Value.direction = m_direction;
         ShotData.Value.type = m_type;
+        ShotData.Value.leftHanded = m_leftHanded;
 
-        StartCoroutine(ShotQuality(p, player));
+        p.InvokeClientRpcOnClient(p.ClientShootBall, pid, m_type, m_leftHanded, speed, bonusHeight, startOffset, endOffset);
+
+        StartCoroutine(ShotQuality(p, pid));
     }
 
     public void OnRelease(ulong player)
@@ -104,18 +114,15 @@ public class ShotManager : MonoBehaviour
         {
             if (angle > 125)
             {
-                print("fade");
                 return ShotDirection.BACK;
             }
             else
             {
-                print("side");
                 return ShotDirection.SIDE;
             }
         }
         else
         {
-            print("front");
             return ShotDirection.FRONT;
         }
     }

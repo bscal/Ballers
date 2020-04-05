@@ -168,7 +168,7 @@ public class PlayerControls : NetworkedBehaviour
     void StartShot()
     {
         m_player.ShootBall();
-        m_animator.SetTrigger("Shoot");
+        //m_animator.SetTrigger("Shoot");
         StartCoroutine(WaitShoot(0.20f));
     }
 
