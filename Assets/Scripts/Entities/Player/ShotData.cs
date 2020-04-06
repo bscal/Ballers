@@ -20,6 +20,7 @@ public class ShotData
     public float distance;
     public float contest;
     public bool leftHanded;
+    public BankType bankshot;
 }
 
 /// <summary>

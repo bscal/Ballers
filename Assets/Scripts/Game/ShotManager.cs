@@ -7,6 +7,10 @@ using MLAPI.NetworkedVar;
 public class ShotManager : MonoBehaviour
 {
 
+    public static ShotManager Singleton { get; private set; }
+
+    private ShotManager() { }
+
     private static readonly NetworkedVarSettings settings = new NetworkedVarSettings() {
         SendChannel = "GameChannel",
         ReadPermission = NetworkedVarPermission.Everyone,
@@ -25,6 +29,7 @@ public class ShotManager : MonoBehaviour
     private float m_startOffset;
     private float m_endOffset;
     private bool m_leftHanded;
+    private BankType m_bankShot;
     private ShotType m_type;
     private ShotDirection m_direction;
     private float m_releaseDist;
@@ -35,6 +40,7 @@ public class ShotManager : MonoBehaviour
 
     void Start()
     {
+        Singleton = this;
         ShotData = new NetworkedShotData(settings, new ShotData());
         m_shotController = GetComponent<ShotController>();
         if (NetworkingManager.Singleton.IsServer)
@@ -61,6 +67,7 @@ public class ShotManager : MonoBehaviour
         m_leftHanded = p.isBallInLeftHand;
         m_direction = GetShotDirection(angle);
         m_type = m_shotController.GetTypeOfShot(p, dist, m_direction);
+        m_bankShot = IsBankShot(p);
 
         Debug.LogFormat("{0} : {1}", p.transform.position, p.LookTarget);
         Debug.LogFormat("{0} : {1} : {2}", m_type, dist, m_direction);
@@ -71,6 +78,7 @@ public class ShotManager : MonoBehaviour
         ShotData.Value.direction = m_direction;
         ShotData.Value.type = m_type;
         ShotData.Value.leftHanded = m_leftHanded;
+        ShotData.Value.bankshot = m_bankShot;
 
         p.InvokeClientRpcOnClient(p.ClientShootBall, pid, m_type, m_leftHanded, speed, bonusHeight, startOffset, endOffset);
 
@@ -125,6 +133,14 @@ public class ShotManager : MonoBehaviour
         {
             return ShotDirection.FRONT;
         }
+    }
+
+    private BankType IsBankShot(Player p)
+    {
+
+             
+
+        return BankType.NONE;
     }
 
 }

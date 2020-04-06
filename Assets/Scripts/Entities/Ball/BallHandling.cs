@@ -37,6 +37,9 @@ public class BallHandling : NetworkedBehaviour
     public const ulong NO_PLAYER = ulong.MaxValue;
     public const ulong DUMMY_PLAYER = ulong.MaxValue - 1;
 
+    [SerializeField]
+    private const float SHOT_SPEED = 21.0f;
+
     // =================================== Events ===================================
 
     public event Action<Player> ShotMade;
@@ -220,7 +223,54 @@ public class BallHandling : NetworkedBehaviour
         State = BallState.SHOT;
         m_body.isKinematic = false;
 
-        StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.baskets[player.teamID].netPos.position, 1.0f, 1.0f));
+        ShotData shot = ShotManager.Singleton.ShotData.Value;
+        float h = ShotController.GetShotRange(shot.type) == ShotRange.LONG ? UnityEngine.Random.Range(1.5f, 3f) : UnityEngine.Random.Range(.3f, .8f);
+        float d = shot.distance / (SHOT_SPEED + UnityEngine.Random.Range(0, 1)); 
+
+        StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.baskets[player.teamID].netPos.position, h, d));
+    }
+
+    private IEnumerator FollowArc(Vector3 start, Vector3 end, float height, float duration)
+    {
+        float startTime = Time.time;
+        float fracComplete = 0;
+        while (fracComplete < .99f)
+        {
+            Vector3 center = (start + end) * 0.5F;
+            center -= Vector3.up * height;
+
+            Vector3 riseRelCenter = start - center;
+            Vector3 setRelCenter = end - center;
+
+            fracComplete = (Time.time - startTime) / duration;
+
+            transform.position = Vector3.Slerp(riseRelCenter, setRelCenter, fracComplete);
+            transform.position += center;
+            yield return null;
+        }
+        State = BallState.LOOSE;
+    }
+    //TODO
+    private IEnumerator FollowBackboard(Vector3 start, Vector3 end, float height, float duration)
+    {
+        Vector3 bank = GameManager.Singleton.baskets[GameManager.Possession].ban;
+        float startTime = Time.time;
+        float fracComplete = 0;
+        while (fracComplete < .99f)
+        {
+            Vector3 center = (start + end) * 0.5F;
+            center -= Vector3.up * height;
+
+            Vector3 riseRelCenter = start - center;
+            Vector3 setRelCenter = end - center;
+
+            fracComplete = (Time.time - startTime) / duration;
+
+            transform.position = Vector3.Slerp(riseRelCenter, setRelCenter, fracComplete);
+            transform.position += center;
+            yield return null;
+        }
+        State = BallState.LOOSE;
     }
 
     /// Returns the team that does not have possession.
@@ -411,27 +461,6 @@ public class BallHandling : NetworkedBehaviour
     private void OnBasketScored()
     {
         print("scored");
-    }
-
-    private IEnumerator FollowArc(Vector3 start, Vector3 end, float height, float duration)
-    {
-        float startTime = Time.time;
-        float fracComplete = 0;
-        while (fracComplete < duration)
-        {
-            Vector3 center = (start + end) * 0.5F;
-            center -= Vector3.up * height;
-
-            Vector3 riseRelCenter = start - center;
-            Vector3 setRelCenter = end - center;
-
-            fracComplete = (Time.time - startTime) / duration;
-
-            transform.position = Vector3.Slerp(riseRelCenter, setRelCenter, fracComplete);
-            transform.position += center;
-            yield return null;
-        }
-        State = BallState.LOOSE;
     }
 
     private void ChangeBallHandler(ulong newPlayer)
