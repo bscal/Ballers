@@ -38,6 +38,11 @@ public class PlayerControls : NetworkedBehaviour
         m_player.isMoving = IsMoving();
         m_player.isSprinting = Input.GetKey(KeyCode.LeftShift);
 
+        m_player.isDribUp = Luminosity.IO.InputManager.GetKeyDown(KeyCode.W);
+        m_player.isDribDown = Luminosity.IO.InputManager.GetKeyDown(KeyCode.S);
+        m_player.isDribLeft = Luminosity.IO.InputManager.GetKeyDown(KeyCode.A);
+        m_player.isDribRight = Luminosity.IO.InputManager.GetKeyDown(KeyCode.D);
+
         if (Input.GetKey(KeyCode.Space) && !m_jumpCooldown)
         {
             m_animator.SetTrigger("Jump");

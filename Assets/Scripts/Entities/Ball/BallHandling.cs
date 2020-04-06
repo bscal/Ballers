@@ -253,7 +253,7 @@ public class BallHandling : NetworkedBehaviour
     //TODO
     private IEnumerator FollowBackboard(Vector3 start, Vector3 end, float height, float duration)
     {
-        Vector3 bank = GameManager.Singleton.baskets[GameManager.Possession].ban;
+        //Vector3 bank = GameManager.Singleton.baskets[GameManager.Possession];
         float startTime = Time.time;
         float fracComplete = 0;
         while (fracComplete < .99f)

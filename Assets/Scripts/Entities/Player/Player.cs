@@ -56,6 +56,11 @@ public class Player : NetworkedBehaviour, IBitWritable
     public bool isMovementFrozen = false;
     public bool isBallInLeftHand = false;
 
+    public bool isDribUp = false;
+    public bool isDribDown = false;
+    public bool isDribLeft = false;
+    public bool isDribRight = false;
+
     public ClientPlayer ClientPlayer { get; private set; }
     public bool HasBall
     { get
@@ -276,6 +281,12 @@ public class Player : NetworkedBehaviour, IBitWritable
             isHelping =             reader.ReadBool();
             isMovementFrozen =      reader.ReadBool();
             isBallInLeftHand =      reader.ReadBool();
+
+            isDribUp =              reader.ReadBool();
+            isDribDown =            reader.ReadBool();
+            isDribLeft =            reader.ReadBool();
+            isDribRight =           reader.ReadBool();
+
             m_target =              reader.ReadVector3Packed();
         }
     }
@@ -295,6 +306,12 @@ public class Player : NetworkedBehaviour, IBitWritable
             writer.WriteBool(isHelping);
             writer.WriteBool(isMovementFrozen);
             writer.WriteBool(isBallInLeftHand);
+
+            writer.WriteBool(isDribUp);
+            writer.WriteBool(isDribDown);
+            writer.WriteBool(isDribLeft);
+            writer.WriteBool(isDribRight);
+
             writer.WriteVector3Packed(m_target);
         }
     }

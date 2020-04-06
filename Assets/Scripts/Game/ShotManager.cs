@@ -137,10 +137,37 @@ public class ShotManager : MonoBehaviour
 
     private BankType IsBankShot(Player p)
     {
+        if (ShotController.GetShotRange(m_type) == ShotRange.CLOSE)
+        {
+            if (p.isDribLeft) return BankType.LEFT;
+            else if (p.isDribRight) return BankType.RIGHT;
+            else return GetClosestBank(p.transform.position);
+        }
 
-             
+        if (m_type == ShotType.SHOT && Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            return GetClosestBank(p.transform.position);
+        }
 
         return BankType.NONE;
+    }
+
+    public static Vector3 GetClosestBankPos(Vector3 current)
+    {
+        float distL = Vector3.Distance(current, GameManager.Singleton.baskets[GameManager.Possession].banks[0].transform.position);
+        float distR = Vector3.Distance(current, GameManager.Singleton.baskets[GameManager.Possession].banks[1].transform.position);
+        return (distL < distR) ?
+            GameManager.Singleton.baskets[GameManager.Possession].banks[0].transform.position :
+            GameManager.Singleton.baskets[GameManager.Possession].banks[1].transform.position;
+    }
+
+    public static BankType GetClosestBank(Vector3 current)
+    {
+        float distL = Vector3.Distance(current, GameManager.Singleton.baskets[GameManager.Possession].banks[0].transform.position);
+        float distR = Vector3.Distance(current, GameManager.Singleton.baskets[GameManager.Possession].banks[1].transform.position);
+        return (distL < distR) ?
+            BankType.LEFT :
+            BankType.RIGHT;
     }
 
 }

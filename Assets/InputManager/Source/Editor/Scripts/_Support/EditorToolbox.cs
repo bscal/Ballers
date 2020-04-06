@@ -125,6 +125,7 @@ namespace LuminosityEditor.IO
 		public static void ShowStartupWarning()
 		{
 			string key = string.Concat(PlayerSettings.companyName, ".", PlayerSettings.productName, ".InputManager.StartupWarning");
+			
 			if(!EditorPrefs.GetBool(key, false))
 			{
 				string message = "In order to use the InputManager plugin you need to overwrite your project's input settings. Your old input axes will be exported to a file which can be imported at a later time from the File menu.\n\nDo you want to overwrite the input settings now?\nYou can always do it later from the File menu.";

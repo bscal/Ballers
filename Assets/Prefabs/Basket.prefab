@@ -2721,7 +2721,7 @@ MonoBehaviour:
   ImportedFrom: 0
   ImportedFile: 
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 69482
+  thisInstanceId: 27354
   Undone: 1
 --- !u!1 &1623104314282294045
 GameObject:
@@ -3048,7 +3048,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/basketL.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 69508
+  thisInstanceId: 27380
   Undone: 1
 --- !u!114 &440430618588485820
 MonoBehaviour:
@@ -3064,8 +3064,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 0
   netPos: {fileID: 1623104315421406284}
-  leftBank: {fileID: 3947359031964301281}
-  rightBank: {fileID: 4792239484095560967}
+  banks:
+  - {fileID: 3947359031964301281}
+  - {fileID: 4792239484095560967}
 --- !u!1 &1623104314498290207
 GameObject:
   m_ObjectHideFlags: 0
