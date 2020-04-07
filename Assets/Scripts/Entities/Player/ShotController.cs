@@ -25,9 +25,9 @@ public enum ShotRange
 
 public enum BankType
 {
-    NONE,
-    LEFT,
-    RIGHT
+    NONE = -1,
+    LEFT = 0,
+    RIGHT = 1
 }
 
 public class ShotController : MonoBehaviour

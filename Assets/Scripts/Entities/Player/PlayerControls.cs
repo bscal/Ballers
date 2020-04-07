@@ -43,7 +43,7 @@ public class PlayerControls : NetworkedBehaviour
         m_player.isDribLeft = Luminosity.IO.InputManager.GetKeyDown(KeyCode.A);
         m_player.isDribRight = Luminosity.IO.InputManager.GetKeyDown(KeyCode.D);
 
-        if (Input.GetKey(KeyCode.Space) && !m_jumpCooldown)
+        if (Input.GetKey(KeyCode.Y) && !m_jumpCooldown)
         {
             m_animator.SetTrigger("Jump");
             StartCoroutine(WaitJump(1.5f));
@@ -91,10 +91,10 @@ public class PlayerControls : NetworkedBehaviour
             if (m_shootCooldown || m_player.isShooting) yield return new WaitForSeconds(0.1f);
 
             //Check when the key is pressed
-            if (Input.GetKeyDown(KeyCode.Y))
+            if (Input.GetKeyDown(KeyCode.Space))
             {
                 //Continue to check if it is still heldown and keep counting the how long
-                while (Input.GetKey(KeyCode.Y))
+                while (Input.GetKey(KeyCode.Space))
                 {
                     //Start incrementing timer
                     pressTimer += Time.deltaTime;
@@ -115,7 +115,7 @@ public class PlayerControls : NetworkedBehaviour
 
 
             //Check if key is released 
-            if (Input.GetKeyUp(KeyCode.Y))
+            if (Input.GetKeyUp(KeyCode.Space))
             {
                 //Check if we have not not reached the timer then it is only a key press
                 if (pressTimer < timeToCountAsHeldDown)
@@ -150,7 +150,7 @@ public class PlayerControls : NetworkedBehaviour
         //Move 1 unit every frame until edge detection is reached!
         while (pressTimer < MAX_TIME)
         {
-            if (!Input.GetKey(KeyCode.Y)) break;
+            if (!Input.GetKey(KeyCode.Space)) break;
 
             //Start incrementing timer
             pressTimer += Time.deltaTime;
