@@ -55,6 +55,8 @@ public class Player : NetworkedBehaviour, IBitWritable
     public bool isHelping = false;
     public bool isMovementFrozen = false;
     public bool isBallInLeftHand = false;
+    public bool isCtrlDown = false;
+    public bool isAltDown = false;
 
     public bool isDribUp = false;
     public bool isDribDown = false;
@@ -281,6 +283,8 @@ public class Player : NetworkedBehaviour, IBitWritable
             isHelping =             reader.ReadBool();
             isMovementFrozen =      reader.ReadBool();
             isBallInLeftHand =      reader.ReadBool();
+            isCtrlDown =            reader.ReadBool();
+            isAltDown =             reader.ReadBool();
 
             isDribUp =              reader.ReadBool();
             isDribDown =            reader.ReadBool();
@@ -305,7 +309,9 @@ public class Player : NetworkedBehaviour, IBitWritable
             writer.WriteBool(isShooting);
             writer.WriteBool(isHelping);
             writer.WriteBool(isMovementFrozen);
-            writer.WriteBool(isBallInLeftHand);
+            writer.WriteBool(isBallInLeftHand); 
+            writer.WriteBool(isCtrlDown);
+            writer.WriteBool(isAltDown);
 
             writer.WriteBool(isDribUp);
             writer.WriteBool(isDribDown);

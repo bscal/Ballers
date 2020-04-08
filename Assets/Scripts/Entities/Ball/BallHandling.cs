@@ -171,8 +171,8 @@ public class BallHandling : NetworkedBehaviour
         {
             m_currentPlayer = GameManager.GetPlayer(PlayerWithBall);
             if (!m_currentPlayer) return;
-
-            ChangePossession(m_currentPlayer.teamID, false, false);  
+            if (m_currentPlayer.OwnerClientId != PlayerWithBall)
+                ChangePossession(m_currentPlayer.teamID, false, false);  
 
             m_body.isKinematic = true;
 
@@ -230,7 +230,7 @@ public class BallHandling : NetworkedBehaviour
         if (shot.bankshot == BankType.NONE)
             StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.baskets[player.teamID].netPos.position, h, d));
         else
-            StartCoroutine(FollowBackboard(shot.bankshot, m_ball.transform.position, m_gameManager.baskets[player.teamID].netPos.position, h, d));
+            StartCoroutine(FollowBackboard(shot, m_ball.transform.position, m_gameManager.baskets[player.teamID].netPos.position, h, d));
 
     }
 
@@ -255,22 +255,28 @@ public class BallHandling : NetworkedBehaviour
         State = BallState.LOOSE;
     }
     //TODO
-    private IEnumerator FollowBackboard(BankType type, Vector3 start, Vector3 end, float height, float duration)
+    private IEnumerator FollowBackboard(ShotData shot, Vector3 start, Vector3 end, float height, float duration)
     {
-        Vector3 bankPos = GameManager.Singleton.baskets[GameManager.Possession].banks[(int)type].transform.position;
+        Vector3 bankPos = GameManager.Singleton.baskets[GameManager.Possession].banks[(int)shot.bankshot].transform.position;
         float startTime = Time.time;
         float fracComplete;
 
+        // This is the loop for slerping the ball position from the player to the bank position
+        // This statement will break itself at 99% completion of journey
         for (;;)
         {
-            Vector3 center = (start + bankPos) * 0.5f; ;
-            center -= Vector3.up;
+            // Sets the center
+            Vector3 center = (start + bankPos) * 0.5f;
+            // Adjusts the height of the center point based on shot type
+            center -=  (shot.type == ShotType.SHOT) ? Vector3.up * height : Vector3.up;
 
+            // Gets the points to Slerp with based on center
             Vector3 riseRelCenter = start - center;
             Vector3 setRelCenter = bankPos - center;
 
             fracComplete = (Time.time - startTime) / duration;
 
+            // Breaks loop if gotten to destination
             if (fracComplete > .99)
                 break;
 
@@ -279,12 +285,16 @@ public class BallHandling : NetworkedBehaviour
             yield return null;
         }
 
-        //Resets
+        //Resets values
         startTime = Time.time;
         fracComplete = 0;
+        // This is the loop for lerping ball position from bank spot on backboard to basket.
         while (fracComplete < .99)
         {
-            fracComplete = (Time.time - startTime) / duration;
+            // Using duration here does not makes sense since its a constant distance between the bank and the
+            // basket. Think about moveing this to a static const or some better way?
+            fracComplete = (Time.time - startTime) / (duration * .75f);
+
             transform.position = Vector3.Lerp(bankPos, end, fracComplete);
             yield return null;
         }
@@ -484,16 +494,16 @@ public class BallHandling : NetworkedBehaviour
 
     private void ChangeBallHandler(ulong newPlayer)
     {
-        if (newPlayer == DUMMY_PLAYER)
-        {
-            PlayerWithBall = DUMMY_PLAYER;
-            return;
-        }
-
         PlayerLastPossesion = PlayerWithBall;
-        if (m_currentPlayer) m_currentPlayer.isDribbling = false;
         PlayerWithBall = newPlayer;
+
+        if (newPlayer == DUMMY_PLAYER)
+            return;
+
+        if (m_currentPlayer) m_currentPlayer.isDribbling = false;
+
         m_currentPlayer = (newPlayer == NO_PLAYER) ? null : GameManager.GetPlayer(newPlayer);
+
         if (m_currentPlayer)
         {
             m_currentPlayer.isDribbling = true;
@@ -516,7 +526,7 @@ public class BallHandling : NetworkedBehaviour
         GameObject inboundObj = GameManager.Singleton.GetClosestInbound(m_ball.transform.position);
 
         //ChangeBallHandler(NO_PLAYER);
-
+        print("changing to " + team);
         Possession = team;
 
         if (inbound)

@@ -1,4 +1,5 @@
-﻿using MLAPI;
+﻿using Luminosity.IO;
+using MLAPI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -38,10 +39,13 @@ public class PlayerControls : NetworkedBehaviour
         m_player.isMoving = IsMoving();
         m_player.isSprinting = Input.GetKey(KeyCode.LeftShift);
 
-        m_player.isDribUp = Luminosity.IO.InputManager.GetKeyDown(KeyCode.W);
-        m_player.isDribDown = Luminosity.IO.InputManager.GetKeyDown(KeyCode.S);
-        m_player.isDribLeft = Luminosity.IO.InputManager.GetKeyDown(KeyCode.A);
-        m_player.isDribRight = Luminosity.IO.InputManager.GetKeyDown(KeyCode.D);
+        m_player.isCtrlDown = InputManager.GetKey(KeyCode.LeftControl);
+        m_player.isAltDown = InputManager.GetKey(KeyCode.LeftAlt);
+
+        m_player.isDribUp = InputManager.GetKey(KeyCode.W);
+        m_player.isDribDown = InputManager.GetKey(KeyCode.S);
+        m_player.isDribLeft = InputManager.GetKey(KeyCode.A);
+        m_player.isDribRight = InputManager.GetKey(KeyCode.D);
 
         if (Input.GetKey(KeyCode.Y) && !m_jumpCooldown)
         {
