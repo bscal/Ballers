@@ -145,7 +145,6 @@ public class ShotManager : MonoBehaviour
         }
         else if (m_type == ShotType.SHOT && p.isCtrlDown)
         {
-            print("banking?");
             return GetClosestBank(p.transform.position);
         }
 

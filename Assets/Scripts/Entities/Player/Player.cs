@@ -72,6 +72,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     }
     public Vector3 RightHand { get { return m_rightHand.transform.position; } }
     public Vector3 LeftHand { get { return m_leftHand.transform.position; } }
+    public Vector3 GetHand { get { return (isBallInLeftHand) ? LeftHand : RightHand; } }
     public Vector3 CenterPos { get { return m_center.transform.position; } }
     public Transform OwnBasket { get { return GameManager.Singleton.baskets[teamID].transform; } }
     public bool OnLeftSide { get { return transform.position.x < 0; } }
@@ -151,6 +152,8 @@ public class Player : NetworkedBehaviour, IBitWritable
         GameObject.Find("Cube").transform.position = transform.position + transform.forward * 3 + transform.up * 3;
 
         m_target = GameManager.Singleton.baskets[GameManager.Possession].gameObject.transform.position;
+
+
     }
 
     public void ShootBall()
@@ -204,6 +207,11 @@ public class Player : NetworkedBehaviour, IBitWritable
             case ShotType.LAYUP:
                 if (leftHanded) m_animator.Play("LayupL");
                 else m_animator.Play("Layup");
+                break;
+            case ShotType.DUNK:
+                if (leftHanded) m_animator.Play("1hand_dunkL");
+                else m_animator.Play("1hand_dunk");
+                StartCoroutine(PlayerUtils.Dunk(this, GameManager.GetBasket()));
                 break;
             default:
                 break;
@@ -272,6 +280,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     {
         using (PooledBitReader reader = PooledBitReader.Get(stream))
         {
+            teamID =                Convert.ToInt32(reader.ReadBit());
             isRightHanded =         reader.ReadBool();
             isDribbling =           reader.ReadBool();
             isMoving =              reader.ReadBool();
@@ -299,6 +308,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     {
         using (PooledBitWriter writer = PooledBitWriter.Get(stream))
         {
+            writer.WriteBit(Convert.ToBoolean(teamID));
             writer.WriteBool(isRightHanded);
             writer.WriteBool(isDribbling);
             writer.WriteBool(isMoving);

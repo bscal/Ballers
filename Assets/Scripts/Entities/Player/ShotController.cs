@@ -42,8 +42,9 @@ public class ShotController : MonoBehaviour
     {
         if (dist < CLOSE_RANGE)
         {
-            if (p.isMoving) return ShotType.LAYUP;
-            else if (p.isSprinting) return ShotType.DUNK;
+            if (p.isSprinting) return ShotType.DUNK;
+            else if (p.isMoving) return ShotType.LAYUP;
+            
         }
 
         return ShotType.SHOT;

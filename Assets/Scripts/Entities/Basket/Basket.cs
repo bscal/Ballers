@@ -3,6 +3,8 @@
 public class Basket : MonoBehaviour
 {
 
+    public const float RADIUS = .5f;
+
     public uint id = 0;
     public Transform netPos;
     public GameObject[] banks;

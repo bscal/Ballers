@@ -324,6 +324,11 @@ public class GameManager : NetworkedBehaviour
         return m_playersByTeam;
     }
 
+    public static Basket GetBasket()
+    {
+        return CurrentBasket;
+    }
+
     private void OnConnected(ulong client)
     {
 
