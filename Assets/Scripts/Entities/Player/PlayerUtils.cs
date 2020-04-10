@@ -5,39 +5,40 @@ using UnityEngine;
 public class PlayerUtils : MonoBehaviour
 {
 
-    private static Transform tempTrans =  new GameObject().transform;
+    private static readonly Transform m_tempTrans =  new GameObject().transform;
 
     public static IEnumerator Dunk(Player p, Basket b)
     {
-        //TODO MESSY MESSY MESSY REDO functionally works but needs to be cleaned up alot
-        // current bug: lerps the position of the player not his hand
         p.isMovementFrozen = true;
-        tempTrans.position = b.netPos.position;
 
-        Vector3 startPos = p.transform.position;
+        m_tempTrans.position = b.netPos.position;
+        m_tempTrans.LookAt(p.transform);
+        Vector3 tempV = new Vector3(0, m_tempTrans.rotation.eulerAngles.y, m_tempTrans.rotation.eulerAngles.z);
+        m_tempTrans.rotation = Quaternion.Euler(tempV);
+        m_tempTrans.position += m_tempTrans.forward * Basket.RADIUS;
 
-        tempTrans.LookAt(p.transform);
-        Vector3 tempV = new Vector3(0, tempTrans.rotation.eulerAngles.y, tempTrans.rotation.eulerAngles.z);
-        tempTrans.rotation = Quaternion.Euler(tempV);
-        tempTrans.position += tempTrans.forward * Basket.RADIUS;
-        
+        Vector3 hand = p.GetHand;
         float startTime = Time.time;
         float fracComplete = 0;
         while (fracComplete < .99)
         {
-            fracComplete = (Time.time - startTime) / .6f;
-            p.transform.position = Vector3.Lerp(startPos, tempTrans.position, fracComplete);
+            fracComplete = (Time.time - startTime) / .33f;
+            p.transform.position = Vector3.Lerp(hand, m_tempTrans.position, fracComplete) - (hand - p.transform.position);
             yield return null;
         }
-        float height = p.transform.position.y - startPos.y;
+
         startTime = Time.time;
         fracComplete = 0;
+        Vector3 startPos = p.transform.position;
+        Vector3 endPos = p.transform.position;
+        endPos.y = .1f;
         while (fracComplete < .99)
         {
             fracComplete = (Time.time - startTime) / .6f;
-            p.transform.position = Vector3.Lerp(tempTrans.position, tempTrans.position - Vector3.up * height, fracComplete);
+            p.transform.position = Vector3.Lerp(startPos, endPos, fracComplete);
             yield return null;
         }
+        p.transform.position = endPos;
 
         p.isMovementFrozen = false;
     }
