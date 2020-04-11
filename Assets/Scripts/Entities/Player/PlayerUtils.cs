@@ -17,13 +17,13 @@ public class PlayerUtils : MonoBehaviour
         m_tempTrans.rotation = Quaternion.Euler(tempV);
         m_tempTrans.position += m_tempTrans.forward * Basket.RADIUS;
 
-        Vector3 hand = p.GetHand;
+
         float startTime = Time.time;
         float fracComplete = 0;
         while (fracComplete < .99)
         {
             fracComplete = (Time.time - startTime) / .33f;
-            p.transform.position = Vector3.Lerp(hand, m_tempTrans.position, fracComplete) - (hand - p.transform.position);
+            p.transform.position = Vector3.Lerp(p.GetHand, m_tempTrans.position, fracComplete) - (p.GetHand - p.transform.position);
             yield return null;
         }
 
