@@ -185,6 +185,8 @@ public class Player : NetworkedBehaviour, IBitWritable
     public void ClientShootBall(ShotType type, bool leftHanded, float speed, float bonusHeight, float start, float end)
     {
         isShooting = true;
+        if (isCtrlDown)
+            ChangeHand();
         m_shotmeter.OnShoot(this, speed, bonusHeight ,start, end);
         PlayAnimationForType(type, leftHanded);
     }
