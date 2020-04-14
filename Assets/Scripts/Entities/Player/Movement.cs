@@ -68,6 +68,14 @@ public class Movement : MonoBehaviour
             }
             else
             {
+                if (m_targetDirection != null)
+                {
+                    m_targetDirection.y = 0f;
+                    // Rotate the forward vector towards the target direction by one step
+                    Vector3 newDirection = Vector3.RotateTowards(m_parent.transform.forward, m_targetDirection, AUTO_TURN_SPEED * Time.deltaTime, 0.0f);
+                    // Calculate a rotation a step closer to the target and applies rotation to this object
+                    m_parent.transform.rotation = Quaternion.LookRotation(newDirection);
+                }
                 m_vertical = Input.GetAxis("Vertical") * (m_movementSpeed * Time.deltaTime);
                 m_strafe = Input.GetAxis("Horizontal") * (m_movementSpeed * Time.deltaTime);
                 if (Input.GetAxis("Horizontal") > 0)
@@ -81,6 +89,7 @@ public class Movement : MonoBehaviour
             }
             m_parent.transform.Translate(m_strafe, 0f, m_vertical);
         }
+/*
         else if (!m_skipRotate)
         {
             m_targetDirection.y = 0f;
@@ -89,7 +98,7 @@ public class Movement : MonoBehaviour
             // Calculate a rotation a step closer to the target and applies rotation to this object
             m_parent.transform.rotation = Quaternion.LookRotation(newDirection);
             
-        }
+        }*/
         m_skipRotate = false;
     }
 
