@@ -237,6 +237,39 @@ public class CharacterData
 
 public class CharacterStats
 {
+    [JsonProperty("close_shooting")]
+    public int closeShooting;
+    [JsonProperty("mid_shooting")]
+    public int midShooting;
     [JsonProperty("three_shooting")]
     public int threeShooting;
+    [JsonProperty("free_throw")]
+    public int freeThrow;
+    [JsonProperty("layup")]
+    public int layup;
+    [JsonProperty("dunk")]
+    public int dunk;
+    [JsonProperty("post")]
+    public int post;
+    [JsonProperty("finishing")]
+    public int finishing;
+    [JsonProperty("ballhandling")]
+    public int ballhandling;
+    [JsonProperty("passing")]
+    public int passing;
+    [JsonProperty("perimeter_d")]
+    public int perimeterD;
+    [JsonProperty("post_d")]
+    public int post_d;
+    [JsonProperty("blocking")]
+    public int blocking;
+    [JsonProperty("speed")]
+    public int speed;
+    [JsonProperty("strength")]
+    public int strength;
+    [JsonProperty("vertical")]
+    public int vertical;
+    [JsonProperty("hands")]
+    public int hands;
+
 }

@@ -30,7 +30,7 @@ public class CharacterTabCallback : TabCallback
     void Start()
     {
         m_player = GameObject.Find("NetworkClient").GetComponent<ClientPlayer>();
-        m_menuPanel = GameObject.Find("Menu Panel").GetComponent<Image>();
+        //m_menuPanel = GameObject.Find("Menu Panel").GetComponent<Image>();
     }
 
     private IEnumerator LoadCharacters()

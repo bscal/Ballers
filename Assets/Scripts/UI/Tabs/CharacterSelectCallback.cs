@@ -1,6 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CharacterSelectCallback : TabCallback
 {
@@ -28,10 +31,20 @@ public class CharacterSelectCallback : TabCallback
         m_charUi.weight.text = CharacterUI.FormatWeight(cData.weight);
         m_charUi.wingspan.text = CharacterUI.FormatHeight(cData.wingspan);
 
-        m_charUi.Three.text = cData.stats.threeShooting.ToString();
+        // Uses reflection to set UI values for stats
+        Type to = m_charUi.skillTexts.GetType();
+        Type from = cData.stats.GetType();
+        for (int i = 0; i < to.GetFields().Length; i++)
+        {
+            FieldInfo fTo = to.GetFields()[i];
+            FieldInfo fFrom = from.GetFields()[i];
+            if (fTo == null || fFrom == null) continue;
+            Text t = (Text)fTo.GetValue(m_charUi.skillTexts);
+            t.text = fFrom.GetValue(cData.stats).ToString();
+        }
 
-
-        profileCam.gameObject.SetActive(true);
+        if (profileCam)
+            profileCam.gameObject.SetActive(true);
     }
 
     //private string GetStat(CharacterData cData, string key)

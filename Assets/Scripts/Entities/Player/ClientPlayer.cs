@@ -30,8 +30,8 @@ public class ClientPlayer : NetworkedBehaviour
     public Dictionary<int, CharacterData> characterStats = new Dictionary<int, CharacterData>();
     public float lastCharacterUpdate;
 
-    private GameSetup m_gameSetup;
-    private SteamP2PTransport.SteamP2PTransport m_transport;
+    //private GameSetup m_gameSetup;
+    //private SteamP2PTransport.SteamP2PTransport m_transport;
 
     void Awake()
     {
@@ -43,9 +43,9 @@ public class ClientPlayer : NetworkedBehaviour
 
     void Start()
     {
-        m_gameSetup = GameObject.Find("GameManager").GetComponent<GameSetup>();
-        m_transport = GameObject.Find("NetworkManager").GetComponent<SteamP2PTransport.SteamP2PTransport>();
-        print(m_transport.GetCurrentRtt(OwnerClientId));
+        //m_gameSetup = GameObject.Find("GameManager").GetComponent<GameSetup>();
+        //m_transport = GameObject.Find("NetworkManager").GetComponent<SteamP2PTransport.SteamP2PTransport>();
+        //print(m_transport.GetCurrentRtt(OwnerClientId));
         StartCoroutine(Load());
     }
 
@@ -67,7 +67,7 @@ public class ClientPlayer : NetworkedBehaviour
 
         yield return null;
 
-        m_gameSetup.hasClientLoaded = true;
+        //m_gameSetup.hasClientLoaded = true;
         status = 1;
         print("Finished loading client");
     }

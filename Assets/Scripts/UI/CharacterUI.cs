@@ -1,7 +1,31 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+[Serializable]
+public struct UISkillTexts
+{
+    public Text close;
+    public Text midRange;
+    public Text three;
+    public Text freeThrow;
+    public Text layup;
+    public Text dunk;
+    public Text finishing;
+    public Text post;
+    public Text ballhandling;
+    public Text passing;
+    public Text perimterD;
+    public Text postD;
+    public Text block;
+    //public Text helpD;
+    public Text speed;
+    public Text strength;
+    public Text vertical;
+    public Text hands;
+}
 
 public class CharacterUI : MonoBehaviour
 {
@@ -14,10 +38,14 @@ public class CharacterUI : MonoBehaviour
     public Text weight;
     public Text wingspan;
 
-    [Header("Offense")]
-    public Text close;
-    public Text midRange;
-    public Text Three;
+
+    [SerializeField]
+    public UISkillTexts skillTexts;
+
+    void Awake()
+    {
+        //skillTexts = new UISkillTexts();
+    }
 
     public static string FormatHeight(int height)
     {
