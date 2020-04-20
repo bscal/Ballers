@@ -6,6 +6,7 @@ public class MenuSetup : MonoBehaviour
 {
 
     public GameObject modelPrefab;
+
     private GameObject m_model;
 
     void Awake()

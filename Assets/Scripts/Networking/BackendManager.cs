@@ -195,6 +195,71 @@ public class BackendManager : MonoBehaviour
 
         callback?.Invoke(cData);
     }
+
+    public static IEnumerator StartFinding(ulong steamid, int cid, ulong[] partyIds, int[] cidIds)
+    {
+        WWWForm form = new WWWForm();
+        form.AddField("steamid", steamid.ToString());
+        form.AddField("cid", cid);
+        form.AddField("party_size", partyIds.Length);
+        for (int i = 0; i < partyIds.Length; i++)
+        {
+            form.AddField("memeber_id_" + i, partyIds[i].ToString());
+            form.AddField("memeber_cid_" + i, cidIds[i]);
+        }
+
+        using (UnityWebRequest www = UnityWebRequest.Post("bscal.me:9090/matchmaking/join", form))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.isNetworkError || www.isHttpError)
+            {
+                Debug.Log(www.error);
+            }
+            else
+            {
+                Debug.Log("Form upload complete! Deleting Character");
+            }
+        }
+    }
+
+    public static IEnumerator StopFinding(ulong steamid)
+    {
+        using (UnityWebRequest www = UnityWebRequest.Post("bscal.me:9090/matchmaking/leave", steamid.ToString()))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.isNetworkError || www.isHttpError)
+            {
+                Debug.Log(www.error);
+            }
+            else
+            {
+                Debug.Log("Form upload complete! Deleting Character");
+            }
+        }
+    }
+
+    public static IEnumerator UpdateFinding(ulong steamid, int cid, Action<bool, string> callback)
+    {
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(string.Format("bscal.me:9090/matchmaking/{0}", steamid)))
+        {
+            yield return webRequest.SendWebRequest();
+
+            if (webRequest.isNetworkError)
+            {
+                Debug.LogError("Web Error: " + webRequest.error);
+                callback?.Invoke(false, webRequest.error);
+            }
+            else
+            {
+                string data = webRequest.downloadHandler.text;
+                JToken tokens = JArray.Parse(data);
+                callback?.Invoke(tokens.ToObject<bool>(), webRequest.error);
+            }
+        }
+    }
+
 }
 
 public class UserData
