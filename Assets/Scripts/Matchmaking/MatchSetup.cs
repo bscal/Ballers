@@ -32,14 +32,23 @@ public class MatchSetup : MonoBehaviour
 
     }
 
-    private void LoadGameScene()
+    private void MatchReady()
     {
         HasStarted = true;
+    }
+
+    private void SetupServer()
+    {
+
     }
 
     private IEnumerator ConnectToServer()
     {
         yield return null;
+    }
+    private void LoadGameScene()
+    {
+
     }
 
     private void AfterLoadGameScene()

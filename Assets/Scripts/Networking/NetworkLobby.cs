@@ -24,6 +24,7 @@ public class NetworkLobby : MonoBehaviour
 
     void Start()
     {
+        return;
         m_p2PTransport = GetComponent<SteamP2PTransport.SteamP2PTransport>();
         m_p2PTransport.ConnectToSteamID = ClientPlayer.Singleton.SteamId;
 

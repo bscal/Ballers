@@ -614,6 +614,11 @@ PrefabInstance:
       propertyPath: DontDestroy
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3826671062112935201, guid: 2cf0204740b240345837345804dbec80,
+        type: 3}
+      propertyPath: NetworkConfig.CreatePlayerPrefab
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3826671062112935203, guid: 2cf0204740b240345837345804dbec80,
         type: 3}
       propertyPath: m_Name
@@ -993,6 +998,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startDisabled: 0
+  GetLocalPlayerObject: 0
   offset: {x: 0, y: 3, z: 6}
   rotation: 0
 --- !u!114 &938387011 stripped
@@ -3837,6 +3843,11 @@ PrefabInstance:
         type: 3}
       propertyPath: rotation
       value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 3406084504982642633, guid: 854713a735406ff419aa31fd98cb25c5,
+        type: 3}
+      propertyPath: GetLocalPlayerObject
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3406084504982642634, guid: 854713a735406ff419aa31fd98cb25c5,
         type: 3}
