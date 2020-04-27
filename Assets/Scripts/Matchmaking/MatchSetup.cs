@@ -21,6 +21,7 @@ public class MatchSetup : MonoBehaviour
 
     private Dictionary<byte, ulong> m_playerSlots = new Dictionary<byte, ulong>();
     private GameType m_type;
+    private NetworkLobby m_networkLobby;
 
     void Start()
     {
@@ -32,6 +33,19 @@ public class MatchSetup : MonoBehaviour
 
     }
 
+    public void Setup(LobbyEnter_t lobbyEnter, ulong hostSteamID)
+    {
+        HostID = new CSteamID(hostSteamID);
+        m_networkLobby.SetSteamIDToConnect(hostSteamID);
+        MatchID = 1;
+
+        if (hostSteamID == ClientPlayer.Singleton.SteamID) SetupServer();
+        else ConnectToServer();
+
+        MatchReady();
+        print("match setup successful");
+    }
+
     private void MatchReady()
     {
         HasStarted = true;
@@ -39,13 +53,14 @@ public class MatchSetup : MonoBehaviour
 
     private void SetupServer()
     {
-
+        m_networkLobby.HostServer();
     }
 
-    private IEnumerator ConnectToServer()
+    private void ConnectToServer()
     {
-        yield return null;
+        m_networkLobby.Connect();
     }
+
     private void LoadGameScene()
     {
 

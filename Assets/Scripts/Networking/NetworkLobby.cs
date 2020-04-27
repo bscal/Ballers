@@ -5,6 +5,7 @@ using MLAPI;
 using MLAPI.Spawning;
 using MLAPI.Transports.UNET;
 using MLAPI.Transports.Tasks;
+using Steamworks;
 
 public class NetworkLobby : MonoBehaviour
 {
@@ -24,28 +25,36 @@ public class NetworkLobby : MonoBehaviour
 
     void Start()
     {
-        return;
         m_p2PTransport = GetComponent<SteamP2PTransport.SteamP2PTransport>();
-        m_p2PTransport.ConnectToSteamID = ClientPlayer.Singleton.SteamId;
 
         NetworkingManager.Singleton.ConnectionApprovalCallback += ApprovalCheck;
         NetworkingManager.Singleton.OnClientConnectedCallback += OnConnected;
         NetworkingManager.Singleton.OnClientDisconnectCallback += OnDisconnected;
-
-        if (hostServer)
-        {
-            NetworkingManager.Singleton.OnServerStarted += OnServerReady;
-            SocketTasks task = NetworkingManager.Singleton.StartHost();
-            Debug.Log(string.Format("Starting in server mode. Address {0}:{1}", host, port));
-        }
-        else
-        {
-            NetworkingManager.Singleton.GetComponent<UnetTransport>().ConnectAddress = host;
-            NetworkingManager.Singleton.GetComponent<UnetTransport>().ConnectPort = port;
-            NetworkingManager.Singleton.StartClient();
-            Debug.Log(string.Format("Starting in client mode. Address {0}:{1}", host, port));
-        }
+        NetworkingManager.Singleton.OnServerStarted += OnServerReady;
     }
+
+    // Public Functions
+
+    public void Connect()
+    {
+        NetworkingManager.Singleton.GetComponent<UnetTransport>().ConnectAddress = host;
+        NetworkingManager.Singleton.GetComponent<UnetTransport>().ConnectPort = port;
+        NetworkingManager.Singleton.StartClient();
+        Debug.Log("Starting in client mode.");
+    }
+
+    public void HostServer()
+    {
+        NetworkingManager.Singleton.StartHost();
+        Debug.Log("Starting in server mode.");
+    }
+
+    public void SetSteamIDToConnect(ulong steamID)
+    {
+        m_p2PTransport.ConnectToSteamID = steamID;
+    }
+
+    // Private Functions
 
     void ApprovalCheck(byte[] connectionData, ulong clientId, MLAPI.NetworkingManager.ConnectionApprovedDelegate callback)
     {

@@ -23,7 +23,7 @@ public class ClientPlayer : NetworkedBehaviour
             characterStats.Add(Cid, value);
         }
     }
-    public ulong SteamId { get; private set; }
+    public ulong SteamID { get; private set; }
 
     // This is cached character data. Can be used server or client side.
     // Primarily for non essential or non gameplay tasks. ie. character selection menu
@@ -38,7 +38,7 @@ public class ClientPlayer : NetworkedBehaviour
         DontDestroyOnLoad(gameObject);
         Singleton = this;
         if (SteamManager.Initialized)
-            SteamId = SteamUser.GetSteamID().m_SteamID;
+            SteamID = SteamUser.GetSteamID().m_SteamID;
     }
 
     void Start()
@@ -51,7 +51,7 @@ public class ClientPlayer : NetworkedBehaviour
 
     void OnDestroy()
     {
-        BackendManager.SaveCharacter(SteamId, Cid, CharData);
+        BackendManager.SaveCharacter(SteamID, Cid, CharData);
     }
 
     // Loads locally
@@ -59,11 +59,11 @@ public class ClientPlayer : NetworkedBehaviour
     {
         yield return null;
 
-        yield return BackendManager.Login(SteamId, LoginCallback);
+        yield return BackendManager.Login(SteamID, LoginCallback);
 
-        yield return BackendManager.FetchCharacterFromServer(SteamId, Cid, FetchCharacterCallback);
+        yield return BackendManager.FetchCharacterFromServer(SteamID, Cid, FetchCharacterCallback);
 
-        yield return BackendManager.FetchAllCharacters(SteamId, FetchAllCharacterCallback);
+        yield return BackendManager.FetchAllCharacters(SteamID, FetchAllCharacterCallback);
 
         yield return null;
 
@@ -74,7 +74,7 @@ public class ClientPlayer : NetworkedBehaviour
 
     public IEnumerator ReLoadCharacters()
     {
-        yield return BackendManager.FetchAllCharacters(SteamId, FetchAllCharacterCallback);
+        yield return BackendManager.FetchAllCharacters(SteamID, FetchAllCharacterCallback);
     }
 
     // Logins to server
@@ -105,9 +105,9 @@ public class ClientPlayer : NetworkedBehaviour
 
     private IEnumerator ChangeCharacterCoroutine(int cid)
     {
-        yield return BackendManager.SaveCharacter(SteamId, Cid, CharData);
+        yield return BackendManager.SaveCharacter(SteamID, Cid, CharData);
         yield return null;
-        yield return BackendManager.FetchCharacterFromServer(SteamId, cid, FetchCharacterCallback);
+        yield return BackendManager.FetchCharacterFromServer(SteamID, cid, FetchCharacterCallback);
     }
 
 }

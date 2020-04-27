@@ -15,6 +15,12 @@ public class Matchmaking : MonoBehaviour
     private readonly CallResult<LobbyEnter_t> m_CallResultLobbyEnter = new CallResult<LobbyEnter_t>();
 
     private float m_timer = 0f;
+    private MatchSetup m_matchSetup;
+
+    private void Start()
+    {
+        m_matchSetup = GetComponent<MatchSetup>();
+    }
 
     void Update()
     {
@@ -38,6 +44,7 @@ public class Matchmaking : MonoBehaviour
 
     public void StartFinding()
     {
+        if (!SteamManager.Initialized) return;
         IsFinding = true;
 
         // This filters were lobbies with correct gamemodes this is required before RequestLobbyList
@@ -57,6 +64,7 @@ public class Matchmaking : MonoBehaviour
         {
             SteamAPICall_t result = SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, 2);
             m_CallResultLobbyCreated.Set(result, OnLobbyCreated);
+            m_CallResultLobbyEnter.Set(result, OnLobbyJoin);
         }
         else
         {
@@ -69,16 +77,25 @@ public class Matchmaking : MonoBehaviour
     // Callback for Matchmaking CreateLobby
     private void OnLobbyCreated(LobbyCreated_t lobbyCreated, bool bIOfailure)
     {
+        CSteamID lobbyID = new CSteamID(lobbyCreated.m_ulSteamIDLobby);
+
+
         // Sets lobby gamemode
-        SteamMatchmaking.SetLobbyData(new CSteamID(lobbyCreated.m_ulSteamIDLobby), "Gamemode", "Ballers-1v1");
+        SteamMatchmaking.SetLobbyData(lobbyID, "Gamemode", "Ballers-1v1");
+        // Sets lobby host steamid
+        SteamMatchmaking.SetLobbyData(lobbyID, "Host", ClientPlayer.Singleton.SteamID.ToString());
     }
 
     // Callback for Matchmaking JoinLobby
     private void OnLobbyJoin(LobbyEnter_t lobbyEnter, bool bIOfailure)
     {
+        m_lobbyID = new CSteamID(lobbyEnter.m_ulSteamIDLobby);
         EChatRoomEnterResponse response = (EChatRoomEnterResponse)lobbyEnter.m_EChatRoomEnterResponse;
         print(response.GetType().Name);
         print("created lobby waiting to test 3secs...");
+        string hostSteamID = SteamMatchmaking.GetLobbyData(m_lobbyID, "Host");
+        print(hostSteamID);
+        //m_matchSetup.Setup(lobbyEnter, ulong.Parse(hostSteamID));
         StartCoroutine(Test(lobbyEnter.m_ulSteamIDLobby));
     }
 
@@ -91,6 +108,7 @@ public class Matchmaking : MonoBehaviour
         SteamAPICall_t result = SteamMatchmaking.RequestLobbyList();
         m_CallResultLobbyMatchList.Set(result, OnLobbyMatchListTest);
         yield return new WaitForSeconds(1.0f);
+        print("leaving lobby...");
         SteamMatchmaking.LeaveLobby(new CSteamID(l));
         m_lobbyID = CSteamID.Nil;
     }

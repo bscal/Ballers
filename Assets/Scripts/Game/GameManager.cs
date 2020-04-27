@@ -336,9 +336,9 @@ public class GameManager : NetworkedBehaviour
 
     public void InitLocalPlayer(ulong pid)
     {
-        AddPlayer(SpawnManager.GetLocalPlayerObject(), ClientPlayer.Singleton.SteamId);
+        AddPlayer(SpawnManager.GetLocalPlayerObject(), ClientPlayer.Singleton.SteamID);
         // Registers player to server
-        InvokeServerRpc(RegisterPlayerServer, pid, ClientPlayer.Singleton.SteamId);
+        InvokeServerRpc(RegisterPlayerServer, pid, ClientPlayer.Singleton.SteamID);
     }
 
     private void StartPregame()
