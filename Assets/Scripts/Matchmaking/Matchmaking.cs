@@ -13,6 +13,7 @@ public class Matchmaking : MonoBehaviour
     private readonly CallResult<LobbyMatchList_t> m_CallResultLobbyMatchList = new CallResult<LobbyMatchList_t>();
     private readonly CallResult<LobbyCreated_t> m_CallResultLobbyCreated = new CallResult<LobbyCreated_t>();
     private readonly CallResult<LobbyEnter_t> m_CallResultLobbyEnter = new CallResult<LobbyEnter_t>();
+    private Callback<LobbyEnter_t> m_CallbackLobbyEnter;
 
     private float m_timer = 0f;
     private MatchSetup m_matchSetup;
@@ -20,6 +21,7 @@ public class Matchmaking : MonoBehaviour
     private void Start()
     {
         m_matchSetup = GetComponent<MatchSetup>();
+        m_CallbackLobbyEnter = new Callback<LobbyEnter_t>(OnLobbyJoin);
     }
 
     void Update()
@@ -64,14 +66,14 @@ public class Matchmaking : MonoBehaviour
         {
             SteamAPICall_t result = SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, 2);
             m_CallResultLobbyCreated.Set(result, OnLobbyCreated);
-            m_CallResultLobbyEnter.Set(result, OnLobbyJoin);
         }
         else
         {
             CSteamID lobby = SteamMatchmaking.GetLobbyByIndex(0);
             SteamAPICall_t result = SteamMatchmaking.JoinLobby(lobby);
-            m_CallResultLobbyEnter.Set(result, OnLobbyJoin);
         }
+
+        SteamAPI.RunCallbacks();
     }
 
     // Callback for Matchmaking CreateLobby
@@ -87,15 +89,14 @@ public class Matchmaking : MonoBehaviour
     }
 
     // Callback for Matchmaking JoinLobby
-    private void OnLobbyJoin(LobbyEnter_t lobbyEnter, bool bIOfailure)
+    private void OnLobbyJoin(LobbyEnter_t lobbyEnter)
     {
         m_lobbyID = new CSteamID(lobbyEnter.m_ulSteamIDLobby);
         EChatRoomEnterResponse response = (EChatRoomEnterResponse)lobbyEnter.m_EChatRoomEnterResponse;
-        print(response.GetType().Name);
+        print(lobbyEnter.m_EChatRoomEnterResponse);
         print("created lobby waiting to test 3secs...");
         string hostSteamID = SteamMatchmaking.GetLobbyData(m_lobbyID, "Host");
-        print(hostSteamID);
-        //m_matchSetup.Setup(lobbyEnter, ulong.Parse(hostSteamID));
+        m_matchSetup.Setup(lobbyEnter, ulong.Parse(hostSteamID));
         StartCoroutine(Test(lobbyEnter.m_ulSteamIDLobby));
     }
 

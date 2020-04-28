@@ -101,6 +101,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     private Animator m_animator;
     private ShotController m_shotController;
     private ShotManager m_shotManager;
+    private bool m_hasLoaded = false;
 
     private void Start()
     {
@@ -114,34 +115,37 @@ public class Player : NetworkedBehaviour, IBitWritable
                 m_shotmeter = GetComponent<ShotMeter>();
                 m_shotController = GetComponent<ShotController>();
             }
+
+            if (IsServer && !IsHost)
+            {
+                username = "Server";
+            }
+            else
+            {
+                m_rightHand = transform.Find("root/body/right arm/forearm/hand").gameObject;
+                m_leftHand = transform.Find("root/body/left arm/forearm/hand").gameObject;
+                m_center = transform.Find("Center").gameObject;
+                m_animator = GetComponentInChildren<Animator>();
+            }
+
+            id = username.GetHashCode();
+            m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
         }
+
+        m_hasLoaded = true;
     }
 
     public override void NetworkStart()
     {
         if (!IsOwner)
             return;
-
-        if (IsServer && !IsHost)
-        {
-            username = "Server";
-        }
-        else
-        {
-            m_rightHand = transform.Find("root/body/right arm/forearm/hand").gameObject;
-            m_leftHand = transform.Find("root/body/left arm/forearm/hand").gameObject;
-            m_center = transform.Find("Center").gameObject;
-            m_animator = GetComponentInChildren<Animator>();
-        }
-
-        id = username.GetHashCode();
-        m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
     }
 
     void Update()
     {
-        if (!IsOwner || isDummy)
-            return;
+        if (!IsOwner || isDummy) return;
+
+        if (!m_hasLoaded) return;
 
         m_animator.SetBool("hasBall", HasBall);
         m_animator.SetBool("hasBallInLeft", isBallInLeftHand);
@@ -152,8 +156,38 @@ public class Player : NetworkedBehaviour, IBitWritable
         GameObject.Find("Cube").transform.position = transform.position + transform.forward * 3 + transform.up * 3;
 
         m_target = GameManager.Singleton.baskets[GameManager.Possession].gameObject.transform.position;
+    }
 
+    public void StartLoad()
+    {
+        if (!isDummy)
+        {
+            if (IsClient)
+            {
+                GameManager.Singleton.InitLocalPlayer(OwnerClientId);
+                //NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, this, OnGameStarted);
+                GameManager.Singleton.GameStarted += OnGameStarted;
+                m_shotmeter = GetComponent<ShotMeter>();
+                m_shotController = GetComponent<ShotController>();
+            }
 
+            if (IsServer && !IsHost)
+            {
+                username = "Server";
+            }
+            else
+            {
+                m_rightHand = transform.Find("root/body/right arm/forearm/hand").gameObject;
+                m_leftHand = transform.Find("root/body/left arm/forearm/hand").gameObject;
+                m_center = transform.Find("Center").gameObject;
+                m_animator = GetComponentInChildren<Animator>();
+            }
+
+            id = username.GetHashCode();
+            m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
+        }
+
+        m_hasLoaded = true;
     }
 
     public void ShootBall()

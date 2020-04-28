@@ -1,7 +1,10 @@
-﻿using Steamworks;
+﻿using MLAPI;
+using MLAPI.SceneManagement;
+using Steamworks;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public enum GameType
 {
@@ -10,13 +13,17 @@ public enum GameType
     FIVES
 }
 
+[RequireComponent(typeof(GameObject))]
 public class MatchSetup : MonoBehaviour
 {
 
-    private const string GAME_SCENE_NAME = "";
+    private const string CONST_GAME_SCENE_NAME = "SampleScene";
 
-    public bool HasStarted { get; private set; }
-    public ulong MatchID { get; private set; }
+    public GameObject playerPrefab;
+
+    public bool HasStarted { get; private set; } = false;
+    public bool HasLoaded { get; private set; } = false;
+    public ulong MatchID { get; private set; } = 1;
     public CSteamID HostID { get; private set; }
 
     private Dictionary<byte, ulong> m_playerSlots = new Dictionary<byte, ulong>();
@@ -25,7 +32,14 @@ public class MatchSetup : MonoBehaviour
 
     void Start()
     {
-        
+        if (playerPrefab == null)
+            Debug.LogError("Player prefab not added.");
+
+        m_networkLobby = GameObject.Find("NetworkManager").GetComponent<NetworkLobby>();
+
+        SceneManager.sceneLoaded += OnAferSceneLoaded;
+
+
     }
 
     void Update()
@@ -37,7 +51,6 @@ public class MatchSetup : MonoBehaviour
     {
         HostID = new CSteamID(hostSteamID);
         m_networkLobby.SetSteamIDToConnect(hostSteamID);
-        MatchID = 1;
 
         if (hostSteamID == ClientPlayer.Singleton.SteamID) SetupServer();
         else ConnectToServer();
@@ -49,6 +62,12 @@ public class MatchSetup : MonoBehaviour
     private void MatchReady()
     {
         HasStarted = true;
+
+        if (NetworkingManager.Singleton.IsServer)
+        {
+            NetworkSceneManager.SwitchScene(CONST_GAME_SCENE_NAME);
+
+        }
     }
 
     private void SetupServer()
@@ -61,14 +80,25 @@ public class MatchSetup : MonoBehaviour
         m_networkLobby.Connect();
     }
 
-    private void LoadGameScene()
+    private void OnAferSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
     {
+        if (scene.name == CONST_GAME_SCENE_NAME)
+        {
+            HasLoaded = true;
 
+            GameObject go = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+            NetworkedObject no = go.GetComponent<NetworkedObject>();
+            no.SpawnAsPlayerObject(no.OwnerClientId, null, false);
+            print("scene loaded");
+        }
     }
 
-    private void AfterLoadGameScene()
+    private IEnumerator LoadGame()
     {
-
+        while (!HasLoaded)
+        {
+            yield return null;
+        }
     }
 
 }

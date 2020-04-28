@@ -78,6 +78,8 @@ public class GameManager : NetworkedBehaviour
         NetworkingManager.Singleton.OnClientConnectedCallback += OnConnected;
 
         m_gameState.OnHalfEnd += EndHalf;
+
+        //m_players.ForEach((p) => { p.StartLoad(); });
     }
 
     public override void NetworkStart()
