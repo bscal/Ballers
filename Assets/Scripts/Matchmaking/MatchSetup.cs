@@ -52,7 +52,7 @@ public class MatchSetup : NetworkedBehaviour
         HostID = new CSteamID(hostSteamID);
         m_networkLobby.SetSteamIDToConnect(hostSteamID);
 
-        if (hostSteamID == ClientPlayer.Singleton.SteamID) SetupServer();
+        if (m_networkLobby.hostServer) SetupServer();
         else ConnectToServer();
 
         MatchReady();
