@@ -6,6 +6,7 @@ using MLAPI.Spawning;
 using MLAPI.Transports.UNET;
 using MLAPI.Transports.Tasks;
 using Steamworks;
+using MLAPI.Messaging;
 
 public class NetworkLobby : MonoBehaviour
 {
@@ -61,7 +62,7 @@ public class NetworkLobby : MonoBehaviour
         Debug.Log("Approving...");
         //Your logic here
         bool approve = true;
-        bool createPlayerObject = true;
+        bool createPlayerObject = false;
 
         ulong? prefabHash = SpawnManager.GetPrefabHashFromGenerator(null); // The prefab hash. Use null to use the default player prefab
 

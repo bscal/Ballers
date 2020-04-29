@@ -1,4 +1,5 @@
 ﻿using MLAPI;
+using MLAPI.Messaging;
 using MLAPI.SceneManagement;
 using Steamworks;
 using System.Collections;
@@ -13,13 +14,12 @@ public enum GameType
     FIVES
 }
 
-[RequireComponent(typeof(GameObject))]
-public class MatchSetup : MonoBehaviour
+public class MatchSetup : NetworkedBehaviour
 {
 
     private const string CONST_GAME_SCENE_NAME = "SampleScene";
 
-    public GameObject playerPrefab;
+    public GameObject loaderPrefab;
 
     public bool HasStarted { get; private set; } = false;
     public bool HasLoaded { get; private set; } = false;
@@ -30,16 +30,16 @@ public class MatchSetup : MonoBehaviour
     private GameType m_type;
     private NetworkLobby m_networkLobby;
 
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+    }
+
     void Start()
     {
-        if (playerPrefab == null)
-            Debug.LogError("Player prefab not added.");
-
         m_networkLobby = GameObject.Find("NetworkManager").GetComponent<NetworkLobby>();
 
         SceneManager.sceneLoaded += OnAferSceneLoaded;
-
-
     }
 
     void Update()
@@ -66,7 +66,6 @@ public class MatchSetup : MonoBehaviour
         if (NetworkingManager.Singleton.IsServer)
         {
             NetworkSceneManager.SwitchScene(CONST_GAME_SCENE_NAME);
-
         }
     }
 
@@ -86,9 +85,10 @@ public class MatchSetup : MonoBehaviour
         {
             HasLoaded = true;
 
-            GameObject go = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
-            NetworkedObject no = go.GetComponent<NetworkedObject>();
-            no.SpawnAsPlayerObject(no.OwnerClientId, null, false);
+            MatchLoader loader = loaderPrefab.GetComponent<MatchLoader>();
+
+            loader.InvokeServerRpc(loader.PlayerLoaded, NetworkingManager.Singleton.LocalClientId);
+
             print("scene loaded");
         }
     }

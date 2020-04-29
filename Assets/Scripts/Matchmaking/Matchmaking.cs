@@ -20,7 +20,7 @@ public class Matchmaking : MonoBehaviour
 
     private void Start()
     {
-        m_matchSetup = GetComponent<MatchSetup>();
+        m_matchSetup = GameObject.Find("MatchManager").GetComponent<MatchSetup>();
         m_CallbackLobbyEnter = new Callback<LobbyEnter_t>(OnLobbyJoin);
     }
 
