@@ -99,9 +99,15 @@ public class BallHandling : NetworkedBehaviour
 
     // =================================== Functions ===================================
 
+    private void Awake()
+    {
+        GameManager.Singleton.PlayerLoaded += OnPlayerLoaded;
+        GameManager.Singleton.GameStarted += OnGameStarted;
+    }
+
     void Start()
     {
-        StartCoroutine(UpdatePlayerDistances());
+
     }
 
     public override void NetworkStart()
@@ -118,16 +124,12 @@ public class BallHandling : NetworkedBehaviour
         m_possession = new NetworkedVarSByte(settings, -1);
         m_playerDistances = new Dictionary<ulong, float>();
 
-
         GameObject gamemanager = GameObject.Find("GameManager");
         m_gameManager = gamemanager.GetComponent<GameManager>();
         m_shotManager = gamemanager.GetComponent<ShotManager>();
-        m_playerObj = SpawnManager.GetLocalPlayerObject();
-        m_currentPlayer = m_playerObj.GetComponent<Player>();
         m_ball = NetworkedObject.gameObject;
         m_body = gameObject.GetComponent<Rigidbody>();
         m_body.AddForce(new Vector3(1, 1, 1), ForceMode.Impulse);
-        State = BallState.LOOSE;
     }
 
     void Update()
@@ -188,6 +190,22 @@ public class BallHandling : NetworkedBehaviour
             m_body.AddRelativeTorque(Vector3.forward * 10);
             if (m_currentPlayer) ChangeBallHandler(NO_PLAYER);
         }
+    }
+
+    public void OnPlayerLoaded()
+    {
+    }
+
+    public void OnGameStarted()
+    {
+        m_playerObj = SpawnManager.GetLocalPlayerObject();
+        m_currentPlayer = m_playerObj.GetComponent<Player>();
+        if (!gameObject.activeSelf)
+            gameObject.SetActive(true);
+        StopBall();
+        gameObject.transform.position = new Vector3(1, 3, 1);
+        StartCoroutine(UpdatePlayerDistances());
+        State = BallState.LOOSE;
     }
 
     // =================================== RPCs ===================================

@@ -20,6 +20,7 @@ public class GameManager : NetworkedBehaviour
 
     public event Action Pregame;
     public event Action GameStarted;
+    public event Action PlayerLoaded;
 
     private static BallHandling m_ballhandling;
     private static List<Player> m_players = new List<Player>();
@@ -112,6 +113,11 @@ public class GameManager : NetworkedBehaviour
         }
     }
 
+    public void LocalPlayerLoaded()
+    {
+        PlayerLoaded?.Invoke();
+    }
+
     public void StartGame()
     {
         if (IsClient)
@@ -127,13 +133,6 @@ public class GameManager : NetworkedBehaviour
     public void OnStartGame()
     {
         GameStarted?.Invoke();
-
-
-        if (!ball.activeSelf)
-            ball.SetActive(true);
-
-        m_ballhandling.StopBall();
-        ball.transform.position = new Vector3(1, 3, 1);
 
         Debug.Log("Game Starting!");
     }

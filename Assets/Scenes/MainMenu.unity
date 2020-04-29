@@ -155,7 +155,6 @@ GameObject:
   m_Component:
   - component: {fileID: 104518296}
   - component: {fileID: 104518295}
-  - component: {fileID: 104518294}
   m_Layer: 0
   m_Name: MatchManager
   m_TagString: Untagged
@@ -163,23 +162,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &104518294
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 104518293}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 209037615, guid: 01701b64234b4d523d8045142cbc73fa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  NetworkedInstanceId: 0
-  PrefabHash: 4439249810333279693
-  PrefabHashGenerator: MatchManager
-  AlwaysReplicateAsRoot: 0
-  DontDestroyWithOwner: 0
 --- !u!114 &104518295
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -192,7 +174,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3da36923e317d94cad0231d8c2c69f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 9132637102776717737, guid: b84da050e08d8a743bc9abfc6034bc8d,
+  loaderPrefab: {fileID: 1304583784701660350, guid: 5a15f7cbd00840f4e93da9d20a422f6d,
     type: 3}
 --- !u!4 &104518296
 Transform:
@@ -673,12 +655,12 @@ PrefabInstance:
     - target: {fileID: 3826671062112935201, guid: 2cf0204740b240345837345804dbec80,
         type: 3}
       propertyPath: NetworkConfig.RegisteredScenes.Array.data[1]
-      value: SampleScene
+      value: MainMenu
       objectReference: {fileID: 0}
     - target: {fileID: 3826671062112935201, guid: 2cf0204740b240345837345804dbec80,
         type: 3}
       propertyPath: NetworkConfig.RegisteredScenes.Array.data[0]
-      value: MainMenu
+      value: SampleScene
       objectReference: {fileID: 0}
     - target: {fileID: 3826671062112935201, guid: 2cf0204740b240345837345804dbec80,
         type: 3}
@@ -689,6 +671,11 @@ PrefabInstance:
         type: 3}
       propertyPath: NetworkConfig.CreatePlayerPrefab
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3826671062112935201, guid: 2cf0204740b240345837345804dbec80,
+        type: 3}
+      propertyPath: NetworkConfig.RegisteredScenes.Array.data[2]
+      value: MainMenu
       objectReference: {fileID: 0}
     - target: {fileID: 3826671062112935203, guid: 2cf0204740b240345837345804dbec80,
         type: 3}

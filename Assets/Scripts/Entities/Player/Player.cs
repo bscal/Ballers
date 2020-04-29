@@ -132,7 +132,6 @@ public class Player : NetworkedBehaviour, IBitWritable
             m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
         }
 
-        m_hasLoaded = true;
     }
 
     public override void NetworkStart()

@@ -17,7 +17,7 @@ public class FocusOnPlayer : MonoBehaviour
     {
         if (GetLocalPlayerObject)
         {
-            m_target = SpawnManager.GetLocalPlayerObject().gameObject;
+            m_target = SpawnManager.GetLocalPlayerObject()?.gameObject;
             Debug.LogError(string.Format("FocusOnPlayer: Target of GameObject: {0} is null? Did you forget to set something?", gameObject.name));
         }
         else
@@ -33,8 +33,11 @@ public class FocusOnPlayer : MonoBehaviour
 
     void Update()
     {
-        if (m_target == null)
-            m_target = SpawnManager.GetLocalPlayerObject().gameObject;
+        if (m_target == null) 
+        {
+            m_target = SpawnManager.GetLocalPlayerObject()?.gameObject;
+            return;
+        }
 
         transform.position = m_target.transform.position + offset;
     }

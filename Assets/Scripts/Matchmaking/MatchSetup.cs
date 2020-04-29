@@ -85,9 +85,9 @@ public class MatchSetup : NetworkedBehaviour
         {
             HasLoaded = true;
 
-            MatchLoader loader = loaderPrefab.GetComponent<MatchLoader>();
-
-            loader.InvokeServerRpc(loader.PlayerLoaded, NetworkingManager.Singleton.LocalClientId);
+            GameObject go = Instantiate(loaderPrefab);
+            MatchLoader loader = go.GetComponent<MatchLoader>();
+            loader.Load();
 
             print("scene loaded");
         }

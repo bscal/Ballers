@@ -29,7 +29,7 @@ public class FreeCamera : MonoBehaviour
 
     void Update()
     {
-        if (!m_movement)
+        if (m_movement == null)
             m_movement = SpawnManager.GetLocalPlayerObject()?.GetComponentInChildren<Movement>();
 
         if (m_camera.enabled)
@@ -44,7 +44,10 @@ public class FreeCamera : MonoBehaviour
             else if (Input.GetKey(KeyCode.LeftShift))
                 transform.Translate(0.0f, -upSpeed * Time.deltaTime, 0.0f);
         }
-        else if (!m_movement)
-            m_movement.isEnabled = false;
+    }
+
+    private void OnDisable()
+    {
+        m_movement.isEnabled = true;
     }
 }

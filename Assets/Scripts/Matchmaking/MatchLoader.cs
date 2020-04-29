@@ -15,11 +15,31 @@ public class MatchLoader : NetworkedBehaviour
         GameObject go = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
         NetworkedObject no = go.GetComponent<NetworkedObject>();
         no.SpawnAsPlayerObject(pid, null, false);
+
+        InvokeClientRpcOnClient(PlayerLoaded, pid);
     }
 
     [ClientRPC]
-    public void PlayersLoaded()
+    public void PlayerLoaded()
+    {
+        GameManager.Singleton.LocalPlayerLoaded();
+    }
+
+    [ClientRPC]
+    public void AllPlayersLoaded()
     {
 
     }
+
+    public void Load()
+    {
+        StartCoroutine(LoadCoroutine());
+    }
+
+    private IEnumerator LoadCoroutine()
+    {
+        yield return null;
+        InvokeServerRpc(PlayerLoaded, NetworkingManager.Singleton.LocalClientId);
+    }
+
 }
