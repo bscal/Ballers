@@ -3,7 +3,13 @@ guid: bd6355156dbf12f4bb1c8b302bbf0b14
 ModelImporter:
   serializedVersion: 19300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: defaultMat
+    second: {fileID: -3033667219593020291, guid: bd6355156dbf12f4bb1c8b302bbf0b14,
+      type: 3}
   materials:
     materialImportMode: 1
     materialName: 0
@@ -68,7 +74,7 @@ ModelImporter:
     blendShapeNormalImportMode: 1
     normalSmoothingSource: 0
   referencedClips: []
-  importAnimation: 1
+  importAnimation: 0
   humanDescription:
     serializedVersion: 3
     human: []
