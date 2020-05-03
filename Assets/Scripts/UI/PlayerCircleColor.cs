@@ -26,12 +26,15 @@ public class PlayerCircleColor : MonoBehaviour
         {
             if (p.Equals(current))
                 current.SetCircleColor(PLAYER_COLOR);
-            if (p.teamID == current.teamID)
+            else if (p.teamID == current.teamID)
                 p.SetCircleColor(ALLY_COLOR);
-            else if (p.teamID == -1)
-                p.SetCircleColor(DUMMY_COLOR);
             else
                 p.SetCircleColor(ENEMY_COLOR);
+        }
+
+        foreach (BasicDummy d in GameManager.GetDummies())
+        {
+            d.GetPlayer().SetCircleColor(DUMMY_COLOR);
         }
     }
 }

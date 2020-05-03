@@ -106,6 +106,7 @@ public class Player : NetworkedBehaviour, IBitWritable
 
     private void Start()
     {
+        m_playerCircle = GetComponentInChildren<SpriteRenderer>();
         if (!isDummy)
         {
             if (IsClient)
@@ -181,7 +182,7 @@ public class Player : NetworkedBehaviour, IBitWritable
                 m_leftHand = transform.Find("root/body/left arm/forearm/hand").gameObject;
                 m_center = transform.Find("Center").gameObject;
                 m_animator = GetComponentInChildren<Animator>();
-                m_playerCircle = transform.Find("PlayerCirlce").GetComponent<SpriteRenderer>();
+                m_playerCircle = transform.Find("Player Circle").GetComponent<SpriteRenderer>();
             }
 
             id = username.GetHashCode();

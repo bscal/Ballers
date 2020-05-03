@@ -24,6 +24,8 @@ public class BasicDummy : MonoBehaviour
     {
         m_player = GetComponent<Player>();
 
+        GameManager.AddDummy(this);
+
         switch (Type)
         {
             case DummyType.BASIC: break;
@@ -41,6 +43,11 @@ public class BasicDummy : MonoBehaviour
     void Update()
     {
 
+    }
+
+    public Player GetPlayer()
+    {
+        return m_player;
     }
 
 }

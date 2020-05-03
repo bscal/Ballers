@@ -28,6 +28,7 @@ public class GameManager : NetworkedBehaviour
     private static Dictionary<ulong, uint> m_playersByTeam = new Dictionary<ulong, uint>();
     private static Dictionary<ulong, ulong> m_playersBySteam = new Dictionary<ulong, ulong>();
 
+    private static List<BasicDummy> m_dummies = new List<BasicDummy>();
 
     public static Player BallHandler { get { return GetPlayer(m_ballhandling.PlayerWithBall); } }
     public static Basket CurrentBasket { get { return Singleton.baskets[m_ballhandling.PossessionOrHome]; } }
@@ -133,7 +134,7 @@ public class GameManager : NetworkedBehaviour
     public void OnStartGame()
     {
         GameStarted?.Invoke();
-
+        HasStarted = true;
         Debug.Log("Game Starting!");
     }
 
@@ -142,6 +143,18 @@ public class GameManager : NetworkedBehaviour
     {
         // Checks if already registered on server
         if (m_playersByID.TryGetValue(pid, out Player p)) 
+            return; // Already registered
+
+        NetworkedObject netObj = SpawnManager.GetPlayerObject(pid);
+        AddPlayer(netObj, steamid);
+        InvokeClientRpcOnEveryoneExcept(RegisterPlayerClient, pid, pid, steamid);
+    }
+
+    [ServerRPC]
+    public void RegisterNPCServer(ulong pid, ulong steamid)
+    {
+        // Checks if already registered on server
+        if (m_playersByID.TryGetValue(pid, out Player p))
             return; // Already registered
 
         NetworkedObject netObj = SpawnManager.GetPlayerObject(pid);
@@ -323,6 +336,16 @@ public class GameManager : NetworkedBehaviour
     public static Dictionary<ulong, uint> GetPlayersByTeam()
     {
         return m_playersByTeam;
+    }
+
+    public static List<BasicDummy> GetDummies()
+    {
+        return m_dummies;
+    }
+
+    public static void AddDummy(BasicDummy dummy)
+    {
+        m_dummies.Add(dummy);
     }
 
     public static Basket GetBasket()
