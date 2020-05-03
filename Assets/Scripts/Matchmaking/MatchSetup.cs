@@ -20,6 +20,8 @@ public class MatchSetup : NetworkedBehaviour
     private const string CONST_GAME_SCENE_NAME = "SampleScene";
 
     public GameObject loaderPrefab;
+    public GameObject loadingCanvas;
+    public LoadingScreen loadingScreen;
 
     public bool HasStarted { get; private set; } = false;
     public bool HasLoaded { get; private set; } = false;
@@ -81,6 +83,10 @@ public class MatchSetup : NetworkedBehaviour
 
     private void OnAferSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
     {
+        GameObject canvas = Instantiate(loadingCanvas);
+        loadingScreen = canvas.GetComponent<LoadingScreen>();
+        loadingScreen.enabled = true;
+
         if (scene.name == CONST_GAME_SCENE_NAME)
         {
             HasLoaded = true;
@@ -91,6 +97,8 @@ public class MatchSetup : NetworkedBehaviour
 
             print("scene loaded");
         }
+
+        loadingScreen.enabled = false;
     }
 
     private IEnumerator LoadGame()
