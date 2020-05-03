@@ -101,6 +101,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     private Animator m_animator;
     private ShotController m_shotController;
     private ShotManager m_shotManager;
+    private SpriteRenderer m_playerCircle;
     private bool m_hasLoaded = false;
 
     private void Start()
@@ -180,6 +181,7 @@ public class Player : NetworkedBehaviour, IBitWritable
                 m_leftHand = transform.Find("root/body/left arm/forearm/hand").gameObject;
                 m_center = transform.Find("Center").gameObject;
                 m_animator = GetComponentInChildren<Animator>();
+                m_playerCircle = transform.Find("PlayerCirlce").GetComponent<SpriteRenderer>();
             }
 
             id = username.GetHashCode();
@@ -272,6 +274,11 @@ public class Player : NetworkedBehaviour, IBitWritable
     public GameObject GetRightHand()
     {
         return m_rightHand;
+    }
+
+    public void SetCircleColor(Color color)
+    {
+        m_playerCircle.color = color;
     }
 
     private void OnGameStarted()
