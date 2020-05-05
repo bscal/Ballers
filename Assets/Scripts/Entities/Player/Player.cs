@@ -324,6 +324,7 @@ public class Player : NetworkedBehaviour, IBitWritable
         using (PooledBitReader reader = PooledBitReader.Get(stream))
         {
             teamID =                Convert.ToInt32(reader.ReadBit());
+
             isRightHanded =         reader.ReadBool();
             isDribbling =           reader.ReadBool();
             isMoving =              reader.ReadBool();
@@ -332,15 +333,16 @@ public class Player : NetworkedBehaviour, IBitWritable
             isScreening =           reader.ReadBool();
             isHardScreening =       reader.ReadBool();
             isShooting =            reader.ReadBool();
+
             isHelping =             reader.ReadBool();
             isMovementFrozen =      reader.ReadBool();
             isBallInLeftHand =      reader.ReadBool();
             isCtrlDown =            reader.ReadBool();
             isAltDown =             reader.ReadBool();
-
             isDribUp =              reader.ReadBool();
             isDribDown =            reader.ReadBool();
             isDribLeft =            reader.ReadBool();
+
             isDribRight =           reader.ReadBool();
 
             m_target =              reader.ReadVector3Packed();
@@ -352,6 +354,7 @@ public class Player : NetworkedBehaviour, IBitWritable
         using (PooledBitWriter writer = PooledBitWriter.Get(stream))
         {
             writer.WriteBit(Convert.ToBoolean(teamID));
+
             writer.WriteBool(isRightHanded);
             writer.WriteBool(isDribbling);
             writer.WriteBool(isMoving);
@@ -360,15 +363,16 @@ public class Player : NetworkedBehaviour, IBitWritable
             writer.WriteBool(isScreening);
             writer.WriteBool(isHardScreening);
             writer.WriteBool(isShooting);
+
             writer.WriteBool(isHelping);
             writer.WriteBool(isMovementFrozen);
             writer.WriteBool(isBallInLeftHand); 
             writer.WriteBool(isCtrlDown);
             writer.WriteBool(isAltDown);
-
             writer.WriteBool(isDribUp);
             writer.WriteBool(isDribDown);
             writer.WriteBool(isDribLeft);
+
             writer.WriteBool(isDribRight);
 
             writer.WriteVector3Packed(m_target);

@@ -20,6 +20,9 @@ public class MatchSetup : NetworkedBehaviour
     private const string CONST_GAME_SCENE_NAME = "SampleScene";
 
     public GameObject loaderPrefab;
+
+    public LoadingScreen currentScreen;
+
     public GameObject loadingCanvas;
     public LoadingScreen loadingScreen;
 

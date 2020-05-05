@@ -69,8 +69,8 @@ public class GameManager : NetworkedBehaviour
 
         centerCourt = GameObject.Find("CenterCourt").transform.position;
 
-        teams[0] = new Team(0, teamSize);
-        teams[1] = new Team(1, teamSize);
+        teams[0] = new Team((int)TeamType.HOME, teamSize);
+        teams[1] = new Team((int)TeamType.AWAY, teamSize);
 
         inbounds = GameObject.FindGameObjectsWithTag("Inbound");
     }
