@@ -88,7 +88,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     public float DistanceFromTarget { get { return Vector3.Distance(transform.position, m_target); } }
     public Player Assignment { get
         {
-            if (isHelping) return GameManager.BallHandler;
+            if (isHelping) return GameManager.Singleton.BallHandler;
             else return GetNearestEnemy();
         } }
 
@@ -156,7 +156,7 @@ public class Player : NetworkedBehaviour, IBitWritable
 
         GameObject.Find("Cube").transform.position = transform.position + transform.forward * 3 + transform.up * 3;
 
-        m_target = GameManager.Singleton.baskets[GameManager.Possession].gameObject.transform.position;
+        m_target = GameManager.Singleton.baskets[GameManager.Singleton.Possession].gameObject.transform.position;
     }
 
     public void StartLoad()
@@ -264,7 +264,7 @@ public class Player : NetworkedBehaviour, IBitWritable
 
     public bool OnOffense()
     {
-        return GameManager.Possession == teamID;
+        return GameManager.Singleton.Possession == teamID;
     }
 
     public GameObject GetLeftHand()
@@ -286,12 +286,6 @@ public class Player : NetworkedBehaviour, IBitWritable
     {
     }
 
-    private Player GetPlayerByPosition(Team team, int position)
-    {
-        return (team.players[position]) ? team.players[position] : team.players[0];
-    }
-
-
     private Player GetNearestEnemy()
     {
         Player shortestPlayer = null;
@@ -300,7 +294,7 @@ public class Player : NetworkedBehaviour, IBitWritable
         Team enemyTeam = GameManager.Singleton.teams[teamID ^ 1];
         for (int i = 0; i < GameManager.Singleton.teamSize; i++)
         {
-            Player p = enemyTeam.players[i];
+            Player p = GameManager.GetPlayer(enemyTeam.playersInPosition[i]);
             if (!p) continue;
             float dist = Vector3.Distance(transform.position, p.transform.position);
             if (dist < shortestDist)

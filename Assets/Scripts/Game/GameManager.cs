@@ -30,9 +30,9 @@ public class GameManager : NetworkedBehaviour
 
     private static List<BasicDummy> m_dummies = new List<BasicDummy>();
 
-    public static Player BallHandler { get { return GetPlayer(m_ballhandling.PlayerWithBall); } }
-    public static Basket CurrentBasket { get { return Singleton.baskets[m_ballhandling.PossessionOrHome]; } }
-    public static int Possession { get { return m_ballhandling.PossessionOrHome; } }
+    public Player BallHandler { get { return GetPlayer(m_ballhandling.PlayerWithBall); } }
+    public Basket CurrentBasket { get { return Singleton.baskets[m_ballhandling.PossessionOrHome]; } }
+    public int Possession { get { return m_ballhandling.PossessionOrHome; } }
 
     public Team TeamHome { get { return teams[0]; } }
     public Team TeamAway { get { return teams[1]; } }
@@ -338,6 +338,12 @@ public class GameManager : NetworkedBehaviour
         return m_playersByTeam;
     }
 
+    public static Player GetPlayerByPosition(Team team, int position)
+    {
+        if (position < 0 || position > team.playersInPosition.Length) return GetPlayer(team.playersInPosition[0]);
+        return GetPlayer(team.playersInPosition[position]);
+    }
+
     public static List<BasicDummy> GetDummies()
     {
         return m_dummies;
@@ -350,7 +356,7 @@ public class GameManager : NetworkedBehaviour
 
     public static Basket GetBasket()
     {
-        return CurrentBasket;
+        return Singleton.CurrentBasket;
     }
 
     private void OnConnected(ulong client)

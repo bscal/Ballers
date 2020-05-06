@@ -275,7 +275,7 @@ public class BallHandling : NetworkedBehaviour
     //TODO
     private IEnumerator FollowBackboard(ShotData shot, Vector3 start, Vector3 end, float height, float duration)
     {
-        Vector3 bankPos = GameManager.Singleton.baskets[GameManager.Possession].banks[(int)shot.bankshot].transform.position;
+        Vector3 bankPos = GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[(int)shot.bankshot].transform.position;
         float startTime = Time.time;
         float fracComplete;
 
