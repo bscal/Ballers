@@ -91,7 +91,7 @@ public class SyncedMatchState : NetworkedBehaviour
     [ClientRPC]
     public void SyncMatchState(float lastSync, SyncedMatchStateData state)
     {
-
+        m_gm.SyncState(state);
     }
    
 }

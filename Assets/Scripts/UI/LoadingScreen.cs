@@ -18,6 +18,7 @@ public class LoadingScreen : MonoBehaviour
 
     void OnEnable()
     {
+        loadingPanel = transform.GetChild(0).gameObject;
         loadingPanel.SetActive(true);
         tipDate.index = Random.Range(0, tipDate.tips.Length);
         text.text = tipDate.tips[tipDate.index];

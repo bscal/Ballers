@@ -375,4 +375,28 @@ public class GameManager : NetworkedBehaviour
     {
         print(1);
     }
+
+    /// <summary>
+    /// Synces the state the the given state data.
+    /// This sync is done throughout the game.
+    /// </summary>
+    /// <param name="state"></param>
+    public void SyncState(SyncedMatchStateData state)
+    {
+        HasStarted = state.hasStarted;
+        m_ballhandling.PlayerWithBall = state.playerWithBall;
+        m_ballhandling.Possession = state.teamWithPossession;
+        teams[(int)TeamType.HOME] = state.teams[(int)TeamType.HOME];
+        teams[(int)TeamType.AWAY] = state.teams[(int)TeamType.AWAY];
+    }
+
+    /// <summary>
+    /// Syncs the essential data with the given client.
+    /// Useful for reconnects, host changes, new connections.
+    /// </summary>
+    public void FullGameSync(ulong clientid)
+    {
+
+    }
+
 }

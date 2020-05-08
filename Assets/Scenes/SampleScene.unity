@@ -673,7 +673,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_AdditionalShaderChannelsFlag: 25
+  m_AdditionalShaderChannelsFlag: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -12647,6 +12647,7 @@ GameObject:
   - component: {fileID: 1132911715}
   - component: {fileID: 1132911718}
   - component: {fileID: 1132911716}
+  - component: {fileID: 1132911723}
   - component: {fileID: 1132911717}
   - component: {fileID: 1132911719}
   - component: {fileID: 1132911720}
@@ -12741,6 +12742,15 @@ MonoBehaviour:
   ball: {fileID: 0}
   centerCourt: {x: 0, y: 0, z: 0}
   inboundPositions: []
+  teams:
+  - id: 0
+    playersInPosition: 
+    points: 0
+    fouls: 0
+  - id: 0
+    playersInPosition: 
+    points: 0
+    fouls: 0
   baskets:
   - {fileID: 0}
   - {fileID: 0}
@@ -12801,6 +12811,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e149da408be8ed544aaa202ba4d68288, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1132911723
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1132911713}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1266f91d4251b1845ac8124862ae2686, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1161903382
