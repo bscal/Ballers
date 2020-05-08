@@ -137,7 +137,7 @@ public class ShotManager : MonoBehaviour
 
     private BankType IsBankShot(Player p)
     {
-        if (ShotController.GetShotRange(m_type) == ShotRange.CLOSE)
+        if (m_type == ShotType.LAYUP && ShotController.GetShotRange(m_type) == ShotRange.CLOSE)
         {
             if (p.isDribLeft) return BankType.LEFT;
             else if (p.isDribRight) return BankType.RIGHT;

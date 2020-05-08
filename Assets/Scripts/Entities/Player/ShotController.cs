@@ -44,7 +44,6 @@ public class ShotController : MonoBehaviour
         {
             if (p.isSprinting) return ShotType.DUNK;
             else if (p.isMoving) return ShotType.LAYUP;
-            
         }
 
         return ShotType.SHOT;

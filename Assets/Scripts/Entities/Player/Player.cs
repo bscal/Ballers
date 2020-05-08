@@ -77,13 +77,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     public Transform OwnBasket { get { return GameManager.Singleton.baskets[teamID].transform; } }
     public bool OnLeftSide { get { return transform.position.x < 0; } }
     private Vector3 m_target;
-    public Vector3 LookTarget
-    {
-        get
-        {
-            return m_target;
-        }
-    }
+    public Vector3 LookTarget { get { return m_target; } }
     public Quaternion LookRotation { get { return Quaternion.LookRotation(m_target); } }
     public float DistanceFromTarget { get { return Vector3.Distance(transform.position, m_target); } }
     public Player Assignment { get
@@ -102,7 +96,6 @@ public class Player : NetworkedBehaviour, IBitWritable
     private ShotController m_shotController;
     private ShotManager m_shotManager;
     private SpriteRenderer m_playerCircle;
-    private bool m_hasLoaded = false;
 
     private void Start()
     {
@@ -146,7 +139,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     {
         if (!IsOwner || isDummy) return;
 
-        if (!m_hasLoaded) return;
+        if (!GameManager.Singleton.HasStarted) return;
 
         m_animator.SetBool("hasBall", HasBall);
         m_animator.SetBool("hasBallInLeft", isBallInLeftHand);
@@ -189,7 +182,6 @@ public class Player : NetworkedBehaviour, IBitWritable
             m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
         }
 
-        m_hasLoaded = true;
     }
 
     public void ShootBall()
@@ -220,6 +212,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     [ClientRPC]
     public void ClientShootBall(ShotType type, bool leftHanded, float speed, float bonusHeight, float start, float end)
     {
+        print(type);
         isShooting = true;
         if (isCtrlDown)
             ChangeHand();
