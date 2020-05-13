@@ -44,11 +44,11 @@ public class Player : NetworkedBehaviour, IBitWritable
     [Header("Player Data")]
     public int teamID;
 
+    // Client Values
     public bool isRightHanded = true;
-    public bool isDribbling = false;
+
     public bool isMoving = false;
     public bool isSprinting = false;
-    public bool isInsideThree = false;
     public bool isScreening = false;
     public bool isHardScreening = false;
     public bool isShooting = false;
@@ -63,13 +63,13 @@ public class Player : NetworkedBehaviour, IBitWritable
     public bool isDribLeft = false;
     public bool isDribRight = false;
 
+    // Server values
+    public bool isDribbling = false;
+    public bool isInsideThree = false;
+    public bool isInbounds = false;
+
     public ClientPlayer ClientPlayer { get; private set; }
-    public bool HasBall
-    { get
-        {
-            return GameManager.GetBallHandling().PlayerWithBall == OwnerClientId || isDummy && GameManager.GetBallHandling().PlayerWithBall == BallHandling.DUMMY_PLAYER;
-        }
-    }
+    public bool HasBall { get; set; } = false;
     public Vector3 RightHand { get { return m_rightHand.transform.position; } }
     public Vector3 LeftHand { get { return m_leftHand.transform.position; } }
     public Vector3 GetHand { get { return (isBallInLeftHand) ? LeftHand : RightHand; } }
@@ -80,11 +80,14 @@ public class Player : NetworkedBehaviour, IBitWritable
     public Vector3 LookTarget { get { return m_target; } }
     public Quaternion LookRotation { get { return Quaternion.LookRotation(m_target); } }
     public float DistanceFromTarget { get { return Vector3.Distance(transform.position, m_target); } }
-    public Player Assignment { get
+    public Player Assignment
+    {
+        get
         {
             if (isHelping) return GameManager.Singleton.BallHandler;
             else return GetNearestEnemy();
-        } }
+        }
+    }
 
     [SerializeField]
     private GameObject m_rightHand;
@@ -216,7 +219,7 @@ public class Player : NetworkedBehaviour, IBitWritable
         isShooting = true;
         if (isCtrlDown)
             ChangeHand();
-        m_shotmeter.OnShoot(this, speed, bonusHeight ,start, end);
+        m_shotmeter.OnShoot(this, speed, bonusHeight, start, end);
         PlayAnimationForType(type, leftHanded);
     }
 
@@ -295,7 +298,7 @@ public class Player : NetworkedBehaviour, IBitWritable
                 shortestPlayer = p;
                 shortestDist = dist;
             }
-            
+
         }
 
         return shortestPlayer;
@@ -306,33 +309,42 @@ public class Player : NetworkedBehaviour, IBitWritable
         isBallInLeftHand = !isBallInLeftHand;
     }
 
+    [ClientRPC]
+    public void ReadPlayerFromServer(Stream stream)
+    {
+        using (PooledBitReader reader = PooledBitReader.Get(stream))
+        {
+            isInsideThree = reader.ReadBit();
+            isInbounds = reader.ReadBit();
+            HasBall = reader.ReadBit();
+        }
+    }
+
     public void Read(Stream stream)
     {
         using (PooledBitReader reader = PooledBitReader.Get(stream))
         {
-            teamID =                Convert.ToInt32(reader.ReadBit());
+            teamID = Convert.ToInt32(reader.ReadBit());
 
-            isRightHanded =         reader.ReadBool();
-            isDribbling =           reader.ReadBool();
-            isMoving =              reader.ReadBool();
-            isSprinting =           reader.ReadBool();
-            isInsideThree =         reader.ReadBool();
-            isScreening =           reader.ReadBool();
-            isHardScreening =       reader.ReadBool();
-            isShooting =            reader.ReadBool();
+            isRightHanded = reader.ReadBool();
+            isMoving = reader.ReadBool();
+            isSprinting = reader.ReadBool();
+            isDribbling = reader.ReadBit();
+            isScreening = reader.ReadBool();
+            isHardScreening = reader.ReadBool();
+            isShooting = reader.ReadBool();
+            isHelping = reader.ReadBool();
 
-            isHelping =             reader.ReadBool();
-            isMovementFrozen =      reader.ReadBool();
-            isBallInLeftHand =      reader.ReadBool();
-            isCtrlDown =            reader.ReadBool();
-            isAltDown =             reader.ReadBool();
-            isDribUp =              reader.ReadBool();
-            isDribDown =            reader.ReadBool();
-            isDribLeft =            reader.ReadBool();
+            isMovementFrozen = reader.ReadBool();
+            isBallInLeftHand = reader.ReadBool();
+            isCtrlDown = reader.ReadBool();
+            isAltDown = reader.ReadBool();
+            isDribUp = reader.ReadBool();
+            isDribDown = reader.ReadBool();
+            isDribLeft = reader.ReadBool();
+            isDribRight = reader.ReadBool();
 
-            isDribRight =           reader.ReadBool();
-
-            m_target =              reader.ReadVector3Packed();
+            m_target = reader.ReadVector3Packed();
         }
     }
 
@@ -343,24 +355,23 @@ public class Player : NetworkedBehaviour, IBitWritable
             writer.WriteBit(Convert.ToBoolean(teamID));
 
             writer.WriteBool(isRightHanded);
-            writer.WriteBool(isDribbling);
             writer.WriteBool(isMoving);
             writer.WriteBool(isSprinting);
-            writer.WriteBool(isInsideThree);
+            writer.WriteBool(isDribbling);
             writer.WriteBool(isScreening);
             writer.WriteBool(isHardScreening);
             writer.WriteBool(isShooting);
-
             writer.WriteBool(isHelping);
+
             writer.WriteBool(isMovementFrozen);
-            writer.WriteBool(isBallInLeftHand); 
+            writer.WriteBool(isBallInLeftHand);
             writer.WriteBool(isCtrlDown);
             writer.WriteBool(isAltDown);
             writer.WriteBool(isDribUp);
             writer.WriteBool(isDribDown);
             writer.WriteBool(isDribLeft);
-
             writer.WriteBool(isDribRight);
+            //
 
             writer.WriteVector3Packed(m_target);
         }

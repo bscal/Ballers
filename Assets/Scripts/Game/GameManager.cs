@@ -25,7 +25,6 @@ public class GameManager : NetworkedBehaviour
     private static BallHandling m_ballhandling;
     private static List<Player> m_players = new List<Player>();
     private static Dictionary<ulong, Player> m_playersByID = new Dictionary<ulong, Player>();
-    private static Dictionary<ulong, uint> m_playersByTeam = new Dictionary<ulong, uint>();
     private static Dictionary<ulong, ulong> m_playersBySteam = new Dictionary<ulong, ulong>();
 
     private static List<BasicDummy> m_dummies = new List<BasicDummy>();
@@ -207,6 +206,11 @@ public class GameManager : NetworkedBehaviour
         }
     }
 
+    public void Turnover()
+    {
+        print("turnover");
+    }
+
     public void EndHalf()
     {
         TeamHome.id = 1;
@@ -280,7 +284,6 @@ public class GameManager : NetworkedBehaviour
 
         m_players.Add(p);
         m_playersByID.Add(netObj.OwnerClientId, p);
-        m_playersByTeam.Add(netObj.OwnerClientId, teamid);
         m_playersBySteam.Add(netObj.OwnerClientId, steamid);
     }
 
@@ -297,7 +300,6 @@ public class GameManager : NetworkedBehaviour
 
         m_players.Remove(p);
         m_playersByID.Remove(netObj.OwnerClientId);
-        m_playersByTeam.Remove(netObj.OwnerClientId);
         m_playersBySteam.Remove(netObj.OwnerClientId);
     }
 
@@ -333,10 +335,6 @@ public class GameManager : NetworkedBehaviour
         return m_players;
     }
 
-    public static Dictionary<ulong, uint> GetPlayersByTeam()
-    {
-        return m_playersByTeam;
-    }
 
     public static Player GetPlayerByPosition(Team team, int position)
     {
