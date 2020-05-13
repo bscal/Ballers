@@ -176,6 +176,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   loaderPrefab: {fileID: 1304583784701660350, guid: 5a15f7cbd00840f4e93da9d20a422f6d,
     type: 3}
+  currentScreen: {fileID: 0}
   loadingCanvas: {fileID: 6088395088423292034, guid: 53badf5109b80974ab416c40a437d5f8,
     type: 3}
   loadingScreen: {fileID: 0}
@@ -3773,7 +3774,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1870889555}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ef4bffeda13d7a748973ff9204401c07, type: 3}
+  m_Script: {fileID: 11500000, guid: c9eed726e08e1a04db18c970c2c1b8a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &1870889557

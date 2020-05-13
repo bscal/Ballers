@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using MLAPI;
+using MLAPI.Spawning;
+using UnityEngine;
 
 public class ThreePointCollision : MonoBehaviour
 {
@@ -7,17 +9,25 @@ public class ThreePointCollision : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.gameObject.CompareTag(PLAYER_TAG))
+        if (NetworkingManager.Singleton.IsServer)
         {
-            GameManager.GetPlayer().isInsideThree = true;
+            if (other.gameObject.CompareTag(PLAYER_TAG))
+            {
+                Player p = other.gameObject.GetComponent<Player>();
+                p.isInsideThree = true;
+            }
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.CompareTag(PLAYER_TAG))
+        if (NetworkingManager.Singleton.IsServer)
         {
-            GameManager.GetPlayer().isInsideThree = false;
+            if (other.gameObject.CompareTag(PLAYER_TAG))
+            {
+                Player p = other.gameObject.GetComponent<Player>();
+                p.isInsideThree = false;
+            }
         }
     }
 }

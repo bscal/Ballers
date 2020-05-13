@@ -8,6 +8,7 @@ TagManager:
   - Dummy
   - Inbound
   - Not Mirrorable
+  - Bounds Trigger
   layers:
   - Default
   - TransparentFX
