@@ -76,17 +76,21 @@ public class Player : NetworkedBehaviour, IBitWritable
     public Vector3 CenterPos { get { return m_center.transform.position; } }
     public Transform OwnBasket { get { return GameManager.Singleton.baskets[teamID].transform; } }
     public bool OnLeftSide { get { return transform.position.x < 0; } }
+
     private Vector3 m_target;
     public Vector3 LookTarget { get { return m_target; } }
     public Quaternion LookRotation { get { return Quaternion.LookRotation(m_target); } }
     public float DistanceFromTarget { get { return Vector3.Distance(transform.position, m_target); } }
+    private Player m_assignment;
     public Player Assignment
     {
         get
         {
             if (isHelping) return GameManager.Singleton.BallHandler;
+            else if (!OnOffense()) return m_assignment;
             else return GetNearestEnemy();
         }
+        set { m_assignment = value; }
     }
 
     [SerializeField]

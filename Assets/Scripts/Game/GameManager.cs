@@ -81,6 +81,7 @@ public class GameManager : NetworkedBehaviour
         m_gameState.OnHalfEnd += EndHalf;
 
         //m_players.ForEach((p) => { p.StartLoad(); });
+
     }
 
     public override void NetworkStart()

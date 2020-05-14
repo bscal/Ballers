@@ -15,15 +15,19 @@ public class BasicDummy : MonoBehaviour
     [Header("Dummy Type")]
     [Tooltip("The type of dummy to create")]
     [SerializeField]
-    private DummyType m_type;
+    protected DummyType m_type;
     public DummyType Type { get { return m_type; } }
 
-    private Player m_player;
+    protected Player m_player;
 
-    void Start()
+    protected void Awake()
     {
         m_player = GetComponent<Player>();
+        m_player.teamID = (int)TeamType.AWAY;
+    }
 
+    protected void Start()
+    {
         GameManager.AddDummy(this);
 
         switch (Type)
@@ -32,17 +36,13 @@ public class BasicDummy : MonoBehaviour
             case DummyType.SCREENER:
                 m_player.isScreening = true;
                 break;
-
             default: break;
-
-
-
         }
+
     }
 
     void Update()
     {
-
     }
 
     public Player GetPlayer()
