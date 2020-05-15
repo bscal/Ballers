@@ -8,8 +8,8 @@ public class DefenderDummy : BasicDummy
 
     protected new void Start()
     {
-        GameManager.Singleton.GameStarted += OnGameStarted;
         base.Start();
+        GameManager.Singleton.GameStarted += OnGameStarted;
     }
 
     private void OnGameStarted()
