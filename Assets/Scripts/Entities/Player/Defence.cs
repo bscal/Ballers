@@ -9,6 +9,7 @@ public class Defence : MonoBehaviour
 
     private bool m_showTrackers = true;
     private Player m_player;
+    private Vector3 m_contestLook;
 
     private void Awake()
     {
@@ -29,8 +30,15 @@ public class Defence : MonoBehaviour
         if (!GameManager.Singleton.HasStarted) return;
         if (m_showTrackers)
         {
-            contestTracker.transform.position = m_player.transform.position + m_player.transform.forward;
-            //contestTracker.transform.Rotate(m_player.transform.forward);
+            m_contestLook = m_player.transform.position + m_player.transform.forward;
+            contestTracker.transform.position = m_contestLook;
+
+
+            contestTracker.transform.LookAt(m_contestLook + m_player.transform.forward * 2);
+            contestTracker.transform.rotation = Quaternion.Euler(0f, contestTracker.transform.eulerAngles.y, 0f);
+
+            //transform.LookAt(Vector3.forward, Vector3.Cross(Vector3.forward, (m_player.transform.position + m_player.transform.forward * 2) - contestTracker.transform.position));
+
         }
     }
 
