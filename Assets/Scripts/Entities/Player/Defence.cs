@@ -33,12 +33,8 @@ public class Defence : MonoBehaviour
             m_contestLook = m_player.transform.position + m_player.transform.forward;
             contestTracker.transform.position = m_contestLook;
 
-
             contestTracker.transform.LookAt(m_contestLook + m_player.transform.forward * 2);
             contestTracker.transform.rotation = Quaternion.Euler(0f, contestTracker.transform.eulerAngles.y, 0f);
-
-            //transform.LookAt(Vector3.forward, Vector3.Cross(Vector3.forward, (m_player.transform.position + m_player.transform.forward * 2) - contestTracker.transform.position));
-
         }
     }
 

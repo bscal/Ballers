@@ -18,21 +18,23 @@ public class GameManager : NetworkedBehaviour
 
     public static GameManager Singleton { get; private set; }
 
-    public event Action Pregame;
+    public event Action<MatchSettings> Pregame;
     public event Action GameStarted;
+    public event Action GameBegin;
+    public event Action GameEnd;
     public event Action PlayerLoaded;
+    public event Action<ulong> PlayerConnected;
+    public event Action<ulong> AllPlayersConnected;
 
     private static BallHandling m_ballhandling;
-    private static List<Player> m_players = new List<Player>();
-    private static Dictionary<ulong, Player> m_playersByID = new Dictionary<ulong, Player>();
-    private static Dictionary<ulong, ulong> m_playersBySteam = new Dictionary<ulong, ulong>();
-
-    private static List<BasicDummy> m_dummies = new List<BasicDummy>();
+    private readonly static List<Player> m_players = new List<Player>();
+    private readonly static Dictionary<ulong, Player> m_playersByID = new Dictionary<ulong, Player>();
+    private readonly static Dictionary<ulong, ulong> m_playersBySteam = new Dictionary<ulong, ulong>();
+    private readonly static List<BasicDummy> m_dummies = new List<BasicDummy>();
 
     public Player BallHandler { get { return GetPlayer(m_ballhandling.PlayerWithBall); } }
     public Basket CurrentBasket { get { return Singleton.baskets[m_ballhandling.PossessionOrHome]; } }
     public int Possession { get { return m_ballhandling.PossessionOrHome; } }
-
     public Team TeamHome { get { return teams[0]; } }
     public Team TeamAway { get { return teams[1]; } }
     public bool HasStarted { get; private set; }
@@ -160,17 +162,18 @@ public class GameManager : NetworkedBehaviour
         NetworkedObject netObj = SpawnManager.GetPlayerObject(pid);
         AddPlayer(netObj, steamid);
         InvokeClientRpcOnEveryoneExcept(RegisterPlayerClient, pid, pid, steamid);
+        PlayerConnected?.Invoke(pid);
     }
 
     [ClientRPC]
     public void RegisterPlayerClient(ulong pid, ulong steamid)
     {
-        print(4);
         NetworkedObject netObj = SpawnManager.GetPlayerObject(pid);
 
         if (netObj.IsOwnedByServer) return;
 
         AddPlayer(netObj, steamid);
+        PlayerConnected?.Invoke(pid);
     }
 
     [ServerRPC]
@@ -203,7 +206,7 @@ public class GameManager : NetworkedBehaviour
 
             if (netObj.IsOwnedByServer || netObj.IsLocalPlayer) return;
 
-            AddPlayer(netObj, teamids[i], steamids[i]);
+            AddPlayer(netObj, steamids[i]);
         }
     }
 
@@ -268,11 +271,6 @@ public class GameManager : NetworkedBehaviour
     }
 
     public static void AddPlayer(NetworkedObject netObj, ulong steamid)
-    {
-        AddPlayer(netObj, 0, steamid);
-    }
-
-    public static void AddPlayer(NetworkedObject netObj, uint teamid, ulong steamid)
     {
         print("Adding player " + netObj.OwnerClientId + " " + netObj.NetworkId + " " + steamid);
         Player p = netObj.gameObject.GetComponent<Player>();
