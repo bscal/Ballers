@@ -1,14 +1,17 @@
-﻿using System.Collections;
+﻿using MLAPI;
+using MLAPI.Messaging;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GameSetup : MonoBehaviour
+public class GameSetup : NetworkedBehaviour
 {
     private const string DEFAULT_LOADING_MSG = "Loading...";
     private const string NETWORK_LOADING_MSG = "Logging you in...";
 
     public bool hasClientLoaded = false;
+    public GameObject playerPrefab;
 
     private GameObject m_loadingScreen;
     private Image m_image;
@@ -29,6 +32,8 @@ public class GameSetup : MonoBehaviour
         m_image.enabled = true;
 
         m_text = m_loadingScreen.GetComponentInChildren<Text>();
+
+        StartCoroutine(LoadCoroutine());
     }
 
     void Update()
@@ -51,5 +56,33 @@ public class GameSetup : MonoBehaviour
     public void SetLoadingText(string text)
     {
         m_text.text = text;
+    }
+
+    [ServerRPC]
+    public void PlayerLoaded(ulong pid)
+    {
+        GameObject go = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+        NetworkedObject no = go.GetComponent<NetworkedObject>();
+        no.SpawnAsPlayerObject(pid, null, false);
+
+        InvokeClientRpcOnClient(PlayerLoaded, pid);
+    }
+
+    [ClientRPC]
+    public void PlayerLoaded()
+    {
+        GameManager.Singleton.LocalPlayerLoaded();
+    }
+
+    [ClientRPC]
+    public void AllPlayersLoaded()
+    {
+
+    }
+
+    private IEnumerator LoadCoroutine()
+    {
+        yield return null;
+        InvokeServerRpc(PlayerLoaded, NetworkingManager.Singleton.LocalClientId);
     }
 }
