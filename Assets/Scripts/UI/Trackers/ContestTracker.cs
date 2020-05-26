@@ -17,7 +17,7 @@ public class ContestTracker : MonoBehaviour
 
     }
 
-    void OnPlayerLoaded()
+    void OnPlayerLoaded(Player p)
     {
 
     }

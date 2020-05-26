@@ -192,7 +192,7 @@ public class BallHandling : NetworkedBehaviour
         }
     }
 
-    public void OnPlayerLoaded()
+    public void OnPlayerLoaded(Player p)
     {
     }
 

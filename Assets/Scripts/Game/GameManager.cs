@@ -23,6 +23,7 @@ public class GameManager : NetworkedBehaviour
     public event Action GameBegin;
     public event Action GameEnd;
     public event Action<Player> PlayerLoaded;
+    public event Action<Player> LocalPlayerLoaded;
     public event Action<ulong> PlayerConnected;
     public event Action<ulong> AllPlayersConnected;
 
@@ -116,9 +117,9 @@ public class GameManager : NetworkedBehaviour
         }
     }
 
-    public void LocalPlayerLoaded()
+    public void LocalPlayerInitilized()
     {
-        PlayerLoaded?.Invoke();
+        LocalPlayerLoaded?.Invoke(GetPlayer());
     }
 
     public void StartGame()
@@ -284,6 +285,8 @@ public class GameManager : NetworkedBehaviour
         m_players.Add(p);
         m_playersByID.Add(netObj.OwnerClientId, p);
         m_playersBySteam.Add(netObj.OwnerClientId, steamid);
+
+        Singleton.PlayerLoaded?.Invoke(p);
     }
 
     public static void RemovePlayer(NetworkedObject netObj)
