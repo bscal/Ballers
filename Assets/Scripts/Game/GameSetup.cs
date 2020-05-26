@@ -33,6 +33,11 @@ public class GameSetup : NetworkedBehaviour
 
         m_text = m_loadingScreen.GetComponentInChildren<Text>();
 
+        if (MatchGlobals.HostServer)
+            MatchGlobals.NetworkLobby.HostServer();
+        else
+            MatchGlobals.NetworkLobby.Connect();
+
         StartCoroutine(LoadCoroutine());
     }
 
@@ -65,13 +70,15 @@ public class GameSetup : NetworkedBehaviour
         NetworkedObject no = go.GetComponent<NetworkedObject>();
         no.SpawnAsPlayerObject(pid, null, false);
 
+        MatchGlobals.HasLoadedGame = true;
+
         InvokeClientRpcOnClient(PlayerLoaded, pid);
     }
 
     [ClientRPC]
     public void PlayerLoaded()
     {
-        GameManager.Singleton.LocalPlayerLoaded();
+        GameManager.Singleton.LocalPlayerInitilized();
     }
 
     [ClientRPC]

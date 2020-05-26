@@ -7,6 +7,7 @@ using MLAPI.Transports.UNET;
 using MLAPI.Transports.Tasks;
 using Steamworks;
 using MLAPI.Messaging;
+using System.Text.RegularExpressions;
 
 public class NetworkLobby : MonoBehaviour
 {
@@ -22,6 +23,7 @@ public class NetworkLobby : MonoBehaviour
     private void Awake()
     {
         m_networkEvents = GameObject.Find("NetworkManager").GetComponent<NetworkEvents>();
+        MatchGlobals.NetworkLobby = this;
     }
 
     void Start()

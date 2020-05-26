@@ -174,8 +174,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3da36923e317d94cad0231d8c2c69f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  loaderPrefab: {fileID: 1304583784701660350, guid: 5a15f7cbd00840f4e93da9d20a422f6d,
-    type: 3}
   currentScreen: {fileID: 0}
   loadingCanvas: {fileID: 6088395088423292034, guid: 53badf5109b80974ab416c40a437d5f8,
     type: 3}
@@ -296,7 +294,6 @@ GameObject:
   - component: {fileID: 250698572}
   - component: {fileID: 250698571}
   - component: {fileID: 250698570}
-  - component: {fileID: 250698569}
   m_Layer: 0
   m_Name: NetworkClient
   m_TagString: Untagged
@@ -304,19 +301,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &250698569
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 250698568}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 284d1c9a54ccbdc4480240e77dcb42b7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hasClientLoaded: 0
 --- !u!114 &250698570
 MonoBehaviour:
   m_ObjectHideFlags: 0

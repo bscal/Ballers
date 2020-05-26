@@ -96,7 +96,19 @@ public class Matchmaking : MonoBehaviour
         print(lobbyEnter.m_EChatRoomEnterResponse);
         print("created lobby waiting to test 3secs...");
         string hostSteamID = SteamMatchmaking.GetLobbyData(m_lobbyID, "Host");
-        m_matchSetup.Setup(lobbyEnter, ulong.Parse(hostSteamID));
+        ulong steamid = ulong.Parse(hostSteamID);
+        m_matchSetup.Setup(lobbyEnter, steamid);
+
+        MatchGlobals.NetworkLobby.SetSteamIDToConnect(steamid);
+        if (steamid == ClientPlayer.Singleton.SteamID)
+            MatchGlobals.HostServer = true;
+        MatchGlobals.GameMode = BallersGamemode.SP_BOTS;
+        MatchGlobals.QuarterLength = 6;
+        MatchGlobals.QuartersCount = 4;
+        MatchGlobals.TeamSize = 5;
+        MatchGlobals.MatchID = 1;
+        MatchGlobals.HasJoinedLobby = true;
+
         StartCoroutine(Test(lobbyEnter.m_ulSteamIDLobby));
     }
 
