@@ -22,7 +22,7 @@ public class GameManager : NetworkedBehaviour
     public event Action GameStarted;
     public event Action GameBegin;
     public event Action GameEnd;
-    public event Action PlayerLoaded;
+    public event Action<Player> PlayerLoaded;
     public event Action<ulong> PlayerConnected;
     public event Action<ulong> AllPlayersConnected;
 
@@ -48,6 +48,7 @@ public class GameManager : NetworkedBehaviour
     public Basket[] baskets = new Basket[2];
     public Vector3[] freethrowPos = new Vector3[2];
     public GameObject[] inbounds;
+    public GameObject loaderPrefab;
 
     private BasketballStateManager m_gameState;
     private ShotManager m_shotManager;
@@ -83,7 +84,6 @@ public class GameManager : NetworkedBehaviour
         m_gameState.OnHalfEnd += EndHalf;
 
         //m_players.ForEach((p) => { p.StartLoad(); });
-
     }
 
     public override void NetworkStart()
@@ -380,7 +380,7 @@ public class GameManager : NetworkedBehaviour
     /// <param name="state"></param>
     public void SyncState(SyncedMatchStateData state)
     {
-        HasStarted = state.hasStarted;
+        HasStarted = state.HasStarted;
         m_ballhandling.PlayerWithBall = state.playerWithBall;
         m_ballhandling.Possession = state.teamWithPossession;
         teams[(int)TeamType.HOME] = state.teams[(int)TeamType.HOME];

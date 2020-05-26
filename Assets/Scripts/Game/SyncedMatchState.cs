@@ -11,7 +11,7 @@ using UnityEngine;
 
 public class SyncedMatchStateData : IBitWritable
 {
-    public bool hasStarted { get; set; }
+    public bool HasStarted { get; set; }
     public int teamWithPossession { get; set; }
     public ulong playerWithBall { get; set; }
     public Team[] teams { get; set; } = new Team[2];
@@ -26,7 +26,7 @@ public class SyncedMatchStateData : IBitWritable
     {
         using (PooledBitReader reader = PooledBitReader.Get(stream))
         {
-            hasStarted = reader.ReadBit();
+            HasStarted = reader.ReadBit();
             reader.SkipPadBits();
             teamWithPossession = reader.ReadInt32Packed();
             playerWithBall = reader.ReadUInt64Packed();
@@ -41,7 +41,7 @@ public class SyncedMatchStateData : IBitWritable
     {
         using (PooledBitWriter writer = PooledBitWriter.Get(stream))
         {
-            writer.WriteBit(hasStarted);
+            writer.WriteBit(HasStarted);
             writer.WritePadBits();
             writer.WriteInt32Packed(teamWithPossession);
             writer.WriteUInt64Packed(playerWithBall);
@@ -57,8 +57,6 @@ public class SyncedMatchState : NetworkedBehaviour
     private SyncedMatchStateData m_state;
     public SyncedMatchStateData State { get { return m_state; } }
 
-    private GameManager m_gm;
-
     private float m_timerSync;
     private float m_lastSync;
 
@@ -69,7 +67,6 @@ public class SyncedMatchState : NetworkedBehaviour
 
     void Start()
     {
-        m_gm = GameManager.Singleton;
     }
 
     void Update()
@@ -81,11 +78,11 @@ public class SyncedMatchState : NetworkedBehaviour
             {
                 m_lastSync = m_timerSync + 500;
 
-                m_state.hasStarted = m_gm.HasStarted;
-                m_state.playerWithBall = (m_gm.BallHandler) ? m_gm.BallHandler.OwnerClientId : 0;
-                m_state.teamWithPossession = m_gm.Possession;
-                m_state.teams[(int)TeamType.HOME] = m_gm.teams[(int)TeamType.HOME];
-                m_state.teams[(int)TeamType.AWAY] = m_gm.teams[(int)TeamType.AWAY];
+                m_state.HasStarted = GameManager.Singleton.HasStarted;
+                m_state.playerWithBall = (GameManager.Singleton.BallHandler) ? GameManager.Singleton.BallHandler.OwnerClientId : 0;
+                m_state.teamWithPossession = GameManager.Singleton.Possession;
+                m_state.teams[(int)TeamType.HOME] = GameManager.Singleton.teams[(int)TeamType.HOME];
+                m_state.teams[(int)TeamType.AWAY] = GameManager.Singleton.teams[(int)TeamType.AWAY];
 
 
                 using (PooledBitStream stream = PooledBitStream.Get())
@@ -112,7 +109,7 @@ public class SyncedMatchState : NetworkedBehaviour
     [ClientRPC]
     public void SyncMatchState(float lastSync, SyncedMatchStateData state)
     {
-        m_gm.SyncState(state);
+        GameManager.Singleton.SyncState(state);
     }
 
     [ClientRPC]
