@@ -2,8 +2,10 @@
 using MLAPI.Messaging;
 using MLAPI.SceneManagement;
 using Steamworks;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Remoting.Messaging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -19,10 +21,7 @@ public class MatchSetup : NetworkedBehaviour
 
     private const string CONST_GAME_SCENE_NAME = "SampleScene";
 
-    public GameObject loaderPrefab;
-
     public LoadingScreen currentScreen;
-
     public GameObject loadingCanvas;
     public LoadingScreen loadingScreen;
 
@@ -44,7 +43,7 @@ public class MatchSetup : NetworkedBehaviour
     {
         m_networkLobby = GameObject.Find("NetworkManager").GetComponent<NetworkLobby>();
 
-        SceneManager.sceneLoaded += OnAferSceneLoaded;
+        NetworkSceneManager.OnSceneSwitchStarted += OnSceneSwitchStarted;
     }
 
     void Update()
@@ -84,29 +83,18 @@ public class MatchSetup : NetworkedBehaviour
         m_networkLobby.Connect();
     }
 
-    private void OnAferSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
+    private void OnSceneSwitchStarted(AsyncOperation operation)
+    {
+        StartCoroutine(LoadGame(operation));
+    }
+
+    private IEnumerator LoadGame(AsyncOperation operation)
     {
         GameObject canvas = Instantiate(loadingCanvas);
         loadingScreen = canvas.GetComponent<LoadingScreen>();
         loadingScreen.enabled = true;
 
-        if (scene.name == CONST_GAME_SCENE_NAME)
-        {
-            HasLoaded = true;
-
-            GameObject go = Instantiate(loaderPrefab);
-            MatchLoader loader = go.GetComponent<MatchLoader>();
-            loader.Load();
-
-            print("scene loaded");
-        }
-
-        loadingScreen.enabled = false;
-    }
-
-    private IEnumerator LoadGame()
-    {
-        while (!HasLoaded)
+        while (!operation.isDone)
         {
             yield return null;
         }

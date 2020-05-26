@@ -1,4 +1,4 @@
-﻿public enum EGameState
+﻿public enum GameState
 {
     LOADING,
     PREGAME,
