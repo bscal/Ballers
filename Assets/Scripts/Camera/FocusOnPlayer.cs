@@ -12,18 +12,12 @@ public class FocusOnPlayer : MonoBehaviour
     public float rotation;
 
     private GameObject m_target;
+    private bool m_loaded;
 
     void Start()
     {
         if (GetLocalPlayerObject)
-        {
-            m_target = SpawnManager.GetLocalPlayerObject()?.gameObject;
-            Debug.LogError(string.Format("FocusOnPlayer: Target of GameObject: {0} is null? Did you forget to set something?", gameObject.name));
-        }
-        else
-        {
-            m_target = GameObject.Find("Player");
-        }
+            GameManager.Singleton.LocalPlayerLoaded += OnLocalPlayerLoaded;
 
         if (startDisabled)
             gameObject.SetActive(false);
@@ -33,12 +27,27 @@ public class FocusOnPlayer : MonoBehaviour
 
     void Update()
     {
-        if (m_target == null) 
-        {
-            m_target = SpawnManager.GetLocalPlayerObject()?.gameObject;
-            return;
-        }
+        if (!m_loaded) return;
+        if (m_target == null) SetTarget();
 
         transform.position = m_target.transform.position + offset;
+    }
+
+    private void OnLocalPlayerLoaded(Player p)
+    {
+        m_loaded = true;
+        SetTarget();
+    }
+
+    private void SetTarget()
+    {
+        if (GetLocalPlayerObject)
+        {
+            m_target = SpawnManager.GetLocalPlayerObject()?.gameObject;
+        }
+        else
+        {
+            m_target = GameObject.Find("Player");
+        }
     }
 }
