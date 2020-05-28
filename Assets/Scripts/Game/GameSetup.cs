@@ -70,14 +70,13 @@ public class GameSetup : NetworkedBehaviour
         NetworkedObject no = go.GetComponent<NetworkedObject>();
         no.SpawnAsPlayerObject(pid, null, false);
 
-        MatchGlobals.HasLoadedGame = true;
-
         InvokeClientRpcOnClient(PlayerLoaded, pid);
     }
 
     [ClientRPC]
     public void PlayerLoaded()
     {
+        MatchGlobals.HasLoadedGame = true;
         GameManager.Singleton.LocalPlayerInitilized();
     }
 

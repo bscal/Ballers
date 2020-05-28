@@ -5,6 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+public static class TeamGlobals
+{
+    public static List<ulong> HomeIds { get; set; }
+    public static List<ulong> AwayIds { get; set; }
+    public static Dictionary<int, ulong> HomeIdsByPosition { get; set; }
+    public static Dictionary<int, ulong> AwayIdsByPosition { get; set; }
+
+}
+
 public static class MatchGlobals
 {
     public static NetworkLobby NetworkLobby { get; set; }
