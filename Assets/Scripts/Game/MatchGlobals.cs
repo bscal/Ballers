@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 public static class TeamGlobals
 {
-    public static List<ServerPlayer> Players { get; set; }
     public static List<ulong> HomeIds { get; set; }
     public static List<ulong> AwayIds { get; set; }
     public static Dictionary<int, ulong> HomeIdsByPosition { get; set; }
@@ -30,19 +29,6 @@ public static class MatchGlobals
     public static bool HasLoadedGame { get; set; }
     public static bool HasJoinedLobby { get; set; }
     public static bool HostServer { get; set; }
-
-    public static void HandlePlayerConnection(ulong steamId)
-    {
-        if (GameManager.Singleton == null) return;
-        if (GameManager.ContainsPlayer(steamId))
-        {
-            return;
-        }
-        else
-        {
-            TeamGlobals.Players.Add(new ServerPlayer(steamId));
-        }
-    }
 
     public static void ResetDefault()
     {
