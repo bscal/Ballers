@@ -17,27 +17,11 @@ public class GameSetup : NetworkedBehaviour
 
     public GameObject playerPrefab;
 
-    private GameObject m_loadingScreen;
-    private Image m_image;
-    private Text m_text;
     private bool m_hasClientLoaded = false;
     private bool m_hasClientConnected = false;
 
     private void Start()
     {
-        m_loadingScreen = GameObject.Find("Loading Screen");
-
-        if (!m_loadingScreen)
-        {
-            enabled = false;
-            return;
-        }
-
-        m_image = m_loadingScreen.GetComponent<Image>();
-        m_image.enabled = false;
-
-        m_text = m_loadingScreen.GetComponentInChildren<Text>();
-
         if (MatchGlobals.HostServer)
             MatchGlobals.NetworkLobby.HostServer();
         else
@@ -60,7 +44,7 @@ public class GameSetup : NetworkedBehaviour
     {
         bool hasConnected = true;
 
-        MatchGlobals.HandlePlayerConnection(id);
+        ServerState.HandlePlayerConnection(id);
 
         InvokeClientRpcOnClient(ConnectedStatus, id, hasConnected);
     }
@@ -69,11 +53,6 @@ public class GameSetup : NetworkedBehaviour
     private void ConnectedStatus(bool hasConnected)
     {
         m_hasClientConnected = hasConnected;
-    }
-
-    public void SetLoadingText(string text)
-    {
-        m_text.text = text;
     }
 
     [ServerRPC]
