@@ -1,6 +1,7 @@
 ﻿using Steamworks;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.UIElements;
 using UnityEngine;
 
 public class Matchmaking : MonoBehaviour
@@ -86,6 +87,7 @@ public class Matchmaking : MonoBehaviour
         SteamMatchmaking.SetLobbyData(lobbyID, "Gamemode", "Ballers-1v1");
         // Sets lobby host steamid
         SteamMatchmaking.SetLobbyData(lobbyID, "Host", ClientPlayer.Singleton.SteamID.ToString());
+        SteamMatchmaking.SetLobbyData(lobbyID, "NeededPlayers", $"{10}");
     }
 
     // Callback for Matchmaking JoinLobby
@@ -97,7 +99,9 @@ public class Matchmaking : MonoBehaviour
         print("created lobby waiting to test 3secs...");
         string hostSteamID = SteamMatchmaking.GetLobbyData(m_lobbyID, "Host");
         ulong steamid = ulong.Parse(hostSteamID);
-        m_matchSetup.Setup(lobbyEnter, steamid);
+
+        int neededPlayers = int.Parse(SteamMatchmaking.GetLobbyData(m_lobbyID, "NeededPlayers"));
+        int playerCount = SteamMatchmaking.GetNumLobbyMembers(m_lobbyID);
 
         MatchGlobals.NetworkLobby.SetSteamIDToConnect(steamid);
         if (steamid == ClientPlayer.Singleton.SteamID)
@@ -106,8 +110,20 @@ public class Matchmaking : MonoBehaviour
         MatchGlobals.QuarterLength = 6;
         MatchGlobals.QuartersCount = 4;
         MatchGlobals.TeamSize = 5;
+        MatchGlobals.NeededPlayers = neededPlayers;
         MatchGlobals.MatchID = 1;
         MatchGlobals.HasJoinedLobby = true;
+
+        // FOR DEBUGGING
+        m_matchSetup.Setup(lobbyEnter, steamid);
+
+        Debug.Log($"{playerCount} / {neededPlayers}");
+
+        if (playerCount == neededPlayers)
+        {
+            Debug.Log($"Required players met. Starting...");
+            m_matchSetup.Setup(lobbyEnter, steamid);
+        }
 
         StartCoroutine(Test(lobbyEnter.m_ulSteamIDLobby));
     }
