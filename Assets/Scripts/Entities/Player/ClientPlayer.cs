@@ -4,6 +4,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// User, Character, and Player data stored on client side. This is for local client use only
+/// </summary>
 public class ClientPlayer : NetworkedBehaviour
 {
     public static ClientPlayer Singleton { get; private set; }
