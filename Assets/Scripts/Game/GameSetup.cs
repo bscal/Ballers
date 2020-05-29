@@ -5,18 +5,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// GameSetup handles getting the game ready for play. Making sure players are connected. MatchGlobals are set.
+/// </summary>
 public class GameSetup : NetworkedBehaviour
 {
     private const string DEFAULT_LOADING_MSG = "Loading...";
     private const string NETWORK_LOADING_MSG = "Logging you in...";
 
-    public bool hasClientLoaded = false;
+    public bool isReady = false;
+
     public GameObject playerPrefab;
 
     private GameObject m_loadingScreen;
     private Image m_image;
     private Text m_text;
-    private bool m_nothingToLoad = false;
+    private bool m_hasClientLoaded = false;
+    private bool m_hasClientConnected = false;
 
     private void Start()
     {
@@ -29,7 +34,7 @@ public class GameSetup : NetworkedBehaviour
         }
 
         m_image = m_loadingScreen.GetComponent<Image>();
-        m_image.enabled = true;
+        m_image.enabled = false;
 
         m_text = m_loadingScreen.GetComponentInChildren<Text>();
 
@@ -38,24 +43,32 @@ public class GameSetup : NetworkedBehaviour
         else
             MatchGlobals.NetworkLobby.Connect();
 
+        if (IsServer)
+            NetworkingManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+
+        m_hasClientLoaded = true;
+
         StartCoroutine(LoadCoroutine());
     }
 
     void Update()
     {
-        if (m_nothingToLoad) return;
+        isReady = (m_hasClientLoaded && m_hasClientConnected);
+    }
 
-        if (!hasClientLoaded)
-        {
-            SetLoadingText(NETWORK_LOADING_MSG);
-        }
-        else
-        {
-            SetLoadingText(DEFAULT_LOADING_MSG);
-        }
+    private void OnClientConnected(ulong id)
+    {
+        bool hasConnected = true;
 
-        m_loadingScreen.SetActive(false);
-        m_nothingToLoad = true;
+        MatchGlobals.HandlePlayerConnection(id);
+
+        InvokeClientRpcOnClient(ConnectedStatus, id, hasConnected);
+    }
+
+    [ClientRPC]
+    private void ConnectedStatus(bool hasConnected)
+    {
+        m_hasClientConnected = hasConnected;
     }
 
     public void SetLoadingText(string text)

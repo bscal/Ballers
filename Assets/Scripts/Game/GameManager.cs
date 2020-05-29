@@ -332,6 +332,11 @@ public class GameManager : NetworkedBehaviour
         return p;
     }
 
+    public static bool ContainsPlayer(ulong id)
+    {
+        return m_playersByID.ContainsKey(id);
+    }
+
     public static List<Player> GetPlayers()
     {
         return m_players;
