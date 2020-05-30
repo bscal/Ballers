@@ -40,13 +40,13 @@ public class GameSetup : NetworkedBehaviour
         isReady = (m_hasClientLoaded && m_hasClientConnected);
     }
 
-    private void OnClientConnected(ulong id)
+    private void OnClientConnected(ulong steamId)
     {
         bool hasConnected = true;
 
-        ServerState.HandlePlayerConnection(id);
+        ServerState.HandlePlayerConnection(steamId);
 
-        InvokeClientRpcOnClient(ConnectedStatus, id, hasConnected);
+        InvokeClientRpcOnClient(ConnectedStatus, steamId, hasConnected);
     }
 
     [ClientRPC]

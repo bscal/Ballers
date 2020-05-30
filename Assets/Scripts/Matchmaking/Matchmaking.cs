@@ -87,7 +87,7 @@ public class Matchmaking : MonoBehaviour
         SteamMatchmaking.SetLobbyData(lobbyID, "Gamemode", "Ballers-1v1");
         // Sets lobby host steamid
         SteamMatchmaking.SetLobbyData(lobbyID, "Host", ClientPlayer.Singleton.SteamID.ToString());
-        SteamMatchmaking.SetLobbyData(lobbyID, "NeededPlayers", $"{10}");
+        SteamMatchmaking.SetLobbyData(lobbyID, "NeededPlayers", $"{1}");
     }
 
     // Callback for Matchmaking JoinLobby
@@ -115,7 +115,7 @@ public class Matchmaking : MonoBehaviour
         MatchGlobals.HasJoinedLobby = true;
 
         // FOR DEBUGGING
-        m_matchSetup.Setup(lobbyEnter, steamid);
+        //m_matchSetup.Setup(lobbyEnter, steamid);
 
         Debug.Log($"{playerCount} / {neededPlayers}");
 
