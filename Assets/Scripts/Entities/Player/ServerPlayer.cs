@@ -23,6 +23,7 @@ public class ServerPlayer
     public ulong steamId;
 
     public ServerPlayerStatus status;
+    public bool isReady;
 
     public ServerPlayer(ulong steamId)
     {

@@ -4,7 +4,9 @@ using MLAPI.Spawning;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
+using UnityEngine.Video;
 
 public enum TeamType
 {
@@ -18,7 +20,7 @@ public class GameManager : NetworkedBehaviour
 
     public static GameManager Singleton { get; private set; }
 
-    public event Action<MatchSettings> Pregame;
+    public event Action Pregame;
     public event Action GameStarted;
     public event Action GameBegin;
     public event Action GameEnd;
@@ -122,8 +124,20 @@ public class GameManager : NetworkedBehaviour
         LocalPlayerLoaded?.Invoke(GetPlayer());
     }
 
+    public void StartPregame()
+    {
+        Pregame?.Invoke();
+        m_gameState.MatchStateValue = EMatchState.PREGAME;
+        if (IsServer)
+        {
+            StartCoroutine(PregameTimer());
+        }
+
+    }
+
     public void StartGame()
     {
+        m_gameState.MatchStateValue = EMatchState.INPROGRESS;
         if (IsClient)
         {
             NetworkEvents.Singleton.CallEventServer(NetworkEvent.GAME_START);
@@ -140,6 +154,44 @@ public class GameManager : NetworkedBehaviour
         HasStarted = true;
         Debug.Log("Game Starting!");
     }
+
+    private IEnumerator PregameTimer()
+    {
+        const float TIMEOUT = 30;
+        float timer = 0;
+        while (m_gameState.MatchStateValue == EMatchState.PREGAME)
+        {
+            yield return new WaitForSeconds(1);
+
+            if (ServerState.AllPlayersReady())
+            {
+                yield return StartCountDown();
+                break;
+            }
+
+            timer += 1;
+            if (TIMEOUT < timer)
+            {
+                yield return StartCountDown();
+                break;
+            }
+        }
+    }
+
+    private IEnumerator StartCountDown()
+    {
+        Debug.Log("Game starting in 5 seconds...");
+        yield return new WaitForSeconds(2);
+        Debug.Log("Game starting in 3 seconds...");
+        yield return new WaitForSeconds(1);
+        Debug.Log("Game starting in 2 seconds...");
+        yield return new WaitForSeconds(1);
+        Debug.Log("Game starting in 1 seconds...");
+        yield return new WaitForSeconds(1);
+        Debug.Log("Game starting!");
+        StartGame();
+    }
+
 
     [ServerRPC]
     public void RegisterPlayerServer(ulong pid, ulong steamid)
@@ -374,11 +426,6 @@ public class GameManager : NetworkedBehaviour
         AddPlayer(SpawnManager.GetLocalPlayerObject(), ClientPlayer.Singleton.SteamID);
         // Registers player to server
         InvokeServerRpc(RegisterPlayerServer, pid, ClientPlayer.Singleton.SteamID);
-    }
-
-    private void StartPregame()
-    {
-        print(1);
     }
 
     /// <summary>

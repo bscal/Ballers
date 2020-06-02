@@ -58,8 +58,18 @@ public static class ServerState
         }
         // All players have loaded
         return true;
+    }
 
-
+    public static bool AllPlayersReady()
+    {
+        foreach (ServerPlayer sp in Players.Values)
+        {
+            if (!sp.isReady)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static void StartMatch()
