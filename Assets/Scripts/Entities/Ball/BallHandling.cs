@@ -202,10 +202,16 @@ public class BallHandling : NetworkedBehaviour
         m_currentPlayer = m_playerObj.GetComponent<Player>();
         if (!gameObject.activeSelf)
             gameObject.SetActive(true);
-        StopBall();
-        gameObject.transform.position = new Vector3(1, 3, 1);
-        StartCoroutine(UpdatePlayerDistances());
-        State = BallState.LOOSE;
+
+        if (IsServer)
+        {
+            StartCoroutine(UpdatePlayerDistances());
+            StopBall();
+            gameObject.transform.position = new Vector3(1, 3, 1);
+            State = BallState.LOOSE;
+        }
+
+
     }
 
     // =================================== RPCs ===================================

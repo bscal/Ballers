@@ -127,9 +127,10 @@ public class GameManager : NetworkedBehaviour
     public void StartPregame()
     {
         Pregame?.Invoke();
-        m_gameState.MatchStateValue = EMatchState.PREGAME;
+
         if (IsServer)
         {
+            m_gameState.MatchStateValue = EMatchState.PREGAME;
             StartCoroutine(PregameTimer());
         }
 
@@ -137,7 +138,6 @@ public class GameManager : NetworkedBehaviour
 
     public void StartGame()
     {
-        m_gameState.MatchStateValue = EMatchState.INPROGRESS;
         if (IsClient)
         {
             NetworkEvents.Singleton.CallEventServer(NetworkEvent.GAME_START);
@@ -152,6 +152,12 @@ public class GameManager : NetworkedBehaviour
     {
         GameStarted?.Invoke();
         HasStarted = true;
+
+        if (IsServer)
+        {
+            m_gameState.MatchStateValue = EMatchState.INPROGRESS;
+        }
+
         Debug.Log("Game Starting!");
     }
 

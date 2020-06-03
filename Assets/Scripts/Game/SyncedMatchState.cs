@@ -6,7 +6,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using UnityEditor.Build.Content;
 using UnityEngine;
 
 public class SyncedMatchStateData : IBitWritable
@@ -45,7 +44,7 @@ public class SyncedMatchStateData : IBitWritable
             writer.WritePadBits();
             writer.WriteInt32Packed(teamWithPossession);
             writer.WriteUInt64Packed(playerWithBall);
-            Debug.Log(teams);
+
             foreach (Team t in teams)
                 t.Write(stream);
         }
@@ -96,7 +95,6 @@ public class SyncedMatchState : NetworkedBehaviour
                             writer.WriteBit(p.isInsideThree);
                         }
                         // Sends the stream of player dota to all players
-                        print("hello???");
                         InvokeClientRpcOnEveryonePerformance(ReadPlayerFromServer, stream);
                     }
                 }
@@ -115,8 +113,6 @@ public class SyncedMatchState : NetworkedBehaviour
     [ClientRPC]
     public void ReadPlayerFromServer(ulong clientid, Stream stream)
     {
-        print("streamed");
-        print(stream.ToString());
         GameManager.GetPlayer(clientid)?.ReadPlayerFromServer(stream);
     }
 

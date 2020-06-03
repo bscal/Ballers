@@ -1,7 +1,6 @@
 ﻿using Steamworks;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.UIElements;
 using UnityEngine;
 
 public class Matchmaking : MonoBehaviour
@@ -60,7 +59,6 @@ public class Matchmaking : MonoBehaviour
     private void OnLobbyMatchList(LobbyMatchList_t lobbyMatchList, bool bIOfailure)
     {
         uint num = lobbyMatchList.m_nLobbiesMatching;
-        print(num);
 
         // If no lobbies create one
         if (num < 1)
@@ -95,7 +93,6 @@ public class Matchmaking : MonoBehaviour
     {
         m_lobbyID = new CSteamID(lobbyEnter.m_ulSteamIDLobby);
         EChatRoomEnterResponse response = (EChatRoomEnterResponse)lobbyEnter.m_EChatRoomEnterResponse;
-        print(lobbyEnter.m_EChatRoomEnterResponse);
         print("created lobby waiting to test 3secs...");
         string hostSteamID = SteamMatchmaking.GetLobbyData(m_lobbyID, "Host");
         ulong steamid = ulong.Parse(hostSteamID);
@@ -119,7 +116,7 @@ public class Matchmaking : MonoBehaviour
 
         Debug.Log($"{playerCount} / {neededPlayers}");
 
-        if (playerCount == neededPlayers)
+        if (playerCount >= neededPlayers)
         {
             Debug.Log($"Required players met. Starting...");
             m_matchSetup.Setup(lobbyEnter, steamid);

@@ -80,7 +80,7 @@ public class BasketballStateManager : NetworkedBehaviour
         m_quarter = new NetworkedVarByte(STATE_SETTINGS);
         if (IsServer)
         {
-            MatchStateValue = EMatchState.PREGAME;
+            //MatchStateValue = EMatchState.PREGAME;
             GameManager.Singleton.GameStarted += OnGameStarted;
         }
     }
