@@ -69,6 +69,7 @@ MonoBehaviour:
     NetworkTransport: {fileID: 3826671062112935196}
     RegisteredScenes:
     - SampleScene
+    - MainMenu
     AllowRuntimeSceneChanges: 0
     NetworkedPrefabs:
     - Prefab: {fileID: 9132637102776717737, guid: b84da050e08d8a743bc9abfc6034bc8d,
@@ -88,7 +89,7 @@ MonoBehaviour:
     EventTickrate: 64
     MaxObjectUpdatesPerTick: -1
     ClientConnectionBufferTimeout: 10
-    ConnectionApproval: 0
+    ConnectionApproval: 1
     ConnectionData: 
     SecondsHistory: 5
     EnableTimeResync: 0

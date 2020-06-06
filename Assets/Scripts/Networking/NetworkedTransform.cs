@@ -212,7 +212,6 @@ namespace Ballers.Networking
                 float zPos = reader.ReadSinglePacked();
 
                 print(xPos);
-                print(1);
 
                 float xRot = reader.ReadSinglePacked();
                 float yRot = reader.ReadSinglePacked();

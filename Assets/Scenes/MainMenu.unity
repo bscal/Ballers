@@ -583,7 +583,7 @@ PrefabInstance:
     - target: {fileID: 3826671062112935198, guid: 2cf0204740b240345837345804dbec80,
         type: 3}
       propertyPath: hostServer
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3826671062112935199, guid: 2cf0204740b240345837345804dbec80,
         type: 3}
@@ -663,12 +663,17 @@ PrefabInstance:
     - target: {fileID: 3826671062112935201, guid: 2cf0204740b240345837345804dbec80,
         type: 3}
       propertyPath: NetworkConfig.CreatePlayerPrefab
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3826671062112935201, guid: 2cf0204740b240345837345804dbec80,
         type: 3}
       propertyPath: NetworkConfig.RegisteredScenes.Array.data[2]
       value: MainMenu
+      objectReference: {fileID: 0}
+    - target: {fileID: 3826671062112935201, guid: 2cf0204740b240345837345804dbec80,
+        type: 3}
+      propertyPath: NetworkConfig.ConnectionApproval
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3826671062112935203, guid: 2cf0204740b240345837345804dbec80,
         type: 3}

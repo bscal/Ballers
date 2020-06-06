@@ -9,6 +9,7 @@ TagManager:
   - Inbound
   - Not Mirrorable
   - Bounds Trigger
+  - Ball
   layers:
   - Default
   - TransparentFX

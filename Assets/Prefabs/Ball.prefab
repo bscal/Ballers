@@ -191,7 +191,7 @@ GameObject:
   - component: {fileID: 6508387135232067079}
   m_Layer: 0
   m_Name: Ball
-  m_TagString: PicaVoxelVolume
+  m_TagString: Ball
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
