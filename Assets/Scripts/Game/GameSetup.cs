@@ -1,9 +1,7 @@
 ﻿using MLAPI;
-using MLAPI.Messaging;
+using MLAPI.Messaging; 
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 /// <summary>
 /// GameSetup handles getting the game ready for play. Making sure players are connected. MatchGlobals are set.
@@ -31,8 +29,8 @@ public class GameSetup : NetworkedBehaviour
             NetworkingManager.Singleton.OnClientConnectedCallback += OnClientConnected;
 
         m_hasClientLoaded = true;
-
-        StartCoroutine(LoadCoroutine());
+        print("creating player");
+        InvokeServerRpc(PlayerLoaded, NetworkingManager.Singleton.LocalClientId);
     }
 
     void Update()
@@ -58,9 +56,12 @@ public class GameSetup : NetworkedBehaviour
     [ServerRPC]
     public void PlayerLoaded(ulong pid)
     {
-        GameObject go = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
-        NetworkedObject no = go.GetComponent<NetworkedObject>();
-        no.SpawnAsPlayerObject(pid, null, false);
+        if (MatchGlobals.HostServer)
+        {
+            //GameObject go = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+            //NetworkedObject no = go.GetComponent<NetworkedObject>();
+            //no.SpawnAsPlayerObject(OwnerClientId);
+        }
 
         InvokeClientRpcOnClient(PlayerLoaded, pid);
     }
@@ -68,7 +69,7 @@ public class GameSetup : NetworkedBehaviour
     [ClientRPC]
     public void PlayerLoaded()
     {
-        MatchGlobals.HasLoadedGame = true;
+        ClientPlayer.Singleton.State = ServerPlayerState.READY;
         GameManager.Singleton.LocalPlayerInitilized();
     }
 

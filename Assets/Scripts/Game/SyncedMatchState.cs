@@ -90,12 +90,14 @@ public class SyncedMatchState : NetworkedBehaviour
                     {
                         foreach (Player p in GameManager.GetPlayers())
                         {
+                            Debug.Log($"NetUpdate for nid: {p.NetworkId}");
                             // Writes data for a player that needs to be validated
                             writer.WriteBit(p == GameManager.Singleton.BallHandler);
                             writer.WriteBit(p.isInsideThree);
                         }
                         // Sends the stream of player dota to all players
                         InvokeClientRpcOnEveryonePerformance(ReadPlayerFromServer, stream);
+                        stream.Dispose();
                     }
                 }
                 // Syncs the MatchState with all players
@@ -114,6 +116,7 @@ public class SyncedMatchState : NetworkedBehaviour
     public void ReadPlayerFromServer(ulong clientid, Stream stream)
     {
         GameManager.GetPlayer(clientid)?.ReadPlayerFromServer(stream);
+        stream.Dispose();
     }
 
 }

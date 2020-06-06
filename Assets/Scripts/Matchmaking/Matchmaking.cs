@@ -103,13 +103,11 @@ public class Matchmaking : MonoBehaviour
         MatchGlobals.NetworkLobby.SetSteamIDToConnect(steamid);
         if (steamid == ClientPlayer.Singleton.SteamID)
             MatchGlobals.HostServer = true;
-        MatchGlobals.GameMode = BallersGamemode.SP_BOTS;
-        MatchGlobals.QuarterLength = 6;
-        MatchGlobals.QuartersCount = 4;
-        MatchGlobals.TeamSize = 5;
-        MatchGlobals.NeededPlayers = neededPlayers;
+        MatchGlobals.MatchSettings = new MatchSettings(BallersGamemode.SP_BOTS, 5, 60.0f * 6.0f, 4);
+        MatchGlobals.PlayersNeeded = neededPlayers;
         MatchGlobals.MatchID = 1;
-        MatchGlobals.HasJoinedLobby = true;
+
+        ClientPlayer.Singleton.State = ServerPlayerState.JOINED;
 
         // FOR DEBUGGING
         //m_matchSetup.Setup(lobbyEnter, steamid);

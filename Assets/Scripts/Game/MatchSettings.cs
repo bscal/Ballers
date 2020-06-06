@@ -15,13 +15,28 @@ public enum BallersGamemode
 public class MatchSettings : IBitWritable
 {
 
+    public BallersGamemode GameMode { get; set; }
+    public int TeamSize { get; set; }
+    public float QuarterLength { get; set; }
+    public int QuartersCount { get; set; }
+
+    public MatchSettings() { }
+    public MatchSettings(BallersGamemode gamemode, int teamSize, float quarterL, int quarterC)
+    {
+        this.GameMode = gamemode;
+        this.TeamSize = teamSize;
+        this.QuarterLength = quarterL;
+        this.QuartersCount = quarterC;
+    }
+
     public void Read(Stream stream)
     {
         using (PooledBitReader reader = PooledBitReader.Get(stream))
         {
-            MatchGlobals.GameMode = (BallersGamemode)reader.ReadByte();
-            MatchGlobals.TeamSize = reader.ReadByte();
-            MatchGlobals.QuarterLength = reader.ReadByte();
+            GameMode = (BallersGamemode)reader.ReadByte();
+            TeamSize = reader.ReadByte();
+            QuarterLength = reader.ReadByte();
+            QuartersCount = reader.ReadByte();
         }
     }
 
@@ -29,9 +44,10 @@ public class MatchSettings : IBitWritable
     {
         using (PooledBitWriter writer = PooledBitWriter.Get(stream))
         {
-            writer.WriteByte((byte)MatchGlobals.GameMode);
-            writer.WriteByte((byte)MatchGlobals.TeamSize);
-            writer.WriteByte((byte)MatchGlobals.QuarterLength);
+            writer.WriteByte((byte)GameMode);
+            writer.WriteByte((byte)TeamSize);
+            writer.WriteByte((byte)QuarterLength);
+            writer.WriteByte((byte)QuartersCount);
         }
     }
 }
