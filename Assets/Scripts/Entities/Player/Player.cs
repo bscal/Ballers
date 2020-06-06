@@ -106,10 +106,11 @@ public class Player : NetworkedBehaviour, IBitWritable
 
     private void Start()
     {
+
         m_playerCircle = GetComponentInChildren<SpriteRenderer>();
         if (!isDummy)
         {
-            if (IsClient)
+            if (IsClient && IsOwner)
             {
                 GameManager.Singleton.InitLocalPlayer(OwnerClientId);
                 //NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, this, OnGameStarted);

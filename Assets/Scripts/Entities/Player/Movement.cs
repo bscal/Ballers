@@ -31,7 +31,14 @@ public class Movement : MonoBehaviour
             Destroy(this);
         }
 
+
+
         m_player = GetComponentInParent<Player>();
+        if (!m_player.IsOwner)
+        {
+            enabled = false;
+            return;
+        }
         m_parent = m_player.gameObject;
         
     }
@@ -41,6 +48,8 @@ public class Movement : MonoBehaviour
     {
         if (m_player.isMovementFrozen || !isEnabled) return;
 
+        print(GameManager.GetBallHandling());
+        print(GameManager.GetBallHandling().PossessionOrHome);
         int possesion = GameManager.GetBallHandling().PossessionOrHome;
 
         if (m_player.HasBall && possesion != -1)
