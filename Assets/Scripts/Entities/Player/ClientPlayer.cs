@@ -28,6 +28,8 @@ public class ClientPlayer : NetworkedBehaviour
     }
     public ulong SteamID { get; private set; }
 
+    public ServerPlayerState State { get; set; }
+
     // This is cached character data. Can be used server or client side.
     // Primarily for non essential or non gameplay tasks. ie. character selection menu
     public Dictionary<int, CharacterData> characterStats = new Dictionary<int, CharacterData>();

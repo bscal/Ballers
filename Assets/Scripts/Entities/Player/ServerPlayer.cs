@@ -5,6 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+/// <summary>
+/// Players connection status
+/// </summary>
 public enum ServerPlayerStatus
 {
     NONE,
@@ -12,6 +15,17 @@ public enum ServerPlayerStatus
     CONNECTED,
     DISCONNECTED,
     ABANDONED
+}
+
+/// <summary>
+/// Players State
+/// </summary>
+public enum ServerPlayerState
+{
+    NONE,
+    JOINED,
+    LOADED,
+    READY
 }
 
 /// <summary>
@@ -23,7 +37,7 @@ public class ServerPlayer
     public ulong steamId;
 
     public ServerPlayerStatus status;
-    public bool isReady;
+    public ServerPlayerState state;
 
     public ServerPlayer(ulong steamId)
     {

@@ -1,5 +1,6 @@
 ﻿using MLAPI;
 using MLAPI.Messaging;
+using MLAPI.Spawning;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,10 +26,13 @@ class ServerManager : NetworkedBehaviour
         NetworkingManager.Singleton.OnClientConnectedCallback += OnClientConnected;
         NetworkingManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
 
-        // These 2 statements are a temp solution because starting a server (or host)
+        // These statements are a temp solution because starting a server (or host)
         // will not fire OnClientConnectedCallback
         ServerState.HandlePlayerConnection(ClientPlayer.Singleton.SteamID);
         OnClientConnected(ClientPlayer.Singleton.SteamID);
+        ServerState.Players.TryGetValue(ClientPlayer.Singleton.SteamID, out ServerPlayer sp);
+        sp.state = ServerPlayerState.READY;
+        sp.status = ServerPlayerStatus.CONNECTED;
 
         StartCoroutine(ServerState.PlayersLoadedCoroutine(30));
     }
@@ -37,7 +41,8 @@ class ServerManager : NetworkedBehaviour
     {
         if (ServerState.Players.TryGetValue(steamId, out ServerPlayer player))
         {
-            player.SetStatus(ServerPlayerStatus.CONNECTED);
+            player.status = ServerPlayerStatus.CONNECTED;
+            player.state = ServerPlayerState.READY;
         }
     }
 
