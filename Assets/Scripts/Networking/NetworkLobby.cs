@@ -1,13 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using MLAPI;
 using MLAPI.Spawning;
 using MLAPI.Transports.UNET;
-using MLAPI.Transports.Tasks;
-using Steamworks;
-using MLAPI.Messaging;
-using System.Text.RegularExpressions;
 
 public class NetworkLobby : MonoBehaviour
 {
@@ -29,7 +23,6 @@ public class NetworkLobby : MonoBehaviour
     void Start()
     {
         m_p2PTransport = GetComponent<SteamP2PTransport.SteamP2PTransport>();
-
         NetworkingManager.Singleton.ConnectionApprovalCallback += ApprovalCheck;
         NetworkingManager.Singleton.OnClientConnectedCallback += OnConnected;
         NetworkingManager.Singleton.OnClientDisconnectCallback += OnDisconnected;
@@ -64,9 +57,9 @@ public class NetworkLobby : MonoBehaviour
         Debug.Log("Approving...");
         //Your logic here
         bool approve = true;
-        bool createPlayerObject = false;
+        bool createPlayerObject = true;
 
-        ulong? prefabHash = SpawnManager.GetPrefabHashFromGenerator(null); // The prefab hash. Use null to use the default player prefab
+        ulong? prefabHash = SpawnManager.GetPrefabHashFromIndex(0); // The prefab hash. Use null to use the default player prefab
 
         //If approve is true, the connection gets added. If it's false. The client gets disconnected
         callback(createPlayerObject, prefabHash, approve, Vector3.zero, Quaternion.identity);

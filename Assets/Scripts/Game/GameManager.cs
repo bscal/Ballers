@@ -4,9 +4,7 @@ using MLAPI.Spawning;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
-using UnityEngine.Video;
 
 public enum TeamType
 {
@@ -95,12 +93,18 @@ public class GameManager : NetworkedBehaviour
         {
             NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, this, OnStartGame);
         }
+
         if (IsServer)
         {
             ball = Instantiate(m_ballPrefab, new Vector3(1, 3, 1), Quaternion.identity);
             ball.GetComponent<NetworkedObject>().Spawn();
             m_ballhandling = ball.GetComponent<BallHandling>();
             ball.SetActive(false);
+            ball.name = "Ball";
+        }
+        if (IsServer)
+        {
+            StartCoroutine(DEBUG_SERVER_UPDATE());
         }
     }
 
@@ -115,6 +119,24 @@ public class GameManager : NetworkedBehaviour
                 {
                     HasStarted = true;
                 }
+            }
+        }
+
+        if (m_ballhandling == null)
+        {
+            m_ballhandling = GameObject.FindGameObjectWithTag("Ball").GetComponent<BallHandling>();
+        }
+
+    }
+
+    private IEnumerator DEBUG_SERVER_UPDATE()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(5);
+            foreach (var v in NetworkingManager.Singleton.ConnectedClients)
+            {
+                Debug.Log($"{v.Key} | {v.Value.ClientId}");
             }
         }
     }
@@ -152,12 +174,6 @@ public class GameManager : NetworkedBehaviour
     {
         GameStarted?.Invoke();
         HasStarted = true;
-
-        if (IsServer)
-        {
-            m_gameState.MatchStateValue = EMatchState.INPROGRESS;
-        }
-
         Debug.Log("Game Starting!");
     }
 

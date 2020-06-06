@@ -61,7 +61,6 @@ public class BasketballStateManager : NetworkedBehaviour
     [SerializeField]
     private Text m_UIShotClock;
 
-    private GameManager m_gameManager;
     private byte m_OvertimeCount = 0;
     private bool m_shotclockOff = false;
 
@@ -69,24 +68,26 @@ public class BasketballStateManager : NetworkedBehaviour
     {
         m_UIHomeName.text = "Home";
         m_UIAwayName.text = "Away";
-        m_gameManager = GameManager.Singleton;
     }
 
     public override void NetworkStart()
     {
-        m_inGameTime = new NetworkedVarFloat(STATE_SETTINGS);
-        m_shotClock = new NetworkedVarFloat(STATE_SETTINGS);
-        m_state = new NetworkedVarByte(STATE_SETTINGS);
-        m_quarter = new NetworkedVarByte(STATE_SETTINGS);
+        print(MatchGlobals.MatchSettings.QuarterLength);
+        m_inGameTime = new NetworkedVarFloat(STATE_SETTINGS, MatchGlobals.MatchSettings.QuarterLength);
+        m_shotClock = new NetworkedVarFloat(STATE_SETTINGS, SHOTCLOCK_LENGTH);
+        m_state = new NetworkedVarByte(STATE_SETTINGS, (byte)EMatchState.PREGAME);
+        m_quarter = new NetworkedVarByte(STATE_SETTINGS, 1);
+
         if (IsServer)
         {
-            //MatchStateValue = EMatchState.PREGAME;
             GameManager.Singleton.GameStarted += OnGameStarted;
         }
     }
 
     private void Update()
     {
+        if (!MatchGlobals.HasGameStarted) return;
+
         if (IsServer)
         {
             if (MatchStateValue == EMatchState.INPROGRESS)
@@ -132,32 +133,40 @@ public class BasketballStateManager : NetworkedBehaviour
         MatchStateValue = state;
     }
 
+    public void InitMatchSettings(MatchSettings settings)
+    {
+
+    }
+
     // Private Functions
 
-    public void OnGameStarted()
+    private void OnGameStarted()
     {
-        InGameTime = QUARTER_LENGTH;
-        ShotClock = SHOTCLOCK_LENGTH;
-        Quarter = 1;
         MatchStateValue = EMatchState.INPROGRESS;
+    }
+
+    private void OnPlayerLoaded(ulong pid)
+    {
+
     }
 
     private void EndQuarter()
     {
         Quarter++;
-        if (Quarter > 2)
+
+        if (Quarter == MatchGlobals.MatchSettings.QuartersCount / 2)
         {
             EndHalf();
         }
 
-        else if (Quarter > 4)
+        else if (Quarter > MatchGlobals.MatchSettings.QuartersCount)
         {
             if (Quarter >= byte.MaxValue)
             {
                 //End Game
             }
 
-            if (m_gameManager.GetScoreDifference() == 0)
+            if (GameManager.Singleton.GetScoreDifference() == 0)
             {
                 m_OvertimeCount++;
             }
@@ -179,8 +188,8 @@ public class BasketballStateManager : NetworkedBehaviour
 
     private void UpdateUI()
     {
-        m_UIHomeScore.text = m_gameManager.TeamHome.points.ToString();
-        m_UIAwayScore.text = m_gameManager.TeamAway.points.ToString();
+        m_UIHomeScore.text = GameManager.Singleton.TeamHome.points.ToString();
+        m_UIAwayScore.text = GameManager.Singleton.TeamAway.points.ToString();
         m_UIQuarter.text = (m_OvertimeCount > 0) ? "OT" + m_OvertimeCount : Quarter.ToString();
         m_UIClock.text = string.Format("{0}:{1}", Mathf.Floor(InGameTime / 60), Mathf.RoundToInt(InGameTime % 60));
         if (m_shotclockOff)

@@ -73,7 +73,7 @@ public class BallHandling : NetworkedBehaviour
 
     private NetworkedVarSByte m_possession;
     public int Possession { get { return m_possession.Value; } set { if (value < -1 || value > 1) value = -1; m_possession.Value = (sbyte)value; } }
-    public int PossessionOrHome { get { return (Possession == -1) ? 0 : Possession; } }
+    public int PossessionOrHome { get { return (Possession != 1) ? 0 : 1; } }
 
     // =================================== Public Varibles ===================================
 
@@ -150,14 +150,14 @@ public class BallHandling : NetworkedBehaviour
     // FixedUpdate is called 50x per frame
     void FixedUpdate()
     {
-        if (!IsOwner || !IsServer)
-            return;
+        if (!IsServer) return;
+        if (!MatchGlobals.HasGameStarted) return;
 
         // ============ Loose ball ============
         if (State == BallState.LOOSE)
         {
             m_body.isKinematic = false;
-
+            if (m_pairs == null) return;
             foreach (KeyValuePair<ulong, float> pair in m_pairs)
             {
                 if (pair.Value < 1.5f)
@@ -469,10 +469,17 @@ public class BallHandling : NetworkedBehaviour
     {
         for (; ; )
         {
+            if (!MatchGlobals.HasGameStarted)
+            {
+                yield return new WaitForSeconds(.5f);
+                continue;
+            }
             // ============ Lists Closest Players ============
             foreach (KeyValuePair<ulong, NetworkedClient> pair in NetworkingManager.Singleton.ConnectedClients)
             {
+                if (pair.Value.PlayerObject == null) continue;
                 float dist = Vector3.Distance(m_ball.transform.position, pair.Value.PlayerObject.transform.position);
+
                 m_playerDistances[pair.Key] = dist;
 
                 if (pair.Value.PlayerObject.GetComponent<BoxCollider>().bounds.Intersects(m_ball.GetComponentInChildren<SphereCollider>().bounds))
