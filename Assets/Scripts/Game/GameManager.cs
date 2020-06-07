@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public enum TeamType
 {
@@ -81,6 +82,7 @@ public class GameManager : NetworkedBehaviour
     void Start()
     {
         NetworkingManager.Singleton.OnClientConnectedCallback += OnConnected;
+        NetworkingManager.Singleton.OnClientDisconnectCallback += OnDisconnected;
 
         m_gameState.OnHalfEnd += EndHalf;
 
@@ -124,7 +126,7 @@ public class GameManager : NetworkedBehaviour
 
         if (m_ballhandling == null)
         {
-            m_ballhandling = GameObject.FindGameObjectWithTag("Ball").GetComponent<BallHandling>();
+            m_ballhandling = GameObject.FindGameObjectWithTag("Ball")?.GetComponent<BallHandling>();
         }
 
     }
@@ -441,6 +443,12 @@ public class GameManager : NetworkedBehaviour
     private void OnConnected(ulong client)
     {
 
+    }
+    private void OnDisconnected(ulong client)
+    {
+        Debug.Log($"Disconnecting client {client}.");
+        if (SpawnManager.GetLocalPlayerObject() == null || SpawnManager.GetLocalPlayerObject().OwnerClientId == client)
+            SceneManager.LoadScene(0);
     }
 
     public void InitLocalPlayer(ulong pid)
