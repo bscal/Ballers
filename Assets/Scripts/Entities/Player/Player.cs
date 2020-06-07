@@ -134,6 +134,11 @@ public class Player : NetworkedBehaviour, IBitWritable
             id = username.GetHashCode();
             m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
         }
+        else
+        {
+            // Dummy values
+            teamID = 1;
+        }
 
     }
 
@@ -290,10 +295,10 @@ public class Player : NetworkedBehaviour, IBitWritable
     private Player GetNearestEnemy()
     {
         Player shortestPlayer = null;
-        float shortestDist = 0;
+        float shortestDist = float.MaxValue;
 
         Team enemyTeam = GameManager.Singleton.teams[teamID ^ 1];
-        for (int i = 0; i < GameManager.Singleton.teamSize; i++)
+        for (int i = 0; i < enemyTeam.playersInPosition.Length; i++)
         {
             Player p = GameManager.GetPlayer(enemyTeam.playersInPosition[i]);
             if (!p) continue;

@@ -28,6 +28,7 @@ public class Defence : MonoBehaviour
     private void FixedUpdate()
     {
         if (!GameManager.Singleton.HasStarted) return;
+        if (m_player == null || !m_player.IsOwner) return;
         if (m_showTrackers)
         {
             m_contestLook = m_player.transform.position + m_player.transform.forward;

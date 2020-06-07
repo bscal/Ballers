@@ -48,8 +48,6 @@ public class Movement : MonoBehaviour
     {
         if (m_player.isMovementFrozen || !isEnabled) return;
 
-        print(GameManager.GetBallHandling());
-        print(GameManager.GetBallHandling().PossessionOrHome);
         int possesion = GameManager.GetBallHandling().PossessionOrHome;
 
         if (m_player.HasBall && possesion != -1)

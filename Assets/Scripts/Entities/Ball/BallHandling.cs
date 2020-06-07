@@ -168,6 +168,7 @@ public class BallHandling : NetworkedBehaviour
                 }
             }
         }
+
         // ============ ball held ============
         else if (State == BallState.HELD)
         {
@@ -183,6 +184,7 @@ public class BallHandling : NetworkedBehaviour
             else
                 m_ball.transform.position = m_currentPlayer.GetRightHand().transform.position;
         }
+
         // ============ ball shoot ============
         else if (State == BallState.SHOT)
         {
