@@ -124,9 +124,7 @@ public class BallHandling : NetworkedBehaviour
         m_possession = new NetworkedVarSByte(settings, -1);
         m_playerDistances = new Dictionary<ulong, float>();
 
-        GameObject gamemanager = GameObject.Find("GameManager");
-        m_gameManager = gamemanager.GetComponent<GameManager>();
-        m_shotManager = gamemanager.GetComponent<ShotManager>();
+        m_shotManager = GameManager.Singleton.gameObject.GetComponent<ShotManager>();
         m_ball = NetworkedObject.gameObject;
         m_body = gameObject.GetComponent<Rigidbody>();
         m_body.AddForce(new Vector3(1, 1, 1), ForceMode.Impulse);
@@ -157,7 +155,10 @@ public class BallHandling : NetworkedBehaviour
         if (State == BallState.LOOSE)
         {
             m_body.isKinematic = false;
-            if (m_pairs == null) return;
+            if (m_pairs == null) {
+                Debug.LogWarning("loose ball::pairs::is null");
+                return;
+            }
             foreach (KeyValuePair<ulong, float> pair in m_pairs)
             {
                 if (pair.Value < 1.5f)
@@ -469,11 +470,11 @@ public class BallHandling : NetworkedBehaviour
 
     private IEnumerator UpdatePlayerDistances()
     {
-        for (; ; )
+        while (true)
         {
             if (!MatchGlobals.HasGameStarted)
             {
-                yield return new WaitForSeconds(.5f);
+                yield return new WaitForSeconds(.33f);
                 continue;
             }
             // ============ Lists Closest Players ============
@@ -483,6 +484,7 @@ public class BallHandling : NetworkedBehaviour
                 float dist = Vector3.Distance(m_ball.transform.position, pair.Value.PlayerObject.transform.position);
 
                 m_playerDistances[pair.Key] = dist;
+                print(dist);
 
                 if (pair.Value.PlayerObject.GetComponent<BoxCollider>().bounds.Intersects(m_ball.GetComponentInChildren<SphereCollider>().bounds))
                 {
