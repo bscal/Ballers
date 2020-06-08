@@ -18,7 +18,7 @@ public enum GameType
 
 public class MatchSetup : NetworkedBehaviour
 {
-    private const string CONST_GAME_SCENE_NAME = "SampleScene";
+    private const string CONST_GAME_SCENE_NAME = "Match";
 
     public LoadingScreen currentScreen;
     public GameObject loadingCanvas;
