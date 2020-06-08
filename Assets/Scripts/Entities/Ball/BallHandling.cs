@@ -83,7 +83,6 @@ public class BallHandling : NetworkedBehaviour
 
     // =================================== Private Varibles ===================================
 
-    private GameManager m_gameManager;
     private NetworkedObject m_playerObj;
     private Player m_currentPlayer;
     private GameObject m_ball;
@@ -255,9 +254,9 @@ public class BallHandling : NetworkedBehaviour
         float d = shot.distance / (SHOT_SPEED + UnityEngine.Random.Range(0, 1)); 
 
         if (shot.bankshot == BankType.NONE)
-            StartCoroutine(FollowArc(m_ball.transform.position, m_gameManager.baskets[player.teamID].netPos.position, h, d));
+            StartCoroutine(FollowArc(m_ball.transform.position, GameManager.Singleton.baskets[player.teamID].netPos.position, h, d));
         else
-            StartCoroutine(FollowBackboard(shot, m_ball.transform.position, m_gameManager.baskets[player.teamID].netPos.position, h, d));
+            StartCoroutine(FollowBackboard(shot, m_ball.transform.position, GameManager.Singleton.baskets[player.teamID].netPos.position, h, d));
 
     }
 
@@ -517,7 +516,7 @@ public class BallHandling : NetworkedBehaviour
             {
                 ShotMade?.Invoke(GameManager.GetPlayer(PlayerLastTouched));
                 OnBasketScored();
-                m_gameManager.AddScore(other.GetComponentInParent<Basket>().id, 2);
+                GameManager.Singleton.AddScore(other.GetComponentInParent<Basket>().id, 2);
             }
         }
     }
