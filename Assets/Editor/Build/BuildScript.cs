@@ -9,7 +9,7 @@ public static class BuildScript
         "Assets/scenes/Match.unity",
     };
 
-    public static void Win64()
+    public static void Windows64()
     {
         string pathToDeploy = "builds/Windows64/Ballers.exe";
 

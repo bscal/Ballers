@@ -20,6 +20,9 @@ public class PlayerControls : NetworkedBehaviour
 
    void Start()
    {
+        if (!IsOwner)
+            return;
+
         m_player = GetComponent<Player>();
         m_animator = GetComponentInChildren<Animator>();
         m_menu = GameObject.Find("Menu Panel");
@@ -28,13 +31,8 @@ public class PlayerControls : NetworkedBehaviour
 
     void Update()
     {
-        if (!IsOwner || IsServer && !IsHost)
+        if (!IsOwner)
             return;
-
-        if (GameManager.Singleton.HasStarted)
-        {
-
-        }
 
         m_player.isMoving = IsMoving();
         m_player.isSprinting = Input.GetKey(KeyCode.LeftShift);

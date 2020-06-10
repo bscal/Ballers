@@ -111,16 +111,16 @@ public class BallHandling : NetworkedBehaviour
 
     public override void NetworkStart()
     {
-        if (!IsServer)
-        {
-            return;
-        }
-
         m_playerWithBall = new NetworkedVarULong(settings, 0);
         m_playerLastTouched = new NetworkedVarULong(settings, 0);
         m_playerLastPossesion = new NetworkedVarULong(settings, 0);
         m_state = new NetworkedVarByte(settings, 0);
         m_possession = new NetworkedVarSByte(settings, -1);
+
+        if (!IsServer)
+        {
+            return;
+        }
         m_playerDistances = new Dictionary<ulong, float>();
 
         m_shotManager = GameManager.Singleton.gameObject.GetComponent<ShotManager>();
@@ -165,6 +165,7 @@ public class BallHandling : NetworkedBehaviour
                     State = BallState.HELD;
 
                     ChangeBallHandler(pair.Key);
+                    Debug.Log(pair.Key + " picked up ball");
                 }
             }
         }
@@ -233,7 +234,7 @@ public class BallHandling : NetworkedBehaviour
     [ServerRPC]
     public void OnAnimationRelease()
     {
-        BallFollowArc();
+        
     }
 
     // =================================== Public Functions ===================================
@@ -242,14 +243,17 @@ public class BallHandling : NetworkedBehaviour
         m_body.velocity = Vector3.zero;
     }
 
-    public void BallFollowArc()
+    public void BallFollowArc(ulong pid)
     {
-        Player player = GameManager.GetPlayer(PlayerLastTouched);
+        Player player = GameManager.GetPlayer(pid);
+        print($"{player} | BALLFOLLOWARC | {PlayerLastTouched} {GameManager.GetPlayer().OwnerClientId}");
+
 
         State = BallState.SHOT;
         m_body.isKinematic = false;
 
         ShotData shot = ShotManager.Singleton.ShotData.Value;
+        print($"{shot} | shotdata");
         float h = ShotController.GetShotRange(shot.type) == ShotRange.LONG ? UnityEngine.Random.Range(1.5f, 3f) : UnityEngine.Random.Range(.3f, .8f);
         float d = shot.distance / (SHOT_SPEED + UnityEngine.Random.Range(0, 1)); 
 
@@ -483,7 +487,6 @@ public class BallHandling : NetworkedBehaviour
                 float dist = Vector3.Distance(m_ball.transform.position, pair.Value.PlayerObject.transform.position);
 
                 m_playerDistances[pair.Key] = dist;
-                print(dist);
 
                 if (pair.Value.PlayerObject.GetComponent<BoxCollider>().bounds.Intersects(m_ball.GetComponentInChildren<SphereCollider>().bounds))
                 {

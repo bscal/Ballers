@@ -15099,10 +15099,8 @@ MonoBehaviour:
   m_hardScreenCollider: {fileID: 499513842373943136}
   teamID: 0
   isRightHanded: 1
-  isDribbling: 0
   isMoving: 0
   isSprinting: 0
-  isInsideThree: 0
   isScreening: 0
   isHardScreening: 0
   isShooting: 0
@@ -15115,6 +15113,9 @@ MonoBehaviour:
   isDribDown: 0
   isDribLeft: 0
   isDribRight: 0
+  isDribbling: 0
+  isInsideThree: 0
+  isInbounds: 0
   m_rightHand: {fileID: 1367100140280164334}
   m_leftHand: {fileID: 5912948185960104492}
 --- !u!114 &648187691570040564
@@ -15158,7 +15159,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 027aefa5fcb01574f9c1353068bb3a91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FixedSendsPerSecond: 20
+  FixedSendsPerSecond: 60
   AssumeSyncedSends: 1
   InterpolatePosition: 0
   SnapDistance: 10

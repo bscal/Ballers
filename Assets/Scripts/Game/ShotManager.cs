@@ -95,6 +95,7 @@ public class ShotManager : MonoBehaviour
     private void HandleShot(ulong player)
     {
         print("shot: " + m_releaseDist);
+        GameManager.GetBallHandling().BallFollowArc(player);
     }
 
     /// <summary>Server handling of shot quality<br></br>
