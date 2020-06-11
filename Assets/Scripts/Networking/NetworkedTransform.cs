@@ -211,7 +211,6 @@ namespace Ballers.Networking
                 float yPos = reader.ReadSinglePacked();
                 float zPos = reader.ReadSinglePacked();
 
-                print(xPos);
 
                 float xRot = reader.ReadSinglePacked();
                 float yRot = reader.ReadSinglePacked();
@@ -219,7 +218,6 @@ namespace Ballers.Networking
 
                 if (InterpolatePosition)
                 {
-                    print(new Vector3(xPos, yPos, zPos));
                     lastRecieveTime = Time.unscaledTime;
                     lerpStartPos = transform.position;
                     lerpStartRot = transform.rotation;
@@ -229,7 +227,6 @@ namespace Ballers.Networking
                 }
                 else
                 {
-                    print(new Vector3(xPos, yPos, zPos));
                     transform.position = new Vector3(xPos, yPos, zPos);
                     transform.rotation = Quaternion.Euler(new Vector3(xRot, yRot, zRot));
                 }

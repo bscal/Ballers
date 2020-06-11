@@ -943,7 +943,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/upperarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 125602
+  thisInstanceId: 22838
   Undone: 1
 --- !u!1 &839673004282485492
 GameObject:
@@ -1090,7 +1090,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/foot.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 124516
+  thisInstanceId: 21752
   Undone: 1
 --- !u!1 &855668793950629865
 GameObject:
@@ -4969,7 +4969,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/upperchest.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 125290
+  thisInstanceId: 22526
   Undone: 1
 --- !u!1 &2938245477022681954
 GameObject:
@@ -5296,7 +5296,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/calf.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 124434
+  thisInstanceId: 21670
   Undone: 1
 --- !u!1 &3249661851278890336
 GameObject:
@@ -6486,7 +6486,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/leg.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 125298
+  thisInstanceId: 22534
   Undone: 1
 --- !u!1 &3916156810308084338
 GameObject:
@@ -7566,7 +7566,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/lowerchest.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 124828
+  thisInstanceId: 22064
   Undone: 1
 --- !u!1 &4601289110702898129
 GameObject:
@@ -8923,7 +8923,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/calf.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 125580
+  thisInstanceId: 22816
   Undone: 1
 --- !u!1 &5325683939739797947
 GameObject:
@@ -9486,7 +9486,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/leg.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 124478
+  thisInstanceId: 21714
   Undone: 1
 --- !u!1 &5647321667379715171
 GameObject:
@@ -9646,7 +9646,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/lowerarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 124892
+  thisInstanceId: 22128
   Undone: 1
 --- !u!1 &5690431781121862110
 GameObject:
@@ -10430,7 +10430,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/lowerarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 125010
+  thisInstanceId: 22246
   Undone: 1
 --- !u!1 &5965997991029536111
 GameObject:
@@ -10962,7 +10962,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/head.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 124484
+  thisInstanceId: 21720
   Undone: 1
 --- !u!1 &6166792760984548341
 GameObject:
@@ -12302,7 +12302,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/upperarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 125544
+  thisInstanceId: 22780
   Undone: 1
 --- !u!1 &6927265981159084006
 GameObject:
@@ -13581,7 +13581,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/foot.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 124574
+  thisInstanceId: 21810
   Undone: 1
 --- !u!1 &7765132884196620524
 GameObject:
@@ -15159,11 +15159,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 027aefa5fcb01574f9c1353068bb3a91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FixedSendsPerSecond: 60
+  FixedSendsPerSecond: 30
   AssumeSyncedSends: 1
-  InterpolatePosition: 0
+  InterpolatePosition: 1
   SnapDistance: 10
-  InterpolateServer: 0
+  InterpolateServer: 1
   MinMeters: 0
   MinDegrees: 0
   ExtrapolatePosition: 0

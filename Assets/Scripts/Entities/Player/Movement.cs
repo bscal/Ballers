@@ -34,18 +34,13 @@ public class Movement : MonoBehaviour
 
 
         m_player = GetComponentInParent<Player>();
-        if (!m_player.IsOwner)
-        {
-            enabled = false;
-            return;
-        }
         m_parent = m_player.gameObject;
-        
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (!m_player.IsOwner) return;
         if (m_player.isMovementFrozen || !isEnabled) return;
 
         int possesion = GameManager.GetBallHandling().PossessionOrHome;
