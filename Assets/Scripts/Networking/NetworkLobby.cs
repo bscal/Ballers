@@ -17,7 +17,7 @@ public class NetworkLobby : MonoBehaviour
     private void Awake()
     {
         m_networkEvents = GameObject.Find("NetworkManager").GetComponent<NetworkEvents>();
-        MatchGlobals.NetworkLobby = this;
+        Match.NetworkLobby = this;
     }
 
     void Start()

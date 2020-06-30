@@ -20,10 +20,10 @@ public class GameSetup : NetworkedBehaviour
 
     private void Start()
     {
-        if (MatchGlobals.HostServer)
-            MatchGlobals.NetworkLobby.HostServer();
+        if (Match.HostServer)
+            Match.NetworkLobby.HostServer();
         else
-            MatchGlobals.NetworkLobby.Connect();
+            Match.NetworkLobby.Connect();
 
         if (IsServer)
             NetworkingManager.Singleton.OnClientConnectedCallback += OnClientConnected;
@@ -56,7 +56,7 @@ public class GameSetup : NetworkedBehaviour
     [ServerRPC]
     public void PlayerLoaded(ulong pid)
     {
-        if (MatchGlobals.HostServer)
+        if (Match.HostServer)
         {
             //GameObject go = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
             //NetworkedObject no = go.GetComponent<NetworkedObject>();

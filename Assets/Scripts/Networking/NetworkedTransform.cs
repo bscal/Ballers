@@ -223,6 +223,9 @@ namespace Ballers.Networking
                     lerpStartRot = transform.rotation;
                     lerpEndPos = new Vector3(xPos, yPos, zPos);
                     lerpEndRot = Quaternion.Euler(xRot, yRot, zRot);
+
+                    print($"APPLYTRANSFORM: {lerpStartPos}, {lerpEndPos}");
+
                     lerpT = 0;
                 }
                 else
@@ -369,6 +372,7 @@ namespace Ballers.Networking
                 lerpStartRot = rotation;
                 lerpEndPos = position;
                 lerpEndRot = rotation;
+
                 lerpT = 0;
             }
         }

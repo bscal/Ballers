@@ -148,7 +148,7 @@ public class BallHandling : NetworkedBehaviour
     void FixedUpdate()
     {
         if (!IsServer) return;
-        if (!MatchGlobals.HasGameStarted) return;
+        if (!Match.HasGameStarted) return;
 
         // ============ Loose ball ============
         if (State == BallState.LOOSE)
@@ -475,7 +475,7 @@ public class BallHandling : NetworkedBehaviour
     {
         while (true)
         {
-            if (!MatchGlobals.HasGameStarted)
+            if (!Match.HasGameStarted)
             {
                 yield return new WaitForSeconds(.33f);
                 continue;

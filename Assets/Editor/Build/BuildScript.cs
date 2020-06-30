@@ -9,6 +9,11 @@ public static class BuildScript
         "Assets/scenes/Match.unity",
     };
 
+    public static bool BatchCheck()
+    {
+        return Application.isBatchMode;
+    }
+
     public static void Windows64()
     {
         string pathToDeploy = "builds/Windows64/Ballers.exe";

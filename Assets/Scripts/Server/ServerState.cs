@@ -47,7 +47,7 @@ public static class ServerState
 
     private static bool HaveAllPlayersLoaded()
     {
-        if (Players.Count < MatchGlobals.PlayersNeeded)
+        if (Players.Count < Match.PlayersNeeded)
             return false;
         foreach (ServerPlayer sp in Players.Values)
         {

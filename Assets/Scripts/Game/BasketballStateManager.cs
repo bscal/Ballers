@@ -72,8 +72,8 @@ public class BasketballStateManager : NetworkedBehaviour
 
     public override void NetworkStart()
     {
-        print(MatchGlobals.MatchSettings.QuarterLength);
-        m_inGameTime = new NetworkedVarFloat(STATE_SETTINGS, MatchGlobals.MatchSettings.QuarterLength);
+        print(Match.MatchSettings.QuarterLength);
+        m_inGameTime = new NetworkedVarFloat(STATE_SETTINGS, Match.MatchSettings.QuarterLength);
         m_shotClock = new NetworkedVarFloat(STATE_SETTINGS, SHOTCLOCK_LENGTH);
         m_state = new NetworkedVarByte(STATE_SETTINGS, (byte)EMatchState.PREGAME);
         m_quarter = new NetworkedVarByte(STATE_SETTINGS, 1);
@@ -86,7 +86,7 @@ public class BasketballStateManager : NetworkedBehaviour
 
     private void Update()
     {
-        if (!MatchGlobals.HasGameStarted) return;
+        if (!Match.HasGameStarted) return;
 
         if (IsServer)
         {
@@ -154,12 +154,12 @@ public class BasketballStateManager : NetworkedBehaviour
     {
         Quarter++;
 
-        if (Quarter == MatchGlobals.MatchSettings.QuartersCount / 2)
+        if (Quarter == Match.MatchSettings.QuartersCount / 2)
         {
             EndHalf();
         }
 
-        else if (Quarter > MatchGlobals.MatchSettings.QuartersCount)
+        else if (Quarter > Match.MatchSettings.QuartersCount)
         {
             if (Quarter >= byte.MaxValue)
             {

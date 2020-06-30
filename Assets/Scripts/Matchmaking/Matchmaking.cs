@@ -100,12 +100,12 @@ public class Matchmaking : MonoBehaviour
         int neededPlayers = int.Parse(SteamMatchmaking.GetLobbyData(m_lobbyID, "NeededPlayers"));
         int playerCount = SteamMatchmaking.GetNumLobbyMembers(m_lobbyID);
 
-        MatchGlobals.NetworkLobby.SetSteamIDToConnect(steamid);
+        Match.NetworkLobby.SetSteamIDToConnect(steamid);
         if (steamid == ClientPlayer.Singleton.SteamID)
-            MatchGlobals.HostServer = true;
-        MatchGlobals.MatchSettings = new MatchSettings(BallersGamemode.SP_BOTS, 5, 60.0f * 6.0f, 4);
-        MatchGlobals.PlayersNeeded = neededPlayers;
-        MatchGlobals.MatchID = 1;
+            Match.HostServer = true;
+        Match.MatchSettings = new MatchSettings(BallersGamemode.SP_BOTS, 5, 60.0f * 6.0f, 4);
+        Match.PlayersNeeded = neededPlayers;
+        Match.MatchID = 1;
 
         ClientPlayer.Singleton.State = ServerPlayerState.JOINED;
 

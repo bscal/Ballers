@@ -15159,7 +15159,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 027aefa5fcb01574f9c1353068bb3a91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FixedSendsPerSecond: 30
+  FixedSendsPerSecond: 10
   AssumeSyncedSends: 1
   InterpolatePosition: 1
   SnapDistance: 10

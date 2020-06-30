@@ -14,7 +14,7 @@ public static class TeamGlobals
 
 }
 
-public static class MatchGlobals
+public static class Match
 {
     public static NetworkLobby NetworkLobby { get; set; }
     public static MatchSettings MatchSettings { get; set; }
