@@ -10,6 +10,7 @@ TagManager:
   - Not Mirrorable
   - Bounds Trigger
   - Ball
+  - AI
   layers:
   - Default
   - TransparentFX
