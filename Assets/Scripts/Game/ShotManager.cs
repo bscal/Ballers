@@ -43,14 +43,13 @@ public class ShotManager : MonoBehaviour
         Singleton = this;
         ShotData = new NetworkedShotData(settings, new ShotData());
         m_shotController = GetComponent<ShotController>();
-        if (NetworkingManager.Singleton.IsServer)
-        {
-
-        }
     }
 
     // =================================== Public Functions ===================================
 
+    /***
+     * Starting a shot starts here.
+     */
     public void OnShoot(ulong pid, Player p, float speed, float targetHeight, float bonusHeight, float startOffset, float endOffset)
     {
         if (!NetworkingManager.Singleton.IsServer) return;
@@ -98,8 +97,10 @@ public class ShotManager : MonoBehaviour
         GameManager.GetBallHandling().BallFollowArc(player);
     }
 
-    /// <summary>Server handling of shot quality<br></br>
-    /// Used delta time and speed increment to determine where player's target should be</summary>
+    /// <summary>
+    /// Server handling of shot quality<br></br>
+    /// Used delta time and speed increment to determine where player's target should be
+    /// </summary>
     private IEnumerator ShotQuality(Player p, ulong player)
     {
         yield return null;
@@ -152,7 +153,7 @@ public class ShotManager : MonoBehaviour
         return BankType.NONE;
     }
 
-    public static Vector3 GetClosestBankPos(Vector3 current)
+    private static Vector3 GetClosestBankPos(Vector3 current)
     {
         float distL = Vector3.Distance(current, GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[0].transform.position);
         float distR = Vector3.Distance(current, GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[1].transform.position);
@@ -161,7 +162,7 @@ public class ShotManager : MonoBehaviour
             GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[1].transform.position;
     }
 
-    public static BankType GetClosestBank(Vector3 current)
+    private static BankType GetClosestBank(Vector3 current)
     {
         float distL = Vector3.Distance(current, GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[0].transform.position);
         float distR = Vector3.Distance(current, GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[1].transform.position);

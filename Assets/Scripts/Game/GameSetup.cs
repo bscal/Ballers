@@ -2,6 +2,16 @@
 using MLAPI.Messaging; 
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Assertions;
+
+public enum MatchSlot
+{
+    PG,
+    SG,
+    SF,
+    PF,
+    C
+}
 
 /// <summary>
 /// GameSetup handles getting the game ready for play. Making sure players are connected. MatchGlobals are set.
@@ -14,6 +24,7 @@ public class GameSetup : NetworkedBehaviour
     public bool isReady = false;
 
     public GameObject playerPrefab;
+    public GameObject aiPrefab;
 
     private bool m_hasClientLoaded = false;
     private bool m_hasClientConnected = false;
@@ -26,7 +37,30 @@ public class GameSetup : NetworkedBehaviour
             Match.NetworkLobby.Connect();
 
         if (IsServer)
+        {
             NetworkingManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+
+            // Initialize ai
+            for (int tid = 0; tid < 2; tid++)
+            {
+                MatchTeam team = Match.matchTeams[tid];
+
+                int aiToCreate = Match.MatchSettings.TeamSize - team.teamSize;
+
+                for (int i = 0; i < aiToCreate; i++)
+                {
+                    GameObject go = Instantiate(aiPrefab, Vector3.zero, Quaternion.identity);
+                    AIPlayer aiLogic = go.GetComponent<AIPlayer>();
+                    Assert.IsNotNull(aiLogic, "aiPrefab in GameSetup does not have AIPlayer component");
+                    GameManager.AddAI(aiLogic);
+
+                    go.GetComponent<Player>().teamID = tid;
+                    go.GetComponent<NetworkedObject>().Spawn();
+                }
+            }
+
+
+        }
 
         m_hasClientLoaded = true;
         print("creating player");

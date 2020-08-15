@@ -109,6 +109,8 @@ public class Matchmaking : MonoBehaviour
 
         ClientPlayer.Singleton.State = ServerPlayerState.JOINED;
 
+        Match.AddPlayer(steamid);
+
         // FOR DEBUGGING
         //m_matchSetup.Setup(lobbyEnter, steamid);
 

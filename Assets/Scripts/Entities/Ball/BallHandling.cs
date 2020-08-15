@@ -125,6 +125,7 @@ public class BallHandling : NetworkedBehaviour
 
         m_shotManager = GameManager.Singleton.gameObject.GetComponent<ShotManager>();
         m_ball = NetworkedObject.gameObject;
+
         m_body = gameObject.GetComponent<Rigidbody>();
         m_body.AddForce(new Vector3(1, 1, 1), ForceMode.Impulse);
     }
@@ -529,24 +530,32 @@ public class BallHandling : NetworkedBehaviour
         print("scored");
     }
 
+    [ClientRPC]
+    public void SetPlayerHandler(bool isHandler)
+    {
+        Player passer = GameManager.GetPlayer();
+        passer.isDribbling = isHandler;
+
+        if (isHandler)
+        {
+            m_currentPlayer.isBallInLeftHand = !m_currentPlayer.isRightHanded;
+        }
+    }
+
     private void ChangeBallHandler(ulong newPlayer)
     {
+        if (newPlayer == PlayerWithBall) return;
+
         PlayerLastPossesion = PlayerWithBall;
         PlayerWithBall = newPlayer;
 
-        if (newPlayer == DUMMY_PLAYER)
-            return;
+        if (newPlayer == DUMMY_PLAYER) return;
 
-        if (m_currentPlayer) m_currentPlayer.isDribbling = false;
+        InvokeClientRpcOnClient(SetPlayerHandler, PlayerLastPossesion, false);
+        InvokeClientRpcOnClient(SetPlayerHandler, PlayerWithBall, true);
 
         m_currentPlayer = (newPlayer == NO_PLAYER) ? null : GameManager.GetPlayer(newPlayer);
-
-        if (m_currentPlayer)
-        {
-            m_currentPlayer.isDribbling = true;
-            m_currentPlayer.isBallInLeftHand = !m_currentPlayer.isRightHanded;
-            if (Possession != m_currentPlayer.teamID) Possession = m_currentPlayer.teamID;
-        }
+        if (Possession != m_currentPlayer.teamID) Possession = m_currentPlayer.teamID;
     }
 
     private void SetupInbound(int team, GameObject inbound)

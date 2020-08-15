@@ -19,12 +19,12 @@ public class Player : NetworkedBehaviour, IBitWritable
     public event Action<Player> Shoot;
     public event Action<Player> Release;
 
-    private static readonly NetworkedVarSettings settings = new NetworkedVarSettings() {
-        SendChannel = "PlayerChannel", // The var value will be synced over this channel
+    public static readonly NetworkedVarSettings settings = new NetworkedVarSettings() {
+        SendChannel = "Player", // The var value will be synced over this channel
         ReadPermission = NetworkedVarPermission.Everyone, // The var values will be synced to everyone
         ReadPermissionCallback = null, // Only used when using "Custom" read permission
-        SendTickrate = 2, // The var will sync no more than 2 times per second
-        WritePermission = NetworkedVarPermission.OwnerOnly, // Only the owner of this object is allowed to change the value
+        SendTickrate = 20, // The var will sync no more than 2 times per second
+        WritePermission = NetworkedVarPermission.ServerOnly, // Only the owner of this object is allowed to change the value
         WritePermissionCallback = null // Only used when write permission is "Custom"
     };
 
@@ -33,7 +33,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     public string username = "test";
     [Header("CPU or Dummy Controls")]
     public bool isDummy = false;
-    public int position = 3;
+    public int slot = 3;
     public float height = 2.35f;
 
     [Header("Screen Hitbox")]
@@ -63,6 +63,8 @@ public class Player : NetworkedBehaviour, IBitWritable
     public bool isDribLeft = false;
     public bool isDribRight = false;
 
+    public bool isAI = false;
+
     // Server values
     public bool isDribbling = false;
     public bool isInsideThree = false;
@@ -75,8 +77,8 @@ public class Player : NetworkedBehaviour, IBitWritable
     public Vector3 GetHand { get { return (isBallInLeftHand) ? LeftHand : RightHand; } }
     public Vector3 CenterPos { get { return m_center.transform.position; } }
     public Transform OwnBasket { get { return GameManager.Singleton.baskets[teamID].transform; } }
+    public Transform OtherBasket { get { return GameManager.Singleton.baskets[FlipTeamID(teamID)].transform; } }
     public bool OnLeftSide { get { return transform.position.x < 0; } }
-
     private Vector3 m_target;
     public Vector3 LookTarget { get { return m_target; } }
     public Quaternion LookRotation { get { return Quaternion.LookRotation(m_target); } }
@@ -86,9 +88,10 @@ public class Player : NetworkedBehaviour, IBitWritable
     {
         get
         {
+            if (OnOffense()) return null;
             if (isHelping) return GameManager.Singleton.BallHandler;
-            else if (!OnOffense()) return m_assignment;
-            else return GetNearestEnemy();
+            else if (m_assignment == null) m_assignment = GetNearestEnemy();
+            return m_assignment;
         }
         set { m_assignment = value; }
     }
@@ -297,10 +300,10 @@ public class Player : NetworkedBehaviour, IBitWritable
         Player shortestPlayer = null;
         float shortestDist = float.MaxValue;
 
-        Team enemyTeam = GameManager.Singleton.teams[teamID ^ 1];
-        for (int i = 0; i < enemyTeam.playersInPosition.Length; i++)
+        Team enemyTeam = GameManager.Singleton.teams[FlipTeamID(teamID)];
+        for (int i = 0; i < Match.MatchSettings.TeamSize; i++)
         {
-            Player p = GameManager.GetPlayer(enemyTeam.playersInPosition[i]);
+            Player p = enemyTeam.teamSlots[i];
             if (!p) continue;
             float dist = Vector3.Distance(transform.position, p.transform.position);
             if (dist < shortestDist)
@@ -319,6 +322,11 @@ public class Player : NetworkedBehaviour, IBitWritable
         isBallInLeftHand = !isBallInLeftHand;
     }
 
+    public static int FlipTeamID(int teamid)
+    {
+        return Mathf.Clamp(1 - teamid, 0, 1);
+    }
+
     [ClientRPC]
     public void ReadPlayerFromServer(Stream stream)
     {
@@ -334,7 +342,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     {
         using (PooledBitReader reader = PooledBitReader.Get(stream))
         {
-            teamID = Convert.ToInt32(reader.ReadBit());
+            teamID = reader.ReadInt32Packed();
 
             isRightHanded = reader.ReadBool();
             isMoving = reader.ReadBool();
@@ -354,6 +362,8 @@ public class Player : NetworkedBehaviour, IBitWritable
             isDribLeft = reader.ReadBool();
             isDribRight = reader.ReadBool();
 
+            isAI = reader.ReadBool();
+
             m_target = reader.ReadVector3Packed();
         }
     }
@@ -362,7 +372,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     {
         using (PooledBitWriter writer = PooledBitWriter.Get(stream))
         {
-            writer.WriteBit(Convert.ToBoolean(teamID));
+            writer.WriteInt32Packed(teamID);
 
             writer.WriteBool(isRightHanded);
             writer.WriteBool(isMoving);
@@ -381,7 +391,8 @@ public class Player : NetworkedBehaviour, IBitWritable
             writer.WriteBool(isDribDown);
             writer.WriteBool(isDribLeft);
             writer.WriteBool(isDribRight);
-            //
+
+            writer.WriteBool(isAI);
 
             writer.WriteVector3Packed(m_target);
         }

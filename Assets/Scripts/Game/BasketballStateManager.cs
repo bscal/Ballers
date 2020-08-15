@@ -72,7 +72,6 @@ public class BasketballStateManager : NetworkedBehaviour
 
     public override void NetworkStart()
     {
-        print(Match.MatchSettings.QuarterLength);
         m_inGameTime = new NetworkedVarFloat(STATE_SETTINGS, Match.MatchSettings.QuarterLength);
         m_shotClock = new NetworkedVarFloat(STATE_SETTINGS, SHOTCLOCK_LENGTH);
         m_state = new NetworkedVarByte(STATE_SETTINGS, (byte)EMatchState.PREGAME);

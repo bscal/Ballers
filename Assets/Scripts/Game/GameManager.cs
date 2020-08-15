@@ -1,9 +1,12 @@
 ﻿using MLAPI;
 using MLAPI.Messaging;
+using MLAPI.NetworkedVar.Collections;
+using MLAPI.Serialization.Pooled;
 using MLAPI.Spawning;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -29,10 +32,13 @@ public class GameManager : NetworkedBehaviour
     public event Action<ulong> AllPlayersConnected;
 
     private static BallHandling m_ballhandling;
-    private readonly static List<Player> m_players = new List<Player>();
+    private readonly static NetworkedList<Player> m_players = new NetworkedList<Player>(Player.settings);
+
     private readonly static Dictionary<ulong, Player> m_playersByID = new Dictionary<ulong, Player>();
     private readonly static Dictionary<ulong, ulong> m_playersBySteam = new Dictionary<ulong, ulong>();
     private readonly static List<BasicDummy> m_dummies = new List<BasicDummy>();
+    private readonly static List<AIPlayer> m_ais = new List<AIPlayer>();
+    
 
     public Player BallHandler { get { return GetPlayer(m_ballhandling.PlayerWithBall); } }
     public Basket CurrentBasket { get { return Singleton.baskets[m_ballhandling.PossessionOrHome]; } }
@@ -40,6 +46,7 @@ public class GameManager : NetworkedBehaviour
     public Team TeamHome { get { return teams[0]; } }
     public Team TeamAway { get { return teams[1]; } }
     public bool HasStarted { get; private set; }
+    public BasketballStateManager GameState { get; private set; }
 
     public int teamSize = 5;
     public bool lastShotMade = false;
@@ -52,7 +59,6 @@ public class GameManager : NetworkedBehaviour
     public GameObject[] inbounds;
     public GameObject loaderPrefab;
 
-    private BasketballStateManager m_gameState;
     private ShotManager m_shotManager;
     private float m_pregameTime = 0;
 
@@ -63,12 +69,12 @@ public class GameManager : NetworkedBehaviour
     {
         Singleton = this;
 
-        m_gameState = GetComponent<BasketballStateManager>();
+        GameState = GetComponent<BasketballStateManager>();
         m_shotManager = GetComponent<ShotManager>();
 
         baskets[0] = GameObject.Find("BasketLeft").GetComponent<Basket>();
-        baskets[1] = GameObject.Find("BasketRight").GetComponent<Basket>();
         baskets[0].id = 0;
+        baskets[1] = GameObject.Find("BasketRight").GetComponent<Basket>();
         baskets[1].id = 1;
 
         centerCourt = GameObject.Find("CenterCourt").transform.position;
@@ -84,7 +90,7 @@ public class GameManager : NetworkedBehaviour
         NetworkingManager.Singleton.OnClientConnectedCallback += OnConnected;
         NetworkingManager.Singleton.OnClientDisconnectCallback += OnDisconnected;
 
-        m_gameState.OnHalfEnd += EndHalf;
+        GameState.OnHalfEnd += EndHalf;
 
         //m_players.ForEach((p) => { p.StartLoad(); });
     }
@@ -103,6 +109,9 @@ public class GameManager : NetworkedBehaviour
             m_ballhandling = ball.GetComponent<BallHandling>();
             ball.SetActive(false);
             ball.name = "Ball";
+
+
+
         }
         if (IsServer)
         {
@@ -154,7 +163,7 @@ public class GameManager : NetworkedBehaviour
 
         if (IsServer)
         {
-            m_gameState.MatchStateValue = EMatchState.PREGAME;
+            GameState.MatchStateValue = EMatchState.PREGAME;
             StartCoroutine(PregameTimer());
         }
 
@@ -183,7 +192,7 @@ public class GameManager : NetworkedBehaviour
     {
         const float TIMEOUT = 30;
         float timer = 0;
-        while (m_gameState.MatchStateValue == EMatchState.PREGAME)
+        while (GameState.MatchStateValue == EMatchState.PREGAME)
         {
             yield return new WaitForSeconds(1);
 
@@ -226,20 +235,16 @@ public class GameManager : NetworkedBehaviour
 
         NetworkedObject netObj = SpawnManager.GetPlayerObject(pid);
         AddPlayer(netObj, steamid);
-        InvokeClientRpcOnEveryoneExcept(RegisterPlayerClient, pid, pid, steamid);
-    }
 
-    [ServerRPC]
-    public void RegisterNPCServer(ulong pid, ulong steamid)
-    {
-        // Checks if already registered on server
-        if (m_playersByID.TryGetValue(pid, out Player p))
-            return; // Already registered
+        if (!p.isAI)
+        {
+            p.teamID = Match.GetPlayersTeam(steamid);
+            p.slot = teams[p.teamID].
+        }
 
-        NetworkedObject netObj = SpawnManager.GetPlayerObject(pid);
-        AddPlayer(netObj, steamid);
         InvokeClientRpcOnEveryoneExcept(RegisterPlayerClient, pid, pid, steamid);
-        PlayerConnected?.Invoke(pid);
+
+
     }
 
     [ClientRPC]
@@ -294,8 +299,11 @@ public class GameManager : NetworkedBehaviour
 
     public void EndHalf()
     {
-        TeamHome.id = 1;
-        TeamAway.id = 0;
+        Basket homeb = baskets[0];
+        Basket awayb = baskets[1];
+
+        baskets[0] = awayb;
+        baskets[1] = homeb;
     }
 
     /// <summary> Returns size 2 int array. index 0 = home, 1 = away </summary>
@@ -347,6 +355,11 @@ public class GameManager : NetworkedBehaviour
             TeamAway.points += points;
     }
 
+    private static void InitPlayer()
+    {
+
+    }
+
     public static void AddPlayer(NetworkedObject netObj, ulong steamid)
     {
         print("Adding player " + netObj.OwnerClientId + " " + netObj.NetworkId + " " + steamid);
@@ -358,10 +371,18 @@ public class GameManager : NetworkedBehaviour
             return;
         }
 
-        m_players.Add(p);
-        m_playersByID.Add(netObj.OwnerClientId, p);
-        m_playersBySteam.Add(netObj.OwnerClientId, steamid);
+        if (NetworkingManager.Singleton.IsServer)
+        {
+            m_players.Add(p);
+            GameManager.Singleton.teams[p.teamID].teamSlots.Add(p.slot, p);
+        }
 
+        if (!p.isAI)
+        {
+            m_playersByID.Add(netObj.OwnerClientId, p);
+            m_playersBySteam.Add(netObj.OwnerClientId, steamid);
+        }
+        
         Singleton.PlayerLoaded?.Invoke(p);
     }
 
@@ -381,9 +402,21 @@ public class GameManager : NetworkedBehaviour
         m_playersBySteam.Remove(netObj.OwnerClientId);
     }
 
-    public bool GetIsServer()
+    public static void AddAI(AIPlayer ai)
     {
-        return IsServer;
+        if (m_ais.Contains(ai))
+        {
+            Debug.LogWarning("AI already added to list");
+            return;
+        }
+
+        m_ais.Add(ai);
+        AddPlayer(ai.GetComponent<NetworkedObject>(), 0);
+    }
+
+    public static void RemoveAI(AIPlayer ai)
+    {
+        m_ais.Remove(ai);
     }
 
     public ShotManager GetShotManager()
@@ -413,7 +446,7 @@ public class GameManager : NetworkedBehaviour
         return m_playersByID.ContainsKey(id);
     }
 
-    public static List<Player> GetPlayers()
+    public static NetworkedList<Player> GetPlayers()
     {
         return m_players;
     }
@@ -421,8 +454,9 @@ public class GameManager : NetworkedBehaviour
 
     public static Player GetPlayerByPosition(Team team, int position)
     {
-        if (position < 0 || position > team.playersInPosition.Length) return GetPlayer(team.playersInPosition[0]);
-        return GetPlayer(team.playersInPosition[position]);
+        //if (position < 0 || position > team.playersInPosition.Length) return GetPlayer(team.playersInPosition[0]);
+        //return GetPlayer(team.playersInPosition[position]);
+        return GetPlayer(0);
     }
 
     public static List<BasicDummy> GetDummies()
@@ -470,6 +504,17 @@ public class GameManager : NetworkedBehaviour
         m_ballhandling.Possession = state.teamWithPossession;
         teams[(int)TeamType.HOME] = state.teams[(int)TeamType.HOME];
         teams[(int)TeamType.AWAY] = state.teams[(int)TeamType.AWAY];
+    }
+
+
+    [ClientRPC]
+    public void ClientSyncTeamSlots(Stream stream)
+    {
+        using (PooledBitReader reader = PooledBitReader.Get(stream))
+        {
+            int teamid = reader.ReadInt32Packed();
+            teams[teamid].ReadSyncTeamSlots(reader);
+        }
     }
 
     /// <summary>

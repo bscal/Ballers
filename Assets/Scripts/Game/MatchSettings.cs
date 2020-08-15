@@ -19,6 +19,9 @@ public class MatchSettings : IBitWritable
     public int TeamSize { get; set; }
     public float QuarterLength { get; set; }
     public int QuartersCount { get; set; }
+    public int NumOfAIs { get; set; }
+    public AIDifficulty Difficulty { get; set; }
+
 
     public MatchSettings() { }
     public MatchSettings(BallersGamemode gamemode, int teamSize, float quarterL, int quarterC)

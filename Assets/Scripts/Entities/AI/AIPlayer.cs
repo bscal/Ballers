@@ -10,10 +10,16 @@ public class AIPlayer : NetworkedBehaviour
     protected AIDifficulty m_difficulty;
     protected GameObject m_object;
 
+
+    private void Awake()
+    {
+        m_player = GetComponent<Player>();
+        m_player.isAI = true;
+    }
     // Start is called before the first frame update
     void Start()
     {
-        
+        m_difficulty = AIDifficulty.PRO;
     }
 
     // Update is called once per frame
