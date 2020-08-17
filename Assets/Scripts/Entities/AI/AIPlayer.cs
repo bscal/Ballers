@@ -10,15 +10,15 @@ public class AIPlayer : NetworkedBehaviour
     protected AIDifficulty m_difficulty;
     protected GameObject m_object;
 
-
     private void Awake()
     {
         m_player = GetComponent<Player>();
-        m_player.isAI = true;
     }
+
     // Start is called before the first frame update
     void Start()
     {
+        
         m_difficulty = AIDifficulty.PRO;
     }
 
@@ -28,23 +28,28 @@ public class AIPlayer : NetworkedBehaviour
         if (!IsOwnedByServer) return;
         if (GameManager.Singleton.GameState.MatchStateValue == EMatchState.INPROGRESS)
         {
-            if (m_player.OnOffense())
+            if (GameManager.GetBallHandling().IsBallLoose())
             {
-                if (Vector3.Distance(transform.position, m_player.OtherBasket.position) > 3f)
+                // TODO should player try and get ball?
+                return;
+            }
+            if (m_player.IsOnOffense())
+            {
+                if (Vector3.Distance(transform.position, m_player.OwnBasket.position) > 1f)
                 {
-                    float step = 5.0f * Time.deltaTime;
-                    Vector3 move = Vector3.MoveTowards(transform.position, m_player.OtherBasket.position, step);
+                    float step = 3.0f * Time.deltaTime;
+                    Vector3 move = Vector3.MoveTowards(transform.position, m_player.OwnBasket.position, step);
                     move.y = transform.position.y;
                     transform.position = move;
                 }
                 else
                 {
-                    Shoot();
+                    if (m_player.HasBall)
+                        Shoot();
                 }
             }
-            else
+            else if (m_player.IsOnDefense() && m_player.Assignment != null)
             {
-                if (m_player.Assignment == null) return;
                 transform.position = m_player.Assignment.gameObject.transform.position + (m_player.Assignment.gameObject.transform.forward * 6);
                 transform.LookAt(m_player.Assignment.gameObject.transform);
             }
@@ -55,5 +60,10 @@ public class AIPlayer : NetworkedBehaviour
     private void Shoot()
     {
         print("AI shoots the ball");
+    }
+
+    public Player GetPlayer()
+    {
+        return m_player;
     }
 }

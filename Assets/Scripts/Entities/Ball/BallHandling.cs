@@ -111,9 +111,9 @@ public class BallHandling : NetworkedBehaviour
 
     public override void NetworkStart()
     {
-        m_playerWithBall = new NetworkedVarULong(settings, 0);
-        m_playerLastTouched = new NetworkedVarULong(settings, 0);
-        m_playerLastPossesion = new NetworkedVarULong(settings, 0);
+        m_playerWithBall = new NetworkedVarULong(settings, NO_PLAYER);
+        m_playerLastTouched = new NetworkedVarULong(settings, NO_PLAYER);
+        m_playerLastPossesion = new NetworkedVarULong(settings, NO_PLAYER);
         m_state = new NetworkedVarByte(settings, 0);
         m_possession = new NetworkedVarSByte(settings, -1);
 
@@ -164,7 +164,6 @@ public class BallHandling : NetworkedBehaviour
                 if (pair.Value < 1.5f)
                 {
                     State = BallState.HELD;
-
                     ChangeBallHandler(pair.Key);
                     Debug.Log(pair.Key + " picked up ball");
                 }
@@ -174,10 +173,10 @@ public class BallHandling : NetworkedBehaviour
         // ============ ball held ============
         else if (State == BallState.HELD)
         {
-            m_currentPlayer = GameManager.GetPlayer(PlayerWithBall);
-            if (!m_currentPlayer) return;
-            if (m_currentPlayer.OwnerClientId != PlayerWithBall)
-                ChangePossession(m_currentPlayer.teamID, false, false);  
+//             m_currentPlayer = GameManager.GetPlayer(PlayerWithBall);
+//             if (!m_currentPlayer) return;
+//             if (m_currentPlayer.OwnerClientId != PlayerWithBall)
+//                 ChangePossession(m_currentPlayer.teamID, false, false);  
 
             m_body.isKinematic = true;
 
@@ -259,9 +258,9 @@ public class BallHandling : NetworkedBehaviour
         float d = shot.distance / (SHOT_SPEED + UnityEngine.Random.Range(0, 1)); 
 
         if (shot.bankshot == BankType.NONE)
-            StartCoroutine(FollowArc(m_ball.transform.position, GameManager.Singleton.baskets[player.teamID].netPos.position, h, d));
+            StartCoroutine(FollowArc(m_ball.transform.position, GameManager.Singleton.baskets[player.TeamID].netPos.position, h, d));
         else
-            StartCoroutine(FollowBackboard(shot, m_ball.transform.position, GameManager.Singleton.baskets[player.teamID].netPos.position, h, d));
+            StartCoroutine(FollowBackboard(shot, m_ball.transform.position, GameManager.Singleton.baskets[player.TeamID].netPos.position, h, d));
 
     }
 
@@ -334,9 +333,9 @@ public class BallHandling : NetworkedBehaviour
     }
 
     /// Returns the team that does not have possession.
-    public int OtherTeam()
+    public int FlipTeam()
     {
-        return Possession ^ 1;
+        return Mathf.Clamp(Possession ^ 1, 0, 1);
     }
 
     // =================================== Passing ===================================
@@ -542,20 +541,42 @@ public class BallHandling : NetworkedBehaviour
         }
     }
 
-    private void ChangeBallHandler(ulong newPlayer)
+    /// <summary>
+    /// Changes the Player with ball and updates clients that have the ball.<br></br>
+    /// If NO_PLAYER id is set sets State to LOOSE.<br></br>
+    /// Possession is also changed to correct possession if needed.
+    /// </summary>
+    private void ChangeBallHandler(ulong newPlayerID)
     {
-        if (newPlayer == PlayerWithBall) return;
+        if (newPlayerID == PlayerWithBall) return;
 
         PlayerLastPossesion = PlayerWithBall;
-        PlayerWithBall = newPlayer;
+        PlayerWithBall = newPlayerID;
 
-        if (newPlayer == DUMMY_PLAYER) return;
+        if (newPlayerID == DUMMY_PLAYER) return;
 
         InvokeClientRpcOnClient(SetPlayerHandler, PlayerLastPossesion, false);
-        InvokeClientRpcOnClient(SetPlayerHandler, PlayerWithBall, true);
 
-        m_currentPlayer = (newPlayer == NO_PLAYER) ? null : GameManager.GetPlayer(newPlayer);
-        if (Possession != m_currentPlayer.teamID) Possession = m_currentPlayer.teamID;
+        int teamToSwitch = (int)TeamType.NONE;
+        // If newPlayer is set to NO_PLAYER id the ball should be loose.
+        // There is no need to update that client or change possession until ball is picked up.
+        if (newPlayerID == NO_PLAYER)
+        {
+            State = BallState.LOOSE;
+        }
+        else
+        {
+            InvokeClientRpcOnClient(SetPlayerHandler, PlayerWithBall, true);
+            m_currentPlayer = GameManager.GetPlayer(newPlayerID);
+            // if old id and new id are same don't change teams.
+            if (Possession == m_currentPlayer.TeamID) return;
+
+            if (IsBallLoose())
+                teamToSwitch = m_currentPlayer.TeamID;
+            else
+                teamToSwitch = Player.FlipTeamID(m_currentPlayer.TeamID);
+        }
+        ChangePossession(teamToSwitch, false, false);
     }
 
     private void SetupInbound(int team, GameObject inbound)
@@ -585,8 +606,15 @@ public class BallHandling : NetworkedBehaviour
         {
             State = BallState.LOOSE;
         }
-
-
     }
 
+    public bool IsBallLoose()
+    {
+        return Possession == -1;
+    }
+
+    public bool IsBallNotInPlay()
+    {
+        return Possession < -1 && Possession > 1;
+    }
 }
