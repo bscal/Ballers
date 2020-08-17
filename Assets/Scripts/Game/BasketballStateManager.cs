@@ -187,8 +187,8 @@ public class BasketballStateManager : NetworkedBehaviour
 
     private void UpdateUI()
     {
-        m_UIHomeScore.text = GameManager.Singleton.TeamHome.points.ToString();
-        m_UIAwayScore.text = GameManager.Singleton.TeamAway.points.ToString();
+        m_UIHomeScore.text = GameManager.Singleton.TeamHome.TeamData.points.ToString();
+        m_UIAwayScore.text = GameManager.Singleton.TeamAway.TeamData.points.ToString();
         m_UIQuarter.text = (m_OvertimeCount > 0) ? "OT" + m_OvertimeCount : Quarter.ToString();
         m_UIClock.text = string.Format("{0}:{1}", Mathf.Floor(InGameTime / 60), Mathf.RoundToInt(InGameTime % 60));
         if (m_shotclockOff)

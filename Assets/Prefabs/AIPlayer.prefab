@@ -149,6 +149,16 @@ PrefabInstance:
       propertyPath: thisInstanceId
       value: -15608
       objectReference: {fileID: 0}
+    - target: {fileID: 8812082304833967157, guid: a08e994a8c3cf984a9fad88426ce24c4,
+        type: 3}
+      propertyPath: PrefabHash
+      value: 590612599564599603
+      objectReference: {fileID: 0}
+    - target: {fileID: 8812082304833967157, guid: a08e994a8c3cf984a9fad88426ce24c4,
+        type: 3}
+      propertyPath: PrefabHashGenerator
+      value: AI
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 8838469337460656423, guid: a08e994a8c3cf984a9fad88426ce24c4, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: a08e994a8c3cf984a9fad88426ce24c4, type: 3}

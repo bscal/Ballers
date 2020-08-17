@@ -13,12 +13,10 @@ public class SyncedMatchStateData : IBitWritable
     public bool HasStarted { get; set; }
     public int teamWithPossession { get; set; }
     public ulong playerWithBall { get; set; }
-    public Team[] teams { get; set; } = new Team[2];
+    public TeamData[] teams { get; set; } = new TeamData[2];
 
     public SyncedMatchStateData()
     {
-        teams[0] = new Team((int)TeamType.HOME, 5);
-        teams[1] = new Team((int)TeamType.AWAY, 5);
     }
 
     public void Read(Stream stream)
@@ -29,9 +27,9 @@ public class SyncedMatchStateData : IBitWritable
             reader.SkipPadBits();
             teamWithPossession = reader.ReadInt32Packed();
             playerWithBall = reader.ReadUInt64Packed();
-            foreach (Team t in teams)
+            foreach (TeamData team in teams)
             {
-                t.Read(stream);
+                team.Read(stream);
             }
         }
     }
@@ -45,8 +43,8 @@ public class SyncedMatchStateData : IBitWritable
             writer.WriteInt32Packed(teamWithPossession);
             writer.WriteUInt64Packed(playerWithBall);
 
-            foreach (Team t in teams)
-                t.Write(stream);
+            foreach (TeamData team in teams)
+                team.Write(stream);
         }
     }
 }
@@ -80,8 +78,8 @@ public class SyncedMatchState : NetworkedBehaviour
                 m_state.HasStarted = GameManager.Singleton.HasStarted;
                 m_state.playerWithBall = (GameManager.Singleton.BallHandler) ? GameManager.Singleton.BallHandler.OwnerClientId : 0;
                 m_state.teamWithPossession = GameManager.Singleton.Possession;
-                m_state.teams[(int)TeamType.HOME] = GameManager.Singleton.teams[(int)TeamType.HOME];
-                m_state.teams[(int)TeamType.AWAY] = GameManager.Singleton.teams[(int)TeamType.AWAY];
+                m_state.teams[(int)TeamType.HOME] = GameManager.Singleton.teams[(int)TeamType.HOME].TeamData;
+                m_state.teams[(int)TeamType.AWAY] = GameManager.Singleton.teams[(int)TeamType.AWAY].TeamData;
 
 
                 using (PooledBitStream stream = PooledBitStream.Get())
@@ -101,7 +99,7 @@ public class SyncedMatchState : NetworkedBehaviour
                     }
                 }
                 // Syncs the MatchState with all players
-                InvokeClientRpcOnEveryone(SyncMatchState, m_lastSync, m_state);
+                InvokeClientRpcOnEveryoneExcept(SyncMatchState, OwnerClientId, m_lastSync, m_state);
             }
         }
     }

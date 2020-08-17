@@ -41,8 +41,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     public BoxCollider m_screenCollider;
     public BoxCollider m_hardScreenCollider;
 
-    [Header("Player Data")]
-    public int teamID;
+    public int TeamID { get; set; }
 
     // Client Values
     public bool isRightHanded = true;
@@ -76,8 +75,8 @@ public class Player : NetworkedBehaviour, IBitWritable
     public Vector3 LeftHand { get { return m_leftHand.transform.position; } }
     public Vector3 GetHand { get { return (isBallInLeftHand) ? LeftHand : RightHand; } }
     public Vector3 CenterPos { get { return m_center.transform.position; } }
-    public Transform OwnBasket { get { return GameManager.Singleton.baskets[teamID].transform; } }
-    public Transform OtherBasket { get { return GameManager.Singleton.baskets[FlipTeamID(teamID)].transform; } }
+    public Transform OwnBasket { get { return GameManager.Singleton.baskets[TeamID].transform; } }
+    public Transform OtherBasket { get { return GameManager.Singleton.baskets[FlipTeamID(TeamID)].transform; } }
     public bool OnLeftSide { get { return transform.position.x < 0; } }
     private Vector3 m_target;
     public Vector3 LookTarget { get { return m_target; } }
@@ -88,9 +87,9 @@ public class Player : NetworkedBehaviour, IBitWritable
     {
         get
         {
-            if (OnOffense()) return null;
+            if (IsOnOffense() || GameManager.GetBallHandling().IsBallLoose()) return null;
             if (isHelping) return GameManager.Singleton.BallHandler;
-            else if (m_assignment == null) m_assignment = GetNearestEnemy();
+            else if (m_assignment == null) m_assignment = GameManager.GetPlayerBySlot(FlipTeamID(TeamID), slot);
             return m_assignment;
         }
         set { m_assignment = value; }
@@ -136,11 +135,6 @@ public class Player : NetworkedBehaviour, IBitWritable
 
             id = username.GetHashCode();
             m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
-        }
-        else
-        {
-            // Dummy values
-            teamID = 1;
         }
 
     }
@@ -271,9 +265,14 @@ public class Player : NetworkedBehaviour, IBitWritable
         return Vector3.Distance(transform.position, other);
     }
 
-    public bool OnOffense()
+    public bool IsOnOffense()
     {
-        return GameManager.Singleton.Possession == teamID;
+        return GameManager.GetBallHandling().Possession == TeamID;
+    }
+
+    public bool IsOnDefense()
+    {
+        return FlipTeamID(GameManager.Singleton.Possession) == TeamID;
     }
 
     public GameObject GetLeftHand()
@@ -300,7 +299,7 @@ public class Player : NetworkedBehaviour, IBitWritable
         Player shortestPlayer = null;
         float shortestDist = float.MaxValue;
 
-        Team enemyTeam = GameManager.Singleton.teams[FlipTeamID(teamID)];
+        Team enemyTeam = GameManager.Singleton.teams[FlipTeamID(TeamID)];
         for (int i = 0; i < Match.MatchSettings.TeamSize; i++)
         {
             Player p = enemyTeam.teamSlots[i];
@@ -342,7 +341,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     {
         using (PooledBitReader reader = PooledBitReader.Get(stream))
         {
-            teamID = reader.ReadInt32Packed();
+            TeamID = reader.ReadInt32Packed();
 
             isRightHanded = reader.ReadBool();
             isMoving = reader.ReadBool();
@@ -372,7 +371,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     {
         using (PooledBitWriter writer = PooledBitWriter.Get(stream))
         {
-            writer.WriteInt32Packed(teamID);
+            writer.WriteInt32Packed(TeamID);
 
             writer.WriteBool(isRightHanded);
             writer.WriteBool(isMoving);

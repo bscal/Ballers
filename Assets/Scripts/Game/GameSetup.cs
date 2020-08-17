@@ -52,9 +52,13 @@ public class GameSetup : NetworkedBehaviour
                     GameObject go = Instantiate(aiPrefab, Vector3.zero, Quaternion.identity);
                     AIPlayer aiLogic = go.GetComponent<AIPlayer>();
                     Assert.IsNotNull(aiLogic, "aiPrefab in GameSetup does not have AIPlayer component");
+
+                    Player p = go.GetComponent<Player>();
+                    p.isAI = true;
+                    p.TeamID = tid;
+                    p.slot = Match.matchTeams[tid].numOfPlayers + i;
                     GameManager.AddAI(aiLogic);
 
-                    go.GetComponent<Player>().teamID = tid;
                     go.GetComponent<NetworkedObject>().Spawn();
                 }
             }
