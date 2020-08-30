@@ -57,6 +57,7 @@ public class GameSetup : NetworkedBehaviour
                     p.isAI = true;
                     p.TeamID = tid;
                     p.slot = Match.matchTeams[tid].numOfPlayers + i;
+
                     GameManager.AddAI(aiLogic);
 
                     go.GetComponent<NetworkedObject>().Spawn();
@@ -80,7 +81,7 @@ public class GameSetup : NetworkedBehaviour
     {
         bool hasConnected = true;
 
-        ServerState.HandlePlayerConnection(steamId);
+        //ServerState.HandlePlayerConnection(steamId);
 
         InvokeClientRpcOnClient(ConnectedStatus, steamId, hasConnected);
     }

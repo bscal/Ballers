@@ -29,7 +29,7 @@ public class MatchSetup : NetworkedBehaviour
         NetworkSceneManager.OnSceneSwitchStarted += OnSceneSwitchStarted;
     }
 
-    public void Setup(LobbyEnter_t lobbyEnter, ulong hostSteamID)
+    public void Setup(CSteamID hostSteamID)
     {
         //NetworkSceneManager.SwitchScene(CONST_GAME_SCENE_NAME);
         var operation = SceneManager.LoadSceneAsync(CONST_GAME_SCENE_NAME);

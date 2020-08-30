@@ -28,11 +28,17 @@ public static class Match
         new MatchTeam()
     };
 
-    private static int m_curTeam = 0;
+    public static bool initilized = false;
 
-    public static void ResetDefault()
+    public static void InitMatch()
     {
-        NetworkLobby = null;
+        initilized = true;
+        ResetDefaults();
+        ServerManager.Singleton.ResetDefaults();
+    }
+
+    public static void ResetDefaults()
+    {
         MatchID = 0;
         HostID = CSteamID.Nil;
         HostServer = false;
@@ -42,23 +48,32 @@ public static class Match
         };
     }
 
-    public static void AddPlayer(ulong steamid)
+    public static void AddPlayer(ulong steamid, int cid)
     {
-        if (m_curTeam > 1 || m_curTeam < 0) m_curTeam = 0;
+        ServerManager.Singleton.AddPlayer(steamid, cid);
 
-        MatchTeam team = matchTeams[m_curTeam];
+        int teamID;
 
-        if (team.teamSize >= MatchSettings.TeamSize)
-        {
-            team = matchTeams[m_curTeam & 1];
-        }
+        if (matchTeams[0].numOfPlayers >= MatchSettings.TeamSize)
+            teamID = 1;
+        else if (matchTeams[1].numOfPlayers >= MatchSettings.TeamSize)
+            teamID = 0;
+        else if (matchTeams[0].numOfPlayers > matchTeams[1].numOfPlayers)
+            teamID = 1;
+        else
+            teamID = 0;
 
+        MatchTeam team = matchTeams[teamID];
         team.playerIds.Add(steamid);
+
+        ServerManager.Singleton.AssignPlayer(steamid, teamID, team.numOfPlayers);
         team.numOfPlayers++;
         team.teamSize++;
+    }
 
-        // Switches between 0 and 1
-        m_curTeam &= 1;
+    public static void RemovePlayer(ulong steamid)
+    {
+
     }
 
     public static int GetPlayersTeam(ulong steamid)

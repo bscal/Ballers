@@ -28,12 +28,22 @@ public class PlayerManager : NetworkedBehaviour
 
     public float GetPlayerStat(Player player, string stat)
     {
+        
+
         return 0f;
     }
 
     public CharacterData GetPlayerStats(Player player)
     {
+        if (IsServer)
+        {
+
+        }
         return null;
+    }
+
+    private void SyncCharacterData()
+    {
     }
 
 }

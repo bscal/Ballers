@@ -8,17 +8,56 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-class ServerManager : NetworkedBehaviour
+public class ServerManager : NetworkedBehaviour
 {
+
+    public static ServerManager Singleton { get; private set; }
 
     private void Awake()
     {
+        Singleton = this;
         DontDestroyOnLoad(this);
     }
 
     private void Start()
     {
         NetworkingManager.Singleton.OnServerStarted += OnServerStarted;
+    }
+
+    public void AddPlayer(ulong steamid, int cid)
+    {
+        if (Match.HostServer)
+            ServerState.HandlePlayerConnection(steamid, cid);
+    }
+
+    public void RemovePlayer(ulong steamid)
+    {
+        if (Match.HostServer)
+            ServerState.Players.Remove(steamid);
+    }
+
+    public ServerPlayer GetPlayer(ulong steamid)
+    {
+        if (Match.HostServer)
+        {
+            if (ServerState.Players.TryGetValue(steamid, out ServerPlayer sPlayer))
+                return sPlayer;
+        }
+        return null;
+    }
+
+    public void ResetDefaults()
+    {
+        ServerState.Players.Clear();
+    }
+
+    public void AssignPlayer(ulong steamid, int teamID, int slot)
+    {
+        if (Match.HostServer)
+        {
+            ServerState.Players[steamid].team = teamID;
+            ServerState.Players[steamid].slot = slot;
+        }
     }
 
     private void OnServerStarted()
@@ -28,7 +67,6 @@ class ServerManager : NetworkedBehaviour
 
         // These statements are a temp solution because starting a server (or host)
         // will not fire OnClientConnectedCallback
-        ServerState.HandlePlayerConnection(ClientPlayer.Singleton.SteamID);
         OnClientConnected(ClientPlayer.Singleton.SteamID);
         ServerState.Players.TryGetValue(ClientPlayer.Singleton.SteamID, out ServerPlayer sp);
         sp.state = ServerPlayerState.READY;
@@ -53,5 +91,4 @@ class ServerManager : NetworkedBehaviour
             player.SetStatus(ServerPlayerStatus.DISCONNECTED);
         }
     }
-
 }

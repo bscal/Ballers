@@ -6,22 +6,17 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public static class ServerState
+static class ServerState
 {
 
     public static Dictionary<ulong, ServerPlayer> Players = new Dictionary<ulong, ServerPlayer>();
 
-    public static void HandlePlayerConnection(ulong steamId)
+    public static void HandlePlayerConnection(ulong steamId, int cid)
     {
-        if (GameManager.Singleton == null) return;
         if (GameManager.ContainsPlayer(steamId))
-        {
             return;
-        }
         else
-        {
-            Players.Add(steamId, new ServerPlayer(steamId));
-        }
+            Players.Add(steamId, new ServerPlayer(steamId, cid));
     }
 
     public static IEnumerator PlayersLoadedCoroutine(float timeout)

@@ -241,8 +241,8 @@ public class GameManager : NetworkedBehaviour
 
         if (!player.isAI)
         {
-            player.TeamID = Match.GetPlayersTeam(steamid);
-            player.slot = teams[player.TeamID].GetOpenSlot();
+            player.TeamID = ServerState.Players[steamid].team;
+            player.slot = ServerState.Players[steamid].slot;
         }
 
         AddPlayer(player, steamid);
