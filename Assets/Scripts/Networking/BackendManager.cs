@@ -10,6 +10,7 @@ using UnityEngine.Networking;
 
 public class BackendManager : MonoBehaviour
 {
+    public const string STATUS_OK = "Ok";
 
     void Awake()
     {
@@ -34,7 +35,7 @@ public class BackendManager : MonoBehaviour
                 Debug.Log("Web Received: " + data);
 
                 var userData = JsonConvert.DeserializeObject<List<UserData>>(data);
-                callback(userData[0], "Ok");
+                callback(userData[0], STATUS_OK);
             }
         }
     }
@@ -139,7 +140,7 @@ public class BackendManager : MonoBehaviour
                 JsonConvert.PopulateObject(array[0].ToString(), cData);
                 JsonConvert.PopulateObject(array[1].ToString(), sData);
 
-                callback?.Invoke(cData, "Ok");
+                callback?.Invoke(cData, STATUS_OK);
             }
         }
     }
@@ -176,7 +177,7 @@ public class BackendManager : MonoBehaviour
                     dataList.Add(cData);
                 }
 
-                callback?.Invoke(dataList, "Ok");
+                callback?.Invoke(dataList, STATUS_OK);
             }
         }
     }

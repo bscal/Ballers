@@ -2,6 +2,7 @@
 using MLAPI.Messaging;
 using MLAPI.Spawning;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,8 @@ public class ServerManager : NetworkedBehaviour
 {
 
     public static ServerManager Singleton { get; private set; }
+
+    public readonly Dictionary<ulong, ServerPlayer> players = new Dictionary<ulong, ServerPlayer>();
 
     private void Awake()
     {
@@ -27,20 +30,20 @@ public class ServerManager : NetworkedBehaviour
     public void AddPlayer(ulong steamid, int cid)
     {
         if (Match.HostServer)
-            ServerState.HandlePlayerConnection(steamid, cid);
+            HandlePlayerConnection(steamid, cid);
     }
 
     public void RemovePlayer(ulong steamid)
     {
         if (Match.HostServer)
-            ServerState.Players.Remove(steamid);
+            players.Remove(steamid);
     }
 
     public ServerPlayer GetPlayer(ulong steamid)
     {
         if (Match.HostServer)
         {
-            if (ServerState.Players.TryGetValue(steamid, out ServerPlayer sPlayer))
+            if (players.TryGetValue(steamid, out ServerPlayer sPlayer))
                 return sPlayer;
         }
         return null;
@@ -48,15 +51,15 @@ public class ServerManager : NetworkedBehaviour
 
     public void ResetDefaults()
     {
-        ServerState.Players.Clear();
+        players.Clear();
     }
 
     public void AssignPlayer(ulong steamid, int teamID, int slot)
     {
         if (Match.HostServer)
         {
-            ServerState.Players[steamid].team = teamID;
-            ServerState.Players[steamid].slot = slot;
+            players[steamid].team = teamID;
+            players[steamid].slot = slot;
         }
     }
 
@@ -68,16 +71,16 @@ public class ServerManager : NetworkedBehaviour
         // These statements are a temp solution because starting a server (or host)
         // will not fire OnClientConnectedCallback
         OnClientConnected(ClientPlayer.Singleton.SteamID);
-        ServerState.Players.TryGetValue(ClientPlayer.Singleton.SteamID, out ServerPlayer sp);
+        players.TryGetValue(ClientPlayer.Singleton.SteamID, out ServerPlayer sp);
         sp.state = ServerPlayerState.READY;
         sp.status = ServerPlayerStatus.CONNECTED;
 
-        StartCoroutine(ServerState.PlayersLoadedCoroutine(30));
+        StartCoroutine(PlayersLoadedCoroutine(30));
     }
 
     private void OnClientConnected(ulong steamId)
     {
-        if (ServerState.Players.TryGetValue(steamId, out ServerPlayer player))
+        if (players.TryGetValue(steamId, out ServerPlayer player))
         {
             player.status = ServerPlayerStatus.CONNECTED;
             player.state = ServerPlayerState.READY;
@@ -86,9 +89,80 @@ public class ServerManager : NetworkedBehaviour
 
     private void OnClientDisconnected(ulong steamId)
     {
-        if (ServerState.Players.TryGetValue(steamId, out ServerPlayer player))
+        if (players.TryGetValue(steamId, out ServerPlayer player))
         {
             player.SetStatus(ServerPlayerStatus.DISCONNECTED);
         }
+    }
+
+    public void HandlePlayerConnection(ulong steamId, int cid)
+    {
+        if (GameManager.ContainsPlayer(steamId))
+            return;
+        else
+            players.Add(steamId, new ServerPlayer(steamId, cid));
+    }
+
+    private IEnumerator PlayersLoadedCoroutine(float timeout)
+    {
+        const float WAIT_TIME = 3f;
+        float timer = 0f;
+        while (timeout > timer)
+        {
+            timer += WAIT_TIME;
+            if (HaveAllPlayersLoaded())
+            {
+                StartMatch();
+                break;
+            }
+            if (timer > timeout)
+            {
+                DestroyMatch();
+                break;
+            }
+            yield return new WaitForSeconds(WAIT_TIME);
+        }
+    }
+
+    private bool HaveAllPlayersLoaded()
+    {
+        if (players.Count < Match.PlayersNeeded)
+            return false;
+        foreach (ServerPlayer sp in players.Values)
+        {
+            if (sp.status == ServerPlayerStatus.DISCONNECTED)
+            {
+                return false;
+            }
+        }
+        // All players have loaded
+        return true;
+    }
+
+    public bool AllPlayersReady()
+    {
+        foreach (ServerPlayer sp in players.Values)
+        {
+            if (sp.state != ServerPlayerState.READY)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void StartMatch()
+    {
+        Debug.Log("starting match");
+    }
+
+    private void DestroyMatch()
+    {
+        Debug.Log("destroying match");
+    }
+
+    public void MigrateHost()
+    {
+
     }
 }

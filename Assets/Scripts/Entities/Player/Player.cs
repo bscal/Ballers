@@ -69,7 +69,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     public bool isInsideThree = false;
     public bool isInbounds = false;
 
-    public ClientPlayer ClientPlayer { get; private set; }
+    public ulong SteamID { get; set; }
     public bool HasBall { get; set; } = false;
     public Vector3 RightHand { get { return m_rightHand.transform.position; } }
     public Vector3 LeftHand { get { return m_leftHand.transform.position; } }

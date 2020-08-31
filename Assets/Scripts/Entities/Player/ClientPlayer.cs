@@ -44,6 +44,7 @@ public class ClientPlayer : NetworkedBehaviour
         Singleton = this;
         if (SteamManager.Initialized)
             SteamID = SteamUser.GetSteamID().m_SteamID;
+        gameObject.AddComponent(typeof(PlayerHandler));
     }
 
     void Start()
@@ -54,9 +55,9 @@ public class ClientPlayer : NetworkedBehaviour
         StartCoroutine(Load());
     }
 
-    void OnDestroy()
+    void OnDisable()
     {
-        BackendManager.SaveCharacter(SteamID, Cid, CharData);
+        StartCoroutine(BackendManager.SaveCharacter(SteamID, Cid, CharData));
     }
 
     // Loads locally
