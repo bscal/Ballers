@@ -227,6 +227,11 @@
             The amount of time a message should be buffered for without being consumed. If it is not consumed within this time, it will be dropped.
             </summary>
         </member>
+        <member name="F:MLAPI.Configuration.NetworkConfig.EnableNetworkLogs">
+            <summary>
+            Whether or not to enable network logs.
+            </summary>
+        </member>
         <member name="F:MLAPI.Configuration.NetworkConfig.EnableEncryption">
             <summary>
             Whether or not to enable the ECDHE key exchange to allow for encryption and authentication of messages
@@ -431,6 +436,11 @@
         <member name="P:MLAPI.NetworkedBehaviour.NetworkedObject">
             <summary>
             Gets the NetworkedObject that owns this NetworkedBehaviour instance
+            </summary>
+        </member>
+        <member name="P:MLAPI.NetworkedBehaviour.HasNetworkedObject">
+            <summary>
+            Gets whether or not this NetworkedBehaviour instance has a NetworkedObject owner.
             </summary>
         </member>
         <member name="P:MLAPI.NetworkedBehaviour.networkId">
@@ -1317,6 +1327,14 @@
             <param name="secondsAgo">The amount of seconds</param>
             <param name="action">The action to invoke when time is turned back</param>
         </member>
+        <member name="M:MLAPI.LagCompensation.LagCompensationManager.Simulate(System.Single,System.Collections.Generic.IList{MLAPI.LagCompensation.TrackedObject},System.Action)">
+            <summary>
+            Turns time back a given amount of second on the given objects, invokes an action and turns it back
+            </summary>
+            <param name="secondsAgo">The amount of seconds</param>
+            <param name="simulatedObjects">The object to simulate back in time</param>
+            <param name="action">The action to invoke when time is turned back</param>
+        </member>
         <member name="M:MLAPI.LagCompensation.LagCompensationManager.Simulate(System.UInt64,System.Action)">
             <summary>
             Turns time back a given amount of seconds, invokes an action and turns it back. The time is based on the estimated RTT of a clientId
@@ -1344,35 +1362,6 @@
             Gets the total time history we have for this object
             </summary>
         </member>
-        <member name="T:MLAPI.Logging.LogHelper">
-            <summary>
-            Helper class for logging
-            </summary>
-        </member>
-        <member name="P:MLAPI.Logging.LogHelper.CurrentLogLevel">
-            <summary>
-            Gets the current log level.
-            </summary>
-            <value>The current log level.</value>
-        </member>
-        <member name="M:MLAPI.Logging.LogHelper.LogInfo(System.String)">
-            <summary>
-            Logs an info log with the proper MLAPI prefix
-            </summary>
-            <param name="message">The message to log</param>
-        </member>
-        <member name="M:MLAPI.Logging.LogHelper.LogWarning(System.String)">
-            <summary>
-            Logs a warning log with the proper MLAPI prefix
-            </summary>
-            <param name="message">The message to log</param>
-        </member>
-        <member name="M:MLAPI.Logging.LogHelper.LogError(System.String)">
-            <summary>
-            Logs an error log with the proper MLAPI prefix
-            </summary>
-            <param name="message">The message to log</param>
-        </member>
         <member name="T:MLAPI.Logging.LogLevel">
             <summary>
             Log level
@@ -1397,6 +1386,35 @@
             <summary>
             Nothing logging level, no logging will be done
             </summary>
+        </member>
+        <member name="T:MLAPI.Logging.NetworkLog">
+            <summary>
+            Helper class for logging
+            </summary>
+        </member>
+        <member name="P:MLAPI.Logging.NetworkLog.CurrentLogLevel">
+            <summary>
+            Gets the current log level.
+            </summary>
+            <value>The current log level.</value>
+        </member>
+        <member name="M:MLAPI.Logging.NetworkLog.LogInfoServer(System.String)">
+            <summary>
+            Logs an info log locally and on the server if possible.
+            </summary>
+            <param name="message">The message to log</param>
+        </member>
+        <member name="M:MLAPI.Logging.NetworkLog.LogWarningServer(System.String)">
+            <summary>
+            Logs a warning log locally and on the server if possible.
+            </summary>
+            <param name="message">The message to log</param>
+        </member>
+        <member name="M:MLAPI.Logging.NetworkLog.LogErrorServer(System.String)">
+            <summary>
+            Logs an error log locally and on the server if possible.
+            </summary>
+            <param name="message">The message to log</param>
         </member>
         <member name="T:MLAPI.Messaging.ClientRPCAttribute">
             <summary>
