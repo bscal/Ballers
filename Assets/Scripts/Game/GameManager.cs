@@ -79,6 +79,7 @@ public class GameManager : NetworkedBehaviour
 
         centerCourt = GameObject.Find("CenterCourt").transform.position;
 
+        teams = new Team[2];
         teams[0] = new Team((int)TeamType.HOME, teamSize);
         teams[1] = new Team((int)TeamType.AWAY, teamSize);
 
@@ -198,7 +199,7 @@ public class GameManager : NetworkedBehaviour
         {
             yield return new WaitForSeconds(1);
 
-            if (ServerState.AllPlayersReady())
+            if (ServerManager.Singleton.AllPlayersReady())
             {
                 yield return StartCountDown();
                 break;
@@ -241,8 +242,8 @@ public class GameManager : NetworkedBehaviour
 
         if (!player.isAI)
         {
-            player.TeamID = ServerState.Players[steamid].team;
-            player.slot = ServerState.Players[steamid].slot;
+            player.TeamID = ServerManager.Singleton.players[steamid].team;
+            player.slot = ServerManager.Singleton.players[steamid].slot;
         }
 
         AddPlayer(player, steamid);
@@ -379,11 +380,12 @@ public class GameManager : NetworkedBehaviour
         if (NetworkingManager.Singleton.IsServer)
         {
             m_players.Add(p);
-            GameManager.Singleton.teams[p.TeamID].teamSlots.Add(p.slot, p);
+            Singleton.teams[p.TeamID].teamSlots.Add(p.slot, p);
         }
 
         if (!p.isAI)
         {
+            p.SteamID = steamid;
             m_playersByID.Add(p.OwnerClientId, p);
             m_playersBySteam.Add(p.OwnerClientId, steamid);
         }
