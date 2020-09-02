@@ -35,7 +35,10 @@ public class GameSetup : NetworkedBehaviour
             Match.NetworkLobby.HostServer();
         else
             Match.NetworkLobby.Connect();
+    }
 
+    public override void NetworkStart()
+    {
         if (IsServer)
         {
             NetworkingManager.Singleton.OnClientConnectedCallback += OnClientConnected;

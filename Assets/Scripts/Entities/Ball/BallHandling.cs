@@ -49,30 +49,25 @@ public class BallHandling : NetworkedBehaviour
 
     // =================================== Networking Variables ===================================
 
-    private static readonly NetworkedVarSettings settings = new NetworkedVarSettings()
-    {
-        SendChannel = "BallChannel", // The var value will be synced over this channel
-        ReadPermission = NetworkedVarPermission.Everyone, // The var values will be synced to everyone
-        ReadPermissionCallback = null, // Only used when using "Custom" read permission
-        SendTickrate = 2, // The var will sync no more than 2 times per second
-        WritePermission = NetworkedVarPermission.ServerOnly, // Only the owner of this object is allowed to change the value
-        WritePermissionCallback = null // Only used when write permission is "Custom"
-    };
-
-    private NetworkedVarULong m_playerWithBall;
+    // PlayerID with ball
+    private readonly NetworkedVarULong m_playerWithBall = new NetworkedVarULong(NetworkConstants.BALL_CHANNEL, NO_PLAYER);
     public ulong PlayerWithBall { get { return m_playerWithBall.Value; } set { m_playerWithBall.Value = (value); } }
 
-    private NetworkedVarULong m_playerLastTouched;
+    // PlayerID last touched ball
+    private readonly NetworkedVarULong m_playerLastTouched = new NetworkedVarULong(NetworkConstants.BALL_CHANNEL, NO_PLAYER);
     public ulong PlayerLastTouched { get { return m_playerLastTouched.Value; } set { m_playerLastTouched.Value = (value); } }
 
-    private NetworkedVarULong m_playerLastPossesion;
+    // PlayerID last possession
+    private readonly NetworkedVarULong m_playerLastPossesion = new NetworkedVarULong(NetworkConstants.BALL_CHANNEL, NO_PLAYER);
     public ulong PlayerLastPossesion { get { return m_playerLastPossesion.Value; } set { m_playerLastPossesion.Value = (value); } }
 
-    private NetworkedVarByte m_state;
+    // BallState
+    private readonly NetworkedVarByte m_state = new NetworkedVarByte(NetworkConstants.BALL_CHANNEL, 0);
     public BallState State { get { return (BallState) Enum.ToObject(typeof(BallState), m_state.Value); } set { m_state.Value = (byte)value; } }
 
-    private NetworkedVarSByte m_possession;
-    public int Possession { get { return m_possession.Value; } set { if (value < -1 || value > 1) value = -1; m_possession.Value = (sbyte)value; } }
+    // TeamID with possession
+    private readonly NetworkedVarByte m_possession = new NetworkedVarByte(NetworkConstants.BALL_CHANNEL, byte.MaxValue);
+    public int Possession { get { return m_possession.Value; } set { if (value < -1 || value > 1) value = -1; m_possession.Value = (byte)value; } }
     public int PossessionOrHome { get { return (Possession != 1) ? 0 : 1; } }
 
     // =================================== Public Varibles ===================================
@@ -111,11 +106,6 @@ public class BallHandling : NetworkedBehaviour
 
     public override void NetworkStart()
     {
-        m_playerWithBall = new NetworkedVarULong(settings, NO_PLAYER);
-        m_playerLastTouched = new NetworkedVarULong(settings, NO_PLAYER);
-        m_playerLastPossesion = new NetworkedVarULong(settings, NO_PLAYER);
-        m_state = new NetworkedVarByte(settings, 0);
-        m_possession = new NetworkedVarSByte(settings, -1);
 
         if (!IsServer)
         {

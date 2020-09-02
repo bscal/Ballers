@@ -11,14 +11,7 @@ public class ShotManager : MonoBehaviour
 
     private ShotManager() { }
 
-    private static readonly NetworkedVarSettings settings = new NetworkedVarSettings() {
-        SendChannel = "GameChannel",
-        ReadPermission = NetworkedVarPermission.Everyone,
-        SendTickrate = 0,
-        WritePermission = NetworkedVarPermission.ServerOnly,
-    };
-
-    public NetworkedShotData ShotData { get; private set; }
+    public NetworkedShotData ShotData { get; } = new NetworkedShotData(NetworkConstants.SHOT_CHANNEL, new ShotData());
 
     // =================================== Private Varibles ===================================
 
@@ -41,7 +34,6 @@ public class ShotManager : MonoBehaviour
     void Start()
     {
         Singleton = this;
-        ShotData = new NetworkedShotData(settings, new ShotData());
         m_shotController = GetComponent<ShotController>();
     }
 

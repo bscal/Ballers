@@ -7,17 +7,7 @@ using System;
 public class BasketballStateManager : NetworkedBehaviour
 {
 
-    // Static
-
-    private static readonly NetworkedVarSettings STATE_SETTINGS = new NetworkedVarSettings()
-    {
-        SendChannel = "GameState", // The var value will be synced over this channel
-        ReadPermission = NetworkedVarPermission.Everyone, // The var values will be synced to everyone
-        ReadPermissionCallback = null, // Only used when using "Custom" read permission
-        SendTickrate = 2, // The var will sync no more than 2 times per second
-        WritePermission = NetworkedVarPermission.ServerOnly, // Only the owner of this object is allowed to change the value
-        WritePermissionCallback = null // Only used when write permission is "Custom"
-    };
+    // Constants
 
     private const float QUARTER_LENGTH          = 60.0f * 6.0f;
     private const float OVERTIME_LENGTH         = QUARTER_LENGTH / 2.0f;
@@ -32,16 +22,16 @@ public class BasketballStateManager : NetworkedBehaviour
 
     // Public
 
-    private NetworkedVarFloat m_inGameTime;
+    private NetworkedVarFloat m_inGameTime = new NetworkedVarFloat(NetworkConstants.GAME_STATE_CHANNEL, Match.MatchSettings.QuarterLength);
     public float InGameTime { get { return m_inGameTime.Value; } set { m_inGameTime.Value = value; } }
 
-    private NetworkedVarFloat m_shotClock;
+    private NetworkedVarFloat m_shotClock = new NetworkedVarFloat(NetworkConstants.GAME_STATE_CHANNEL, SHOTCLOCK_LENGTH);
     public float ShotClock { get { return m_shotClock.Value; } set { m_shotClock.Value = (byte)value; } }
 
-    public NetworkedVarByte m_state;
+    public NetworkedVarByte m_state = new NetworkedVarByte(NetworkConstants.GAME_STATE_CHANNEL, (byte)EMatchState.PREGAME);
     public EMatchState MatchStateValue { get { return (EMatchState)Enum.ToObject(typeof(EMatchState), m_state.Value); } set { m_state.Value = (byte)value; } }
     
-    private NetworkedVarByte m_quarter;
+    private NetworkedVarByte m_quarter = new NetworkedVarByte(NetworkConstants.GAME_STATE_CHANNEL, 1);
     public int Quarter { get { return m_quarter.Value; } set { m_quarter.Value = (byte)value; } }
 
     // Private
@@ -72,10 +62,10 @@ public class BasketballStateManager : NetworkedBehaviour
 
     public override void NetworkStart()
     {
-        m_inGameTime = new NetworkedVarFloat(STATE_SETTINGS, Match.MatchSettings.QuarterLength);
-        m_shotClock = new NetworkedVarFloat(STATE_SETTINGS, SHOTCLOCK_LENGTH);
-        m_state = new NetworkedVarByte(STATE_SETTINGS, (byte)EMatchState.PREGAME);
-        m_quarter = new NetworkedVarByte(STATE_SETTINGS, 1);
+        //m_inGameTime = new NetworkedVarFloat(STATE_SETTINGS, Match.MatchSettings.QuarterLength);
+        //m_shotClock = new NetworkedVarFloat(STATE_SETTINGS, SHOTCLOCK_LENGTH);
+        //m_state = new NetworkedVarByte(STATE_SETTINGS, (byte)EMatchState.PREGAME);
+        //m_quarter = new NetworkedVarByte(STATE_SETTINGS, 1);
 
         if (IsServer)
         {
@@ -94,7 +84,7 @@ public class BasketballStateManager : NetworkedBehaviour
                 IncrementTime(Time.deltaTime);
             }
         }
-
+        
         UpdateUI();
     }
 

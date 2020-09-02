@@ -32,7 +32,7 @@ public class GameManager : NetworkedBehaviour
     public event Action<ulong> AllPlayersConnected;
 
     private static BallHandling m_ballhandling;
-    private readonly static NetworkedList<Player> m_players = new NetworkedList<Player>(Player.settings);
+    private readonly static NetworkedList<Player> m_players = new NetworkedList<Player>(NetworkConstants.PLAYER_CHANNEL);
 
     private readonly static Dictionary<ulong, Player> m_playersByID = new Dictionary<ulong, Player>();
     private readonly static Dictionary<ulong, ulong> m_playersBySteam = new Dictionary<ulong, ulong>();
@@ -512,10 +512,10 @@ public class GameManager : NetworkedBehaviour
     public void SyncState(SyncedMatchStateData state)
     {
         HasStarted = state.HasStarted;
-        m_ballhandling.PlayerWithBall = state.playerWithBall;
-        m_ballhandling.Possession = state.teamWithPossession;
-        teams[(int)TeamType.HOME].TeamData = state.teams[(int)TeamType.HOME];
-        teams[(int)TeamType.AWAY].TeamData = state.teams[(int)TeamType.AWAY];
+        m_ballhandling.PlayerWithBall = state.PlayerWithBall;
+        m_ballhandling.Possession = state.TeamWithPossession;
+        teams[(int)TeamType.HOME].TeamData = state.Teams[(int)TeamType.HOME];
+        teams[(int)TeamType.AWAY].TeamData = state.Teams[(int)TeamType.AWAY];
     }
 
 

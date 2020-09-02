@@ -19,15 +19,6 @@ public class Player : NetworkedBehaviour, IBitWritable
     public event Action<Player> Shoot;
     public event Action<Player> Release;
 
-    public static readonly NetworkedVarSettings settings = new NetworkedVarSettings() {
-        SendChannel = "Player", // The var value will be synced over this channel
-        ReadPermission = NetworkedVarPermission.Everyone, // The var values will be synced to everyone
-        ReadPermissionCallback = null, // Only used when using "Custom" read permission
-        SendTickrate = 20, // The var will sync no more than 2 times per second
-        WritePermission = NetworkedVarPermission.ServerOnly, // Only the owner of this object is allowed to change the value
-        WritePermissionCallback = null // Only used when write permission is "Custom"
-    };
-
     [Header("User Ids")]
     public int id;
     public string username = "test";
@@ -326,14 +317,13 @@ public class Player : NetworkedBehaviour, IBitWritable
         return Mathf.Clamp(1 - teamid, 0, 1);
     }
 
-    [ClientRPC]
     public void ReadPlayerFromServer(Stream stream)
     {
         using (PooledBitReader reader = PooledBitReader.Get(stream))
         {
-            isInsideThree = reader.ReadBit();
-            isInbounds = reader.ReadBit();
-            HasBall = reader.ReadBit();
+            isInsideThree = reader.ReadBool();
+            isInbounds = reader.ReadBool();
+            HasBall = reader.ReadBool();
         }
     }
 
