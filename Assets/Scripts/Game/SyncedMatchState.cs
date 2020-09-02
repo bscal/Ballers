@@ -11,12 +11,14 @@ using UnityEngine;
 public class SyncedMatchStateData : IBitWritable
 {
     public bool HasStarted { get; set; }
-    public int teamWithPossession { get; set; }
-    public ulong playerWithBall { get; set; }
-    public TeamData[] teams { get; set; } = new TeamData[2];
+    public int TeamWithPossession { get; set; }
+    public ulong PlayerWithBall { get; set; }
+    public TeamData[] Teams { get; set; } = new TeamData[2];
 
     public SyncedMatchStateData()
     {
+        Teams[(int)TeamType.HOME] = GameManager.Singleton.teams[(int)TeamType.HOME].TeamData;
+        Teams[(int)TeamType.AWAY] = GameManager.Singleton.teams[(int)TeamType.AWAY].TeamData;
     }
 
     public void Read(Stream stream)
@@ -25,9 +27,9 @@ public class SyncedMatchStateData : IBitWritable
         {
             HasStarted = reader.ReadBit();
             reader.SkipPadBits();
-            teamWithPossession = reader.ReadInt32Packed();
-            playerWithBall = reader.ReadUInt64Packed();
-            foreach (TeamData team in teams)
+            TeamWithPossession = reader.ReadInt32Packed();
+            PlayerWithBall = reader.ReadUInt64Packed();
+            foreach (TeamData team in Teams)
             {
                 team.Read(stream);
             }
@@ -40,10 +42,10 @@ public class SyncedMatchStateData : IBitWritable
         {
             writer.WriteBit(HasStarted);
             writer.WritePadBits();
-            writer.WriteInt32Packed(teamWithPossession);
-            writer.WriteUInt64Packed(playerWithBall);
+            writer.WriteInt32Packed(TeamWithPossession);
+            writer.WriteUInt64Packed(PlayerWithBall);
 
-            foreach (TeamData team in teams)
+            foreach (TeamData team in Teams)
                 team.Write(stream);
         }
     }
@@ -62,10 +64,6 @@ public class SyncedMatchState : NetworkedBehaviour
         m_state = new SyncedMatchStateData();
     }
 
-    void Start()
-    {
-    }
-
     void Update()
     {
         if (IsServer && GameManager.Singleton.HasStarted)
@@ -76,28 +74,27 @@ public class SyncedMatchState : NetworkedBehaviour
                 m_lastSync = m_timerSync + 500;
 
                 m_state.HasStarted = GameManager.Singleton.HasStarted;
-                m_state.playerWithBall = (GameManager.Singleton.BallHandler) ? GameManager.Singleton.BallHandler.OwnerClientId : 0;
-                m_state.teamWithPossession = GameManager.Singleton.Possession;
-                m_state.teams[(int)TeamType.HOME] = GameManager.Singleton.teams[(int)TeamType.HOME].TeamData;
-                m_state.teams[(int)TeamType.AWAY] = GameManager.Singleton.teams[(int)TeamType.AWAY].TeamData;
+                m_state.PlayerWithBall = (GameManager.Singleton.BallHandler) ? GameManager.Singleton.BallHandler.OwnerClientId : 0;
+                m_state.TeamWithPossession = GameManager.Singleton.Possession;
+                m_state.Teams[(int)TeamType.HOME] = GameManager.Singleton.teams[(int)TeamType.HOME].TeamData;
+                m_state.Teams[(int)TeamType.AWAY] = GameManager.Singleton.teams[(int)TeamType.AWAY].TeamData;
 
 
-                using (PooledBitStream stream = PooledBitStream.Get())
-                {
-                    using (PooledBitWriter writer = PooledBitWriter.Get(stream))
-                    {
-                        foreach (Player p in GameManager.GetPlayers())
-                        {
-                            Debug.Log($"NetUpdate for nid: {p.NetworkId}");
-                            // Writes data for a player that needs to be validated
-                            writer.WriteBit(p == GameManager.Singleton.BallHandler);
-                            writer.WriteBit(p.isInsideThree);
-                        }
-                        // Sends the stream of player dota to all players
-                        InvokeClientRpcOnEveryonePerformance(ReadPlayerFromServer, stream);
-                        stream.Dispose();
-                    }
-                }
+//                 using (PooledBitStream stream = PooledBitStream.Get())
+//                 {
+//                     using (PooledBitWriter writer = PooledBitWriter.Get(stream))
+//                     {
+//                         foreach (Player p in GameManager.GetPlayers())
+//                         {
+//                             writer.WriteBool(p.isInsideThree);
+//                             writer.WriteBool(p.isInbounds);
+//                             writer.WriteBool(p == GameManager.Singleton.BallHandler);
+//                         }
+//                         // Sends the stream of player dota to all players
+//                         InvokeClientRpcOnEveryonePerformance(ReadPlayerFromServer, stream);
+//                     }
+//                 }
+                
                 // Syncs the MatchState with all players
                 InvokeClientRpcOnEveryoneExcept(SyncMatchState, OwnerClientId, m_lastSync, m_state);
             }
@@ -114,7 +111,6 @@ public class SyncedMatchState : NetworkedBehaviour
     public void ReadPlayerFromServer(ulong clientid, Stream stream)
     {
         GameManager.GetPlayer(clientid)?.ReadPlayerFromServer(stream);
-        stream.Dispose();
     }
 
 }
