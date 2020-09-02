@@ -489,7 +489,7 @@ namespace SteamP2PTransport
             }
             connectedUsers.Clear();
             serverUser = null;
-            if (NetworkingManager.Singleton.LogLevel <= LogLevel.Developer) NetworkLog.LogInfoServer("SteamP2PTransport - CloseP2PSessions - has Closed P2P Sessions With all Users");
+            NetworkLog.LogInfoServer("SteamP2PTransport - CloseP2PSessions - has Closed P2P Sessions With all Users");
         }
 
         private void OnP2PSessionRequest(P2PSessionRequest_t request)
