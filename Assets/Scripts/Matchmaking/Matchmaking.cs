@@ -13,7 +13,7 @@ public class Matchmaking : MonoBehaviour
     private readonly CallResult<LobbyMatchList_t> m_CallResultLobbyMatchList = new CallResult<LobbyMatchList_t>();
     private readonly CallResult<LobbyCreated_t> m_CallResultLobbyCreated = new CallResult<LobbyCreated_t>();
     private readonly CallResult<LobbyEnter_t> m_CallResultLobbyEnter = new CallResult<LobbyEnter_t>();
-    private readonly CallResult<LobbyChatUpdate_t> m_CallResultLobbyChatUpdate = new CallResult<LobbyChatUpdate_t>();
+    private Callback<LobbyDataUpdate_t> m_CallResultLobbyChatUpdate;
     private Callback<LobbyEnter_t> m_CallbackLobbyEnter;
 
     private float m_timer = 0f;
@@ -23,19 +23,22 @@ public class Matchmaking : MonoBehaviour
     {
         m_matchSetup = GameObject.Find("MatchManager").GetComponent<MatchSetup>();
         m_CallbackLobbyEnter = new Callback<LobbyEnter_t>(OnLobbyJoin);
+        m_CallResultLobbyChatUpdate = new Callback<LobbyDataUpdate_t>(OnLobbyChatUpdate);
     }
 
     void Update()
     {
-        if (!IsFinding) return;
-
         m_timer += Time.deltaTime;
-
+        
         if (m_timer > 5.0f)
         {
-            m_timer = 0f;
+            if (IsFinding)
+            {
+                m_timer = 0f;
 
-            UpdateFinding();
+                UpdateFinding();
+            }
+            SteamAPI.RunCallbacks();
         }
     }
 
@@ -60,7 +63,7 @@ public class Matchmaking : MonoBehaviour
     private void OnLobbyMatchList(LobbyMatchList_t lobbyMatchList, bool bIOfailure)
     {
         uint num = lobbyMatchList.m_nLobbiesMatching;
-
+        print(num);
         // If no lobbies create one
         if (num < 1)
         {
@@ -114,17 +117,15 @@ public class Matchmaking : MonoBehaviour
         if (steamid == ClientPlayer.Singleton.SteamID)
         {
             Match.HostServer = true;
-            Match.AddPlayer(steamid, ClientPlayer.Singleton.Cid);
-
-            Debug.Log($"{playerCount} / {neededPlayers}");
-            if (playerCount >= neededPlayers)
-            {
-                Debug.Log($"Required players met. Starting...");
-                m_matchSetup.Setup(Match.HostID);
-            }
-
-            StartCoroutine(Test());
+            //Match.AddPlayer(steamid, ClientPlayer.Singleton.Cid);
+            //StartCoroutine(Test());
         }
+//         Debug.Log($"{playerCount} / {neededPlayers}");
+//         if (playerCount >= neededPlayers)
+//         {
+//             Debug.Log($"Required players met. Starting...");
+//             m_matchSetup.Setup(Match.HostID);
+//         }
 
 
         ClientPlayer.Singleton.State = ServerPlayerState.JOINED;
@@ -157,19 +158,21 @@ public class Matchmaking : MonoBehaviour
     const int ENTER = 0x0001;
     const int LEAVE = 0x0002;
     const int DISCONNECT = 0x0004;
-    private void OnLobbyChatUpdate(LobbyChatUpdate_t lobbyChatUpdate, bool bIOfailure)
+    private void OnLobbyChatUpdate(LobbyDataUpdate_t lobbyDataUpdate)
     {
-        uint state = lobbyChatUpdate.m_rgfChatMemberStateChange;
-        ulong steamid = lobbyChatUpdate.m_ulSteamIDUserChanged;
+        ulong steamid = lobbyDataUpdate.m_ulSteamIDMember;
+
+        print("Player joining... " + steamid );
 
         string joinedCID = SteamMatchmaking.GetLobbyMemberData(
             m_lobbyID,
-            new CSteamID(lobbyChatUpdate.m_ulSteamIDUserChanged),
+            new CSteamID(steamid),
             "cid");
 
-        if (state == ENTER)
+        if (joinedCID == null) return;
+        if (lobbyDataUpdate.m_bSuccess == 1)
         {
-            Match.AddPlayer(lobbyChatUpdate.m_ulSteamIDUserChanged, int.Parse(joinedCID));
+            Match.AddPlayer(steamid, int.Parse(joinedCID));
 
             int neededPlayers = int.Parse(SteamMatchmaking.GetLobbyData(m_lobbyID, "NeededPlayers"));
             int playerCount = SteamMatchmaking.GetNumLobbyMembers(m_lobbyID);
@@ -179,17 +182,15 @@ public class Matchmaking : MonoBehaviour
                 Match.HostServer = true;
                 Match.AddPlayer(steamid, ClientPlayer.Singleton.Cid);
 
-                Debug.Log($"{playerCount} / {neededPlayers}");
-                if (playerCount >= neededPlayers)
-                {
-                    Debug.Log($"Required players met. Starting...");
-                    m_matchSetup.Setup(Match.HostID);
-                }
-
-                StartCoroutine(Test());
+            }
+            Debug.Log($"{playerCount} / {neededPlayers}");
+            if (playerCount >= neededPlayers)
+            {
+                Debug.Log($"Required players met. Starting...");
+                m_matchSetup.Setup(Match.HostID);
             }
         }
-        else if (state == LEAVE || state == DISCONNECT)
+        else
         {
             Match.RemovePlayer(steamid);
         }
