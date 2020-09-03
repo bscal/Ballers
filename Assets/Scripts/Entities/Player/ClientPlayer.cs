@@ -55,11 +55,6 @@ public class ClientPlayer : NetworkedBehaviour
         StartCoroutine(Load());
     }
 
-    void OnDisable()
-    {
-        StartCoroutine(BackendManager.SaveCharacter(SteamID, Cid, CharData));
-    }
-
     // Loads locally
     public IEnumerator Load()
     {

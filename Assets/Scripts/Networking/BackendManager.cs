@@ -17,6 +17,12 @@ public class BackendManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    void OnDestroy()
+    {
+        StartCoroutine(SaveCharacter(ClientPlayer.Singleton));
+    }
+
+
     public static IEnumerator Login(ulong steamid, Action<UserData, string> callback)
     {
         print("Trying to log in...");
