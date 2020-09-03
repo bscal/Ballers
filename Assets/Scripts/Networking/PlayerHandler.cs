@@ -10,7 +10,7 @@ using UnityEngine.Networking;
 public class PlayerHandler : MonoBehaviour
 {
 
-    public event Action<CharacterData> CharacterFetched;
+    public event Action<ulong, CharacterData> CharacterFetched;
 
     private CharacterData m_localPlayer;
     private CharacterData m_focusedPlayer;
@@ -28,7 +28,7 @@ public class PlayerHandler : MonoBehaviour
             if (status == BackendManager.STATUS_OK)
             {
                 m_focusedPlayer = cData;
-                CharacterFetched?.Invoke(cData);
+                CharacterFetched?.Invoke(steamid, cData);
             }
             Debug.LogError(status);
         }));
@@ -47,7 +47,7 @@ public class PlayerHandler : MonoBehaviour
             if (status == BackendManager.STATUS_OK)
             {
                 m_focusedPlayer = cData;
-                CharacterFetched?.Invoke(cData);
+                CharacterFetched?.Invoke(player.SteamID, cData);
             }
             Debug.LogError(status);
         }));
@@ -56,7 +56,7 @@ public class PlayerHandler : MonoBehaviour
     /// <summary>
     /// Server only. Fetches are players from ServerManager players map
     /// </summary>
-    private void SyncCharacterData()
+    public void GetAllPlayersData()
     {
         foreach (var pair in ServerManager.Singleton.players)
         {
@@ -65,8 +65,9 @@ public class PlayerHandler : MonoBehaviour
                 StartCoroutine(BackendManager.FetchCharacterFromServer(pair.Value.steamId, pair.Value.cid, (cData, status) => {
                     if (status == BackendManager.STATUS_OK)
                     {
-                        m_focusedPlayer = cData;
-                        CharacterFetched?.Invoke(cData);
+                        pair.Value.data = cData;
+                        CharacterFetched?.Invoke(pair.Value.steamId, cData);
+                        print(cData.firstname);
                     }
                     Debug.LogError(status);
                 }));

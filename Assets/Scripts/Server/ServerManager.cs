@@ -11,10 +11,11 @@ using UnityEngine;
 
 public class ServerManager : NetworkedBehaviour
 {
-
     public static ServerManager Singleton { get; private set; }
 
     public readonly Dictionary<ulong, ServerPlayer> players = new Dictionary<ulong, ServerPlayer>();
+
+    private PlayerHandler m_playerHandler;
 
     private void Awake()
     {
@@ -25,6 +26,8 @@ public class ServerManager : NetworkedBehaviour
     private void Start()
     {
         NetworkingManager.Singleton.OnServerStarted += OnServerStarted;
+
+        m_playerHandler = GameObject.Find("NetworkClient").GetComponent<PlayerHandler>();
     }
 
     public void AddPlayer(ulong steamid, int cid)
@@ -74,6 +77,8 @@ public class ServerManager : NetworkedBehaviour
         players.TryGetValue(ClientPlayer.Singleton.SteamID, out ServerPlayer sp);
         sp.state = ServerPlayerState.READY;
         sp.status = ServerPlayerStatus.CONNECTED;
+
+        m_playerHandler.GetAllPlayersData();
 
         StartCoroutine(PlayersLoadedCoroutine(30));
     }
