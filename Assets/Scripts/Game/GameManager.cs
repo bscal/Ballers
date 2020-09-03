@@ -40,7 +40,7 @@ public class GameManager : NetworkedBehaviour
     private readonly static List<AIPlayer> m_ais = new List<AIPlayer>();
     
 
-    public Player BallHandler { get { return GetPlayer(m_ballhandling.PlayerWithBall); } }
+    public Player BallHandler { get { return GetPlayerByNetworkID(m_ballhandling.PlayerWithBall); } }
     public Basket CurrentBasket { get { return Singleton.baskets[m_ballhandling.PossessionOrHome]; } }
     public int Possession { get { return m_ballhandling.PossessionOrHome; } }
     public Team TeamHome { get { return teams[0]; } }
@@ -110,9 +110,6 @@ public class GameManager : NetworkedBehaviour
             m_ballhandling = ball.GetComponent<BallHandling>();
             ball.SetActive(false);
             ball.name = "Ball";
-
-
-
         }
         if (IsServer)
         {
@@ -438,37 +435,68 @@ public class GameManager : NetworkedBehaviour
 
     public static Player GetPlayer()
     {
-        m_playersByID.TryGetValue(NetworkingManager.Singleton.LocalClientId, out Player p);
-        return p;
+        return GetPlayerByClientID(NetworkingManager.Singleton.LocalClientId);
     }
 
-    public static Player GetPlayer(ulong id)
+    /// <summary>
+    /// Takes a NetworkID and returns Player matching that id. This can return AIs from the player list.
+    /// </summary>
+    public static Player GetPlayerByNetworkID(ulong netID)
     {
-        m_playersByID.TryGetValue(id, out Player p);
-        return p;
+        for (int i = 0; i < m_players.Count; i++)
+        {
+            Player p = m_players[i];
+            if (p.NetworkId == netID) return m_players[i];
+        }
+        return null;
     }
 
+    /// <summary>
+    /// Takes an OwnerClientID and returns a Player matching that id. Will not return AI only player controlled Players
+    /// </summary>
+    public static Player GetPlayerByClientID(ulong clientID)
+    {
+        for (int i = 0; i < m_players.Count; i++)
+        {
+            if (m_players[i].OwnerClientId == clientID) return m_players[i];
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Takes a steamid and returns a Player with that id. Does not work for AI.
+    /// </summary>
+    public static Player GetPlayerBySteam(ulong steamid)
+    {
+        for (int i = 0; i < m_players.Count; i++)
+        {
+            if (m_players[i].SteamID == steamid) return m_players[i];
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Takes a team and slot id and returns a Player from that team slot.
+    /// </summary>
     public static Player GetPlayerBySlot(int teamID, int slot)
     {
-        return GameManager.Singleton.teams[teamID].teamSlots[slot];
+        int clampTeamID = Mathf.Clamp(teamID, 0, 1);
+        int campSlot = Mathf.Clamp(slot, 0, Match.MatchSettings.TeamSize);
+        return Singleton.teams[clampTeamID].teamSlots[campSlot];
     }
 
     public static bool ContainsPlayer(ulong id)
     {
-        return m_playersByID.ContainsKey(id);
+        for (int i = 0; i < m_players.Count; i++)
+        {
+            if (m_players[i].OwnerClientId == id) return true;
+        }
+        return false;
     }
 
     public static NetworkedList<Player> GetPlayers()
     {
         return m_players;
-    }
-
-
-    public static Player GetPlayerByPosition(Team team, int position)
-    {
-        //if (position < 0 || position > team.playersInPosition.Length) return GetPlayer(team.playersInPosition[0]);
-        //return GetPlayer(team.playersInPosition[position]);
-        return GetPlayer(0);
     }
 
     public static List<BasicDummy> GetDummies()
@@ -525,7 +553,8 @@ public class GameManager : NetworkedBehaviour
         using (PooledBitReader reader = PooledBitReader.Get(stream))
         {
             int teamid = reader.ReadInt32Packed();
-            teams[teamid].ReadSyncTeamSlots(reader);
+            int count = reader.ReadInt32Packed();
+            teams[teamid].ReadSyncTeamSlots(reader, count);
         }
     }
 

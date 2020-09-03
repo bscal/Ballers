@@ -66,8 +66,8 @@ public class BallHandling : NetworkedBehaviour
     public BallState State { get { return (BallState) Enum.ToObject(typeof(BallState), m_state.Value); } set { m_state.Value = (byte)value; } }
 
     // TeamID with possession
-    private readonly NetworkedVarByte m_possession = new NetworkedVarByte(NetworkConstants.BALL_CHANNEL, byte.MaxValue);
-    public int Possession { get { return m_possession.Value; } set { if (value < -1 || value > 1) value = -1; m_possession.Value = (byte)value; } }
+    private readonly NetworkedVarSByte m_possession = new NetworkedVarSByte(NetworkConstants.BALL_CHANNEL, -1);
+    public int Possession { get { return m_possession.Value; } set { if (value < -1 || value > 1) value = -1; m_possession.Value = (sbyte)value; } }
     public int PossessionOrHome { get { return (Possession != 1) ? 0 : 1; } }
 
     // =================================== Public Varibles ===================================
@@ -128,7 +128,7 @@ public class BallHandling : NetworkedBehaviour
         {
             if (m_ballShot && State != BallState.SHOT)
             {
-                ShotMissed(GameManager.GetPlayer(PlayerLastTouched));
+                ShotMissed(GameManager.GetPlayerByNetworkID(PlayerLastTouched));
             }
         }
 
@@ -191,8 +191,8 @@ public class BallHandling : NetworkedBehaviour
 
     public void OnGameStarted()
     {
-        m_playerObj = SpawnManager.GetLocalPlayerObject();
-        m_currentPlayer = m_playerObj.GetComponent<Player>();
+/*        m_playerObj = SpawnManager.GetLocalPlayerObject();*/
+/*        m_currentPlayer = m_playerObj.GetComponent<Player>();*/
         if (!gameObject.activeSelf)
             gameObject.SetActive(true);
 
@@ -200,7 +200,7 @@ public class BallHandling : NetworkedBehaviour
         {
             StartCoroutine(UpdatePlayerDistances());
             StopBall();
-            gameObject.transform.position = new Vector3(1, 3, 1);
+            gameObject.transform.position = new Vector3(5, 3, 5);
             State = BallState.LOOSE;
         }
 
@@ -209,9 +209,9 @@ public class BallHandling : NetworkedBehaviour
 
     // =================================== RPCs ===================================
     [ServerRPC]
-    public void OnShoot(ulong pid, float speed, float height, float startOffset, float endOffset)
+    public void OnShoot(ulong netID, float speed, float height, float startOffset, float endOffset)
     {
-        PlayerLastTouched = pid;
+        PlayerLastTouched = netID;
     }
 
     [ServerRPC]
@@ -233,10 +233,10 @@ public class BallHandling : NetworkedBehaviour
         m_body.velocity = Vector3.zero;
     }
 
-    public void BallFollowArc(ulong pid)
+    public void BallFollowArc(ulong netID)
     {
-        Player player = GameManager.GetPlayer(pid);
-        print($"{player} | BALLFOLLOWARC | {PlayerLastTouched} {GameManager.GetPlayer().OwnerClientId}");
+        Player player = GameManager.GetPlayerByNetworkID(netID);
+        print($"{player} | BALLFOLLOWARC | {PlayerLastTouched} {netID}");
 
 
         State = BallState.SHOT;
@@ -346,8 +346,8 @@ public class BallHandling : NetworkedBehaviour
     public void PassBallServer(ulong passerPid, ulong targetPid, PassType type)
     {
         State = BallState.PASS;
-        Player passer = GameManager.GetPlayer(passerPid);
-        Player target = GameManager.GetPlayer(targetPid);
+        Player passer = GameManager.GetPlayerByNetworkID(passerPid);
+        Player target = GameManager.GetPlayerByNetworkID(targetPid);
         Vector3 position = GetPassPosition(target, 1);
 
         InvokeClientRpcOnClient(PassBallClient, targetPid, passerPid, position, type);
@@ -381,7 +381,7 @@ public class BallHandling : NetworkedBehaviour
     [ClientRPC]
     public void PassBallClient(ulong passerPid, Vector3 pos, PassType type)
     {
-        Player passer = GameManager.GetPlayer(passerPid);
+        Player passer = GameManager.GetPlayerByNetworkID(passerPid);
 
         StartCoroutine(AutoCatchPass(GameManager.GetPlayer(), pos));
     }
@@ -471,16 +471,16 @@ public class BallHandling : NetworkedBehaviour
                 continue;
             }
             // ============ Lists Closest Players ============
-            foreach (KeyValuePair<ulong, NetworkedClient> pair in NetworkingManager.Singleton.ConnectedClients)
+            foreach (Player player in GameManager.GetPlayers())
             {
-                if (pair.Value.PlayerObject == null) continue;
-                float dist = Vector3.Distance(m_ball.transform.position, pair.Value.PlayerObject.transform.position);
+                if (player == null) continue;
+                float dist = Vector3.Distance(m_ball.transform.position, player.transform.position);
 
-                m_playerDistances[pair.Key] = dist;
+                m_playerDistances[player.NetworkId] = dist;
 
-                if (pair.Value.PlayerObject.GetComponent<BoxCollider>().bounds.Intersects(m_ball.GetComponentInChildren<SphereCollider>().bounds))
+                if (player.GetComponent<BoxCollider>().bounds.Intersects(m_ball.GetComponentInChildren<SphereCollider>().bounds))
                 {
-                    PlayerLastPossesion = pair.Key;
+                    PlayerLastPossesion = player.NetworkId;
                 }
             }
 
@@ -494,7 +494,7 @@ public class BallHandling : NetworkedBehaviour
     private void SetBallHandler(ulong id)
     {
         PlayerWithBall = id;
-        m_currentPlayer = GameManager.GetPlayer(PlayerWithBall);
+        m_currentPlayer = GameManager.GetPlayerByNetworkID(PlayerWithBall);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -507,7 +507,7 @@ public class BallHandling : NetworkedBehaviour
 
             if (m_topCollision && other.gameObject.name == "Hitbox Bot")
             {
-                ShotMade?.Invoke(GameManager.GetPlayer(PlayerLastTouched));
+                ShotMade?.Invoke(GameManager.GetPlayerByNetworkID(PlayerLastTouched));
                 OnBasketScored();
                 GameManager.Singleton.AddScore(other.GetComponentInParent<Basket>().id, 2);
             }
@@ -520,9 +520,9 @@ public class BallHandling : NetworkedBehaviour
     }
 
     [ClientRPC]
-    public void SetPlayerHandler(bool isHandler)
+    public void SetPlayerHandler(ulong netID, bool isHandler)
     {
-        Player passer = GameManager.GetPlayer();
+        Player passer = GameManager.GetPlayerByNetworkID(netID);
         passer.isDribbling = isHandler;
 
         if (isHandler)
@@ -536,35 +536,38 @@ public class BallHandling : NetworkedBehaviour
     /// If NO_PLAYER id is set sets State to LOOSE.<br></br>
     /// Possession is also changed to correct possession if needed.
     /// </summary>
-    private void ChangeBallHandler(ulong newPlayerID)
+    private void ChangeBallHandler(ulong newNetworkID)
     {
-        if (newPlayerID == PlayerWithBall) return;
+        if (newNetworkID == PlayerWithBall) return;
 
         PlayerLastPossesion = PlayerWithBall;
-        PlayerWithBall = newPlayerID;
+        PlayerWithBall = newNetworkID;
 
-        if (newPlayerID == DUMMY_PLAYER) return;
+        if (newNetworkID == DUMMY_PLAYER) return;
 
-        InvokeClientRpcOnClient(SetPlayerHandler, PlayerLastPossesion, false);
+        // Alerts the last player with possession if not null hes not holding the ball.
+        if (m_currentPlayer != null)
+            InvokeClientRpcOnClient(SetPlayerHandler, m_currentPlayer.OwnerClientId, m_currentPlayer.NetworkId, false);
 
         int teamToSwitch = (int)TeamType.NONE;
         // If newPlayer is set to NO_PLAYER id the ball should be loose.
         // There is no need to update that client or change possession until ball is picked up.
-        if (newPlayerID == NO_PLAYER)
+        if (newNetworkID == NO_PLAYER)
         {
             State = BallState.LOOSE;
         }
         else
         {
-            InvokeClientRpcOnClient(SetPlayerHandler, PlayerWithBall, true);
-            m_currentPlayer = GameManager.GetPlayer(newPlayerID);
+            m_currentPlayer = GameManager.GetPlayerByNetworkID(newNetworkID);
+            InvokeClientRpcOnClient(SetPlayerHandler, m_currentPlayer.OwnerClientId, m_currentPlayer.NetworkId, true);
             // if old id and new id are same don't change teams.
             if (Possession == m_currentPlayer.TeamID) return;
 
+            // Temp like this in case i want to change something.
             if (IsBallLoose())
                 teamToSwitch = m_currentPlayer.TeamID;
             else
-                teamToSwitch = Player.FlipTeamID(m_currentPlayer.TeamID);
+                teamToSwitch = m_currentPlayer.TeamID;
         }
         ChangePossession(teamToSwitch, false, false);
     }

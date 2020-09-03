@@ -42,7 +42,7 @@ public class ShotManager : MonoBehaviour
     /***
      * Starting a shot starts here.
      */
-    public void OnShoot(ulong pid, Player p, float speed, float targetHeight, float bonusHeight, float startOffset, float endOffset)
+    public void OnShoot(ulong netID, Player p, float speed, float targetHeight, float bonusHeight, float startOffset, float endOffset)
     {
         if (!NetworkingManager.Singleton.IsServer) return;
 
@@ -63,7 +63,7 @@ public class ShotManager : MonoBehaviour
         Debug.LogFormat("{0} : {1}", p.transform.position, p.LookTarget);
         Debug.LogFormat("{0} : {1} : {2}", m_type, dist, m_direction);
 
-        ShotData.Value.shooter = pid;
+        ShotData.Value.shooter = netID;
         ShotData.Value.position = p.transform.position;
         ShotData.Value.distance = dist;
         ShotData.Value.direction = m_direction;
@@ -71,9 +71,9 @@ public class ShotManager : MonoBehaviour
         ShotData.Value.leftHanded = m_leftHanded;
         ShotData.Value.bankshot = m_bankShot;
 
-        p.InvokeClientRpcOnClient(p.ClientShootBall, pid, m_type, m_leftHanded, speed, bonusHeight, startOffset, endOffset);
+        p.InvokeClientRpcOnClient(p.ClientShootBall, p.OwnerClientId, m_type, m_leftHanded, speed, bonusHeight, startOffset, endOffset);
 
-        StartCoroutine(ShotQuality(p, pid));
+        StartCoroutine(ShotQuality(p));
     }
 
     public void OnRelease(ulong player)
@@ -83,17 +83,17 @@ public class ShotManager : MonoBehaviour
 
     // =================================== Private Functions ===================================
 
-    private void HandleShot(ulong player)
+    private void HandleShot(ulong netID)
     {
         print("shot: " + m_releaseDist);
-        GameManager.GetBallHandling().BallFollowArc(player);
+        GameManager.GetBallHandling().BallFollowArc(netID);
     }
 
     /// <summary>
     /// Server handling of shot quality<br></br>
     /// Used delta time and speed increment to determine where player's target should be
     /// </summary>
-    private IEnumerator ShotQuality(Player p, ulong player)
+    private IEnumerator ShotQuality(Player p)
     {
         yield return null;
         float timer = 0.0f;
@@ -106,8 +106,8 @@ public class ShotManager : MonoBehaviour
 
         m_releaseDist = Mathf.Abs(m_targetHeight - timer + m_endOffset - m_startOffset);
 
-        p.InvokeClientRpcOnClient(p.ClientReleaseBall, player, m_releaseDist);
-        HandleShot(player);
+        p.InvokeClientRpcOnClient(p.ClientReleaseBall, p.OwnerClientId, m_releaseDist);
+        HandleShot(p.NetworkId);
     }
 
     private ShotDirection GetShotDirection(float angle)

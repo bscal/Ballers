@@ -10,6 +10,7 @@ using System;
 using MLAPI.Serialization;
 using System.IO;
 using MLAPI.Serialization.Pooled;
+using MLAPI.Spawning;
 
 public class Player : NetworkedBehaviour, IBitWritable
 {
@@ -105,11 +106,15 @@ public class Player : NetworkedBehaviour, IBitWritable
         {
             if (IsClient && IsOwner)
             {
+                GameManager.Singleton.GameStarted += OnGameStarted;
+                if (!isAI)
+                {
                 GameManager.Singleton.InitLocalPlayer(OwnerClientId);
                 //NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, this, OnGameStarted);
-                GameManager.Singleton.GameStarted += OnGameStarted;
                 m_shotmeter = GetComponent<ShotMeter>();
                 m_shotController = GetComponent<ShotController>();
+
+                }
             }
 
             if (IsServer && !IsHost)
@@ -127,7 +132,6 @@ public class Player : NetworkedBehaviour, IBitWritable
             id = username.GetHashCode();
             m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
         }
-
     }
 
     public override void NetworkStart()
@@ -188,7 +192,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     public void ShootBall()
     {
         isShooting = true;
-        InvokeServerRpc(ServerShootBall, OwnerClientId, m_shotmeter.targetHeight);
+        InvokeServerRpc(ServerShootBall, NetworkId, m_shotmeter.targetHeight);
     }
 
     public void ReleaseBall()
@@ -199,21 +203,20 @@ public class Player : NetworkedBehaviour, IBitWritable
     }
 
     [ServerRPC]
-    public void ServerShootBall(ulong id, float targetHeight)
+    public void ServerShootBall(ulong netID, float targetHeight)
     {
         float speed = UnityEngine.Random.Range(3, 6);
         float startOffset = 0f;
         float endOffset = 0f;
         float bonusHeight = UnityEngine.Random.Range(0, 4);
 
-        GameManager.Singleton.GetShotManager().OnShoot(id, this, speed, targetHeight, bonusHeight, startOffset, endOffset);
-        GameManager.GetBallHandling().OnShoot(id, speed, targetHeight, startOffset, endOffset);
+        GameManager.Singleton.GetShotManager().OnShoot(netID, this, speed, targetHeight, bonusHeight, startOffset, endOffset);
+        GameManager.GetBallHandling().OnShoot(netID, speed, targetHeight, startOffset, endOffset);
     }
 
     [ClientRPC]
     public void ClientShootBall(ShotType type, bool leftHanded, float speed, float bonusHeight, float start, float end)
     {
-        print(type);
         isShooting = true;
         if (isCtrlDown)
             ChangeHand();

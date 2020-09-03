@@ -108,9 +108,9 @@ public class SyncedMatchState : NetworkedBehaviour
     }
 
     [ClientRPC]
-    public void ReadPlayerFromServer(ulong clientid, Stream stream)
+    public void ReadPlayerFromServer(ulong netID, Stream stream)
     {
-        GameManager.GetPlayer(clientid)?.ReadPlayerFromServer(stream);
+        GameManager.GetPlayerByNetworkID(netID)?.ReadPlayerFromServer(stream);
     }
 
 }

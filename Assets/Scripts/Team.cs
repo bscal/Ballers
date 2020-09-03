@@ -75,6 +75,7 @@ public class Team
             using (PooledBitWriter writer = PooledBitWriter.Get(stream))
             {
                 writer.WriteInt32Packed(id);
+                writer.WriteInt32Packed(teamSlots.Count);
                 foreach (var pair in teamSlots)
                 {
                     writer.WriteInt32Packed(pair.Key);
@@ -85,11 +86,14 @@ public class Team
         }
     }
 
-    public void ReadSyncTeamSlots(PooledBitReader reader)
+    public void ReadSyncTeamSlots(PooledBitReader reader, int count)
     {
-        int slot = reader.ReadInt32Packed();
-        ulong pid = reader.ReadUInt64Packed();
-        teamSlots[slot] = GameManager.GetPlayer(pid);
+        for (int i = 0; i < count; i++)
+        {
+            int slot = reader.ReadInt32Packed();
+            ulong netID = reader.ReadUInt64Packed();
+            teamSlots[slot] = GameManager.GetPlayerByNetworkID(netID);
+        }
     }
 
     public int GetOpenSlot()
