@@ -129,6 +129,11 @@ PrefabInstance:
       propertyPath: thisInstanceId
       value: -15612
       objectReference: {fileID: 0}
+    - target: {fileID: 6542857271471579134, guid: a08e994a8c3cf984a9fad88426ce24c4,
+        type: 3}
+      propertyPath: isDummy
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6637559279641874406, guid: a08e994a8c3cf984a9fad88426ce24c4,
         type: 3}
       propertyPath: thisInstanceId
