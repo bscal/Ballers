@@ -350,7 +350,7 @@ namespace SteamP2PTransport
 
             if (clientId == ServerClientId)
             {
-                SteamNetworking.SendP2PPacket(serverUser.SteamId, data.Array, (uint)data.Count, sendType, channelId);
+                SteamNetworking.SendP2PPacket(SteamUser.GetSteamID(), data.Array, (uint)data.Count, sendType, channelId);
             }
             else
             {
@@ -434,8 +434,6 @@ namespace SteamP2PTransport
 
         public override SocketTasks StartServer()
         {
-            serverUser = new User(new CSteamID(ConnectToSteamID));
-
             isServer = true;
 
             // setup the callback method
