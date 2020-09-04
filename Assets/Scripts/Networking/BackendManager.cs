@@ -111,7 +111,7 @@ public class BackendManager : MonoBehaviour
                 string data = webRequest.downloadHandler.text;
                 Debug.Log("Web Received: " + data);
 
-                CharacterData cData = DataToCData(JArray.Parse(data));
+                CharacterData cData = DataToAICData(JArray.Parse(data));
 
                 callback?.Invoke(cData, STATUS_OK);
             }
@@ -221,6 +221,20 @@ public class BackendManager : MonoBehaviour
 
         JsonConvert.PopulateObject(data0.ToString(), cData);
         JsonConvert.PopulateObject(data1.ToString(), sData);
+
+        cData.stats = sData;
+        return cData;
+    }
+
+    private static CharacterData DataToAICData(JArray data)
+    {
+        CharacterData cData = new CharacterData();
+        CharacterStats sData = new CharacterStats();
+
+        string dataStr = data[0].ToString();
+
+        JsonConvert.PopulateObject(dataStr, cData);
+        JsonConvert.PopulateObject(dataStr, sData);
 
         cData.stats = sData;
         return cData;

@@ -75,7 +75,6 @@ public class PlayerHandler : MonoBehaviour
             else
             {
                 // Not implemented in backend yet.
-                return;
                 StartCoroutine(BackendManager.FetchAIFromServer(player.aiPlayerID, (cData, status) => {
                     if (status == BackendManager.STATUS_OK)
                     {
