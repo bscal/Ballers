@@ -95,6 +95,29 @@ public class BackendManager : MonoBehaviour
         }
     }
 
+    public static IEnumerator FetchAIFromServer(int aiPlayerID, Action<CharacterData, string> callback)
+    {
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(string.Format("bscal.me:9090/character/ai/{0}", aiPlayerID)))
+        {
+            yield return webRequest.SendWebRequest();
+
+            if (webRequest.isNetworkError)
+            {
+                Debug.LogError("Web Error: " + webRequest.error);
+                if (callback != null) callback.Invoke(null, webRequest.error);
+            }
+            else
+            {
+                string data = webRequest.downloadHandler.text;
+                Debug.Log("Web Received: " + data);
+
+                CharacterData cData = DataToCData(JArray.Parse(data));
+
+                callback?.Invoke(cData, STATUS_OK);
+            }
+        }
+    }
+
     public static IEnumerator SaveCharacter(ClientPlayer cp)
     {
         yield return SaveCharacter(cp.SteamID, cp.Cid, cp.CharData);
@@ -139,12 +162,7 @@ public class BackendManager : MonoBehaviour
                 string data = webRequest.downloadHandler.text;
                 Debug.Log("Web Received: " + data);
 
-                CharacterData cData = new CharacterData();
-                CharacterStats sData = new CharacterStats();
-
-                JArray array = JArray.Parse(data);
-                JsonConvert.PopulateObject(array[0].ToString(), cData);
-                JsonConvert.PopulateObject(array[1].ToString(), sData);
+                CharacterData cData = DataToCData(JArray.Parse(data));
 
                 callback?.Invoke(cData, STATUS_OK);
             }
@@ -175,11 +193,7 @@ public class BackendManager : MonoBehaviour
                 List<CharacterData> dataList = new List<CharacterData>(count);
                 for (int i = 0; i < count; i++)
                 {
-                    CharacterData cData = new CharacterData();
-                    CharacterStats cStats = new CharacterStats();
-                    JsonConvert.PopulateObject(character[i].ToString(), cData);
-                    JsonConvert.PopulateObject(characterStats[i].ToString(), cStats);
-                    cData.stats = cStats;
+                    CharacterData cData = DataToCData(character[i], characterStats[i]);
                     dataList.Add(cData);
                 }
 
@@ -187,6 +201,31 @@ public class BackendManager : MonoBehaviour
             }
         }
     }
+
+    private static CharacterData DataToCData(JArray data)
+    {
+        CharacterData cData = new CharacterData();
+        CharacterStats sData = new CharacterStats();
+
+        JsonConvert.PopulateObject(data[0].ToString(), cData);
+        JsonConvert.PopulateObject(data[1].ToString(), sData);
+
+        cData.stats = sData;
+        return cData;
+    }
+
+    private static CharacterData DataToCData(JToken data0, JToken data1)
+    {
+        CharacterData cData = new CharacterData();
+        CharacterStats sData = new CharacterStats();
+
+        JsonConvert.PopulateObject(data0.ToString(), cData);
+        JsonConvert.PopulateObject(data1.ToString(), sData);
+
+        cData.stats = sData;
+        return cData;
+    }
+
 
     public static IEnumerator FetchEveryPlayers(ulong[] steamids, int[] cids, float timeout, Action<CharacterData[]> callback)
     {

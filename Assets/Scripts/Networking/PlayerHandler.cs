@@ -58,21 +58,34 @@ public class PlayerHandler : MonoBehaviour
     /// </summary>
     public void GetAllPlayersData()
     {
-        foreach (var pair in ServerManager.Singleton.players)
+        foreach (Player player in GameManager.GetPlayers())
         {
-            if (pair.Value.status == ServerPlayerStatus.CONNECTED)
+            if (!player.isAI)
             {
-                StartCoroutine(BackendManager.FetchCharacterFromServer(pair.Value.steamId, pair.Value.cid, (cData, status) => {
+                ServerPlayer sp = ServerManager.Singleton.GetPlayer(player.SteamID);
+                StartCoroutine(BackendManager.FetchCharacterFromServer(player.SteamID, sp.cid, (cData, status) => {
                     if (status == BackendManager.STATUS_OK)
                     {
-                        pair.Value.data = cData;
-                        CharacterFetched?.Invoke(pair.Value.steamId, cData);
-                        print(cData.firstname);
+                        player.CData = cData;
+                        CharacterFetched?.Invoke(player.SteamID, cData);
                     }
                     Debug.LogError(status);
                 }));
             }
+            else
+            {
+                // Not implemented in backend yet.
+                return;
+                StartCoroutine(BackendManager.FetchAIFromServer(player.aiPlayerID, (cData, status) => {
+                    if (status == BackendManager.STATUS_OK)
+                    {
+                        player.CData = cData;
+                        CharacterFetched?.Invoke(player.SteamID, cData);
+                    }
+                    Debug.LogError(status);
+                }));
+            }
+
         }
     }
-
 }

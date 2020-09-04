@@ -43,8 +43,6 @@ public class ServerPlayer
     public ServerPlayerStatus status;
     public ServerPlayerState state;
 
-    public CharacterData data;
-
     public ServerPlayer(ulong steamId, int cid)
     {
         this.steamId = steamId;

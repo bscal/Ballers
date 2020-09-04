@@ -25,6 +25,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     public string username = "test";
     [Header("CPU or Dummy Controls")]
     public bool isDummy = false;
+    public int aiPlayerID = 0;
     public int slot = 3;
     public float height = 2.35f;
 
@@ -61,6 +62,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     public bool isInsideThree = false;
     public bool isInbounds = false;
 
+    public CharacterData CData { get; set; }
     public ulong SteamID { get; set; }
     public bool HasBall { get; set; } = false;
     public Vector3 RightHand { get { return m_rightHand.transform.position; } }
