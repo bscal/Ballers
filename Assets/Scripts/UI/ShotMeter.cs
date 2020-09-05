@@ -7,16 +7,13 @@ using UnityEngine.UI;
 
 public class ShotMeter : MonoBehaviour
 {
-    public const float BASE_SPEED = 50.0f;
-    public const float BASE_TARGET = 3.0f;
+    private const float BASE_TARGET = 3.0f;
 
-    public static float MAX_HEIGHT { get; private set; }
+    private static float MAX_TARGET_HEIGHT;
+    private static float BASE_TARGET_HEIGHT;
+    private static float TARGET_OFFSET;
 
-    float speed = BASE_SPEED;
-
-    public float targetHeight { get; set; }
-    public Vector2 position;
-    public Vector3 targetPos = Vector3.zero;
+    public float TargetHeight { get; set; } = 0;
 
     public GameObject meter;
     public RawImage background;
@@ -24,14 +21,11 @@ public class ShotMeter : MonoBehaviour
     public Image target;
     public RawImage glow;
 
+    private RectTransform m_meterTransform;
+    private ShotBarData m_shotBarData;
     private float m_timer;
-    private float m_startOffset;
-    private float m_endOffset;
-    private float m_height;
-    private bool m_isShooting = false;
-    private RectTransform m_rectTrans;
+    private bool m_isShooting;
 
-    // Start is called before the first frame update
     void Start()
     {
         if (!GetComponent<NetworkedObject>().IsLocalPlayer)
@@ -40,41 +34,35 @@ public class ShotMeter : MonoBehaviour
             return;
         }
 
-        if (GameObject.Find("ShotMeter"))
+        meter = GameObject.Find("ShotMeter");
+        if (meter != null)
         {
-            meter       = GameObject.Find("ShotMeter");
+            m_meterTransform = meter.GetComponent<RectTransform>();
             background  = GameObject.Find("ShotMeterBG").GetComponent<RawImage>();
             fill        = GameObject.Find("ShotMeterBar").GetComponent<RawImage>();
-            target      = GameObject.Find("ShotLine").GetComponent<Image>();
+            target      = GameObject.Find("TargetLine").GetComponent<Image>();
             glow        = GameObject.Find("Glow").GetComponent<RawImage>();
-            m_rectTrans = fill.rectTransform;
         }
 
+        // These can be local because ShotMeter script only effects local clients.
         //SpawnManager.GetLocalPlayerObject().GetComponent<Player>().Shoot += OnShoot;
         SpawnManager.GetLocalPlayerObject().GetComponent<Player>().Release += OnRelease;
 
-        //NetworkEvents.Singleton.RegisterEvent(NetworkEvent.PLAYER_SHOOT, this, OnShoot);
-        //NetworkEvents.Singleton.RegisterEvent(NetworkEvent.PLAYER_RELEASE, this, OnRelease);
-
-        position = fill.rectTransform.sizeDelta;
-        position.y = 0.0f;
-
-        m_height = background.rectTransform.GetHeight();
-        MAX_HEIGHT = m_height;
-        targetHeight = MAX_HEIGHT * .8f + (target.rectTransform.GetHeight() / 2);
-
-        Reset();
+        MAX_TARGET_HEIGHT = background.rectTransform.GetHeight();
+        BASE_TARGET_HEIGHT = MAX_TARGET_HEIGHT * 0.8f;
+        TARGET_OFFSET = m_meterTransform.GetHeight() / 2.0f;
+        meter.SetActive(false);
     }
 
     private void Update()
     {
         if (m_isShooting)
         {
-            m_timer += speed * Time.deltaTime;
-            RectTransformExtensions.SetHeight(m_rectTrans, m_timer);
+            m_timer += m_shotBarData.speed * Time.deltaTime;
+            fill.rectTransform.SetHeight(m_timer);
 
-            // Overflowed bar => Failed shot + disable
-            if (RectTransformExtensions.GetHeight(m_rectTrans) >= m_height)
+            // Overflowed bar -> Failed shot + disable
+            if (fill.rectTransform.GetHeight() >= MAX_TARGET_HEIGHT)
             {
                 StopShooting();
                 StartCoroutine(Hide(1.0f));
@@ -84,17 +72,19 @@ public class ShotMeter : MonoBehaviour
 
     }
 
-    public void OnShoot(Player p, float speedMod, float targetSize, float startOffset, float endOffset)
+    public void OnShoot(Player p, ShotBarData shotBarData)
     {
-        speed = BASE_SPEED * speedMod;
-        m_startOffset = startOffset;
-        m_endOffset = endOffset;
+        Reset();
+        m_shotBarData = shotBarData;
+        m_meterTransform.position = Camera.current.WorldToScreenPoint(p.transform.position) - Vector3.left * 64;
 
-        RectTransformExtensions.SetHeight(m_rectTrans, 0.0f);
+        float targetSize = (MAX_TARGET_HEIGHT * shotBarData.BonusHeight) + BASE_TARGET;
+        TargetHeight = (BASE_TARGET_HEIGHT + shotBarData.endOffset) - (targetSize / 2) - TARGET_OFFSET;
 
-        target.rectTransform.localPosition = GetBarPosition(endOffset);
-        RectTransformExtensions.SetHeight(target.rectTransform, BASE_TARGET + targetSize);
-        
+        fill.rectTransform.SetHeight(0.0f);
+        target.rectTransform.SetHeight(targetSize);
+        target.transform.localPosition = GetBarPosition(TargetHeight);
+
         meter.SetActive(true);
         m_isShooting = true;
         //StartCoroutine(ShootingTimeout());
@@ -102,7 +92,7 @@ public class ShotMeter : MonoBehaviour
 
     public void OnRelease(Player player)
     {
-        float dist = Mathf.Abs(targetHeight - m_timer + m_endOffset - m_startOffset);
+        float dist = Mathf.Abs(TargetHeight - m_timer + m_shotBarData.endOffset - m_shotBarData.startOffset);
         if (dist < 2)
         {
             glow.gameObject.SetActive(true);
@@ -111,10 +101,10 @@ public class ShotMeter : MonoBehaviour
         StartCoroutine(Hide(3.0f));
     }
 
-    public Vector3 GetBarPosition(float t_height)
+    public Vector3 GetBarPosition(float height)
     {
-        Vector3 pos = targetPos;
-        pos.y = targetHeight + t_height;
+        Vector3 pos = Vector3.zero;
+        pos.y = height;
         return pos;
     }
 
@@ -137,11 +127,10 @@ public class ShotMeter : MonoBehaviour
 
     private void Reset()
     {
+        fill.rectTransform.SetHeight(0);
         meter.SetActive(false);
         glow.gameObject.SetActive(false);
         m_timer = 0.0f;
-        target.rectTransform.localPosition = Vector3.zero;
-        m_height = background.rectTransform.rect.height;
-        fill.rectTransform.sizeDelta = position;
+        TargetHeight = 0;
     }
 }
