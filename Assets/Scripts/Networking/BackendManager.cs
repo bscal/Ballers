@@ -16,13 +16,6 @@ public class BackendManager : MonoBehaviour
     {
         DontDestroyOnLoad(gameObject);
     }
-
-    void OnDestroy()
-    {
-        StartCoroutine(SaveCharacter(ClientPlayer.Singleton));
-    }
-
-
     public static IEnumerator Login(ulong steamid, Action<UserData, string> callback)
     {
         print("Trying to log in...");
@@ -187,13 +180,14 @@ public class BackendManager : MonoBehaviour
 
                 JToken tokens = JArray.Parse(data);
                 int count = int.Parse(tokens[0].ToString());
-                JArray character = (JArray)tokens[1];
-                JArray characterStats = (JArray)tokens[2];
+                JToken character = tokens[1];
+                JToken characterStats = tokens[2];
+                JToken characterSkills = tokens[3];
 
                 List<CharacterData> dataList = new List<CharacterData>(count);
                 for (int i = 0; i < count; i++)
                 {
-                    CharacterData cData = DataToCData(character[i], characterStats[i]);
+                    CharacterData cData = DataToCData(character[i], characterStats[i], characterSkills[i]);
                     dataList.Add(cData);
                 }
 
@@ -202,44 +196,86 @@ public class BackendManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Json array of characters info.
+    /// </summary>
     private static CharacterData DataToCData(JArray data)
     {
         CharacterData cData = new CharacterData();
-        CharacterStats sData = new CharacterStats();
+        CharacterStats cStats = new CharacterStats();
+        CharacterSkills cSkills = new CharacterSkills();
 
-        JsonConvert.PopulateObject(data[0].ToString(), cData);
-        JsonConvert.PopulateObject(data[1].ToString(), sData);
+        if (data[0] != null)
+            JsonConvert.PopulateObject(data[0].ToString(), cData);
+        if (data[1] != null)
+            JsonConvert.PopulateObject(data[1].ToString(), cStats);
+        if (data[2] != null)
+            cSkills.skillMap = StringToDictionary(data[2]["skills_json"]);
 
-        cData.stats = sData;
+        cData.stats = cStats;
+        cData.skills = cSkills;
         return cData;
     }
 
-    private static CharacterData DataToCData(JToken data0, JToken data1)
+    /// <summary>
+    /// Returns deserialized CharaterData
+    /// </summary>
+    /// <param name="data0">CharaterData json</param>
+    /// <param name="data1">CharaterStat json</param>
+    /// <param name="data2">CharacterSkill json</param>
+    private static CharacterData DataToCData(JToken data0, JToken data1, JToken data2)
     {
         CharacterData cData = new CharacterData();
-        CharacterStats sData = new CharacterStats();
+        CharacterStats cStats = new CharacterStats();
+        CharacterSkills cSkills = new CharacterSkills();
 
-        JsonConvert.PopulateObject(data0.ToString(), cData);
-        JsonConvert.PopulateObject(data1.ToString(), sData);
+        if (data0 != null)
+            JsonConvert.PopulateObject(data0.ToString(), cData);
+        if (data1 != null)
+            JsonConvert.PopulateObject(data1.ToString(), cStats);
+        if (data2 != null)
+            cSkills.skillMap = StringToDictionary(data2["skills_json"]);
 
-        cData.stats = sData;
+        cData.stats = cStats;
+        cData.skills = cSkills;
         return cData;
     }
 
+    /// <summary>
+    /// Used for AI character deserialization. 
+    /// </summary>
+    /// <param name="data"></param>
+    /// <returns></returns>
     private static CharacterData DataToAICData(JArray data)
     {
         CharacterData cData = new CharacterData();
-        CharacterStats sData = new CharacterStats();
+        CharacterStats cStats = new CharacterStats();
+        CharacterSkills cSkills = new CharacterSkills();
+
+        if (data[0] == null) return cData;
 
         string dataStr = data[0].ToString();
-
         JsonConvert.PopulateObject(dataStr, cData);
-        JsonConvert.PopulateObject(dataStr, sData);
+        JsonConvert.PopulateObject(dataStr, cStats);
 
-        cData.stats = sData;
+        // JSON from backend is in an array. It is size 1 for most fetch methods.
+        // We get the 1st index and then skills_json object from the json.
+        // The string of the object is taken and deserialized into an dictionary to use in
+        // cSkills.
+        cSkills.skillMap = StringToDictionary(data[0]["skills_json"]);
+
+        cData.stats = cStats;
+        cData.skills = cSkills;
         return cData;
     }
 
+    /// <summary>
+    /// Returns a deserialized dictionary from a JToken object.
+    /// </summary>
+    private static Dictionary<string, float> StringToDictionary(JToken token)
+    {
+        return JsonConvert.DeserializeObject<Dictionary<string, float>>(token.ToString());
+    }
 
     public static IEnumerator FetchEveryPlayers(ulong[] steamids, int[] cids, float timeout, Action<CharacterData[]> callback)
     {
@@ -358,6 +394,8 @@ public class CharacterData
     public int weight;
     [JsonIgnore]
     public CharacterStats stats;
+    [JsonIgnore]
+    public CharacterSkills skills;
 }
 
 public class CharacterStats
@@ -396,5 +434,8 @@ public class CharacterStats
     public int vertical;
     [JsonProperty("hands")]
     public int hands;
+}
 
+public class CharacterSkills {
+    public Dictionary<string, float> skillMap;
 }
