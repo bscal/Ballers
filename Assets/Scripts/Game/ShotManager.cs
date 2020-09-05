@@ -11,7 +11,7 @@ public class ShotManager : MonoBehaviour
 
     private ShotManager() { }
 
-    public NetworkedShotData ShotData { get; } = new NetworkedShotData(NetworkConstants.SHOT_CHANNEL, new ShotData());
+    //public NetworkedShotData ShotData { get; } = new NetworkedShotData(NetworkConstants.SHOT_CHANNEL, new ShotData());
 
     // =================================== Private Varibles ===================================
 
@@ -25,16 +25,20 @@ public class ShotManager : MonoBehaviour
     private BankType m_bankShot;
     private ShotType m_type;
     private ShotDirection m_direction;
+    private ShotData m_shotdata;
+    private ShotBarData m_shotBarData;
     private float m_releaseDist;
 
     private ShotController m_shotController;
 
     // =================================== MonoBehaviour Functions ===================================
 
-    void Start()
+    private void Awake()
     {
         Singleton = this;
         m_shotController = GetComponent<ShotController>();
+        m_shotdata = new ShotData();
+        m_shotBarData = new ShotBarData();
     }
 
     // =================================== Public Functions ===================================
@@ -42,7 +46,7 @@ public class ShotManager : MonoBehaviour
     /***
      * Starting a shot starts here.
      */
-    public void OnShoot(ulong netID, Player p, float speed, float targetHeight, float bonusHeight, float startOffset, float endOffset)
+    public void OnShoot(ulong netID, Player p, ShotBarData shotBarData, float targetHeight)
     {
         if (!NetworkingManager.Singleton.IsServer) return;
 
@@ -50,11 +54,8 @@ public class ShotManager : MonoBehaviour
         float angle = Quaternion.Angle(transform.rotation, p.LookRotation);
 
         m_isShot = true;
-        m_speed = speed;
+        m_shotBarData = shotBarData;
         m_targetHeight = targetHeight;
-        m_targetBonusHeight = bonusHeight;
-        m_startOffset = startOffset;
-        m_endOffset = endOffset;
         m_leftHanded = p.isBallInLeftHand;
         m_direction = GetShotDirection(angle);
         m_type = m_shotController.GetTypeOfShot(p, dist, m_direction);
@@ -63,15 +64,24 @@ public class ShotManager : MonoBehaviour
         Debug.LogFormat("{0} : {1}", p.transform.position, p.LookTarget);
         Debug.LogFormat("{0} : {1} : {2}", m_type, dist, m_direction);
 
-        ShotData.Value.shooter = netID;
-        ShotData.Value.position = p.transform.position;
-        ShotData.Value.distance = dist;
-        ShotData.Value.direction = m_direction;
-        ShotData.Value.type = m_type;
-        ShotData.Value.leftHanded = m_leftHanded;
-        ShotData.Value.bankshot = m_bankShot;
+        // Cached shotdata var will replace the current NetworkedShotData value.
+        m_shotdata.shooter = netID;
+        m_shotdata.position = p.transform.position;
+        m_shotdata.distance = dist;
+        m_shotdata.direction = m_direction;
+        m_shotdata.type = m_type;
+        m_shotdata.leftHanded = m_leftHanded;
+        m_shotdata.bankshot = m_bankShot;
+        m_shotdata.contest = 0.0f;
 
-        p.InvokeClientRpcOnClient(p.ClientShootBall, p.OwnerClientId, m_type, m_leftHanded, speed, bonusHeight, startOffset, endOffset);
+        m_shotBarData.bad = .5f;
+        m_shotBarData.ok = .35f;
+        m_shotBarData.good = .15f;
+        m_shotBarData.perfect = .05f;
+
+        //ShotData.Value = m_tempShotdata;
+        p.InvokeClientRpcOnEveryone(p.ClientShootBall, m_shotdata, m_shotBarData);
+        //p.InvokeClientRpcOnClient(p.ClientShootBall, p.OwnerClientId, m_type, m_leftHanded, speed, bonusHeight, startOffset, endOffset);
 
         StartCoroutine(ShotQuality(p));
     }
@@ -80,6 +90,10 @@ public class ShotManager : MonoBehaviour
     {
         m_isShot = false;
     }
+
+    public ShotData GetShotData() => m_shotdata;
+
+    public ShotBarData GetShotBarData() => m_shotBarData;
 
     // =================================== Private Functions ===================================
 
@@ -97,7 +111,7 @@ public class ShotManager : MonoBehaviour
     {
         yield return null;
         float timer = 0.0f;
-        float increment = ShotMeter.BASE_SPEED * m_speed;
+        float increment = m_shotBarData.speed;
         while (m_isShot)
         {
             timer += increment * Time.deltaTime;

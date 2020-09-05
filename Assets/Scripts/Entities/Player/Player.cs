@@ -194,7 +194,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     public void ShootBall()
     {
         isShooting = true;
-        InvokeServerRpc(ServerShootBall, NetworkId, m_shotmeter.targetHeight);
+        InvokeServerRpc(ServerShootBall, NetworkId, m_shotmeter.TargetHeight);
     }
 
     public void ReleaseBall()
@@ -204,26 +204,30 @@ public class Player : NetworkedBehaviour, IBitWritable
         GameManager.GetBallHandling().InvokeServerRpc(GameManager.GetBallHandling().OnRelease, OwnerClientId);
     }
 
+    // TODO maybe put this inside somewhere else.
+    private const float BASE_SPEED = 50.0f;
     [ServerRPC]
     public void ServerShootBall(ulong netID, float targetHeight)
     {
-        float speed = UnityEngine.Random.Range(3, 6);
-        float startOffset = 0f;
-        float endOffset = 0f;
-        float bonusHeight = UnityEngine.Random.Range(0, 4);
+        ShotBarData shotBarData = new ShotBarData() {
+            speed = UnityEngine.Random.Range(3, 6) * BASE_SPEED,
+            startOffset = 0f,
+            endOffset = 0f
+        };
 
-        GameManager.Singleton.GetShotManager().OnShoot(netID, this, speed, targetHeight, bonusHeight, startOffset, endOffset);
-        GameManager.GetBallHandling().OnShoot(netID, speed, targetHeight, startOffset, endOffset);
+        GameManager.Singleton.GetShotManager().OnShoot(netID, this, shotBarData, targetHeight);
+        GameManager.GetBallHandling().OnShoot(netID, shotBarData, targetHeight);
     }
 
     [ClientRPC]
-    public void ClientShootBall(ShotType type, bool leftHanded, float speed, float bonusHeight, float start, float end)
+    public void ClientShootBall(ShotData shotData, ShotBarData shotBarData)
     {
         isShooting = true;
         if (isCtrlDown)
             ChangeHand();
-        m_shotmeter.OnShoot(this, speed, bonusHeight, start, end);
-        PlayAnimationForType(type, leftHanded);
+        
+        m_shotmeter.OnShoot(this, shotBarData);
+        PlayAnimationForType(shotData.type, shotData.leftHanded);
     }
 
     [ClientRPC]

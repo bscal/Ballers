@@ -209,7 +209,7 @@ public class BallHandling : NetworkedBehaviour
 
     // =================================== RPCs ===================================
     [ServerRPC]
-    public void OnShoot(ulong netID, float speed, float height, float startOffset, float endOffset)
+    public void OnShoot(ulong netID, ShotBarData shotBarData, float endOffset)
     {
         PlayerLastTouched = netID;
     }
@@ -242,7 +242,7 @@ public class BallHandling : NetworkedBehaviour
         State = BallState.SHOT;
         m_body.isKinematic = false;
 
-        ShotData shot = ShotManager.Singleton.ShotData.Value;
+        ShotData shot = ShotManager.Singleton.GetShotData();
         print($"{shot} | shotdata");
         float h = ShotController.GetShotRange(shot.type) == ShotRange.LONG ? UnityEngine.Random.Range(1.5f, 3f) : UnityEngine.Random.Range(.3f, .8f);
         float d = shot.distance / (SHOT_SPEED + UnityEngine.Random.Range(0, 1)); 
