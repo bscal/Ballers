@@ -209,7 +209,7 @@ public class BallHandling : NetworkedBehaviour
 
     // =================================== RPCs ===================================
     [ServerRPC]
-    public void OnShoot(ulong netID, ShotBarData shotBarData, float endOffset)
+    public void OnShoot(ulong netID, ShotBarData shotBarData)
     {
         PlayerLastTouched = netID;
     }

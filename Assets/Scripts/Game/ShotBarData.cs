@@ -19,7 +19,21 @@ public class ShotBarData : IBitWritable
     public float good;
     public float perfect;
 
+    public float targetSize;
+    public float targetHeight;
+
+    public float BadLength => ShotMeter.MAX_TARGET_HEIGHT * bad;
+    public float OkLength => ShotMeter.MAX_TARGET_HEIGHT * ok;
+    public float GoodLength => ShotMeter.MAX_TARGET_HEIGHT * good;
+    public float PerfectLength => ShotMeter.MAX_TARGET_HEIGHT * perfect;
     public float BonusHeight => good + perfect;
+    public float FinalTargetHeight
+    {
+        get
+        {
+            return targetHeight + endOffset - startOffset;
+        }
+    }
 
     public void Read(Stream stream)
     {
@@ -32,6 +46,8 @@ public class ShotBarData : IBitWritable
             ok              = (float)reader.ReadDoublePacked();
             good            = (float)reader.ReadDoublePacked();
             perfect         = (float)reader.ReadDoublePacked();
+            targetSize      = (float)reader.ReadDoublePacked();
+            targetHeight    = (float)reader.ReadDoublePacked();
         }
     }
     public void Write(Stream stream)
@@ -45,6 +61,8 @@ public class ShotBarData : IBitWritable
             writer.WriteDoublePacked(ok);
             writer.WriteDoublePacked(good);
             writer.WriteDoublePacked(perfect);
+            writer.WriteDoublePacked(targetSize);
+            writer.WriteDoublePacked(targetHeight);
         }
     }
 }

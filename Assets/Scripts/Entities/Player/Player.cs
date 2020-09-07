@@ -194,7 +194,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     public void ShootBall()
     {
         isShooting = true;
-        InvokeServerRpc(ServerShootBall, NetworkId, m_shotmeter.TargetHeight);
+        InvokeServerRpc(ServerShootBall, NetworkId);
     }
 
     public void ReleaseBall()
@@ -204,19 +204,10 @@ public class Player : NetworkedBehaviour, IBitWritable
         GameManager.GetBallHandling().InvokeServerRpc(GameManager.GetBallHandling().OnRelease, OwnerClientId);
     }
 
-    // TODO maybe put this inside somewhere else.
-    private const float BASE_SPEED = 50.0f;
     [ServerRPC]
-    public void ServerShootBall(ulong netID, float targetHeight)
+    public void ServerShootBall(ulong netID)
     {
-        ShotBarData shotBarData = new ShotBarData() {
-            speed = UnityEngine.Random.Range(3, 6) * BASE_SPEED,
-            startOffset = 0f,
-            endOffset = 0f
-        };
-
-        GameManager.Singleton.GetShotManager().OnShoot(netID, this, shotBarData, targetHeight);
-        GameManager.GetBallHandling().OnShoot(netID, shotBarData, targetHeight);
+        GameManager.Singleton.GetShotManager().OnShoot(netID, this);
     }
 
     [ClientRPC]

@@ -7,13 +7,13 @@ using UnityEngine.UI;
 
 public class ShotMeter : MonoBehaviour
 {
-    private const float BASE_TARGET = 3.0f;
+    public const float BASE_TARGET = 3.0f;
 
-    private static float MAX_TARGET_HEIGHT;
-    private static float BASE_TARGET_HEIGHT;
-    private static float TARGET_OFFSET;
+    public static float MAX_TARGET_HEIGHT;
+    public static float BASE_TARGET_HEIGHT;
+    public static float TARGET_OFFSET;
 
-    public float TargetHeight { get; set; } = 0;
+    //public float TargetHeight { get; set; } = 0;
 
     public GameObject meter;
     public RawImage background;
@@ -78,12 +78,9 @@ public class ShotMeter : MonoBehaviour
         m_shotBarData = shotBarData;
         m_meterTransform.position = Camera.current.WorldToScreenPoint(p.transform.position) - Vector3.left * 64;
 
-        float targetSize = (MAX_TARGET_HEIGHT * shotBarData.BonusHeight) + BASE_TARGET;
-        TargetHeight = (BASE_TARGET_HEIGHT + shotBarData.endOffset) - (targetSize / 2) - TARGET_OFFSET;
-
         fill.rectTransform.SetHeight(0.0f);
-        target.rectTransform.SetHeight(targetSize);
-        target.transform.localPosition = GetBarPosition(TargetHeight);
+        target.rectTransform.SetHeight(m_shotBarData.targetSize);
+        target.rectTransform.anchoredPosition = GetBarPosition(m_shotBarData.targetHeight - m_shotBarData.targetSize / 2);
 
         meter.SetActive(true);
         m_isShooting = true;
@@ -92,10 +89,15 @@ public class ShotMeter : MonoBehaviour
 
     public void OnRelease(Player player)
     {
-        float dist = Mathf.Abs(TargetHeight - m_timer + m_shotBarData.endOffset - m_shotBarData.startOffset);
-        if (dist < 2)
+        float dist = Mathf.Abs(m_shotBarData.FinalTargetHeight - m_timer);
+        if (dist < m_shotBarData.PerfectLength)
         {
             glow.gameObject.SetActive(true);
+            print("perfect");
+        }
+        else if (dist < m_shotBarData.GoodLength)
+        {
+            print("good");
         }
         StopShooting();
         StartCoroutine(Hide(3.0f));
@@ -131,6 +133,5 @@ public class ShotMeter : MonoBehaviour
         meter.SetActive(false);
         glow.gameObject.SetActive(false);
         m_timer = 0.0f;
-        TargetHeight = 0;
     }
 }

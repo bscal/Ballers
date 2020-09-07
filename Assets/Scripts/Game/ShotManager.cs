@@ -7,6 +7,8 @@ using MLAPI.NetworkedVar;
 public class ShotManager : MonoBehaviour
 {
 
+    private const float BASE_SPEED = 50.0f;
+
     public static ShotManager Singleton { get; private set; }
 
     private ShotManager() { }
@@ -16,12 +18,6 @@ public class ShotManager : MonoBehaviour
     // =================================== Private Varibles ===================================
 
     private bool m_isShot = false;
-    private float m_speed;
-    private float m_targetHeight;
-    private float m_targetBonusHeight;
-    private float m_startOffset;
-    private float m_endOffset;
-    private bool m_leftHanded;
     private BankType m_bankShot;
     private ShotType m_type;
     private ShotDirection m_direction;
@@ -46,7 +42,7 @@ public class ShotManager : MonoBehaviour
     /***
      * Starting a shot starts here.
      */
-    public void OnShoot(ulong netID, Player p, ShotBarData shotBarData, float targetHeight)
+    public void OnShoot(ulong netID, Player p)
     {
         if (!NetworkingManager.Singleton.IsServer) return;
 
@@ -54,35 +50,33 @@ public class ShotManager : MonoBehaviour
         float angle = Quaternion.Angle(transform.rotation, p.LookRotation);
 
         m_isShot = true;
-        m_shotBarData = shotBarData;
-        m_targetHeight = targetHeight;
-        m_leftHanded = p.isBallInLeftHand;
         m_direction = GetShotDirection(angle);
         m_type = m_shotController.GetTypeOfShot(p, dist, m_direction);
         m_bankShot = IsBankShot(p);
 
-        Debug.LogFormat("{0} : {1}", p.transform.position, p.LookTarget);
-        Debug.LogFormat("{0} : {1} : {2}", m_type, dist, m_direction);
-
-        // Cached shotdata var will replace the current NetworkedShotData value.
         m_shotdata.shooter = netID;
         m_shotdata.position = p.transform.position;
         m_shotdata.distance = dist;
         m_shotdata.direction = m_direction;
         m_shotdata.type = m_type;
-        m_shotdata.leftHanded = m_leftHanded;
+        m_shotdata.leftHanded = p.isBallInLeftHand;
         m_shotdata.bankshot = m_bankShot;
         m_shotdata.contest = 0.0f;
 
+        m_shotBarData.speed = UnityEngine.Random.Range(2, 2) * BASE_SPEED;
+        m_shotBarData.startOffset = 0f;
+        m_shotBarData.endOffset = 0f;
         m_shotBarData.bad = .5f;
         m_shotBarData.ok = .35f;
         m_shotBarData.good = .15f;
         m_shotBarData.perfect = .05f;
 
-        //ShotData.Value = m_tempShotdata;
+        // ShotMeter constants are set in ShotMeter script. These have to do with size of ui elements.
+        m_shotBarData.targetSize = (ShotMeter.MAX_TARGET_HEIGHT * m_shotBarData.BonusHeight) + ShotMeter.BASE_TARGET;
+        m_shotBarData.targetHeight = (ShotMeter.BASE_TARGET_HEIGHT + m_shotBarData.endOffset);
+        print(m_shotBarData.targetHeight);
+        GameManager.GetBallHandling().OnShoot(netID, m_shotBarData);
         p.InvokeClientRpcOnEveryone(p.ClientShootBall, m_shotdata, m_shotBarData);
-        //p.InvokeClientRpcOnClient(p.ClientShootBall, p.OwnerClientId, m_type, m_leftHanded, speed, bonusHeight, startOffset, endOffset);
-
         StartCoroutine(ShotQuality(p));
     }
 
@@ -111,14 +105,14 @@ public class ShotManager : MonoBehaviour
     {
         yield return null;
         float timer = 0.0f;
-        float increment = m_shotBarData.speed;
         while (m_isShot)
         {
-            timer += increment * Time.deltaTime;
+            timer += m_shotBarData.speed * Time.deltaTime;
             yield return null;
         }
 
-        m_releaseDist = Mathf.Abs(m_targetHeight - timer + m_endOffset - m_startOffset);
+        m_releaseDist = Mathf.Abs(m_shotBarData.FinalTargetHeight - timer);
+        print("Server: " + m_shotBarData.FinalTargetHeight + ", " + timer + ", dist = " + m_releaseDist);
 
         p.InvokeClientRpcOnClient(p.ClientReleaseBall, p.OwnerClientId, m_releaseDist);
         HandleShot(p.NetworkId);
