@@ -93,7 +93,6 @@ public class ShotManager : MonoBehaviour
 
     private void HandleShot(ulong netID)
     {
-        print("shot: " + m_releaseDist);
         GameManager.GetBallHandling().BallFollowArc(netID);
     }
 

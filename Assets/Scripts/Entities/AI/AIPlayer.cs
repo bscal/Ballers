@@ -1,4 +1,5 @@
 ﻿using MLAPI;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,16 +11,16 @@ public class AIPlayer : NetworkedBehaviour
     protected AIDifficulty m_difficulty;
     protected GameObject m_object;
 
-    private void Awake()
-    {
-        m_player = GetComponent<Player>();
-    }
-
     // Start is called before the first frame update
     void Start()
     {
-        
         m_difficulty = AIDifficulty.PRO;
+    }
+
+    public override void NetworkStart()
+    {
+        m_player = GetComponent<Player>();
+        GameManager.AddAI(this);
     }
 
     // Update is called once per frame
@@ -65,5 +66,10 @@ public class AIPlayer : NetworkedBehaviour
     public Player GetPlayer()
     {
         return m_player;
+    }
+
+    internal void SetPlayer(Player p)
+    {
+        m_player = p;
     }
 }

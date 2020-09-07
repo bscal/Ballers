@@ -61,7 +61,7 @@ public class GameSetup : NetworkedBehaviour
                     p.TeamID = tid;
                     p.slot = Match.matchTeams[tid].numOfPlayers + i;
 
-                    GameManager.AddAI(aiLogic);
+                    //GameManager.AddAI(aiLogic);
 
                     go.GetComponent<NetworkedObject>().Spawn();
                 }

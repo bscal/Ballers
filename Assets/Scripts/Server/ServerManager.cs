@@ -158,7 +158,6 @@ public class ServerManager : NetworkedBehaviour
 
     private void StartMatch()
     {
-        Debug.Log("starting match");
     }
 
     private void DestroyMatch()

@@ -146,7 +146,6 @@ public class BallHandling : NetworkedBehaviour
         {
             m_body.isKinematic = false;
             if (m_pairs == null) {
-                Debug.LogWarning("loose ball::pairs::is null");
                 return;
             }
             foreach (KeyValuePair<ulong, float> pair in m_pairs)
@@ -243,7 +242,6 @@ public class BallHandling : NetworkedBehaviour
         m_body.isKinematic = false;
 
         ShotData shot = ShotManager.Singleton.GetShotData();
-        print($"{shot} | shotdata");
         float h = ShotController.GetShotRange(shot.type) == ShotRange.LONG ? UnityEngine.Random.Range(1.5f, 3f) : UnityEngine.Random.Range(.3f, .8f);
         float d = shot.distance / (SHOT_SPEED + UnityEngine.Random.Range(0, 1)); 
 
@@ -516,7 +514,7 @@ public class BallHandling : NetworkedBehaviour
 
     private void OnBasketScored()
     {
-        print("scored");
+        
     }
 
     [ClientRPC]

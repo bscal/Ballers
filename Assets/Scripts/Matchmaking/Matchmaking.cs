@@ -63,7 +63,6 @@ public class Matchmaking : MonoBehaviour
     private void OnLobbyMatchList(LobbyMatchList_t lobbyMatchList, bool bIOfailure)
     {
         uint num = lobbyMatchList.m_nLobbiesMatching;
-        print(num);
         // If no lobbies create one
         if (num < 1)
         {
@@ -97,13 +96,13 @@ public class Matchmaking : MonoBehaviour
     {
         m_lobbyID = new CSteamID(lobbyEnter.m_ulSteamIDLobby);
         EChatRoomEnterResponse response = (EChatRoomEnterResponse)lobbyEnter.m_EChatRoomEnterResponse;
-        print("joined lobby waiting to test 3secs...");
+        //print("joined lobby waiting to test 3secs...");
 
         string hostSteamID = SteamMatchmaking.GetLobbyData(m_lobbyID, "Host");
         ulong steamid = ulong.Parse(hostSteamID);
 
-        int neededPlayers = int.Parse(SteamMatchmaking.GetLobbyData(m_lobbyID, "NeededPlayers"));
-        int playerCount = SteamMatchmaking.GetNumLobbyMembers(m_lobbyID);
+        //int neededPlayers = int.Parse(SteamMatchmaking.GetLobbyData(m_lobbyID, "NeededPlayers"));
+        //int playerCount = SteamMatchmaking.GetNumLobbyMembers(m_lobbyID);
 
         SteamMatchmaking.SetLobbyMemberData(m_lobbyID, "cid", ClientPlayer.Singleton.Cid.ToString());
 
@@ -188,6 +187,7 @@ public class Matchmaking : MonoBehaviour
             {
                 Debug.Log($"Required players met. Starting...");
                 m_matchSetup.Setup(Match.HostID);
+                SteamMatchmaking.LeaveLobby(m_lobbyID);
             }
         }
         else

@@ -30,7 +30,10 @@ public class PlayerHandler : MonoBehaviour
                 m_focusedPlayer = cData;
                 CharacterFetched?.Invoke(steamid, cData);
             }
-            Debug.LogError(status);
+            else
+            {
+                Debug.LogError(status);
+            }
         }));
     }
 
@@ -49,7 +52,10 @@ public class PlayerHandler : MonoBehaviour
                 m_focusedPlayer = cData;
                 CharacterFetched?.Invoke(player.SteamID, cData);
             }
-            Debug.LogError(status);
+            else
+            {
+                Debug.LogError(status);
+            }
         }));
     }
 
@@ -69,7 +75,10 @@ public class PlayerHandler : MonoBehaviour
                         player.CData = cData;
                         CharacterFetched?.Invoke(player.SteamID, cData);
                     }
-                    Debug.LogError(status);
+                    else
+                    {
+                        Debug.LogError(status);
+                    }
                 }));
             }
             else
@@ -81,7 +90,11 @@ public class PlayerHandler : MonoBehaviour
                         player.CData = cData;
                         CharacterFetched?.Invoke(player.SteamID, cData);
                     }
-                    Debug.LogError(status);
+                    else
+                    {
+                        Debug.LogError(status);
+                    }
+                    
                 }));
             }
 
