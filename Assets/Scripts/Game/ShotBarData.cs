@@ -9,16 +9,19 @@ using UnityEngine;
 [Serializable]
 public class ShotBarData : IBitWritable
 {
-
+    // ShotMeter fields
     public float speed;
     public float startOffset;
     public float endOffset;
-
+    public float targetFadeSpd;
+    
+    // % of bar per shot grade
     public float bad;
     public float ok;
     public float good;
     public float perfect;
 
+    // target values
     public float targetSize;
     public float targetHeight;
 
@@ -27,42 +30,39 @@ public class ShotBarData : IBitWritable
     public float GoodLength => ShotMeter.MAX_TARGET_HEIGHT * good;
     public float PerfectLength => ShotMeter.MAX_TARGET_HEIGHT * perfect;
     public float BonusHeight => good + perfect;
-    public float FinalTargetHeight
-    {
-        get
-        {
-            return targetHeight + endOffset - startOffset;
-        }
-    }
+    public float FinalTargetHeight => targetHeight + endOffset - startOffset;
 
     public void Read(Stream stream)
     {
         using (PooledBitReader reader = PooledBitReader.Get(stream))
         {
-            speed           = (float)reader.ReadDoublePacked();
-            startOffset     = (float)reader.ReadDoublePacked();
-            endOffset       = (float)reader.ReadDoublePacked();
-            bad             = (float)reader.ReadDoublePacked();
-            ok              = (float)reader.ReadDoublePacked();
-            good            = (float)reader.ReadDoublePacked();
-            perfect         = (float)reader.ReadDoublePacked();
-            targetSize      = (float)reader.ReadDoublePacked();
-            targetHeight    = (float)reader.ReadDoublePacked();
+            speed           = reader.ReadSinglePacked();
+            startOffset     = reader.ReadSinglePacked();
+            endOffset       = reader.ReadSinglePacked();
+            targetFadeSpd   = reader.ReadSinglePacked();
+            //bad             = reader.ReadSinglePacked();
+            ok              = reader.ReadSinglePacked();
+            good            = reader.ReadSinglePacked();
+            perfect         = reader.ReadSinglePacked();
+            targetSize      = reader.ReadSinglePacked();
+            targetHeight    = reader.ReadSinglePacked();
+            bad = Mathf.Clamp(ok + good + perfect - 1f, 0f, 1f);
         }
     }
     public void Write(Stream stream)
     {
         using (PooledBitWriter writer = PooledBitWriter.Get(stream))
         {
-            writer.WriteDoublePacked(speed);
-            writer.WriteDoublePacked(startOffset);
-            writer.WriteDoublePacked(endOffset);
-            writer.WriteDoublePacked(bad);
-            writer.WriteDoublePacked(ok);
-            writer.WriteDoublePacked(good);
-            writer.WriteDoublePacked(perfect);
-            writer.WriteDoublePacked(targetSize);
-            writer.WriteDoublePacked(targetHeight);
+            writer.WriteSinglePacked(speed);
+            writer.WriteSinglePacked(startOffset);
+            writer.WriteSinglePacked(endOffset);
+            writer.WriteSinglePacked(targetFadeSpd);
+            //writer.WriteSinglePacked(bad);
+            writer.WriteSinglePacked(ok);
+            writer.WriteSinglePacked(good);
+            writer.WriteSinglePacked(perfect);
+            writer.WriteSinglePacked(targetSize);
+            writer.WriteSinglePacked(targetHeight);
         }
     }
 }
