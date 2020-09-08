@@ -84,6 +84,8 @@ public class ShotMeter : MonoBehaviour
 
         meter.SetActive(true);
         m_isShooting = true;
+        if (shotBarData.targetFadeSpd != 0f)
+            LeanTween.alpha(target.rectTransform, 0f, shotBarData.targetFadeSpd);
         //StartCoroutine(ShootingTimeout());
     }
 

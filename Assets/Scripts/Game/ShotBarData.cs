@@ -46,6 +46,8 @@ public class ShotBarData : IBitWritable
             perfect         = reader.ReadSinglePacked();
             targetSize      = reader.ReadSinglePacked();
             targetHeight    = reader.ReadSinglePacked();
+
+
             bad = Mathf.Clamp(ok + good + perfect - 1f, 0f, 1f);
         }
     }

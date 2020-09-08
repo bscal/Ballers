@@ -66,6 +66,8 @@ public class ShotManager : MonoBehaviour
         m_shotBarData.speed = UnityEngine.Random.Range(2, 2) * BASE_SPEED;
         m_shotBarData.startOffset = 0f;
         m_shotBarData.endOffset = 0f;
+        m_shotBarData.targetFadeSpd = 0f;
+
         m_shotBarData.bad = .5f;
         m_shotBarData.ok = .35f;
         m_shotBarData.good = .15f;
