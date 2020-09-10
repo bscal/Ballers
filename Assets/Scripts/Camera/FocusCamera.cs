@@ -52,14 +52,14 @@ public class FocusCamera : MonoBehaviour
             float step = 400.0f * Time.deltaTime;
             Vector3 v = basket.transform.rotation.eulerAngles;
             //basket.transform.eulerAngles = v;
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.Euler(v.x + 25f, v.y, v.z), step);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.Euler(v.x + 15f, v.y, v.z), step);
             if (transform.rotation == basket.transform.rotation) m_isRotating = false;
         }
 
 
 
         // Handles settings of position and applying proper offset
-        float dist = Vector3.Distance(basket.transform.position, player.transform.position) * .8f;
+        float dist = Vector3.Distance(basket.transform.position, player.transform.position) * .4f;
         target.Set(0, 10, (GameManager.GetBallHandling().PossessionOrHome == 0) ? -dist : dist);
         cam.transform.position = Vector3.Lerp(cam.transform.position, target, 1.5f * Time.deltaTime);
         target = player.transform.position + basket.transform.position + ((ball != null) ? ball.transform.position : Vector3.zero);
