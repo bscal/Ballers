@@ -78,14 +78,13 @@ public class BallHandling : NetworkedBehaviour
 
     // =================================== Private Varibles ===================================
 
-    private NetworkedObject m_playerObj;
+    private ShotManager m_shotManager;
     private Player m_currentPlayer;
     private GameObject m_ball;
     private Rigidbody m_body;
-    private BallState m_lastState;
-    private ShotManager m_shotManager;
 
-    private bool m_ballShot = false;
+    private float m_timer;
+    private bool m_ballShot;
     private bool m_topCollision;
 
     private Dictionary<ulong, float> m_playerDistances;
@@ -124,6 +123,28 @@ public class BallHandling : NetworkedBehaviour
     {
         Debugger.Instance.Print(string.Format("1:{0} 2:{1} bs:{2}", m_playerWithBall.Value, m_playerLastPossesion.Value, State), 2);
 
+        m_timer += Time.deltaTime;
+
+        if (Match.HasGameStarted && IsServer && m_timer > .1)
+        {
+            m_timer = 0;
+            // ============ Lists Closest Players ============
+            foreach (Player player in GameManager.GetPlayers())
+            {
+                if (player == null) continue;
+                float dist = Vector3.Distance(m_ball.transform.position, player.transform.position);
+
+                m_playerDistances[player.NetworkId] = dist;
+
+                if (player.GetComponent<BoxCollider>().bounds.Intersects(m_ball.GetComponentInChildren<SphereCollider>().bounds))
+                {
+                    PlayerLastPossesion = player.NetworkId;
+                }
+            }
+            // ============ Sorts Closest Players ============
+            m_pairs = from pair in m_playerDistances orderby pair.Value descending select pair;
+        }
+
         if (IsServer)
         {
             if (m_ballShot && State != BallState.SHOT)
@@ -138,49 +159,43 @@ public class BallHandling : NetworkedBehaviour
     // FixedUpdate is called 50x per frame
     void FixedUpdate()
     {
-        if (!IsServer) return;
-        if (!Match.HasGameStarted) return;
+        if (!IsServer || !Match.HasGameStarted) return;
 
-        // ============ Loose ball ============
+        // ============ Loose Ball ============
         if (State == BallState.LOOSE)
         {
             m_body.isKinematic = false;
-            if (m_pairs == null) {
-                return;
-            }
+            if (m_pairs == null) return;
+
             foreach (KeyValuePair<ulong, float> pair in m_pairs)
             {
                 if (pair.Value < 1.5f)
                 {
+                    Debug.Log(pair.Key + " picked up ball");
+                    // Player closest to ball picks up the ball.
                     State = BallState.HELD;
                     ChangeBallHandler(pair.Key);
-                    Debug.Log(pair.Key + " picked up ball");
+                    break;
                 }
             }
         }
-
-        // ============ ball held ============
+        // ============ Ball Held ============
         else if (State == BallState.HELD)
         {
-//             m_currentPlayer = GameManager.GetPlayer(PlayerWithBall);
-//             if (!m_currentPlayer) return;
-//             if (m_currentPlayer.OwnerClientId != PlayerWithBall)
-//                 ChangePossession(m_currentPlayer.teamID, false, false);  
-
             m_body.isKinematic = true;
 
+            // Tells the ball which hand to be in.
             if (m_currentPlayer.isBallInLeftHand)
                 m_ball.transform.position = m_currentPlayer.GetLeftHand().transform.position;
             else
                 m_ball.transform.position = m_currentPlayer.GetRightHand().transform.position;
         }
 
-        // ============ ball shoot ============
+        // ============ Ball Shoot ============
         else if (State == BallState.SHOT)
         {
             m_body.isKinematic = false;
-            m_body.AddRelativeTorque(Vector3.forward * 10);
-            if (m_currentPlayer) ChangeBallHandler(NO_PLAYER);
+            ChangeBallHandler(NO_PLAYER);
         }
     }
 
@@ -190,17 +205,15 @@ public class BallHandling : NetworkedBehaviour
 
     public void OnGameStarted()
     {
-/*        m_playerObj = SpawnManager.GetLocalPlayerObject();*/
-/*        m_currentPlayer = m_playerObj.GetComponent<Player>();*/
         if (!gameObject.activeSelf)
             gameObject.SetActive(true);
 
         if (IsServer)
         {
-            StartCoroutine(UpdatePlayerDistances());
+            //StartCoroutine(UpdatePlayerDistances());
             StopBall();
             gameObject.transform.position = new Vector3(5, 3, 5);
-            State = BallState.LOOSE;
+            ChangeBallHandler(NO_PLAYER);
         }
 
 
@@ -210,20 +223,17 @@ public class BallHandling : NetworkedBehaviour
     [ServerRPC]
     public void OnShoot(ulong netID, ShotBarData shotBarData)
     {
-        PlayerLastTouched = netID;
     }
 
     [ServerRPC]
     public void OnRelease(ulong pid)
     {
-        PlayerLastTouched = pid;
         m_shotManager.OnRelease(pid);
     }
 
     [ServerRPC]
     public void OnAnimationRelease()
     {
-        
     }
 
     // =================================== Public Functions ===================================
@@ -303,7 +313,8 @@ public class BallHandling : NetworkedBehaviour
         }
         State = BallState.LOOSE;
     }
-    //TODO
+
+
     private IEnumerator FollowBackboard(ShotData shot, Vector3 start, Vector3 end, float height, float duration)
     {
         Vector3 bankPos = GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[(int)shot.bankshot].transform.position;
@@ -532,23 +543,30 @@ public class BallHandling : NetworkedBehaviour
         {
             if (other.gameObject.name == "Hitbox Top")
             {
-                m_topCollision = true;
-                // move the ball to avoid it bouncing out of the net
-                LeanTween.move(m_ball, other.GetComponentInParent<Basket>().bottomOfNet.position, .2f);
-            }
+                Vector3 dir = (transform.position - other.transform.position).normalized;
 
-            if (m_topCollision && other.gameObject.name == "Hitbox Bot")
-            {
-                ShotMade?.Invoke(GameManager.GetPlayerByNetworkID(PlayerLastTouched));
-                OnBasketScored();
-                GameManager.Singleton.AddScore(other.GetComponentInParent<Basket>().id, 2);
+                // Detect if coming from above the collider.
+                if (dir.y > 0)
+                {
+                    Basket basket = other.GetComponentInParent<Basket>();
+                    // move the ball to avoid it bouncing out of the net
+                    LeanTween.move(m_ball, basket.bottomOfNet.position, .25f);
+                    ShotMade?.Invoke(GameManager.GetPlayerByNetworkID(PlayerLastTouched));
+                    OnBasketScored();
+                    GameManager.Singleton.AddScore(basket.id, 2);
+                    basket.netCloth.externalAcceleration = new Vector3() {
+                        x = UnityEngine.Random.Range(5, 12),
+                        y = UnityEngine.Random.Range(32, 48),
+                        z = UnityEngine.Random.Range(5, 12),
+                    };
+                    LeanTween.delayedCall(.5f, () => basket.netCloth.externalAcceleration = Vector3.zero);
+                }
             }
         }
     }
 
     private void OnBasketScored()
-    {
-        
+    { 
     }
 
     [ClientRPC]
@@ -570,7 +588,7 @@ public class BallHandling : NetworkedBehaviour
     /// </summary>
     private void ChangeBallHandler(ulong newNetworkID)
     {
-        if (newNetworkID == PlayerWithBall) return;
+        //if (newNetworkID == PlayerWithBall) return;
 
         PlayerLastPossesion = PlayerWithBall;
         PlayerWithBall = newNetworkID;
