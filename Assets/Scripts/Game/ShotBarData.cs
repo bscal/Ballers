@@ -9,6 +9,12 @@ using UnityEngine;
 [Serializable]
 public class ShotBarData : IBitWritable
 {
+
+    public const int GRADE_PERFECT  = 0;
+    public const int GRADE_GOOD     = 1;
+    public const int GRADE_OK       = 2;
+    public const int GRADE_POOR     = 3;
+
     // ShotMeter fields
     public float speed;
     public float startOffset;
@@ -31,6 +37,17 @@ public class ShotBarData : IBitWritable
     public float PerfectLength => ShotMeter.MAX_TARGET_HEIGHT * perfect;
     public float BonusHeight => good + perfect;
     public float FinalTargetHeight => targetHeight + endOffset - startOffset;
+
+    public int GetShotGrade(float distance)
+    {
+        if (distance < PerfectLength)
+            return 0;
+        if (distance < GoodLength)
+            return 1;
+        if (distance < OkLength)
+            return 2;
+        return 3;
+    }
 
     public void Read(Stream stream)
     {

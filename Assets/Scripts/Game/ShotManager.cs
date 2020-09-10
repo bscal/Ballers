@@ -76,7 +76,7 @@ public class ShotManager : MonoBehaviour
         // ShotMeter constants are set in ShotMeter script. These have to do with size of ui elements.
         m_shotBarData.targetSize = (ShotMeter.MAX_TARGET_HEIGHT * m_shotBarData.BonusHeight) + ShotMeter.BASE_TARGET;
         m_shotBarData.targetHeight = (ShotMeter.BASE_TARGET_HEIGHT + m_shotBarData.endOffset);
-        print(m_shotBarData.targetHeight);
+
         GameManager.GetBallHandling().OnShoot(netID, m_shotBarData);
         p.InvokeClientRpcOnEveryone(p.ClientShootBall, m_shotdata, m_shotBarData);
         StartCoroutine(ShotQuality(p));
@@ -95,7 +95,7 @@ public class ShotManager : MonoBehaviour
 
     private void HandleShot(ulong netID)
     {
-        GameManager.GetBallHandling().BallFollowArc(netID);
+        GameManager.GetBallHandling().BallFollowArc(netID, m_releaseDist);
     }
 
     /// <summary>
@@ -113,7 +113,8 @@ public class ShotManager : MonoBehaviour
         }
 
         m_releaseDist = Mathf.Abs(m_shotBarData.FinalTargetHeight - timer);
-        print("Server: " + m_shotBarData.FinalTargetHeight + ", " + timer + ", dist = " + m_releaseDist);
+        int grade = m_shotBarData.GetShotGrade(m_releaseDist);
+        print("Server: " + m_shotBarData.FinalTargetHeight + ", " + timer + ", dist = " + m_releaseDist + ", grade = " + grade);
 
         p.InvokeClientRpcOnClient(p.ClientReleaseBall, p.OwnerClientId, m_releaseDist);
         HandleShot(p.NetworkId);

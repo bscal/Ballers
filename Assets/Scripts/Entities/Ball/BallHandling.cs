@@ -232,23 +232,54 @@ public class BallHandling : NetworkedBehaviour
         m_body.velocity = Vector3.zero;
     }
 
-    public void BallFollowArc(ulong netID)
+    public void BallFollowArc(ulong netID, float releaseDist)
     {
+        if (!IsServer) return;
         Player player = GameManager.GetPlayerByNetworkID(netID);
-        print($"{player} | BALLFOLLOWARC | {PlayerLastTouched} {netID}");
-
 
         State = BallState.SHOT;
         m_body.isKinematic = false;
 
         ShotData shot = ShotManager.Singleton.GetShotData();
-        float h = ShotController.GetShotRange(shot.type) == ShotRange.LONG ? UnityEngine.Random.Range(1.5f, 3f) : UnityEngine.Random.Range(.3f, .8f);
-        float d = shot.distance / (SHOT_SPEED + UnityEngine.Random.Range(0, 1)); 
+        ShotBarData shotBar = ShotManager.Singleton.GetShotBarData();
 
+        float h = ShotController.GetShotRange(shot.type) == ShotRange.LONG ? UnityEngine.Random.Range(1.5f, 3f) : UnityEngine.Random.Range(.3f, .8f);
+        float d = shot.distance / (SHOT_SPEED + UnityEngine.Random.Range(0, 1));
+
+        Vector3 offset = Vector3.zero;
+
+        int grade = shotBar.GetShotGrade(releaseDist);
+        if (grade == ShotBarData.GRADE_GOOD)
+        {
+            offset.x = UnityEngine.Random.Range(.1f, .2f);
+            offset.y = 0f;
+            offset.z = UnityEngine.Random.Range(.1f, .2f);
+        }
+        else if (grade == ShotBarData.GRADE_OK)
+        {
+            offset.x = UnityEngine.Random.Range(.1f, .4f);
+            offset.y = UnityEngine.Random.Range(.0f, .1f);
+            offset.z = UnityEngine.Random.Range(.1f, .4f);
+        }
+        else if (grade == ShotBarData.GRADE_POOR)
+        {
+            offset.x = UnityEngine.Random.Range(.2f, .8f);
+            offset.y = UnityEngine.Random.Range(.1f, .4f);
+            offset.z = UnityEngine.Random.Range(.2f, .8f);
+        }
+
+        offset.x *= RandNegOrPos();
+        //offset.y *= RandNegOrPos();
+        offset.z *= RandNegOrPos();
+        offset *= (Mathf.Clamp(releaseDist, 0, 100) / 100) + 1;
+
+        print(offset);
+
+        Vector3 basketPos = GameManager.Singleton.baskets[player.TeamID].netPos.position;
         if (shot.bankshot == BankType.NONE)
-            StartCoroutine(FollowArc(m_ball.transform.position, GameManager.Singleton.baskets[player.TeamID].netPos.position, h, d));
+            StartCoroutine(FollowArc(m_ball.transform.position, basketPos + offset, h, d));
         else
-            StartCoroutine(FollowBackboard(shot, m_ball.transform.position, GameManager.Singleton.baskets[player.TeamID].netPos.position, h, d));
+            StartCoroutine(FollowBackboard(shot, m_ball.transform.position, basketPos + offset, h, d));
 
     }
 
@@ -500,8 +531,11 @@ public class BallHandling : NetworkedBehaviour
         if (IsServer)
         {
             if (other.gameObject.name == "Hitbox Top")
+            {
                 m_topCollision = true;
-
+                // move the ball to avoid it bouncing out of the net
+                LeanTween.move(m_ball, other.GetComponentInParent<Basket>().bottomOfNet.position, .2f);
+            }
 
             if (m_topCollision && other.gameObject.name == "Hitbox Bot")
             {
@@ -607,5 +641,10 @@ public class BallHandling : NetworkedBehaviour
     public bool IsBallNotInPlay()
     {
         return Possession < -1 && Possession > 1;
+    }
+
+    private int RandNegOrPos()
+    {
+        return (UnityEngine.Random.value > .5f) ? 1 : -1;
     }
 }
