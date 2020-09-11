@@ -21,7 +21,7 @@ public class ShotManager : MonoBehaviour
     private BankType m_bankShot;
     private ShotType m_type;
     private ShotDirection m_direction;
-    private ShotData m_shotdata;
+    private ShotData m_shotData;
     private ShotBarData m_shotBarData;
     private float m_releaseDist;
 
@@ -33,7 +33,7 @@ public class ShotManager : MonoBehaviour
     {
         Singleton = this;
         m_shotController = GetComponent<ShotController>();
-        m_shotdata = new ShotData();
+        m_shotData = new ShotData();
         m_shotBarData = new ShotBarData();
     }
 
@@ -54,14 +54,16 @@ public class ShotManager : MonoBehaviour
         m_type = m_shotController.GetTypeOfShot(p, dist, m_direction);
         m_bankShot = IsBankShot(p);
 
-        m_shotdata.shooter = netID;
-        m_shotdata.position = p.transform.position;
-        m_shotdata.distance = dist;
-        m_shotdata.direction = m_direction;
-        m_shotdata.type = m_type;
-        m_shotdata.leftHanded = p.isBallInLeftHand;
-        m_shotdata.bankshot = m_bankShot;
-        m_shotdata.contest = 0.0f;
+        m_shotData.shooter = netID;
+        m_shotData.position = p.transform.position;
+        m_shotData.distance = dist;
+        m_shotData.direction = m_direction;
+        m_shotData.type = m_type;
+        m_shotData.leftHanded = p.isBallInLeftHand;
+        m_shotData.bankshot = m_bankShot;
+        m_shotData.contest = 0.0f;
+        m_shotData.offSkill = 50.0f;
+        m_shotData.defSkill = 50.0f;
 
         m_shotBarData.speed = UnityEngine.Random.Range(2, 2) * BASE_SPEED;
         m_shotBarData.startOffset = 0f;
@@ -77,17 +79,18 @@ public class ShotManager : MonoBehaviour
         m_shotBarData.targetSize = (ShotMeter.MAX_TARGET_HEIGHT * m_shotBarData.BonusHeight) + ShotMeter.BASE_TARGET;
         m_shotBarData.targetHeight = (ShotMeter.BASE_TARGET_HEIGHT + m_shotBarData.endOffset);
 
-        GameManager.GetBallHandling().OnShoot(netID, m_shotBarData);
-        p.InvokeClientRpcOnEveryone(p.ClientShootBall, m_shotdata, m_shotBarData);
+        GameManager.GetBallHandling().OnShoot(netID, m_shotData, m_shotBarData);
+        p.InvokeClientRpcOnClient(p.ClientShootBall, p.OwnerClientId, netID, m_shotData, m_shotBarData);
+        //p.InvokeClientRpcOnEveryone(p.ClientShootBall, m_shotData, m_shotBarData);
         StartCoroutine(ShotQuality(p));
     }
 
-    public void OnRelease(ulong player)
+    public void OnRelease(ulong netId)
     {
         m_isShot = false;
     }
 
-    public ShotData GetShotData() => m_shotdata;
+    public ShotData GetShotData() => m_shotData;
 
     public ShotBarData GetShotBarData() => m_shotBarData;
 

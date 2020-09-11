@@ -3,7 +3,6 @@ using MLAPI.NetworkedVar;
 using MLAPI.Serialization;
 using MLAPI.Serialization.Pooled;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -16,25 +15,31 @@ public class ShotData : IBitWritable
 {
     public ShotType type;
     public ShotDirection direction;
-    public ulong shooter;
+    public BankType bankshot;
     public Vector3 position;
+    public ulong shooter;
+    public bool leftHanded;
     public float distance;
     public float contest;
-    public bool leftHanded;
-    public BankType bankshot;
+    public float offSkill;
+    public float defSkill;
+    public float passRating;
 
     public void Read(Stream stream)
     {
         using (PooledBitReader reader = PooledBitReader.Get(stream))
         {
-            leftHanded = reader.ReadBool();
-            bankshot = (BankType)reader.ReadSByte();
-            direction = (ShotDirection)reader.ReadSByte();
-            type = (ShotType)reader.ReadSByte();
-            contest = (float)reader.ReadDoublePacked();
-            distance = (float)reader.ReadDoublePacked();
-            shooter = reader.ReadUInt64Packed();
             position = reader.ReadVector3Packed();
+            type = (ShotType)reader.ReadSByte();
+            direction = (ShotDirection)reader.ReadSByte();
+            bankshot = (BankType)reader.ReadSByte();
+            shooter = reader.ReadUInt64Packed();
+            leftHanded = reader.ReadBool();
+            distance = reader.ReadSinglePacked();
+            contest = reader.ReadSinglePacked();
+            offSkill = reader.ReadSinglePacked();
+            defSkill = reader.ReadSinglePacked();
+            passRating = reader.ReadSinglePacked();
         }
     }
 
@@ -42,14 +47,17 @@ public class ShotData : IBitWritable
     {
         using (PooledBitWriter writer = PooledBitWriter.Get(stream))
         {
-            writer.WriteBool(leftHanded);
-            writer.WriteSByte((sbyte)bankshot);
-            writer.WriteSByte((sbyte)direction);
-            writer.WriteSByte((sbyte)type);
-            writer.WriteDoublePacked(contest);
-            writer.WriteDoublePacked(distance);
-            writer.WriteUInt64Packed(shooter);
             writer.WriteVector3Packed(position);
+            writer.WriteSByte((sbyte)type);
+            writer.WriteSByte((sbyte)direction);
+            writer.WriteSByte((sbyte)bankshot);
+            writer.WriteUInt64Packed(shooter);
+            writer.WriteBool(leftHanded);
+            writer.WriteDoublePacked(distance);
+            writer.WriteDoublePacked(contest);
+            writer.WriteDoublePacked(offSkill);
+            writer.WriteDoublePacked(defSkill);
+            writer.WriteDoublePacked(passRating);
         }
     }
 }

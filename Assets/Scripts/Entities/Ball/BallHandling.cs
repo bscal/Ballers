@@ -38,7 +38,7 @@ public class BallHandling : NetworkedBehaviour
     public const ulong DUMMY_PLAYER = ulong.MaxValue - 1;
 
     [SerializeField]
-    private const float SHOT_SPEED = 21.0f;
+    private const float SHOT_SPEED = 0.5f;
 
     // =================================== Events ===================================
 
@@ -83,9 +83,11 @@ public class BallHandling : NetworkedBehaviour
     private GameObject m_ball;
     private Rigidbody m_body;
 
+    private ShotData m_shotData;
+    private ShotBarData m_shotBarData;
+
     private float m_timer;
-    private bool m_ballShot;
-    private bool m_topCollision;
+    private bool m_shotPastArc;
 
     private Dictionary<ulong, float> m_playerDistances;
     private IOrderedEnumerable<KeyValuePair<ulong, float>> m_pairs;
@@ -94,18 +96,11 @@ public class BallHandling : NetworkedBehaviour
 
     private void Awake()
     {
-        GameManager.Singleton.PlayerLoaded += OnPlayerLoaded;
         GameManager.Singleton.GameStarted += OnGameStarted;
-    }
-
-    void Start()
-    {
-
     }
 
     public override void NetworkStart()
     {
-
         if (!IsServer)
         {
             return;
@@ -147,10 +142,6 @@ public class BallHandling : NetworkedBehaviour
 
         if (IsServer)
         {
-            if (m_ballShot && State != BallState.SHOT)
-            {
-                ShotMissed(GameManager.GetPlayerByNetworkID(PlayerLastTouched));
-            }
         }
 
         
@@ -199,10 +190,6 @@ public class BallHandling : NetworkedBehaviour
         }
     }
 
-    public void OnPlayerLoaded(Player p)
-    {
-    }
-
     public void OnGameStarted()
     {
         if (!gameObject.activeSelf)
@@ -220,9 +207,10 @@ public class BallHandling : NetworkedBehaviour
     }
 
     // =================================== RPCs ===================================
-    [ServerRPC]
-    public void OnShoot(ulong netID, ShotBarData shotBarData)
+    public void OnShoot(ulong netID, ShotData shotData, ShotBarData shotBarData)
     {
+        m_shotData = shotData;
+        m_shotBarData = shotBarData;
     }
 
     [ServerRPC]
@@ -250,15 +238,12 @@ public class BallHandling : NetworkedBehaviour
         State = BallState.SHOT;
         m_body.isKinematic = false;
 
-        ShotData shot = ShotManager.Singleton.GetShotData();
-        ShotBarData shotBar = ShotManager.Singleton.GetShotBarData();
-
-        float h = ShotController.GetShotRange(shot.type) == ShotRange.LONG ? UnityEngine.Random.Range(1.5f, 3f) : UnityEngine.Random.Range(.3f, .8f);
-        float d = shot.distance / (SHOT_SPEED + UnityEngine.Random.Range(0, 1));
+        float h = ShotController.GetShotRange(m_shotData.type) == ShotRange.LONG ? UnityEngine.Random.Range(1.5f, 3f) : UnityEngine.Random.Range(.3f, .8f);
+        float d = SHOT_SPEED + UnityEngine.Random.value / m_shotData.distance;
 
         Vector3 offset = Vector3.zero;
 
-        int grade = shotBar.GetShotGrade(releaseDist);
+        int grade = m_shotBarData.GetShotGrade(releaseDist);
         if (grade == ShotBarData.GRADE_GOOD)
         {
             offset.x = UnityEngine.Random.Range(.1f, .2f);
@@ -286,10 +271,10 @@ public class BallHandling : NetworkedBehaviour
         print(offset);
 
         Vector3 basketPos = GameManager.Singleton.baskets[player.TeamID].netPos.position;
-        if (shot.bankshot == BankType.NONE)
+        if (m_shotData.bankshot == BankType.NONE)
             StartCoroutine(FollowArc(m_ball.transform.position, basketPos + offset, h, d));
         else
-            StartCoroutine(FollowBackboard(shot, m_ball.transform.position, basketPos + offset, h, d));
+            StartCoroutine(FollowBackboard(m_shotData, m_ball.transform.position, basketPos + offset, h, d));
 
     }
 
@@ -297,7 +282,7 @@ public class BallHandling : NetworkedBehaviour
     {
         float startTime = Time.time;
         float fracComplete = 0;
-        while (fracComplete < .99f)
+        while (fracComplete < 1)
         {
             Vector3 center = (start + end) * 0.5F;
             center -= Vector3.up * height;
@@ -305,12 +290,15 @@ public class BallHandling : NetworkedBehaviour
             Vector3 riseRelCenter = start - center;
             Vector3 setRelCenter = end - center;
 
+            if (fracComplete < .5f) m_shotPastArc = true;
+
             fracComplete = (Time.time - startTime) / duration;
 
             transform.position = Vector3.Slerp(riseRelCenter, setRelCenter, fracComplete);
             transform.position += center;
             yield return null;
         }
+        m_shotPastArc = false;
         State = BallState.LOOSE;
     }
 

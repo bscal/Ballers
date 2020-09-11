@@ -13,8 +13,6 @@ public class ShotMeter : MonoBehaviour
     public static float BASE_TARGET_HEIGHT;
     public static float TARGET_OFFSET;
 
-    //public float TargetHeight { get; set; } = 0;
-
     public GameObject meter;
     public RawImage background;
     public RawImage fill;
@@ -72,7 +70,7 @@ public class ShotMeter : MonoBehaviour
 
     }
 
-    public void OnShoot(Player p, ShotBarData shotBarData)
+    public void OnShoot(Player p, ShotData shotData, ShotBarData shotBarData)
     {
         Reset();
         m_shotBarData = shotBarData;

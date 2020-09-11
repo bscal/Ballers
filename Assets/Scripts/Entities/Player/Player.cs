@@ -193,15 +193,16 @@ public class Player : NetworkedBehaviour, IBitWritable
 
     public void ShootBall()
     {
-        isShooting = true;
         InvokeServerRpc(ServerShootBall, NetworkId);
+        Shoot?.Invoke(this);
     }
 
     public void ReleaseBall()
     {
+        if (!isShooting) return;
         isShooting = false;
+        GameManager.GetBallHandling().InvokeServerRpc(GameManager.GetBallHandling().OnRelease, NetworkId);
         Release?.Invoke(this);
-        GameManager.GetBallHandling().InvokeServerRpc(GameManager.GetBallHandling().OnRelease, OwnerClientId);
     }
 
     [ServerRPC]
@@ -211,14 +212,16 @@ public class Player : NetworkedBehaviour, IBitWritable
     }
 
     [ClientRPC]
-    public void ClientShootBall(ShotData shotData, ShotBarData shotBarData)
+    public void ClientShootBall(ulong netID, ShotData shotData, ShotBarData shotBarData)
     {
-        isShooting = true;
-        if (isCtrlDown)
-            ChangeHand();
+        Player p = GameManager.GetPlayerByNetworkID(netID);
+        p.isShooting = true;
+        if (p.isCtrlDown)
+            p.ChangeHand();
         
-        m_shotmeter.OnShoot(this, shotBarData);
-        PlayAnimationForType(shotData.type, shotData.leftHanded);
+        if (!p.isAI)
+            m_shotmeter.OnShoot(p, shotData, shotBarData);
+        p.PlayAnimationForType(shotData.type, shotData.leftHanded);
     }
 
     [ClientRPC]

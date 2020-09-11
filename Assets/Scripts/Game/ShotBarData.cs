@@ -1,15 +1,12 @@
 ﻿using MLAPI.Serialization;
 using MLAPI.Serialization.Pooled;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
 [Serializable]
 public class ShotBarData : IBitWritable
 {
-
     public const int GRADE_PERFECT  = 0;
     public const int GRADE_GOOD     = 1;
     public const int GRADE_OK       = 2;
@@ -63,7 +60,6 @@ public class ShotBarData : IBitWritable
             perfect         = reader.ReadSinglePacked();
             targetSize      = reader.ReadSinglePacked();
             targetHeight    = reader.ReadSinglePacked();
-
 
             bad = Mathf.Clamp(ok + good + perfect - 1f, 0f, 1f);
         }
