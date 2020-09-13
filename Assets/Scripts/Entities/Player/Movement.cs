@@ -1,4 +1,5 @@
-﻿using MLAPI;
+﻿using Luminosity.IO;
+using MLAPI;
 using MLAPI.Spawning;
 using UnityEngine;
 
@@ -31,8 +32,6 @@ public class Movement : MonoBehaviour
             Destroy(this);
         }
 
-
-
         m_player = GetComponentInParent<Player>();
         m_parent = m_player.gameObject;
     }
@@ -59,52 +58,91 @@ public class Movement : MonoBehaviour
         }
 
 
-        if (m_player.isMoving)
+        //         if (m_player.isMoving)
+        //         {
+        //             if (m_player.isSprinting)
+        //             {
+        //                 m_horizontal = Input.GetAxis("Horizontal") * (m_turningSpeed * Time.deltaTime);
+        //                 m_parent.transform.Rotate(0f, m_horizontal, 0f);
+        //                 m_vertical = Input.GetAxis("Vertical") * (m_sprintSpeed * Time.deltaTime);
+        //                 m_strafe = 0f;
+        //             }
+        //             else
+        //             {
+        //                 if (m_targetDirection != null)
+        //                 {
+        //                     m_targetDirection.y = 0f;
+        //                     // Rotate the forward vector towards the target direction by one step
+        //                     Vector3 newDirection = Vector3.RotateTowards(m_parent.transform.forward, m_targetDirection, AUTO_TURN_SPEED * Time.deltaTime, 0.0f);
+        //                     // Calculate a rotation a step closer to the target and applies rotation to this object
+        //                     m_parent.transform.rotation = Quaternion.LookRotation(newDirection);
+        //                 }
+        //                 m_vertical = Input.GetAxis("Vertical") * (m_movementSpeed * Time.deltaTime);
+        //                 m_strafe = Input.GetAxis("Horizontal") * (m_movementSpeed * Time.deltaTime);
+        //                 if (Input.GetAxis("Horizontal") > 0)
+        //                 {
+        //                     //animator.CrossFade("strafeRight");
+        //                 }
+        //                 else if (Input.GetAxis("Horizontal") < 0)
+        //                 {
+        //                     //animator.CrossFade("strafeLeft");
+        //                 }
+        //             }
+        //             m_parent.transform.Translate(m_strafe, 0f, m_vertical);
+        //         }
+    MovePlayer();
+    RotatePlayer();
+    /*
+            else if (!m_skipRotate)
+            {
+                m_targetDirection.y = 0f;
+                // Rotate the forward vector towards the target direction by one step
+                Vector3 newDirection = Vector3.RotateTowards(m_parent.transform.forward, m_targetDirection, AUTO_TURN_SPEED * Time.deltaTime, 0.0f);
+                // Calculate a rotation a step closer to the target and applies rotation to this object
+                m_parent.transform.rotation = Quaternion.LookRotation(newDirection);
+
+            }*/
+    m_skipRotate = false;
+    }
+
+    private void MovePlayer()
+    {
+        float ms = (m_player.isSprinting ? m_sprintSpeed : m_movementSpeed) * Time.deltaTime;
+        Vector3 mov = (GameManager.Singleton.Possession == 0 ? Vector3.forward : -Vector3.forward) * ms;
+
+        if (InputManager.GetButton("move_up"))
         {
-            if (m_player.isSprinting)
-            {
-                m_horizontal = Input.GetAxis("Horizontal") * (m_turningSpeed * Time.deltaTime);
-                m_parent.transform.Rotate(0f, m_horizontal, 0f);
-                m_vertical = Input.GetAxis("Vertical") * (m_sprintSpeed * Time.deltaTime);
-                m_strafe = 0f;
-            }
-            else
-            {
-                if (m_targetDirection != null)
-                {
-                    m_targetDirection.y = 0f;
-                    // Rotate the forward vector towards the target direction by one step
-                    Vector3 newDirection = Vector3.RotateTowards(m_parent.transform.forward, m_targetDirection, AUTO_TURN_SPEED * Time.deltaTime, 0.0f);
-                    // Calculate a rotation a step closer to the target and applies rotation to this object
-                    m_parent.transform.rotation = Quaternion.LookRotation(newDirection);
-                }
-                m_vertical = Input.GetAxis("Vertical") * (m_movementSpeed * Time.deltaTime);
-                m_strafe = Input.GetAxis("Horizontal") * (m_movementSpeed * Time.deltaTime);
-                if (Input.GetAxis("Horizontal") > 0)
-                {
-                    //animator.CrossFade("strafeRight");
-                }
-                else if (Input.GetAxis("Horizontal") < 0)
-                {
-                    //animator.CrossFade("strafeLeft");
-                }
-            }
-            m_parent.transform.Translate(m_strafe, 0f, m_vertical);
+            m_parent.transform.position += mov;
         }
-/*
-        else if (!m_skipRotate)
+        else if (InputManager.GetButton("move_down"))
+        {
+            m_parent.transform.position -= mov;
+        }
+
+        mov = (GameManager.Singleton.Possession == 0 ? Vector3.left : -Vector3.left) * ms;
+        if (InputManager.GetButton("move_left"))
+        {
+            m_parent.transform.position += mov;
+        }
+        else if (InputManager.GetButton("move_right"))
+        {
+            m_parent.transform.position -= mov;
+        }
+    }
+
+    private void RotatePlayer()
+    {
+        if (m_targetDirection != null)
         {
             m_targetDirection.y = 0f;
             // Rotate the forward vector towards the target direction by one step
             Vector3 newDirection = Vector3.RotateTowards(m_parent.transform.forward, m_targetDirection, AUTO_TURN_SPEED * Time.deltaTime, 0.0f);
             // Calculate a rotation a step closer to the target and applies rotation to this object
             m_parent.transform.rotation = Quaternion.LookRotation(newDirection);
-            
-        }*/
-        m_skipRotate = false;
+        }
     }
 
-    private void Strafe()
+    private void StrafePlayer()
     {
 
     }
