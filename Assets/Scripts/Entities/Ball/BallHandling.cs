@@ -87,6 +87,7 @@ public class BallHandling : NetworkedBehaviour
     private ShotBarData m_shotBarData;
 
     private float m_timer;
+    private int m_grade;
     private bool m_shotPastArc;
 
     private Dictionary<ulong, float> m_playerDistances;
@@ -243,20 +244,20 @@ public class BallHandling : NetworkedBehaviour
 
         Vector3 offset = Vector3.zero;
 
-        int grade = m_shotBarData.GetShotGrade(releaseDist);
-        if (grade == ShotBarData.GRADE_GOOD)
+        m_grade = m_shotBarData.GetShotGrade(releaseDist);
+        if (m_grade == ShotBarData.GRADE_GOOD)
         {
             offset.x = UnityEngine.Random.Range(.1f, .2f);
             offset.y = 0f;
             offset.z = UnityEngine.Random.Range(.1f, .2f);
         }
-        else if (grade == ShotBarData.GRADE_OK)
+        else if (m_grade == ShotBarData.GRADE_OK)
         {
             offset.x = UnityEngine.Random.Range(.1f, .4f);
             offset.y = UnityEngine.Random.Range(.0f, .1f);
             offset.z = UnityEngine.Random.Range(.1f, .4f);
         }
-        else if (grade == ShotBarData.GRADE_POOR)
+        else if (m_grade == ShotBarData.GRADE_POOR)
         {
             offset.x = UnityEngine.Random.Range(.2f, .8f);
             offset.y = UnityEngine.Random.Range(.1f, .4f);
@@ -325,7 +326,7 @@ public class BallHandling : NetworkedBehaviour
             fracComplete = (Time.time - startTime) / duration;
 
             // Breaks loop if gotten to destination
-            if (fracComplete > .99)
+            if (fracComplete > 1)
                 break;
 
             transform.position = Vector3.Slerp(riseRelCenter, setRelCenter, fracComplete);
@@ -337,7 +338,7 @@ public class BallHandling : NetworkedBehaviour
         startTime = Time.time;
         fracComplete = 0;
         // This is the loop for lerping ball position from bank spot on backboard to basket.
-        while (fracComplete < .99)
+        while (fracComplete < 1)
         {
             // Using duration here does not makes sense since its a constant distance between the bank and the
             // basket. Think about moveing this to a static const or some better way?
@@ -547,7 +548,7 @@ public class BallHandling : NetworkedBehaviour
                         y = UnityEngine.Random.Range(32, 48),
                         z = UnityEngine.Random.Range(5, 12),
                     };
-                    LeanTween.delayedCall(.5f, () => basket.netCloth.externalAcceleration = Vector3.zero);
+                    LeanTween.delayedCall(.25f, () => basket.netCloth.externalAcceleration = Vector3.zero);
                 }
             }
         }

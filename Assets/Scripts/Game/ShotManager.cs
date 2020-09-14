@@ -54,6 +54,8 @@ public class ShotManager : MonoBehaviour
         m_type = m_shotController.GetTypeOfShot(p, dist, m_direction);
         m_bankShot = IsBankShot(p);
 
+        float contest = GetContestRating(p);
+
         m_shotData.shooter = netID;
         m_shotData.position = p.transform.position;
         m_shotData.distance = dist;
@@ -64,6 +66,7 @@ public class ShotManager : MonoBehaviour
         m_shotData.contest = 0.0f;
         m_shotData.offSkill = 50.0f;
         m_shotData.defSkill = 50.0f;
+        m_shotData.passRating = 50.0f;
 
         m_shotBarData.speed = UnityEngine.Random.Range(2, 2) * BASE_SPEED;
         m_shotBarData.startOffset = 0f;
@@ -158,6 +161,24 @@ public class ShotManager : MonoBehaviour
         return BankType.NONE;
     }
 
+    private float GetContestRating(Player p)
+    {
+        float rating = 0;
+        foreach (Player badPlayer in GameManager.Singleton.teams[p.OtherTeam].teamSlots.Values)
+        {
+            Vector3 badPos = badPlayer.transform.position;
+            if (p.m_innerCollider.bounds.Contains(badPos)
+                || p.m_outerCollider.bounds.Contains(badPos))
+            {
+                float dist = Vector3.Distance(badPos, p.transform.position);
+                if (badPlayer.isContesting)
+                    rating += 10;
+                else if (badPlayer.isBlocking)
+                    rating += 5;
+            }
+        }
+        return rating;
+    }
     private static Vector3 GetClosestBankPos(Vector3 current)
     {
         float distL = Vector3.Distance(current, GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[0].transform.position);
