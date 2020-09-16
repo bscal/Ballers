@@ -42,6 +42,13 @@ public class TeamData : IBitWritable
 public class Team
 {
 
+    public const int SLOT_NULL = 0;
+    public const int SLOT_PG = 1;
+    public const int SLOT_SG = 2;
+    public const int SLOT_SF = 3;
+    public const int SLOT_PF = 4;
+    public const int SLOT_C = 5;
+
     /// <summary>
     /// Id of team used to determine if home/away. Home = 0, Away = 1
     /// </summary>
@@ -98,7 +105,7 @@ public class Team
 
     public int GetOpenSlot()
     {
-        for (int i = 0; i < maxTeamSize; i++)
+        for (int i = 1; i < maxTeamSize + 1; i++)
         {
             if (!teamSlots.ContainsKey(i))
             {

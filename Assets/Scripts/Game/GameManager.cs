@@ -377,9 +377,10 @@ public class GameManager : NetworkedBehaviour
         if (NetworkingManager.Singleton.IsServer)
         {
             m_players.Add(p);
-            Singleton.teams[p.TeamID].teamSlots.Add(p.slot, p);
+            //Singleton.teams[p.TeamID].teamSlots.Add(p.slot, p);
         }
-
+        p.slot = GameManager.Singleton.teams[p.TeamID].GetOpenSlot();
+        Singleton.teams[p.TeamID].teamSlots.Add(p.slot, p);
         if (!p.isAI)
         {
             p.SteamID = steamid;

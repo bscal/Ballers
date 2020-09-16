@@ -1,5 +1,6 @@
 ﻿using MLAPI;
-using MLAPI.Messaging; 
+using MLAPI.Messaging;
+using MLAPI.Spawning;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -59,7 +60,7 @@ public class GameSetup : NetworkedBehaviour
                     Player p = go.GetComponent<Player>();
                     p.isAI = true;
                     p.TeamID = tid;
-                    p.slot = Match.matchTeams[tid].numOfPlayers + i;
+                    //p.slot = GameManager.Singleton.teams[tid].GetOpenSlot();
 
                     //GameManager.AddAI(aiLogic);
 
@@ -104,7 +105,6 @@ public class GameSetup : NetworkedBehaviour
             //NetworkedObject no = go.GetComponent<NetworkedObject>();
             //no.SpawnAsPlayerObject(OwnerClientId);
         }
-
         InvokeClientRpcOnClient(PlayerLoaded, pid);
     }
 

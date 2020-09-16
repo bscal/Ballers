@@ -166,39 +166,6 @@ public class Player : NetworkedBehaviour, IBitWritable
 
         m_target = GameManager.Singleton.baskets[GameManager.Singleton.Possession].gameObject.transform.position;
     }
-
-    public void StartLoad()
-    {
-        if (!isDummy)
-        {
-            if (IsClient)
-            {
-                GameManager.Singleton.InitLocalPlayer(OwnerClientId);
-                //NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, this, OnGameStarted);
-                GameManager.Singleton.GameStarted += OnGameStarted;
-                m_shotmeter = GetComponent<ShotMeter>();
-                m_shotController = GetComponent<ShotController>();
-            }
-
-            if (IsServer && !IsHost)
-            {
-                username = "Server";
-            }
-            else
-            {
-                m_rightHand = transform.Find("root/body/right arm/forearm/hand").gameObject;
-                m_leftHand = transform.Find("root/body/left arm/forearm/hand").gameObject;
-                m_center = transform.Find("Center").gameObject;
-                m_animator = GetComponentInChildren<Animator>();
-                m_playerCircle = transform.Find("Player Circle").GetComponent<SpriteRenderer>();
-            }
-
-            id = username.GetHashCode();
-            m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
-        }
-
-    }
-
     public void ShootBall()
     {
         InvokeServerRpc(ServerShootBall, NetworkId);

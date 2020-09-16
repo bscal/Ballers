@@ -16,6 +16,9 @@ public enum GameType
     FIVES
 }
 
+/// <summary>
+/// Handles going from Main Menu scene -> Match scene
+/// </summary>
 public class MatchSetup : NetworkedBehaviour
 {
     private const string CONST_GAME_SCENE_NAME = "Match";

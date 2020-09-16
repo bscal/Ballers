@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class ServerManager : NetworkedBehaviour
 {
@@ -57,12 +58,11 @@ public class ServerManager : NetworkedBehaviour
         players.Clear();
     }
 
-    public void AssignPlayer(ulong steamid, int teamID, int slot)
+    public void AssignPlayer(ulong steamid, int teamID)
     {
         if (Match.HostServer)
         {
             players[steamid].team = teamID;
-            players[steamid].slot = slot;
         }
     }
 

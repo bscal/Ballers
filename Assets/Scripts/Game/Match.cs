@@ -66,7 +66,7 @@ public static class Match
         MatchTeam team = matchTeams[teamID];
         team.playerIds.Add(steamid);
 
-        ServerManager.Singleton.AssignPlayer(steamid, teamID, team.numOfPlayers);
+        ServerManager.Singleton.AssignPlayer(steamid, teamID);
         team.numOfPlayers++;
         team.teamSize++;
     }
