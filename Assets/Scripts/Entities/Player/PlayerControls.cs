@@ -51,11 +51,13 @@ public class PlayerControls : NetworkedBehaviour
             StartCoroutine(WaitJump(1.5f));
         }
 
-        if (Input.GetKey(KeyCode.Alpha1))
-        {
-            Player dummy = GameObject.Find("DummyPasser").GetComponent<Player>();
-            GameManager.GetBallHandling().TryPassBall(m_player, dummy, PassType.CHESS);
-        }
+        TryPassBall();
+
+//         if (Input.GetKey(KeyCode.Alpha1))
+//         {
+//             Player dummy = GameObject.Find("DummyPasser").GetComponent<Player>();
+//             GameManager.GetBallHandling().TryPassBall(m_player, dummy, PassType.CHESS);
+//         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
             m_menu.SetActive(!m_menu.activeSelf);
@@ -85,6 +87,26 @@ public class PlayerControls : NetworkedBehaviour
         m_jumpCooldown = false;
     }
 
+    private void TryPassBall()
+    {
+        int passCode = 0;
+        if (InputManager.GetButtonDown("pass_1"))
+            passCode = 1;
+        if (InputManager.GetButtonDown("pass_2"))
+            passCode = 2;
+        if (InputManager.GetButtonDown("pass_3"))
+            passCode = 3;
+        if (InputManager.GetButtonDown("pass_4"))
+            passCode = 4;
+        if (InputManager.GetButtonDown("pass_5"))
+            passCode = 5;
+
+        if (passCode != 0)
+        {
+            //Player dummy = GameObject.Find("DummyPasser").GetComponent<Player>();
+            GameManager.GetBallHandling().TryPassBall(m_player, passCode, PassType.CHESS);
+        }
+    }
 
     IEnumerator ShotInput()
     {

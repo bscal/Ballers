@@ -359,9 +359,12 @@ public class BallHandling : NetworkedBehaviour
 
     // =================================== Passing ===================================
 
-    public void TryPassBall(Player passer, Player target, PassType type)
+    public void TryPassBall(Player passer, int playerSlot, PassType type)
     {
         if (!passer.HasBall) return;
+        if (passer.slot == playerSlot) return; //TODO fake pass? here because i havent decides on how to handle this
+
+        Player target = GameManager.GetPlayerBySlot(passer.TeamID, playerSlot); 
         InvokeServerRpc(PassBallServer, passer, target, type);
     }
 
@@ -381,7 +384,7 @@ public class BallHandling : NetworkedBehaviour
 
         InvokeClientRpcOnClient(PassBallClient, targetPid, passerPid, position, type);
         ChangeBallHandler(targetPid);
-        StartCoroutine(Pass(passer, target, passerPid, targetPid, position, false, pass_speed));
+        StartCoroutine(Pass(passer, target, position, false, pass_speed));
     }
 
     [ServerRPC]
@@ -390,21 +393,14 @@ public class BallHandling : NetworkedBehaviour
         State = BallState.PASS;
         Vector3 position = GetPassPosition(target, 1);
 
-        ulong passerPid = NO_PLAYER;
-        ulong targetPid = NO_PLAYER;
+        ulong passerNetID = passer.NetworkId; // Player id who passed
+        ulong targetClientID = target.OwnerClientId; // ClientID who to receive (AI client ids are same as p2p host)
 
-        if (!passer.isDummy)
-        {
-            passerPid = passer.OwnerClientId;
-        }
-
-        if (!target.isDummy)
-        {
-            targetPid = target.OwnerClientId;
-            InvokeClientRpcOnClient(PassBallClient, targetPid, passerPid, position, type);
-        }
         ChangeBallHandler(NO_PLAYER);
-        StartCoroutine(Pass(passer, target, passerPid, targetPid, position, false, pass_speed));
+        // Tell the client they are getting the balled passed to them.
+        InvokeClientRpcOnClient(PassBallClient, targetClientID, passerNetID, position, type);
+        // Move the ball
+        StartCoroutine(Pass(passer, target, position, false, pass_speed));
     }
 
     [ClientRPC]
@@ -415,7 +411,7 @@ public class BallHandling : NetworkedBehaviour
         StartCoroutine(AutoCatchPass(GameManager.GetPlayer(), pos));
     }
 
-    private IEnumerator Pass(Player passer, Player target, ulong passerPid, ulong targetPid, Vector3 pos, bool halfPos, float speed)
+    private IEnumerator Pass(Player passer, Player target, Vector3 pos, bool halfPos, float speed)
     {
         // Keep a note of the time the movement started.
         float startTime = Time.time;
@@ -441,14 +437,16 @@ public class BallHandling : NetworkedBehaviour
 
         if (target.isDummy)
         {
+            // Test for dummy passer
             m_currentPlayer = target;
             target.isDribbling = true;
             ChangeBallHandler(DUMMY_PLAYER);
-            StartCoroutine(target.GetComponent<PassingDummy>().ThrowPass(passerPid));
+            // Passes the ball back to the player who passed them the ball.
+            StartCoroutine(target.GetComponent<PassingDummy>().ThrowPass(passer.NetworkId));
         }
         else
         {
-            ChangeBallHandler(targetPid);
+            ChangeBallHandler(target.NetworkId);
         }
 
         State = BallState.HELD;
