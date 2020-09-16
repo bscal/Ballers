@@ -58,10 +58,9 @@ public class ServerPlayer
     {
         this.slot = slot;
     }
-
+   
     public void SetStatus(ServerPlayerStatus status)
     {
         this.status = status;
     }
-
 }
