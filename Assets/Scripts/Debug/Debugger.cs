@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.InputSystem;
 
 public class Debugger : MonoBehaviour
 {
@@ -32,7 +33,7 @@ public class Debugger : MonoBehaviour
     {
         title.text = string.Format("Debug T={0}, F={1}", Mathf.CeilToInt(Time.realtimeSinceStartup), Time.frameCount);
 
-        if (Input.GetKeyDown(KeyCode.Backslash))
+        if (Keyboard.current.backslashKey.isPressed)
         {
             debugPanel.SetActive(!debugPanel.activeSelf);
         }

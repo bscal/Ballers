@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 
 public enum DribbleMove
 {
@@ -28,17 +30,30 @@ public class Combo
 public class KeyData
 {
     public float timer;
+    public bool triggered;
     public bool pressed;
     public bool doubled;
     public bool held;
     public bool shift;
     public bool ctrl;
     public bool alt;
+
+    public void Reset()
+    {
+        timer = 0;
+        triggered = false;
+        pressed = false;
+        doubled = false;
+        held = false;
+        shift = false;
+        ctrl = false;
+        alt = false;
+    }
 }
 
 public class KeyCombo
 {
-    public KeyCode key;
+    public ControlKey key;
     public bool pressed;
     public bool doubled;
     public bool held;
@@ -47,7 +62,7 @@ public class KeyCombo
     public bool alt;
 
     public KeyCombo() { }
-    public KeyCombo(KeyCode key, bool pressed, bool doubled, bool held, bool shift, bool ctrl, bool alt)
+    public KeyCombo(ControlKey key, bool pressed, bool doubled, bool held, bool shift, bool ctrl, bool alt)
     {
         this.key = key;
         this.pressed = pressed;
@@ -63,6 +78,7 @@ public class KeyCombo
         unchecked // only needed if you're compiling with arithmetic checks enabled
         { // (the default compiler behaviour is *disabled*, so most folks won't need this)
             int hash = 13;
+
             hash = (hash * 7) + key.GetHashCode();
             hash = (hash * 7) + pressed.GetHashCode();
             hash = (hash * 7) + doubled.GetHashCode();
@@ -101,44 +117,88 @@ public class ComboList<KeyCombo> : List<KeyCombo>
         return GetHashCode().Equals(obj.GetHashCode());
     }
 }
+public class ControlKey
+{
+    public readonly InputAction action;
+    public readonly string key;
+
+    public bool Pressed { get { return action.ReadValue<float>() > 0; } }
+
+    public bool performed;
+    public bool released;
+
+    private bool m_waiting;
+
+    public ControlKey(string key)
+    {
+        this.key = key;
+        action = new InputAction("dribble" + key, type: InputActionType.Value, binding: "*/" + key);
+        action.Enable();
+
+        action.performed += ctx => {
+            if (!m_waiting) performed = true;
+        };
+
+        action.canceled += ctx => {
+            performed = false;
+            released = true;
+            m_waiting = true;
+            LeanTween.delayedCall(.1f, () => {
+                released = false;
+                m_waiting = false;
+            });
+        };
+    }
+}
 
 public class DribbleControls : MonoBehaviour
 {
     // Constants
-    private const float COUNT_HELD_DOWN         = 0.3f;
+    private const float COUNT_HELD_DOWN         = 0.6f;
     private const float COUNT_DOUBLE_PRESS      = 0.3f;
-    private const float COMBO_TIMEOUT           = 0.6f;
+    private const float COMBO_TIMEOUT           = 0.9f;
     private const int MAX_COMBO                 = 3;
 
     // Key Data
-    private Dictionary<KeyCode, KeyData> m_keyData = new Dictionary<KeyCode, KeyData>();
+    private Dictionary<ControlKey, KeyData> m_keyData = new Dictionary<ControlKey, KeyData>();
 
     // Combo Map
     private Dictionary<ComboList<KeyCombo>, Combo> m_combos = new Dictionary<ComboList<KeyCombo>, Combo>();
 
     // Combo Variables
-    private List<KeyCode> m_combo = new List<KeyCode>();
+    private List<ControlKey> m_combo = new List<ControlKey>();
     private ComboList<KeyCombo> m_comboMove = new ComboList<KeyCombo>();
     private bool m_inputHappened = false;
     private float m_comboTimer = 0.0f;
     private float m_endTime = 0.0f;
 
-    private void Awake()
+    private Controls actions;
+    private ControlKey actionW;
+    private ControlKey actionS;
+    private ControlKey actionA;
+    private ControlKey actionD;
+    private void OnEnable()
     {
-        m_keyData.Add(KeyCode.W, new KeyData());
-        m_keyData.Add(KeyCode.A, new KeyData());
-        m_keyData.Add(KeyCode.S, new KeyData());
-        m_keyData.Add(KeyCode.D, new KeyData());
+        actions = new Controls();
+        actions.Enable();
+        actionW = new ControlKey("W");
+        actionS = new ControlKey("S");
+        actionA = new ControlKey("A");
+        actionD = new ControlKey("D");
+        m_keyData[actionW] = new KeyData();
+        m_keyData[actionS] = new KeyData();
+        m_keyData[actionA] = new KeyData();
+        m_keyData[actionD] = new KeyData();
 
-        KeyCombo crossL = new KeyCombo(KeyCode.A, true, false, false, false, false, false);
-        KeyCombo crossR = new KeyCombo(KeyCode.D, true, false, false, false, false, false);
+        KeyCombo crossL = new KeyCombo(actionA, true, false, false, false, false, false);
+        KeyCombo crossR = new KeyCombo(actionD, true, false, false, false, false, false);
 
         KeyCombo jab = new KeyCombo();
-        jab.key = KeyCode.W;
+        jab.key = actionW;
         jab.doubled = true;
 
         KeyCombo test = new KeyCombo();
-        test.key = KeyCode.S;
+        test.key = actionS;
         test.held = true;
         test.shift = true;
 
@@ -147,7 +207,11 @@ public class DribbleControls : MonoBehaviour
         m_combos.Add(new ComboList<KeyCombo> { jab, jab }, new Combo("Double Jab"));
 
         m_combos.Add(new ComboList<KeyCombo> { test }, new Combo("test test"));
+    }
 
+    private void OnDisable()
+    {
+        actions.Disable();
     }
 
     private void Update()
@@ -155,39 +219,58 @@ public class DribbleControls : MonoBehaviour
         // Checks each resisted key if it is held.
         foreach (var pair in m_keyData)
         {
-            if (Input.GetKeyDown(pair.Key))
+            if (pair.Key.performed && !pair.Value.triggered)
             {
-                if (Input.GetKey(pair.Key))
-                {
-                    // Start a Coroutine to track if key is held
-                    StartCoroutine(Held(pair.Key));
-                }
-            }
-
-            if (Input.GetKeyUp(pair.Key))
-            {
-                // Stops the held coroutine by setting held to false
-                pair.Value.held = false;
-                //Check if we have not not reached the timer then it is only a key press
-                if (pair.Value.timer < COUNT_HELD_DOWN)
-                {
-                    // Will stop the DoublePress coroutine if key is already pressed
-                    if (pair.Value.pressed)
-                    {
-                        pair.Value.doubled = true;
-                    }
-                    else
-                    {
-                        // Starts coroutine to check if key is pressed twice
-                        StartCoroutine(DoublePress(pair.Key));
-                    }
-                }
-                // Reset timer to 0 for the next key press
-                pair.Value.timer = 0f;
+                StartCoroutine(KeyPress(pair.Key, pair.Value));
             }
         }
+
         // Updates combos
         UpdateCombo();
+    }
+
+    private IEnumerator KeyPress(ControlKey key, KeyData data)
+    {
+        print(key.key);
+        data.Reset();
+        data.triggered = true;
+        float timer = 0;
+        bool run = true;
+        while (run)
+        {
+            timer += Time.deltaTime;
+
+            if (timer > COUNT_HELD_DOWN)
+            {
+                // held
+                yield return OnKeyHeldDown(key);
+                run = false;
+            }
+
+            if (key.released)
+            {
+                while (true)
+                {
+                    data.timer += Time.deltaTime;
+                    if (key.action.ReadValue<float>() > 0)
+                    {
+                        // double tapped
+                        yield return OnKeyDoublePressed(key);
+                        break;
+                    }
+                    yield return null;
+                    if (data.timer > COUNT_DOUBLE_PRESS)
+                    {
+                        // single tapped
+                        yield return OnKeyPressed(key);
+                        break;
+                    }
+                }
+                run = false;
+            }
+            yield return null;
+        }
+        data.triggered = false;
     }
 
     private void UpdateCombo()
@@ -202,7 +285,7 @@ public class DribbleControls : MonoBehaviour
         }
     }
 
-    private IEnumerator DoublePress(KeyCode key)
+    private IEnumerator DoublePress(ControlKey key)
     {
         if (m_keyData.TryGetValue(key, out KeyData value))
         {
@@ -217,11 +300,12 @@ public class DribbleControls : MonoBehaviour
         }
     }
 
-    private IEnumerator Held(KeyCode key)
+    private IEnumerator Held(ControlKey key)
     {
         if (m_keyData.TryGetValue(key, out KeyData value))
         {
             value.held = true;
+            value.timer = 0f;
             while (value.held)
             {
                 //Start incrementing timer
@@ -241,29 +325,33 @@ public class DribbleControls : MonoBehaviour
         }
     }
 
-    private IEnumerator OnKeyPressed(KeyCode key)
+    private IEnumerator OnKeyPressed(ControlKey key)
     {
         OnInput(key, true, false, false);
         yield return null;
     }
 
-    private IEnumerator OnKeyDoublePressed(KeyCode key)
+    private IEnumerator OnKeyDoublePressed(ControlKey key)
     {
         OnInput(key, false, true, false);
         yield return null;
     }
 
-    private IEnumerator OnKeyHeldDown(KeyCode key)
+    private IEnumerator OnKeyHeldDown(ControlKey key)
     {
         OnInput(key, false, false, true);
         yield return null;
     }
 
-    private void OnInput(KeyCode key, bool pressed, bool doubled, bool held)
+    private void OnInput(ControlKey key, bool pressed, bool doubled, bool held)
     {
+        print("Key " + key.key + ", " + pressed + ", " + doubled + ", " + held);
         m_inputHappened = true;
         m_combo.Add(key);
-        m_comboMove.Add(new KeyCombo(key, pressed, doubled, held, Input.GetKey(KeyCode.LeftShift), Input.GetKey(KeyCode.LeftControl), Input.GetKey(KeyCode.LeftAlt)));
+        m_comboMove.Add(new KeyCombo(key, pressed, doubled, held,
+            Keyboard.current.leftShiftKey.isPressed,
+            Keyboard.current.leftCtrlKey.isPressed,
+            Keyboard.current.leftAltKey.isPressed));
 
         if (m_combo.Count > MAX_COMBO)
             HandleCombo();
@@ -295,4 +383,3 @@ public class DribbleControls : MonoBehaviour
     }
 
 }
-

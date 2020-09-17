@@ -2,6 +2,7 @@
 using MLAPI;
 using MLAPI.Spawning;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Movement : MonoBehaviour
 {
@@ -24,6 +25,19 @@ public class Movement : MonoBehaviour
     private readonly float m_movementSpeed  = 8.0f;
     private readonly float m_sprintSpeed    = 16.0f;
     private readonly float m_turningSpeed   = 200.0f;
+
+    private Controls actions;
+
+    private void OnEnable()
+    {
+        actions = new Controls();
+        actions.Enable();
+    }
+
+    private void OnDisable()
+    {
+        actions.Disable();
+    }
 
     void Start()
     {
@@ -110,21 +124,29 @@ public class Movement : MonoBehaviour
         float ms = (m_player.isSprinting ? m_sprintSpeed : m_movementSpeed) * Time.deltaTime;
         Vector3 mov = (GameManager.Singleton.Possession == 0 ? Vector3.forward : -Vector3.forward) * ms;
 
-        if (InputManager.GetButton("move_up"))
+        Vector2 move = actions.Keyboard.Move.ReadValue<Vector2>();
+        m_player.isMoving = move != Vector2.zero;
+
+        m_player.isDribUp = move.y > 0;    //1
+        m_player.isDribDown = move.y < 0;  //-1
+        m_player.isDribLeft = move.x < 0;  //-1
+        m_player.isDribRight = move.x > 0; //1
+
+        if (m_player.isDribUp)
         {
             m_parent.transform.position += mov;
         }
-        else if (InputManager.GetButton("move_down"))
+        else if (m_player.isDribDown)
         {
             m_parent.transform.position -= mov;
         }
 
         mov = (GameManager.Singleton.Possession == 0 ? Vector3.left : -Vector3.left) * ms;
-        if (InputManager.GetButton("move_left"))
+        if (m_player.isDribLeft)
         {
             m_parent.transform.position += mov;
         }
-        else if (InputManager.GetButton("move_right"))
+        else if (m_player.isDribRight)
         {
             m_parent.transform.position -= mov;
         }

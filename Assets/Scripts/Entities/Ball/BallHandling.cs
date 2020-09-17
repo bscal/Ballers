@@ -393,22 +393,20 @@ public class BallHandling : NetworkedBehaviour
         State = BallState.PASS;
         Vector3 position = GetPassPosition(target, 1);
 
-        ulong passerNetID = passer.NetworkId; // Player id who passed
+        ulong targetNetID = target.NetworkId; // Player id who passed
         ulong targetClientID = target.OwnerClientId; // ClientID who to receive (AI client ids are same as p2p host)
 
         ChangeBallHandler(NO_PLAYER);
         // Tell the client they are getting the balled passed to them.
-        InvokeClientRpcOnClient(PassBallClient, targetClientID, passerNetID, position, type);
+        InvokeClientRpcOnClient(PassBallClient, targetClientID, targetNetID, position, type);
         // Move the ball
         StartCoroutine(Pass(passer, target, position, false, pass_speed));
     }
 
     [ClientRPC]
-    public void PassBallClient(ulong passerPid, Vector3 pos, PassType type)
+    public void PassBallClient(ulong targetPid, Vector3 pos, PassType type)
     {
-        Player passer = GameManager.GetPlayerByNetworkID(passerPid);
-
-        StartCoroutine(AutoCatchPass(GameManager.GetPlayer(), pos));
+        StartCoroutine(AutoCatchPass(GameManager.GetPlayerByNetworkID(targetPid), pos));
     }
 
     private IEnumerator Pass(Player passer, Player target, Vector3 pos, bool halfPos, float speed)

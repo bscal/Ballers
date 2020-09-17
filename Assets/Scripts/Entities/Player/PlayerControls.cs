@@ -3,6 +3,7 @@ using MLAPI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerControls : NetworkedBehaviour
 {
@@ -18,8 +19,21 @@ public class PlayerControls : NetworkedBehaviour
     private bool m_shootCooldown = false;
     private bool m_jumpCooldown = false;
 
-   void Start()
-   {
+    private Controls actions;
+
+    private void OnEnable()
+    {
+        actions = new Controls();
+        actions.Enable();
+    }
+
+    private void OnDisable()
+    {
+        actions.Disable();
+    }
+
+    void Start()
+    {
         if (!IsOwner)
             return;
 
@@ -27,50 +41,53 @@ public class PlayerControls : NetworkedBehaviour
         m_animator = GetComponentInChildren<Animator>();
         m_menu = GameObject.Find("Menu Panel");
         StartCoroutine(ShotInput());
-   }
+    }
 
     void Update()
     {
         if (!IsOwner)
             return;
 
-        m_player.isMoving = IsMoving();
-        m_player.isSprinting = Input.GetKey(KeyCode.LeftShift);
+        m_player.isSprinting = Keyboard.current.shiftKey.ReadValue() > 0.0f;
 
-        m_player.isCtrlDown = InputManager.GetKey(KeyCode.LeftControl);
-        m_player.isAltDown = InputManager.GetKey(KeyCode.LeftAlt);
+        m_player.isCtrlDown = Keyboard.current.ctrlKey.ReadValue() > 0.0f;
+        m_player.isAltDown = Keyboard.current.altKey.ReadValue() > 0.0f;
 
-        m_player.isDribUp = InputManager.GetKey(KeyCode.W);
-        m_player.isDribDown = InputManager.GetKey(KeyCode.S);
-        m_player.isDribLeft = InputManager.GetKey(KeyCode.A);
-        m_player.isDribRight = InputManager.GetKey(KeyCode.D);
 
-        if (Input.GetKey(KeyCode.Y) && !m_jumpCooldown)
+        Vector2 dribVec = actions.Keyboard.Dribble.ReadValue<Vector2>();
+        m_player.isDribUp = dribVec.y > 0; //1
+        m_player.isDribDown = dribVec.y < 0; //-1
+        m_player.isDribLeft = dribVec.x < 0; //-1
+        m_player.isDribRight = dribVec.x > 0; //1
+
+        if (actions.Keyboard.Jump.triggered && !m_jumpCooldown)
         {
             m_animator.SetTrigger("Jump");
             StartCoroutine(WaitJump(1.5f));
         }
 
+
         TryPassBall();
 
-//         if (Input.GetKey(KeyCode.Alpha1))
-//         {
-//             Player dummy = GameObject.Find("DummyPasser").GetComponent<Player>();
-//             GameManager.GetBallHandling().TryPassBall(m_player, dummy, PassType.CHESS);
-//         }
+        if (actions.Keyboard.Callforball.triggered)
+        {
+            //TODO player with ball pass to player if ai
+        }
 
-        if (Input.GetKeyDown(KeyCode.Escape))
+        //         if (Input.GetKey(KeyCode.Alpha1))
+        //         {
+        //             Player dummy = GameObject.Find("DummyPasser").GetComponent<Player>();
+        //             GameManager.GetBallHandling().TryPassBall(m_player, dummy, PassType.CHESS);
+        //         }
+
+        if (Keyboard.current.escapeKey.isPressed)
             m_menu.SetActive(!m_menu.activeSelf);
 
         m_animator.SetBool("isDribbling", m_player.isDribbling);
         m_animator.SetBool("isSprinting", m_player.isSprinting);
         m_animator.SetBool("isWalking", m_player.isMoving);
 
-        if (Input.GetKey(KeyCode.U)) m_animator.SetTrigger("Crossover");
-    }
-    private bool IsMoving()
-    {
-        return Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow);
+        if (Keyboard.current.uKey.isPressed) m_animator.SetTrigger("Crossover");
     }
 
     private IEnumerator WaitShoot(float delay)
@@ -90,15 +107,15 @@ public class PlayerControls : NetworkedBehaviour
     private void TryPassBall()
     {
         int passCode = 0;
-        if (InputManager.GetButtonDown("pass_1"))
+        if (actions.Keyboard.Pass_1.triggered)
             passCode = 1;
-        if (InputManager.GetButtonDown("pass_2"))
+        if (actions.Keyboard.Pass_2.triggered)
             passCode = 2;
-        if (InputManager.GetButtonDown("pass_3"))
+        if (actions.Keyboard.Pass_3.triggered)
             passCode = 3;
-        if (InputManager.GetButtonDown("pass_4"))
+        if (actions.Keyboard.Pass_4.triggered)
             passCode = 4;
-        if (InputManager.GetButtonDown("pass_5"))
+        if (actions.Keyboard.Pass_5.triggered)
             passCode = 5;
 
         if (passCode != 0)
@@ -110,15 +127,19 @@ public class PlayerControls : NetworkedBehaviour
 
     IEnumerator ShotInput()
     {
+        bool triggered = false;
+        bool held = false;
         while (true)
         {
             if (m_shootCooldown || m_player.isShooting) yield return new WaitForSeconds(0.1f);
 
             //Check when the key is pressed
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (actions.Keyboard.Shoot.ReadValue<float>() > 0)
             {
-                //Continue to check if it is still heldown and keep counting the how long
-                while (Input.GetKey(KeyCode.Space))
+                triggered = true;
+                held = true;
+                //Continue to check if it is still helddown and keep counting the how long
+                while (held)
                 {
                     //Start incrementing timer
                     pressTimer += Time.deltaTime;
@@ -128,19 +149,26 @@ public class PlayerControls : NetworkedBehaviour
                     {
                         //It a "key held down", call the OnKeyHeldDown function and wait for it to return
                         yield return OnKeyHeldDown();
+                        //Press has been handled
+                        triggered = false;
+                        held = false;
                         //No need to continue checking for Input.GetKey(KeyCode.D). Break out of this while loop
                         break;
                     }
+
+                    if (actions.Keyboard.Shoot.ReadValue<float>() == 0)
+                        held = false;
 
                     //Wait for a frame
                     yield return null;
                 }
             }
 
-
             //Check if key is released 
-            if (Input.GetKeyUp(KeyCode.Space))
+            if (triggered && !held)
             {
+                //Press has been handled
+                triggered = false;
                 //Check if we have not not reached the timer then it is only a key press
                 if (pressTimer < timeToCountAsHeldDown)
                 {
@@ -174,7 +202,7 @@ public class PlayerControls : NetworkedBehaviour
         //Move 1 unit every frame until edge detection is reached!
         while (pressTimer < MAX_TIME)
         {
-            if (!Input.GetKey(KeyCode.Space)) break;
+            if (actions.Keyboard.Shoot.ReadValue<float>() == 0) break;
 
             //Start incrementing timer
             pressTimer += Time.deltaTime;
