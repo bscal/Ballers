@@ -119,34 +119,32 @@ public class ComboList<KeyCombo> : List<KeyCombo>
 }
 public class ControlKey
 {
-    public readonly InputAction action;
-    public readonly string key;
+    private readonly DribbleControls m_controls;
+    private readonly InputAction m_action;
 
-    public bool Pressed { get { return action.ReadValue<float>() > 0; } }
+    public float ReadValue { get { return m_action.ReadValue<float>(); } }
+    public string Bind { get { return m_action.name; } }
+    public bool Pressed { get; set; }
+    public bool Released { get; set; }
+    public bool Held { get; set; }
 
-    public bool performed;
-    public bool released;
-
-    private bool m_waiting;
-
-    public ControlKey(string key)
+    public ControlKey(DribbleControls controls, string bind)
     {
-        this.key = key;
-        action = new InputAction("dribble" + key, type: InputActionType.Value, binding: "*/" + key);
-        action.Enable();
+        m_controls = controls;
+        m_action = new InputAction("dribble" + bind, type: InputActionType.Value, binding: "*/" + bind);
+        m_action.Enable();
 
-        action.performed += ctx => {
-            if (!m_waiting) performed = true;
+        m_action.started += ctx => {
+            Pressed = true;
+            m_controls.StartCoroutine(m_controls.ResetPress(this));
+            m_controls.StartCoroutine(m_controls.IsHeld(this));
         };
 
-        action.canceled += ctx => {
-            performed = false;
-            released = true;
-            m_waiting = true;
-            LeanTween.delayedCall(.1f, () => {
-                released = false;
-                m_waiting = false;
-            });
+
+        m_action.canceled += ctx => {
+            Released = true;
+            Held = false;
+            m_controls.StartCoroutine(m_controls.ResetRelease(this));
         };
     }
 }
@@ -154,37 +152,38 @@ public class ControlKey
 public class DribbleControls : MonoBehaviour
 {
     // Constants
-    private const float COUNT_HELD_DOWN         = 0.6f;
-    private const float COUNT_DOUBLE_PRESS      = 0.3f;
-    private const float COMBO_TIMEOUT           = 0.9f;
-    private const int MAX_COMBO                 = 3;
-
+    private const float COUNT_HELD_DOWN     = 0.6f;
+    private const float COUNT_DOUBLE_PRESS  = 0.3f;
+    private const float COMBO_TIMEOUT       = 1.5f;
+    private const int MAX_COMBO             = 3;
+    
     // Key Data
-    private Dictionary<ControlKey, KeyData> m_keyData = new Dictionary<ControlKey, KeyData>();
+    private readonly Dictionary<ControlKey, KeyData> m_keyData = new Dictionary<ControlKey, KeyData>();
 
     // Combo Map
-    private Dictionary<ComboList<KeyCombo>, Combo> m_combos = new Dictionary<ComboList<KeyCombo>, Combo>();
+    private readonly Dictionary<ComboList<KeyCombo>, Combo> m_combos = new Dictionary<ComboList<KeyCombo>, Combo>();
 
     // Combo Variables
-    private List<ControlKey> m_combo = new List<ControlKey>();
-    private ComboList<KeyCombo> m_comboMove = new ComboList<KeyCombo>();
-    private bool m_inputHappened = false;
-    private float m_comboTimer = 0.0f;
-    private float m_endTime = 0.0f;
+    private readonly List<ControlKey> m_combo = new List<ControlKey>();
+    private readonly ComboList<KeyCombo> m_comboMove = new ComboList<KeyCombo>();
+    private bool m_inputHappened;
+    private float m_comboTimer;
+    private float m_endTime;
 
     private Controls actions;
     private ControlKey actionW;
     private ControlKey actionS;
     private ControlKey actionA;
     private ControlKey actionD;
+
     private void OnEnable()
     {
         actions = new Controls();
         actions.Enable();
-        actionW = new ControlKey("W");
-        actionS = new ControlKey("S");
-        actionA = new ControlKey("A");
-        actionD = new ControlKey("D");
+        actionW = new ControlKey(this, "W");
+        actionS = new ControlKey(this, "S");
+        actionA = new ControlKey(this, "A");
+        actionD = new ControlKey(this, "D");
         m_keyData[actionW] = new KeyData();
         m_keyData[actionS] = new KeyData();
         m_keyData[actionA] = new KeyData();
@@ -193,19 +192,19 @@ public class DribbleControls : MonoBehaviour
         KeyCombo crossL = new KeyCombo(actionA, true, false, false, false, false, false);
         KeyCombo crossR = new KeyCombo(actionD, true, false, false, false, false, false);
 
-        KeyCombo jab = new KeyCombo();
-        jab.key = actionW;
-        jab.doubled = true;
+        KeyCombo jab = new KeyCombo {
+            key = actionW,
+            doubled = true
+        };
 
-        KeyCombo test = new KeyCombo();
-        test.key = actionS;
-        test.held = true;
-        test.shift = true;
+        KeyCombo test = new KeyCombo {
+            key = actionS,
+            held = true,
+            shift = true
+        };
 
         m_combos.Add(new ComboList<KeyCombo> { crossL, crossR }, new Combo("Double Cross"));
-
         m_combos.Add(new ComboList<KeyCombo> { jab, jab }, new Combo("Double Jab"));
-
         m_combos.Add(new ComboList<KeyCombo> { test }, new Combo("test test"));
     }
 
@@ -219,7 +218,7 @@ public class DribbleControls : MonoBehaviour
         // Checks each resisted key if it is held.
         foreach (var pair in m_keyData)
         {
-            if (pair.Key.performed && !pair.Value.triggered)
+            if (pair.Key.Pressed && !pair.Key.Held && !pair.Value.triggered)
             {
                 StartCoroutine(KeyPress(pair.Key, pair.Value));
             }
@@ -231,7 +230,6 @@ public class DribbleControls : MonoBehaviour
 
     private IEnumerator KeyPress(ControlKey key, KeyData data)
     {
-        print(key.key);
         data.Reset();
         data.triggered = true;
         float timer = 0;
@@ -240,28 +238,25 @@ public class DribbleControls : MonoBehaviour
         {
             timer += Time.deltaTime;
 
-            if (timer > COUNT_HELD_DOWN)
+            if (timer > COUNT_HELD_DOWN) // held
             {
-                // held
                 yield return OnKeyHeldDown(key);
                 run = false;
             }
 
-            if (key.released)
+            if (key.Released)
             {
                 while (true)
                 {
+                    yield return null;
                     data.timer += Time.deltaTime;
-                    if (key.action.ReadValue<float>() > 0)
+                    if (key.Pressed) // double tapped
                     {
-                        // double tapped
                         yield return OnKeyDoublePressed(key);
                         break;
                     }
-                    yield return null;
-                    if (data.timer > COUNT_DOUBLE_PRESS)
+                    if (data.timer > COUNT_DOUBLE_PRESS) // single tapped
                     {
-                        // single tapped
                         yield return OnKeyPressed(key);
                         break;
                     }
@@ -285,46 +280,6 @@ public class DribbleControls : MonoBehaviour
         }
     }
 
-    private IEnumerator DoublePress(ControlKey key)
-    {
-        if (m_keyData.TryGetValue(key, out KeyData value))
-        {
-            value.pressed = true;
-            yield return new WaitForSeconds(COUNT_DOUBLE_PRESS);
-            value.pressed = false;
-            if (value.doubled)
-                yield return OnKeyDoublePressed(key);
-            else
-                yield return OnKeyPressed(key);
-            value.doubled = false;
-        }
-    }
-
-    private IEnumerator Held(ControlKey key)
-    {
-        if (m_keyData.TryGetValue(key, out KeyData value))
-        {
-            value.held = true;
-            value.timer = 0f;
-            while (value.held)
-            {
-                //Start incrementing timer
-                value.timer += Time.deltaTime;
-
-                //Check if this counts as being "Held Down"
-                if (value.timer > COUNT_HELD_DOWN)
-                {
-                    //It a "key held down", call the OnKeyHeldDown function and wait for it to return
-                    yield return OnKeyHeldDown(key);
-                    break;
-                }
-
-                yield return null;
-            }
-            value.held = false;
-        }
-    }
-
     private IEnumerator OnKeyPressed(ControlKey key)
     {
         OnInput(key, true, false, false);
@@ -345,7 +300,7 @@ public class DribbleControls : MonoBehaviour
 
     private void OnInput(ControlKey key, bool pressed, bool doubled, bool held)
     {
-        print("Key " + key.key + ", " + pressed + ", " + doubled + ", " + held);
+        print("Key " + key + ", " + pressed + ", " + doubled + ", " + held);
         m_inputHappened = true;
         m_combo.Add(key);
         m_comboMove.Add(new KeyCombo(key, pressed, doubled, held,
@@ -356,7 +311,11 @@ public class DribbleControls : MonoBehaviour
         if (m_combo.Count > MAX_COMBO)
             HandleCombo();
         else
-            m_endTime = m_comboTimer + COMBO_TIMEOUT;
+        {
+            m_endTime = COMBO_TIMEOUT;
+            m_comboTimer = 0f;
+        }
+            
     }
 
     private void HandleCombo()
@@ -379,7 +338,36 @@ public class DribbleControls : MonoBehaviour
         m_comboMove.Clear();
         m_inputHappened = false;
         m_comboTimer = 0f;
-        m_endTime = COMBO_TIMEOUT;
+        m_endTime = 0f;
+    }
+
+    // ============== Coroutines for ControlKeys ==============
+
+    public IEnumerator ResetPress(ControlKey obj)
+    {
+        yield return null;
+        obj.Pressed = false;
+    }
+
+    public IEnumerator IsHeld(ControlKey obj)
+    {
+        float timer = 0;
+        while (timer < .3f)
+        {
+            yield return null;
+            timer += Time.deltaTime;
+            if (obj.Released)
+                break;
+        }
+        if (!obj.Released)
+            obj.Held = true;
+
+    }
+
+    public IEnumerator ResetRelease(ControlKey obj)
+    {
+        yield return null;
+        obj.Released = false;
     }
 
 }

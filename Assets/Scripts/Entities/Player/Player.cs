@@ -42,37 +42,33 @@ public class Player : NetworkedBehaviour, IBitWritable
     public int OtherTeam { get { return OtherTeamID(TeamID); } }
 
     // Client Values
-    public bool isRightHanded = true;
-
-    public bool isMoving = false;
-    public bool isSprinting = false;
-    public bool isScreening = false;
-    public bool isHardScreening = false;
-    public bool isShooting = false;
-    public bool isHelping = false;
-    public bool isMovementFrozen = false;
-    public bool isBallInLeftHand = false;
-    public bool isCtrlDown = false;
-    public bool isAltDown = false;
-
-    public bool isDribUp = false;
-    public bool isDribDown = false;
-    public bool isDribLeft = false;
-    public bool isDribRight = false;
-
-    public bool isContesting = false;
-    public bool isBlocking = false;
-
-    public bool isAI = false;
+    public bool isRightHanded;
+    public bool isMoving;
+    public bool isSprinting;
+    public bool isScreening;
+    public bool isHardScreening;
+    public bool isShooting;
+    public bool isHelping;
+    public bool isMovementFrozen;
+    public bool isBallInLeftHand;
+    public bool isCtrlDown;
+    public bool isAltDown;
+    public bool isDribUp;
+    public bool isDribDown;
+    public bool isDribLeft;
+    public bool isDribRight;
+    public bool isContesting;
+    public bool isBlocking;
+    public bool isAI;
 
     // Server values
-    public bool isDribbling = false;
-    public bool isInsideThree = false;
-    public bool isInbounds = false;
+    public bool isDribbling;
+    public bool isInsideThree;
+    public bool isInbounds;
 
     public CharacterData CData { get; set; }
     public ulong SteamID { get; set; }
-    public bool HasBall { get; set; } = false;
+    public bool HasBall { get; set; }
     public Vector3 RightHand { get { return m_rightHand.transform.position; } }
     public Vector3 LeftHand { get { return m_leftHand.transform.position; } }
     public Vector3 GetHand { get { return (isBallInLeftHand) ? LeftHand : RightHand; } }
