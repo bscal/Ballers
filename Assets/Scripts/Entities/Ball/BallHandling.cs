@@ -364,7 +364,7 @@ public class BallHandling : NetworkedBehaviour
         if (!passer.HasBall) return;
         if (passer.slot == playerSlot) return; //TODO fake pass? here because i havent decides on how to handle this
 
-        Player target = GameManager.GetPlayerBySlot(passer.TeamID, playerSlot); 
+        Player target = GameManager.GetPlayerBySlot(passer.TeamID, playerSlot);
         InvokeServerRpc(PassBallServer, passer, target, type);
     }
 
@@ -480,6 +480,17 @@ public class BallHandling : NetworkedBehaviour
             yield return null;
         }
         target.isMovementFrozen = false;
+    }
+
+    [ServerRPC]
+    public void PlayerCallForBall(ulong netID)
+    {
+        Player target = GameManager.GetPlayerByNetworkID(netID);
+        if (target == m_currentPlayer) return;
+        if (m_currentPlayer.isAI && m_currentPlayer.IsOnOffense() && m_currentPlayer.SameTeam(target))
+        {
+            InvokeServerRpc(PassBallServer, m_currentPlayer, target, PassType.CHESS);
+        }
     }
 
     // =================================== End Passing ===================================
