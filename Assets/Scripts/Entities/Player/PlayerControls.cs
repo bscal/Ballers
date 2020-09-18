@@ -1,5 +1,4 @@
-﻿using Luminosity.IO;
-using MLAPI;
+﻿using MLAPI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -25,6 +24,13 @@ public class PlayerControls : NetworkedBehaviour
     {
         actions = new Controls();
         actions.Enable();
+
+        actions.Keyboard.Pass_1.started += TryPassBall;
+        actions.Keyboard.Pass_2.started += TryPassBall;
+        actions.Keyboard.Pass_3.started += TryPassBall;
+        actions.Keyboard.Pass_4.started += TryPassBall;
+        actions.Keyboard.Pass_5.started += TryPassBall;
+        actions.Keyboard.Callforball.started += CallForBall;
     }
 
     private void OnDisable()
@@ -67,18 +73,15 @@ public class PlayerControls : NetworkedBehaviour
         }
 
 
-        TryPassBall();
+        //TryPassBall();
 
-        if (actions.Keyboard.Callforball.triggered)
-        {
-            //TODO player with ball pass to player if ai
-        }
-
-        //         if (Input.GetKey(KeyCode.Alpha1))
-        //         {
-        //             Player dummy = GameObject.Find("DummyPasser").GetComponent<Player>();
-        //             GameManager.GetBallHandling().TryPassBall(m_player, dummy, PassType.CHESS);
-        //         }
+//         if (IsKeyPressed(actions.Keyboard.Callforball))
+//         {
+//             if (!m_player.HasBall && m_player.IsOnOffense())
+//             {
+//                 m_player.CallForBall();
+//             }
+//         }
 
         if (Keyboard.current.escapeKey.isPressed)
             m_menu.SetActive(!m_menu.activeSelf);
@@ -104,23 +107,29 @@ public class PlayerControls : NetworkedBehaviour
         m_jumpCooldown = false;
     }
 
-    private void TryPassBall()
+    private void CallForBall(InputAction.CallbackContext context)
+    {
+        if (!m_player.HasBall && m_player.IsOnOffense())
+        {
+            m_player.CallForBall();
+        }
+    }
+
+    private void TryPassBall(InputAction.CallbackContext context)
     {
         int passCode = 0;
-        if (actions.Keyboard.Pass_1.triggered)
+        if (context.action.name == "Pass_1")
             passCode = 1;
-        if (actions.Keyboard.Pass_2.triggered)
+        else if (context.action.name == "Pass_2")
             passCode = 2;
-        if (actions.Keyboard.Pass_3.triggered)
+        else if(context.action.name == "Pass_3")
             passCode = 3;
-        if (actions.Keyboard.Pass_4.triggered)
+        else if(context.action.name == "Pass_4")
             passCode = 4;
-        if (actions.Keyboard.Pass_5.triggered)
+        else if(context.action.name == "Pass_5")
             passCode = 5;
-
         if (passCode != 0)
         {
-            //Player dummy = GameObject.Find("DummyPasser").GetComponent<Player>();
             GameManager.GetBallHandling().TryPassBall(m_player, passCode, PassType.CHESS);
         }
     }
@@ -236,6 +245,10 @@ public class PlayerControls : NetworkedBehaviour
         StartCoroutine(WaitShoot(0.20f));
     }
 
+    private static bool IsKeyPressed(InputAction action)
+    {
+        return action.ReadValue<float>() > 0;
+    }
 
 
 
