@@ -137,7 +137,6 @@ public class ControlKey
         m_action.started += ctx => {
             Pressed = true;
             m_controls.StartCoroutine(m_controls.ResetPress(this));
-            m_controls.StartCoroutine(m_controls.IsHeld(this));
         };
 
 
@@ -152,9 +151,9 @@ public class ControlKey
 public class DribbleControls : MonoBehaviour
 {
     // Constants
-    private const float COUNT_HELD_DOWN     = 0.6f;
+    private const float COUNT_HELD_DOWN     = 0.4f;
     private const float COUNT_DOUBLE_PRESS  = 0.3f;
-    private const float COMBO_TIMEOUT       = 1.5f;
+    private const float COMBO_TIMEOUT       = 0.9f;
     private const int MAX_COMBO             = 3;
     
     // Key Data
@@ -240,6 +239,7 @@ public class DribbleControls : MonoBehaviour
 
             if (timer > COUNT_HELD_DOWN) // held
             {
+                key.Held = true;
                 yield return OnKeyHeldDown(key);
                 run = false;
             }
@@ -347,21 +347,6 @@ public class DribbleControls : MonoBehaviour
     {
         yield return null;
         obj.Pressed = false;
-    }
-
-    public IEnumerator IsHeld(ControlKey obj)
-    {
-        float timer = 0;
-        while (timer < .3f)
-        {
-            yield return null;
-            timer += Time.deltaTime;
-            if (obj.Released)
-                break;
-        }
-        if (!obj.Released)
-            obj.Held = true;
-
     }
 
     public IEnumerator ResetRelease(ControlKey obj)
