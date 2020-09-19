@@ -31,41 +31,41 @@
                 },
                 {
                     "name": "Pass_1",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "90b075b4-71a4-466b-8aee-f9666b32e4fd",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": ""
                 },
                 {
                     "name": "Pass_2",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "369fa894-0ce4-4bff-a0e0-868281282a8e",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": ""
                 },
                 {
                     "name": "Pass_3",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "11164195-d619-4ee8-a7ca-9894b56db4bb",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": ""
                 },
                 {
                     "name": "Pass_4",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "20433785-3a7f-4a07-9a62-c12d0614bc2b",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": ""
                 },
                 {
                     "name": "Pass_5",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "b6832ef8-83a4-4e6c-b84f-f5515b2052bd",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": ""
                 },

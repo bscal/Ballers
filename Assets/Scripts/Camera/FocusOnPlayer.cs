@@ -47,7 +47,7 @@ public class FocusOnPlayer : MonoBehaviour
         }
         else
         {
-            m_target = GameObject.Find("Player");
+            m_target = GameObject.FindGameObjectWithTag("Player");
         }
     }
 }
