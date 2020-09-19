@@ -25,7 +25,7 @@ public enum PassType
 {
     CHESS,
     BOUNCE,
-    LOP,
+    LOB,
     FLASHY,
     ALLEY_OOP
 }
@@ -285,18 +285,24 @@ public class BallHandling : NetworkedBehaviour
         float fracComplete = 0;
         while (fracComplete < 1)
         {
-            Vector3 center = (start + end) * 0.5F;
-            center -= Vector3.up * height;
-
-            Vector3 riseRelCenter = start - center;
-            Vector3 setRelCenter = end - center;
-
             if (fracComplete < .5f) m_shotPastArc = true;
 
-            fracComplete = (Time.time - startTime) / duration;
+            // OLD way to arc updated to newer
+            //Vector3 center = (start + end) * 0.5F;
+            //center -= Vector3.up * height;
+            //Vector3 riseRelCenter = start - center;
+            //Vector3 setRelCenter = end - center;
+            //fracComplete = (Time.time - startTime) / duration;
+            //transform.position = Vector3.Slerp(riseRelCenter, setRelCenter, fracComplete);
+            //transform.position += center;
 
-            transform.position = Vector3.Slerp(riseRelCenter, setRelCenter, fracComplete);
-            transform.position += center;
+            // Fraction of journey completed equals current distance divided by total distance.
+            fracComplete = (Time.time - startTime) / duration;
+            // Calculate arc
+            Vector3 pos = Vector3.Lerp(start, end, fracComplete);
+            pos.y += Mathf.Sin(Mathf.PI * fracComplete) * height;
+            m_ball.transform.position = pos;
+
             yield return null;
         }
         m_shotPastArc = false;
@@ -307,37 +313,34 @@ public class BallHandling : NetworkedBehaviour
     private IEnumerator FollowBackboard(ShotData shot, Vector3 start, Vector3 end, float height, float duration)
     {
         Vector3 bankPos = GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[(int)shot.bankshot].transform.position;
+        // Sets the center
+        //Vector3 center = (start + bankPos) * 0.5f;
+        // Adjusts the height of the center point based on shot type
+        //center -= (shot.type == ShotType.SHOT) ? Vector3.up * height : Vector3.up;
+        // Gets the points to Slerp with based on center
+        //Vector3 riseRelCenter = start - center;
+        //Vector3 setRelCenter = bankPos - center;
+
         float startTime = Time.time;
-        float fracComplete;
-
-        // This is the loop for slerping the ball position from the player to the bank position
+        float fracComplete = 0;
+        // This is the loop for slerp the ball position from the player to the bank position
         // This statement will break itself at 99% completion of journey
-        for (;;)
+        while (fracComplete < 1)
         {
-            // Sets the center
-            Vector3 center = (start + bankPos) * 0.5f;
-            // Adjusts the height of the center point based on shot type
-            center -=  (shot.type == ShotType.SHOT) ? Vector3.up * height : Vector3.up;
-
-            // Gets the points to Slerp with based on center
-            Vector3 riseRelCenter = start - center;
-            Vector3 setRelCenter = bankPos - center;
-
+            // Fraction of journey completed equals current distance divided by total distance.
             fracComplete = (Time.time - startTime) / duration;
+            // Calculate arc
+            Vector3 pos = Vector3.Lerp(start, bankPos, fracComplete);
+            pos.y += Mathf.Sin(Mathf.PI * fracComplete) * height;
+            m_ball.transform.position = pos;
 
-            // Breaks loop if gotten to destination
-            if (fracComplete > 1)
-                break;
-
-            transform.position = Vector3.Slerp(riseRelCenter, setRelCenter, fracComplete);
-            transform.position += center;
             yield return null;
         }
 
         //Resets values
         startTime = Time.time;
         fracComplete = 0;
-        // This is the loop for lerping ball position from bank spot on backboard to basket.
+        // This is the loop for lerp ball position from bank spot on backboard to basket.
         while (fracComplete < 1)
         {
             // Using duration here does not makes sense since its a constant distance between the bank and the
@@ -362,7 +365,7 @@ public class BallHandling : NetworkedBehaviour
     public void TryPassBall(Player passer, int playerSlot, PassType type)
     {
         if (!passer.HasBall) return;
-        if (passer.slot == playerSlot) return; //TODO fake pass? here because i havent decides on how to handle this
+        if (passer.slot == playerSlot) return; //TODO fake pass? here because i have not decides on how to handle this
 
         Player target = GameManager.GetPlayerBySlot(passer.TeamID, playerSlot);
         InvokeServerRpc(PassBallServer, passer, target, type);
@@ -377,15 +380,11 @@ public class BallHandling : NetworkedBehaviour
     [ServerRPC]
     public void PassBallServer(ulong passerPid, ulong targetPid, PassType type)
     {
-        State = BallState.PASS;
         Player passer = GameManager.GetPlayerByNetworkID(passerPid);
         Player target = GameManager.GetPlayerByNetworkID(targetPid);
-        Vector3 position = GetPassPosition(target, 1);
-
-        InvokeClientRpcOnClient(PassBallClient, targetPid, passerPid, position, type);
-        ChangeBallHandler(targetPid);
-        StartCoroutine(Pass(passer, target, position, false, pass_speed));
+        PassBallServer(passer, target, type);
     }
+
 
     [ServerRPC]
     public void PassBallServer(Player passer, Player target, PassType type)
@@ -393,14 +392,20 @@ public class BallHandling : NetworkedBehaviour
         State = BallState.PASS;
         Vector3 position = GetPassPosition(target, 1);
 
-        ulong targetNetID = target.NetworkId; // Player id who passed
-        ulong targetClientID = target.OwnerClientId; // ClientID who to receive (AI client ids are same as p2p host)
-
+        // Set the ball to NO_PLAYER because ball is in air
         ChangeBallHandler(NO_PLAYER);
         // Tell the client they are getting the balled passed to them.
-        InvokeClientRpcOnClient(PassBallClient, targetClientID, targetNetID, position, type);
-        // Move the ball
-        StartCoroutine(Pass(passer, target, position, false, pass_speed));
+        InvokeClientRpcOnClient(PassBallClient, target.OwnerClientId, target.NetworkId, position, type);
+
+        Debug.Log(string.Format("Pass {0} -> {1} | Type: {2}", passer, target, type));
+
+        // Move the ball by type
+        if (type == PassType.CHESS)
+            StartCoroutine(Pass(passer, target, position, false, pass_speed));
+        else if (type == PassType.BOUNCE)
+            StartCoroutine(BouncePass(passer, target, position, false, pass_speed));
+        else if (type == PassType.LOB)
+            StartCoroutine(LobPass(passer, target, position, false, pass_speed));
     }
 
     [ClientRPC]
@@ -411,14 +416,12 @@ public class BallHandling : NetworkedBehaviour
 
     private IEnumerator Pass(Player passer, Player target, Vector3 pos, bool halfPos, float speed)
     {
+        Vector3 start = m_ball.transform.position;
         // Keep a note of the time the movement started.
         float startTime = Time.time;
-
         // Calculate the journey length.
-        float journeyLength = Vector3.Distance(m_ball.transform.position, pos);
-
-        float fractionOfJourney = 0;
-
+        float journeyLength = Vector3.Distance(start, pos);
+        float fractionOfJourney = 0f;
         while (fractionOfJourney < 1.0f)
         {
             // Distance moved equals elapsed time times speed..
@@ -428,25 +431,85 @@ public class BallHandling : NetworkedBehaviour
             fractionOfJourney = distCovered / journeyLength;
 
             // Set our position as a fraction of the distance between the markers.
-            m_ball.transform.position = Vector3.Lerp(m_ball.transform.position, pos, fractionOfJourney);
+            m_ball.transform.position = Vector3.Lerp(start, pos, fractionOfJourney);
 
             yield return null;
         }
+        FinishPass(target.NetworkId);
+    }
 
-        if (target.isDummy)
-        {
-            // Test for dummy passer
-            m_currentPlayer = target;
-            target.isDribbling = true;
-            ChangeBallHandler(DUMMY_PLAYER);
-            // Passes the ball back to the player who passed them the ball.
-            StartCoroutine(target.GetComponent<PassingDummy>().ThrowPass(passer.NetworkId));
-        }
-        else
-        {
-            ChangeBallHandler(target.NetworkId);
-        }
+    public IEnumerator BouncePass(Player passer, Player target, Vector3 pos, bool halfPos, float speed)
+    {
+        const float FLOOR_OFFSET = .25f;
+        Vector3 start = m_ball.transform.position;
+        Vector3 center = (start + pos) * 0.5f;
+        center.y = FLOOR_OFFSET;
 
+        float startTime = Time.time;
+        float journeyLength = Vector3.Distance(start, center);
+        float fractionOfJourney = 0f;
+        // Part 1 Ball -> center floor pos
+        while (fractionOfJourney < 1.0f)
+        {
+            // Distance moved equals elapsed time times speed..
+            float distCovered = (Time.time - startTime) * speed;
+            // Fraction of journey completed equals current distance divided by total distance.
+            fractionOfJourney = distCovered / journeyLength;
+            // Set our position as a fraction of the distance between the markers.
+            m_ball.transform.position = Vector3.Lerp(start, center, fractionOfJourney);
+            yield return null;
+        }
+        // Reset values;
+        startTime = Time.time;
+        journeyLength = Vector3.Distance(center, pos);
+        fractionOfJourney = 0f;
+        // Part 2 center floor pos -> target
+        while (fractionOfJourney < 1.0f)
+        {
+            // Distance moved equals elapsed time times speed..
+            float distCovered = (Time.time - startTime) * speed;
+            // Fraction of journey completed equals current distance divided by total distance.
+            fractionOfJourney = distCovered / journeyLength;
+            // Set our position as a fraction of the distance between the markers.
+            m_ball.transform.position = Vector3.Lerp(center, pos, fractionOfJourney);
+            yield return null;
+        }
+        FinishPass(target.NetworkId);
+    }
+
+    public IEnumerator LobPass(Player passer, Player target, Vector3 end, bool halfPos, float speed)
+    {
+        const float LOB_HEIGHT = 5f;
+
+        Vector3 start = m_ball.transform.position;
+        float startTime = Time.time;
+        float fractionOfJourney = 0f;
+        while (fractionOfJourney < 1.0f)
+        {
+            // Fraction of journey completed equals current distance divided by total distance.
+            fractionOfJourney = (Time.time - startTime) / speed;
+            // Calculate arc
+            Vector3 pos = Vector3.Lerp(start, end, fractionOfJourney);
+            pos.y += Mathf.Sin(Mathf.PI * fractionOfJourney) * LOB_HEIGHT;
+            m_ball.transform.position = pos;
+            yield return null;
+        }
+        FinishPass(target.NetworkId);
+    }
+
+    public IEnumerator AlleyOopPass(Player passer, Player target, Vector3 pos, bool halfPos, float speed)
+    {
+        yield return null;
+    }
+
+    public IEnumerator FlashyPass(Player passer, Player target, Vector3 pos, bool halfPos, float speed)
+    {
+        yield return null;
+    }
+
+    private void FinishPass(ulong targetNetID)
+    {
+        ChangeBallHandler(targetNetID);
         State = BallState.HELD;
     }
 
@@ -497,6 +560,9 @@ public class BallHandling : NetworkedBehaviour
 
     // =================================== Private Functions ===================================
 
+    /// <summary>
+    /// Deprecated. Moved into Update loop. 
+    /// </summary>
     private IEnumerator UpdatePlayerDistances()
     {
         while (true)

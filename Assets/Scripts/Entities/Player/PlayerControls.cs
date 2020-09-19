@@ -55,7 +55,6 @@ public class PlayerControls : NetworkedBehaviour
             return;
 
         m_player.isSprinting = Keyboard.current.shiftKey.ReadValue() > 0.0f;
-
         m_player.isCtrlDown = Keyboard.current.ctrlKey.ReadValue() > 0.0f;
         m_player.isAltDown = Keyboard.current.altKey.ReadValue() > 0.0f;
 
@@ -130,7 +129,17 @@ public class PlayerControls : NetworkedBehaviour
             passCode = 5;
         if (passCode != 0)
         {
-            GameManager.GetBallHandling().TryPassBall(m_player, passCode, PassType.CHESS);
+            PassType type = PassType.CHESS;
+            if (Keyboard.current.leftShiftKey.ReadValue() > 0)
+            {
+                type = PassType.BOUNCE;
+            }
+            if (Keyboard.current.leftCtrlKey.ReadValue() > 0)
+            {
+                type = PassType.LOB;
+            }
+            print(type);
+            GameManager.GetBallHandling().TryPassBall(m_player, passCode, type);
         }
     }
 
