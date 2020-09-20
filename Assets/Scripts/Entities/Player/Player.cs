@@ -66,6 +66,9 @@ public class Player : NetworkedBehaviour, IBitWritable
     public bool isInsideThree;
     public bool isInbounds;
 
+    public bool isPostShot;
+    public bool isPostMove;
+
     public CharacterData CData { get; set; }
     public ulong SteamID { get; set; }
     public bool HasBall { get { return NetworkId == GameManager.GetBallHandling().PlayerWithBall; } }

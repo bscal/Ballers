@@ -239,7 +239,7 @@ public class BallHandling : NetworkedBehaviour
         State = BallState.SHOT;
         m_body.isKinematic = false;
 
-        float h = ShotController.GetShotRange(m_shotData.type) == ShotRange.LONG ? UnityEngine.Random.Range(1.5f, 3f) : UnityEngine.Random.Range(.3f, .8f);
+        float h = ShotController.GetShotRange(m_shotData.type) == ShotRange.LONG ? UnityEngine.Random.Range(2f, 4f) : UnityEngine.Random.Range(.3f, .8f);
         float d = SHOT_SPEED + UnityEngine.Random.value / m_shotData.distance;
 
         Vector3 offset = Vector3.zero;
@@ -268,6 +268,23 @@ public class BallHandling : NetworkedBehaviour
         //offset.y *= RandNegOrPos();
         offset.z *= RandNegOrPos();
         offset *= (Mathf.Clamp(releaseDist, 0, 100) / 100) + 1;
+
+        if (m_shotData.type == ShotType.LAYUP)
+        {
+            offset *= 0.33f;
+        }
+        else if (m_shotData.type == ShotType.POST_MOVE)
+        {
+            offset *= .50f;
+        }
+        else if (m_shotData.type == ShotType.SHOT_CLOSE || m_shotData.type == ShotType.POST_SHOT)
+        {
+            offset *= 0.66f;
+        }
+        else if (m_shotData.type == ShotType.DUNK)
+        {
+            offset *= 0f;
+        }
 
         print(offset);
 
@@ -308,7 +325,6 @@ public class BallHandling : NetworkedBehaviour
         m_shotPastArc = false;
         State = BallState.LOOSE;
     }
-
 
     private IEnumerator FollowBackboard(ShotData shot, Vector3 start, Vector3 end, float height, float duration)
     {
