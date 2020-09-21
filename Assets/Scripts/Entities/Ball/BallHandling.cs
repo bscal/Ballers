@@ -234,6 +234,13 @@ public class BallHandling : NetworkedBehaviour
     public void BallFollowArc(ulong netID, float releaseDist)
     {
         if (!IsServer) return;
+
+        // Dunks are handle in PlayerUtils.Dunk()
+        // Maybe I should move that to Player but I dont think
+        // it should be in here because the everything is done to
+        // the player and the Ball is just following the hand position.
+        if (m_shotData.type == ShotType.DUNK) return;
+
         Player player = GameManager.GetPlayerByNetworkID(netID);
 
         State = BallState.SHOT;
@@ -326,6 +333,7 @@ public class BallHandling : NetworkedBehaviour
         State = BallState.LOOSE;
     }
 
+    // Bank shots and layup
     private IEnumerator FollowBackboard(ShotData shot, Vector3 start, Vector3 end, float height, float duration)
     {
         Vector3 bankPos = GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[(int)shot.bankshot].transform.position;
@@ -368,6 +376,11 @@ public class BallHandling : NetworkedBehaviour
         }
 
         State = BallState.LOOSE;
+    }
+
+    private IEnumerator FingerRoll(ShotData shot, Vector3 start, Vector3 end, float height, float duration)
+    {
+        yield return null;
     }
 
     /// Returns the team that does not have possession.
