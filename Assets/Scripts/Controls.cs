@@ -19,6 +19,30 @@ public class @Controls : IInputActionCollection, IDisposable
             ""id"": ""40eb852a-53c8-44ca-8bb5-5523b55c564e"",
             ""actions"": [
                 {
+                    ""name"": ""Console"",
+                    ""type"": ""Button"",
+                    ""id"": ""e9330821-ee3a-4e39-8d5b-57cc39f935cf"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Return"",
+                    ""type"": ""Button"",
+                    ""id"": ""0fecb4af-47b7-43c9-8525-88da79486d52"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Cancel"",
+                    ""type"": ""Button"",
+                    ""id"": ""1dbb4bab-3a21-43a3-b698-5302d502a312"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
                     ""name"": ""Move"",
                     ""type"": ""Value"",
                     ""id"": ""3b9d99b2-f70d-4200-ba54-1c13da1b2a31"",
@@ -297,6 +321,164 @@ public class @Controls : IInputActionCollection, IDisposable
                     ""action"": ""Jump"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1f94935d-8938-4676-98b6-10d85d2eedbc"",
+                    ""path"": ""<Keyboard>/backquote"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Console"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7a3d5f46-f8c5-47ce-b88f-fa7126d70077"",
+                    ""path"": ""<Keyboard>/enter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Return"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b178d02a-1daa-4802-94e3-170e23294093"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Cancel"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""UI"",
+            ""id"": ""ba8ebf34-6302-40b0-a440-31ea5291fbae"",
+            ""actions"": [
+                {
+                    ""name"": ""Right Click"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""852cf786-d673-4eb0-ad84-53a92031441d"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Middle Click"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""dcaf556c-f6cf-46ef-aac4-013ffda63ddd"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Left Click"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""cc04e0f0-3a2e-457a-b73c-44be05049df2"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Point"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""33a3fed2-87c8-420a-bd07-b7f58b706275"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Scroll Wheel"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""41065673-0864-4fc3-83a8-c6d9d957cf57"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """"
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""515a4f0e-fca0-417a-aade-82812a1922f9"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""Right Click"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2fb35674-d224-4ce2-8f57-02f67f289703"",
+                    ""path"": ""<Mouse>/middleButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""Middle Click"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""69979b63-3be5-4780-b625-ca4ca9927897"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""Left Click"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6e97e3d0-fc22-479f-9bb8-a3976ef23b49"",
+                    ""path"": ""<Mouse>/position"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""Point"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""08408dd4-6c32-4865-a19c-38a149a3d613"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Scroll Wheel"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""cf9d2052-348c-4fc1-96e2-f44f8c279226"",
+                    ""path"": ""<Mouse>/scroll/x"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""Scroll Wheel"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""54200898-0ea0-438c-930d-24e270385195"",
+                    ""path"": ""<Mouse>/scroll/y"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""Scroll Wheel"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         }
@@ -317,6 +499,9 @@ public class @Controls : IInputActionCollection, IDisposable
 }");
         // Keyboard
         m_Keyboard = asset.FindActionMap("Keyboard", throwIfNotFound: true);
+        m_Keyboard_Console = m_Keyboard.FindAction("Console", throwIfNotFound: true);
+        m_Keyboard_Return = m_Keyboard.FindAction("Return", throwIfNotFound: true);
+        m_Keyboard_Cancel = m_Keyboard.FindAction("Cancel", throwIfNotFound: true);
         m_Keyboard_Move = m_Keyboard.FindAction("Move", throwIfNotFound: true);
         m_Keyboard_Shoot = m_Keyboard.FindAction("Shoot", throwIfNotFound: true);
         m_Keyboard_Dribble = m_Keyboard.FindAction("Dribble", throwIfNotFound: true);
@@ -327,6 +512,13 @@ public class @Controls : IInputActionCollection, IDisposable
         m_Keyboard_Pass_5 = m_Keyboard.FindAction("Pass_5", throwIfNotFound: true);
         m_Keyboard_Callforball = m_Keyboard.FindAction("Call for ball", throwIfNotFound: true);
         m_Keyboard_Jump = m_Keyboard.FindAction("Jump", throwIfNotFound: true);
+        // UI
+        m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
+        m_UI_RightClick = m_UI.FindAction("Right Click", throwIfNotFound: true);
+        m_UI_MiddleClick = m_UI.FindAction("Middle Click", throwIfNotFound: true);
+        m_UI_LeftClick = m_UI.FindAction("Left Click", throwIfNotFound: true);
+        m_UI_Point = m_UI.FindAction("Point", throwIfNotFound: true);
+        m_UI_ScrollWheel = m_UI.FindAction("Scroll Wheel", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -376,6 +568,9 @@ public class @Controls : IInputActionCollection, IDisposable
     // Keyboard
     private readonly InputActionMap m_Keyboard;
     private IKeyboardActions m_KeyboardActionsCallbackInterface;
+    private readonly InputAction m_Keyboard_Console;
+    private readonly InputAction m_Keyboard_Return;
+    private readonly InputAction m_Keyboard_Cancel;
     private readonly InputAction m_Keyboard_Move;
     private readonly InputAction m_Keyboard_Shoot;
     private readonly InputAction m_Keyboard_Dribble;
@@ -390,6 +585,9 @@ public class @Controls : IInputActionCollection, IDisposable
     {
         private @Controls m_Wrapper;
         public KeyboardActions(@Controls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Console => m_Wrapper.m_Keyboard_Console;
+        public InputAction @Return => m_Wrapper.m_Keyboard_Return;
+        public InputAction @Cancel => m_Wrapper.m_Keyboard_Cancel;
         public InputAction @Move => m_Wrapper.m_Keyboard_Move;
         public InputAction @Shoot => m_Wrapper.m_Keyboard_Shoot;
         public InputAction @Dribble => m_Wrapper.m_Keyboard_Dribble;
@@ -409,6 +607,15 @@ public class @Controls : IInputActionCollection, IDisposable
         {
             if (m_Wrapper.m_KeyboardActionsCallbackInterface != null)
             {
+                @Console.started -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnConsole;
+                @Console.performed -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnConsole;
+                @Console.canceled -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnConsole;
+                @Return.started -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnReturn;
+                @Return.performed -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnReturn;
+                @Return.canceled -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnReturn;
+                @Cancel.started -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnCancel;
+                @Cancel.performed -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnCancel;
+                @Cancel.canceled -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnCancel;
                 @Move.started -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnMove;
                 @Move.performed -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnMove;
                 @Move.canceled -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnMove;
@@ -443,6 +650,15 @@ public class @Controls : IInputActionCollection, IDisposable
             m_Wrapper.m_KeyboardActionsCallbackInterface = instance;
             if (instance != null)
             {
+                @Console.started += instance.OnConsole;
+                @Console.performed += instance.OnConsole;
+                @Console.canceled += instance.OnConsole;
+                @Return.started += instance.OnReturn;
+                @Return.performed += instance.OnReturn;
+                @Return.canceled += instance.OnReturn;
+                @Cancel.started += instance.OnCancel;
+                @Cancel.performed += instance.OnCancel;
+                @Cancel.canceled += instance.OnCancel;
                 @Move.started += instance.OnMove;
                 @Move.performed += instance.OnMove;
                 @Move.canceled += instance.OnMove;
@@ -477,6 +693,71 @@ public class @Controls : IInputActionCollection, IDisposable
         }
     }
     public KeyboardActions @Keyboard => new KeyboardActions(this);
+
+    // UI
+    private readonly InputActionMap m_UI;
+    private IUIActions m_UIActionsCallbackInterface;
+    private readonly InputAction m_UI_RightClick;
+    private readonly InputAction m_UI_MiddleClick;
+    private readonly InputAction m_UI_LeftClick;
+    private readonly InputAction m_UI_Point;
+    private readonly InputAction m_UI_ScrollWheel;
+    public struct UIActions
+    {
+        private @Controls m_Wrapper;
+        public UIActions(@Controls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @RightClick => m_Wrapper.m_UI_RightClick;
+        public InputAction @MiddleClick => m_Wrapper.m_UI_MiddleClick;
+        public InputAction @LeftClick => m_Wrapper.m_UI_LeftClick;
+        public InputAction @Point => m_Wrapper.m_UI_Point;
+        public InputAction @ScrollWheel => m_Wrapper.m_UI_ScrollWheel;
+        public InputActionMap Get() { return m_Wrapper.m_UI; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(UIActions set) { return set.Get(); }
+        public void SetCallbacks(IUIActions instance)
+        {
+            if (m_Wrapper.m_UIActionsCallbackInterface != null)
+            {
+                @RightClick.started -= m_Wrapper.m_UIActionsCallbackInterface.OnRightClick;
+                @RightClick.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnRightClick;
+                @RightClick.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnRightClick;
+                @MiddleClick.started -= m_Wrapper.m_UIActionsCallbackInterface.OnMiddleClick;
+                @MiddleClick.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnMiddleClick;
+                @MiddleClick.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnMiddleClick;
+                @LeftClick.started -= m_Wrapper.m_UIActionsCallbackInterface.OnLeftClick;
+                @LeftClick.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnLeftClick;
+                @LeftClick.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnLeftClick;
+                @Point.started -= m_Wrapper.m_UIActionsCallbackInterface.OnPoint;
+                @Point.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnPoint;
+                @Point.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnPoint;
+                @ScrollWheel.started -= m_Wrapper.m_UIActionsCallbackInterface.OnScrollWheel;
+                @ScrollWheel.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnScrollWheel;
+                @ScrollWheel.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnScrollWheel;
+            }
+            m_Wrapper.m_UIActionsCallbackInterface = instance;
+            if (instance != null)
+            {
+                @RightClick.started += instance.OnRightClick;
+                @RightClick.performed += instance.OnRightClick;
+                @RightClick.canceled += instance.OnRightClick;
+                @MiddleClick.started += instance.OnMiddleClick;
+                @MiddleClick.performed += instance.OnMiddleClick;
+                @MiddleClick.canceled += instance.OnMiddleClick;
+                @LeftClick.started += instance.OnLeftClick;
+                @LeftClick.performed += instance.OnLeftClick;
+                @LeftClick.canceled += instance.OnLeftClick;
+                @Point.started += instance.OnPoint;
+                @Point.performed += instance.OnPoint;
+                @Point.canceled += instance.OnPoint;
+                @ScrollWheel.started += instance.OnScrollWheel;
+                @ScrollWheel.performed += instance.OnScrollWheel;
+                @ScrollWheel.canceled += instance.OnScrollWheel;
+            }
+        }
+    }
+    public UIActions @UI => new UIActions(this);
     private int m_KeyboardSchemeIndex = -1;
     public InputControlScheme KeyboardScheme
     {
@@ -488,6 +769,9 @@ public class @Controls : IInputActionCollection, IDisposable
     }
     public interface IKeyboardActions
     {
+        void OnConsole(InputAction.CallbackContext context);
+        void OnReturn(InputAction.CallbackContext context);
+        void OnCancel(InputAction.CallbackContext context);
         void OnMove(InputAction.CallbackContext context);
         void OnShoot(InputAction.CallbackContext context);
         void OnDribble(InputAction.CallbackContext context);
@@ -498,5 +782,13 @@ public class @Controls : IInputActionCollection, IDisposable
         void OnPass_5(InputAction.CallbackContext context);
         void OnCallforball(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
+    }
+    public interface IUIActions
+    {
+        void OnRightClick(InputAction.CallbackContext context);
+        void OnMiddleClick(InputAction.CallbackContext context);
+        void OnLeftClick(InputAction.CallbackContext context);
+        void OnPoint(InputAction.CallbackContext context);
+        void OnScrollWheel(InputAction.CallbackContext context);
     }
 }
