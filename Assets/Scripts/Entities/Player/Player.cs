@@ -102,6 +102,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     private GameObject m_leftHand;
     private GameObject m_center;
     private ShotMeter m_shotmeter;
+    private RoundShotMeter m_roundShotMeter;
     private Animator m_animator;
     private ShotController m_shotController;
     private ShotManager m_shotManager;
@@ -235,6 +236,12 @@ public class Player : NetworkedBehaviour, IBitWritable
             GameManager.GetBallHandling().InvokeServerRpc(
                 GameManager.GetBallHandling().PlayerCallForBall, NetworkId);
         }
+    }
+
+    [ClientRPC]
+    public void TriggerRoundShotMeter(ulong netID, float speed, float difficulty)
+    {
+        m_roundShotMeter.StartMeter(speed, difficulty);
     }
 
     public float Dist(Vector3 other)
