@@ -73,6 +73,7 @@ public class GameSetup : NetworkedBehaviour
 
         m_hasClientLoaded = true;
         print("creating player");
+
         InvokeServerRpc(PlayerLoaded, NetworkingManager.Singleton.LocalClientId);
     }
 

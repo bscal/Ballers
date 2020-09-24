@@ -1,4 +1,5 @@
-﻿using MLAPI;
+﻿using Ballers;
+using MLAPI;
 using MLAPI.Spawning;
 using System.Collections;
 using System.Collections.Generic;
@@ -57,6 +58,9 @@ public class ShotMeter : MonoBehaviour
         if (m_isShooting)
         {
             m_timer += m_shotBarData.speed * Time.deltaTime;
+
+            m_meterTransform.position = PlayerSettings.Singleton.Current.WorldToScreenPoint(GameManager.GetPlayer().transform.position) - Vector3.left * 64;
+
             fill.rectTransform.SetHeight(m_timer);
 
             // Overflowed bar -> Failed shot + disable
@@ -74,7 +78,6 @@ public class ShotMeter : MonoBehaviour
     {
         Reset();
         m_shotBarData = shotBarData;
-        m_meterTransform.position = Camera.current.WorldToScreenPoint(p.transform.position) - Vector3.left * 64;
 
         fill.rectTransform.SetHeight(0.0f);
         target.rectTransform.SetHeight(m_shotBarData.targetSize);

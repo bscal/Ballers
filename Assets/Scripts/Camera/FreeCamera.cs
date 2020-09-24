@@ -25,6 +25,7 @@ public class FreeCamera : MonoBehaviour
 
         m_camera = GetComponent<Camera>();
         m_movement = SpawnManager.GetLocalPlayerObject()?.GetComponentInChildren<Movement>();
+        m_camera.enabled = false;
     }
 
     void Update()

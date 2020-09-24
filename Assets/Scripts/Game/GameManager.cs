@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.SceneManagement;
 
 public enum TeamType
@@ -38,7 +39,7 @@ public class GameManager : NetworkedBehaviour
     private readonly static Dictionary<ulong, ulong> m_playersBySteam = new Dictionary<ulong, ulong>();
     private readonly static List<BasicDummy> m_dummies = new List<BasicDummy>();
     private readonly static List<AIPlayer> m_ais = new List<AIPlayer>();
-    
+    private static Player m_localPlayer;
 
     public Player BallHandler { get { return GetPlayerByNetworkID(m_ballhandling.PlayerWithBall); } }
     public Basket CurrentBasket { get { return Singleton.baskets[m_ballhandling.PossessionOrHome]; } }
@@ -152,6 +153,9 @@ public class GameManager : NetworkedBehaviour
 
     public void LocalPlayerInitilized()
     {
+        //Assert.IsNull(SpawnManager.GetLocalPlayerObject().gameObject.GetComponent<Player>(), "LocalPlayerObject is null.");
+        m_localPlayer = SpawnManager.GetLocalPlayerObject().gameObject.GetComponent<Player>();
+        print(m_localPlayer);
         LocalPlayerLoaded?.Invoke(GetPlayer());
     }
 
@@ -436,7 +440,7 @@ public class GameManager : NetworkedBehaviour
 
     public static Player GetPlayer()
     {
-        return GetPlayerByClientID(NetworkingManager.Singleton.LocalClientId);
+        return m_localPlayer;
     }
 
     /// <summary>

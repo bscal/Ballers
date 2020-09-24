@@ -418,11 +418,16 @@ public class BallHandling : NetworkedBehaviour
     [ServerRPC]
     public void PassBallServer(Player passer, Player target, PassType type)
     {
+        if (!IsServer) return;
+
         State = BallState.PASS;
         Vector3 position = GetPassPosition(target, 1);
 
         // Set the ball to NO_PLAYER because ball is in air
         ChangeBallHandler(NO_PLAYER);
+        // Trigger shot meter for passer
+        if (!passer.isAI)
+            passer.InvokeClientRpcOnClient(passer.TriggerRoundShotMeter, passer.OwnerClientId, 1.0f, 1.0f);
         // Tell the client they are getting the balled passed to them.
         InvokeClientRpcOnClient(PassBallClient, target.OwnerClientId, target.NetworkId, position, type);
 
