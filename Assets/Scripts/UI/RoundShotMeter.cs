@@ -1,9 +1,11 @@
-﻿using MLAPI.Spawning;
+﻿using Ballers;
+using MLAPI.Spawning;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(GameObject))]
@@ -11,16 +13,17 @@ public class RoundShotMeter : MonoBehaviour
 {
 
     private const float MAX_TIME = 1.0f;
+    private const float TARGET_TIME = 0.7f;
 
     [Header("Meter Components")]
     [SerializeField]
     private GameObject m_meter;
-    [SerializeField]
-    private RawImage m_background;
+    private RectTransform m_meterTransform;
     [SerializeField]
     private RawImage m_fill;
     [SerializeField]
-    private RectTransform m_meterTransform;
+    private GameObject m_glow;
+
 
     [Header("Meter Color Values")]
     [Description("Colors go from: Start -> Target -> End")]
@@ -59,9 +62,10 @@ public class RoundShotMeter : MonoBehaviour
 
     void Start()
     {
-        Assert.IsTrue(m_meter == null, "Meter GameObject is null!");
+        if (m_meter == null) Debug.LogError("Meter GameObject is null!");
+        m_meterTransform = m_meter.GetComponent<RectTransform>();
 
-        gameObject.SetActive(false);
+        Reset();
     }
 
     void Update()
@@ -70,12 +74,26 @@ public class RoundShotMeter : MonoBehaviour
         {
             m_timer += Time.deltaTime * m_speed;
 
-            if (m_timer > MAX_TIME)
+            if (m_timer < TARGET_TIME)
             {
-                // Failed
+                m_currentColor = Color.Lerp(m_startColor, m_targetColor, m_timer);
+            }
+            else
+            {
+                m_currentColor = Color.Lerp(m_targetColor, m_endColor, m_timer);
             }
 
-            // TODO color gradient 
+            if (m_timer > MAX_TIME)
+            {
+                m_currentColor = m_endColor;
+                LeanTween.delayedCall(2.0f, () => StopMeter(MAX_TIME));
+            }
+
+            print(m_fill.color);
+            print(m_currentColor);
+            m_fill.color = m_currentColor;
+
+            m_meterTransform.position = PlayerSettings.Singleton.Current.WorldToScreenPoint(GameManager.GetPlayer().transform.position) - Vector3.left * 64;
         }
     }
 
@@ -83,19 +101,14 @@ public class RoundShotMeter : MonoBehaviour
     {
         m_speed = speed;
         m_difficulty = difficulty;
-        MoveToPlayer();
         m_isActive = true;
+        gameObject.SetActive(true);
     }
 
-    public void StopMeter()
+    public void StopMeter(float result)
     {
         //TODO do we need any offset for ping?
         Reset();
-    }
-
-    private void MoveToPlayer()
-    {
-        GameObject playerObj = SpawnManager.GetLocalPlayerObject().gameObject;
     }
 
     private void Reset()
@@ -104,5 +117,6 @@ public class RoundShotMeter : MonoBehaviour
         m_isActive = false;
         m_currentColor = m_startColor;
         gameObject.SetActive(false);
+        m_glow.SetActive(false);
     }
 }

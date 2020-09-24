@@ -11,6 +11,7 @@ using MLAPI.Serialization;
 using System.IO;
 using MLAPI.Serialization.Pooled;
 using MLAPI.Spawning;
+using Ballers;
 
 public class Player : NetworkedBehaviour, IBitWritable
 {
@@ -119,11 +120,11 @@ public class Player : NetworkedBehaviour, IBitWritable
                 GameManager.Singleton.GameStarted += OnGameStarted;
                 if (!isAI)
                 {
-                GameManager.Singleton.InitLocalPlayer(OwnerClientId);
-                //NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, this, OnGameStarted);
-                m_shotmeter = GetComponent<ShotMeter>();
-                m_shotController = GetComponent<ShotController>();
-
+                    GameManager.Singleton.InitLocalPlayer(OwnerClientId);
+                    //NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, this, OnGameStarted);
+                    m_shotmeter = GetComponent<ShotMeter>();
+                    m_shotController = GetComponent<ShotController>();
+                    m_roundShotMeter = GameObject.Find("HUD/Canvas/RoundShotMeter").GetComponent<RoundShotMeter>();
                 }
             }
 
@@ -146,8 +147,7 @@ public class Player : NetworkedBehaviour, IBitWritable
 
     public override void NetworkStart()
     {
-        if (!IsOwner)
-            return;
+        if (!IsOwner) return;
     }
 
     void Update()
@@ -239,9 +239,15 @@ public class Player : NetworkedBehaviour, IBitWritable
     }
 
     [ClientRPC]
-    public void TriggerRoundShotMeter(ulong netID, float speed, float difficulty)
+    public void TriggerRoundShotMeter(float speed, float difficulty)
     {
         m_roundShotMeter.StartMeter(speed, difficulty);
+    }
+
+    [ClientRPC]
+    public void StopRoundShotMeter(float result)
+    {
+        m_roundShotMeter.StopMeter(result);
     }
 
     public float Dist(Vector3 other)
@@ -309,6 +315,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     {
         return TeamID == other.TeamID;
     }
+
 
     /// <summary>
     /// Flips a TeamID to other team
