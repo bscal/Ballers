@@ -13,24 +13,29 @@ public class DebugController : MonoBehaviour
     private const float VIEW_HEIGHT = VIEW_LENGTH * LINE_SIZE;
     private const float VIEW_BORDER_SIZE = LINE_SIZE / 2;
 
+    public static DebugController Singleton { get; private set; }
+
     private Controls m_controls;
     private bool m_showConsole;
 
     private string m_input;
     private Vector2 m_scroll;
     private Vector2 m_hintScroll;
-    private Queue<string> m_buffer = new Queue<string>(BUFFER_SIZE);
+    private Queue<ConsoleText> m_buffer = new Queue<ConsoleText>(BUFFER_SIZE);
 
     private GUIStyle m_textStyle = new GUIStyle();
-    private GUIStyle m_hintStyle = new GUIStyle();
-    private GUIStyle m_boxStyle = new GUIStyle();
+    private GUIStyle m_textIStyle = new GUIStyle();
+    private GUIStyle m_textWStyle = new GUIStyle();
+    private GUIStyle m_textEStyle = new GUIStyle();
 
-    public static DebugCommand TEST_CMD;
+    private GUIStyle m_hintStyle = new GUIStyle();
+
     public List<DebugCommandBase> commandList = new List<DebugCommandBase>();
 
     // Start is called before the first frame update
     void Awake()
     {
+        Singleton = this;
         m_controls = new Controls();
         m_controls.Enable();
         m_controls.Keyboard.Console.performed += ctx => {
@@ -45,10 +50,23 @@ public class DebugController : MonoBehaviour
         m_textStyle.fontSize = 14;
         m_textStyle.normal.textColor = Color.white;
 
+        m_textIStyle.fontSize = 14;
+        m_textIStyle.normal.textColor = new Color(.55f, .8f, 1);
+
+        m_textWStyle.fontSize = 14;
+        m_textWStyle.normal.textColor = new Color(1, .55f, .2f);
+
+        m_textEStyle.fontSize = 14;
+        m_textEStyle.normal.textColor = new Color(1, .3f, .3f);
+
         m_hintStyle.fontSize = 14;
         m_hintStyle.normal.textColor = new Color(.6f, .6f, .6f);
 
-        TEST_CMD = new DebugCommand("test", "testing", "test - testing", args => Debug.Log("test " + args[0]));
+        PrintConsole("Testing This 1!", LogType.INFO);
+        PrintConsole("Test That 2.", LogType.WARNING);
+        PrintConsole("Test These 3?", LogType.ERROR);
+
+        var TEST_CMD = new DebugCommand("test", "testing", "test - testing", args => Debug.Log("test " + args[0]));
         commandList.Add(TEST_CMD);
 
         var TESTDEBUG_CMD = new DebugCommand("test_this", "testing", "test_this <value>", args => Debug.Log("test " + args[1]));
@@ -67,11 +85,16 @@ public class DebugController : MonoBehaviour
 
         m_scroll = GUI.BeginScrollView(new Rect(0, y + VIEW_BORDER_SIZE, Screen.width, VIEW_HEIGHT - VIEW_BORDER_SIZE), m_scroll, viewport);
         int i = 0;
-        foreach (string line in m_buffer)
+        foreach (ConsoleText line in m_buffer)
         {
-            if (string.IsNullOrEmpty(line)) continue;
+            if (string.IsNullOrEmpty(line.text)) continue;
             Rect labelRect = new Rect(VIEW_BORDER_SIZE, LINE_SIZE * i, viewport.width - 100, LINE_SIZE);
-            GUI.Label(labelRect, line, m_textStyle);
+            GUIStyle style;
+            if (line.type == LogType.INFO) style = m_textIStyle;
+            else if (line.type == LogType.WARNING) style = m_textWStyle;
+            else if (line.type == LogType.ERROR) style = m_textEStyle;
+            else style = m_textStyle;
+            GUI.Label(labelRect, line.text, style);
             i++;
             if (i >= VIEW_LENGTH) return;
         }
@@ -108,7 +131,7 @@ public class DebugController : MonoBehaviour
 
     private void HandleInput()
     {
-        PrintConsole(m_input);
+        PrintConsole(m_input, LogType.NONE);
         for (int i = 0; i < commandList.Count; i++)
         {
             DebugCommandBase cmd = commandList[i];
@@ -139,10 +162,51 @@ public class DebugController : MonoBehaviour
         return res;
     }
 
-    public void PrintConsole(string text)
+    public void PrintConsole(string text, LogType type)
     {
+        ConsoleText cText = new ConsoleText(FormatLog(text, type, false), type);
+
         if (m_buffer.Count >= BUFFER_SIZE)
             m_buffer.Dequeue();
-        m_buffer.Enqueue(text);
+        m_buffer.Enqueue(cText);
+    }
+
+    public void PrintConsoleServer(string text, LogType type)
+    {
+        ConsoleText cText = new ConsoleText(FormatLog(text, type, true), type);
+        MLAPI.Logging.NetworkLog.LogInfoServer(cText.text);
+
+        if (m_buffer.Count >= BUFFER_SIZE)
+            m_buffer.Dequeue();
+        m_buffer.Enqueue(cText);
+    }
+
+    private string FormatLog(string text, LogType type, bool isServer)
+    {
+        return string.Format("[{0}]{1}{2}: {3}",
+            DateTime.Now.ToString("HH:mm:ss"),
+            (isServer) ? "[Server] " : "",
+            (type == LogType.NONE) ? "" : "[" + type.ToString() + "]",
+            text);
+    }
+}
+
+public enum LogType
+{
+    NONE,
+    INFO,
+    WARNING,
+    ERROR
+}
+
+struct ConsoleText
+{
+    public string text;
+    public LogType type;
+
+    public ConsoleText(string text, LogType type)
+    {
+        this.text = text;
+        this.type = type;
     }
 }
