@@ -88,6 +88,7 @@ public class BallHandling : NetworkedBehaviour
 
     private float m_timer;
     private int m_grade;
+    private float m_passScore;
     private bool m_shotPastArc;
 
     private Dictionary<ulong, float> m_playerDistances;
@@ -420,26 +421,20 @@ public class BallHandling : NetworkedBehaviour
     {
         if (!IsServer) return;
 
-        State = BallState.PASS;
-        Vector3 position = GetPassPosition(target, 1);
-
         // Set the ball to NO_PLAYER because ball is in air
         ChangeBallHandler(NO_PLAYER);
         // Trigger shot meter for passer
         if (!passer.isAI)
-            passer.InvokeClientRpcOnClient(passer.TriggerRoundShotMeter, passer.OwnerClientId, 1.0f, 1.0f);
-        // Tell the client they are getting the balled passed to them.
-        InvokeClientRpcOnClient(PassBallClient, target.OwnerClientId, target.NetworkId, position, type);
+        {
+            //passer.InvokeClientRpcOnClient(passer.TriggerRoundShotMeter, passer.OwnerClientId, 1.0f, 1.0f);
+            passer.ServerCheckRSM(passer.OwnerClientId, passer.NetworkId, pass_speed, 1.0f, (netID, score) => {
+                m_passScore = score;
+                print("Pass Score: " + score);
+            });
+        }
 
-        Debug.Log(string.Format("Pass {0} -> {1} | Type: {2}", passer, target, type));
-
-        // Move the ball by type
-        if (type == PassType.CHESS)
-            StartCoroutine(Pass(passer, target, position, false, pass_speed));
-        else if (type == PassType.BOUNCE)
-            StartCoroutine(BouncePass(passer, target, position, false, pass_speed));
-        else if (type == PassType.LOB)
-            StartCoroutine(LobPass(passer, target, position, false, pass_speed));
+        Vector3 endPosition = GetPassPosition(target, 1);
+        StartCoroutine(PassDelay(passer, target, endPosition, pass_speed, type));
     }
 
     [ClientRPC]
@@ -448,13 +443,43 @@ public class BallHandling : NetworkedBehaviour
         StartCoroutine(AutoCatchPass(GameManager.GetPlayerByNetworkID(targetPid), pos));
     }
 
-    private IEnumerator Pass(Player passer, Player target, Vector3 pos, bool halfPos, float speed)
+    private IEnumerator PassDelay(Player passer, Player target, Vector3 endPosition, float speed, PassType type)
+    {
+        const float MAX_WAIT = 0.9f;
+        float start = Time.time;
+        while (true)
+        {
+            // TODO animations event to trigger this
+            if (start + MAX_WAIT < Time.time)
+            {
+                break;
+            }
+            yield return null;
+        }
+
+        State = BallState.PASS;
+
+        // Tell the client they are getting the balled passed to them.
+        InvokeClientRpcOnClient(PassBallClient, target.OwnerClientId, target.NetworkId, endPosition, type);
+
+        Debug.Log(string.Format("Pass {0} -> {1} | Type: {2}", passer, target, type));
+
+        // Move the ball by type
+        if (type == PassType.CHESS)
+            yield return StartCoroutine(Pass(passer, target, endPosition, pass_speed));
+        else if (type == PassType.BOUNCE)
+            yield return StartCoroutine(BouncePass(passer, target, endPosition, pass_speed));
+        else if (type == PassType.LOB)
+            yield return StartCoroutine(LobPass(passer, target, endPosition, pass_speed));
+    }
+
+    private IEnumerator Pass(Player passer, Player target, Vector3 end, float speed)
     {
         Vector3 start = m_ball.transform.position;
         // Keep a note of the time the movement started.
         float startTime = Time.time;
         // Calculate the journey length.
-        float journeyLength = Vector3.Distance(start, pos);
+        float journeyLength = Vector3.Distance(start, end);
         float fractionOfJourney = 0f;
         while (fractionOfJourney < 1.0f)
         {
@@ -465,18 +490,18 @@ public class BallHandling : NetworkedBehaviour
             fractionOfJourney = distCovered / journeyLength;
 
             // Set our position as a fraction of the distance between the markers.
-            m_ball.transform.position = Vector3.Lerp(start, pos, fractionOfJourney);
+            m_ball.transform.position = Vector3.Lerp(start, end, fractionOfJourney);
 
             yield return null;
         }
         FinishPass(target.NetworkId);
     }
 
-    public IEnumerator BouncePass(Player passer, Player target, Vector3 pos, bool halfPos, float speed)
+    public IEnumerator BouncePass(Player passer, Player target, Vector3 end, float speed)
     {
         const float FLOOR_OFFSET = .25f;
         Vector3 start = m_ball.transform.position;
-        Vector3 center = (start + pos) * 0.5f;
+        Vector3 center = (start + end) * 0.5f;
         center.y = FLOOR_OFFSET;
 
         float startTime = Time.time;
@@ -495,7 +520,7 @@ public class BallHandling : NetworkedBehaviour
         }
         // Reset values;
         startTime = Time.time;
-        journeyLength = Vector3.Distance(center, pos);
+        journeyLength = Vector3.Distance(center, end);
         fractionOfJourney = 0f;
         // Part 2 center floor pos -> target
         while (fractionOfJourney < 1.0f)
@@ -505,13 +530,13 @@ public class BallHandling : NetworkedBehaviour
             // Fraction of journey completed equals current distance divided by total distance.
             fractionOfJourney = distCovered / journeyLength;
             // Set our position as a fraction of the distance between the markers.
-            m_ball.transform.position = Vector3.Lerp(center, pos, fractionOfJourney);
+            m_ball.transform.position = Vector3.Lerp(center, end, fractionOfJourney);
             yield return null;
         }
         FinishPass(target.NetworkId);
     }
 
-    public IEnumerator LobPass(Player passer, Player target, Vector3 end, bool halfPos, float speed)
+    public IEnumerator LobPass(Player passer, Player target, Vector3 end, float speed)
     {
         const float LOB_HEIGHT = 5f;
 
@@ -531,12 +556,12 @@ public class BallHandling : NetworkedBehaviour
         FinishPass(target.NetworkId);
     }
 
-    public IEnumerator AlleyOopPass(Player passer, Player target, Vector3 pos, bool halfPos, float speed)
+    public IEnumerator AlleyOopPass(Player passer, Player target, Vector3 end, float speed)
     {
         yield return null;
     }
 
-    public IEnumerator FlashyPass(Player passer, Player target, Vector3 pos, bool halfPos, float speed)
+    public IEnumerator FlashyPass(Player passer, Player target, Vector3 end, float speed)
     {
         yield return null;
     }

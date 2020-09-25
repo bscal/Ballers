@@ -250,10 +250,17 @@ public class Player : NetworkedBehaviour, IBitWritable
         m_roundShotMeter.StopMeter(result);
     }
 
-    public void TriggerRoundShotMeterServer(ulong netID, float speed, float difficulty, Action<float> cb)
+    [ClientRPC]
+    public void RoundShotMeterResponse(float score)
+    {
+        m_roundShotMeter.Response(score);
+    }
+
+    public void ServerCheckRSM(ulong clientID, ulong netID, float speed, float difficulty, Action<ulong, float> cb)
     {
         if (IsServer)
         {
+            InvokeClientRpcOnClient(TriggerRoundShotMeter, clientID, speed, difficulty);
             StartCoroutine(m_roundShotMeter.ServerTimer(netID, speed, difficulty, cb));
         }
     }

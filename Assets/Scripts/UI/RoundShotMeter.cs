@@ -7,14 +7,15 @@ using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.InputSystem;
+using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(GameObject))]
 public class RoundShotMeter : MonoBehaviour
 {
 
-    private const float MAX_TIME = 1.0f;
-    private const float TARGET_TIME = 0.7f;
+    private const float MAX_TIME = 0.9f;
+    private const float TARGET_TIME = 0.6f;
 
     [Header("Meter Components")]
     [SerializeField]
@@ -45,6 +46,7 @@ public class RoundShotMeter : MonoBehaviour
     // Meter data;
     private float m_speed;
     private float m_difficulty;
+    private float m_score;
 
     /*
      * TODO
@@ -90,8 +92,6 @@ public class RoundShotMeter : MonoBehaviour
                 LeanTween.delayedCall(2.0f, () => StopMeter(MAX_TIME));
             }
 
-            print(m_fill.color);
-            print(m_currentColor);
             m_fill.color = m_currentColor;
 
             m_meterTransform.position = PlayerSettings.Singleton.Current.WorldToScreenPoint(GameManager.GetPlayer().transform.position) - Vector3.left * 64;
@@ -106,10 +106,17 @@ public class RoundShotMeter : MonoBehaviour
         gameObject.SetActive(true);
     }
 
-    public void StopMeter(float result)
+    public void StopMeter(float score)
     {
         //TODO do we need any offset for ping?
+        m_score = score;
         Reset();
+    }
+
+    public void Response(float score)
+    {
+        // Reponse from the server timer -> client
+        StopMeter(score);
     }
 
     public IEnumerator ServerTimer(ulong netID, float speed, float difficulty, Action<ulong, float> callback)
@@ -124,7 +131,7 @@ public class RoundShotMeter : MonoBehaviour
             }
             yield return null;
         }
-        callback.Invoke(netID, Mathf.Abs(MAX_TIME - timer));
+        callback.Invoke(netID, MAX_TIME - timer);
     }
 
     private void Reset()
