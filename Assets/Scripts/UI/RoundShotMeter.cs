@@ -1,5 +1,6 @@
 ﻿using Ballers;
 using MLAPI.Spawning;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -109,6 +110,21 @@ public class RoundShotMeter : MonoBehaviour
     {
         //TODO do we need any offset for ping?
         Reset();
+    }
+
+    public IEnumerator ServerTimer(ulong netID, float speed, float difficulty, Action<ulong, float> callback)
+    {
+        float timer = 0f;
+        while (true)
+        {
+            timer += Time.deltaTime * speed;
+            if (timer > MAX_TIME)
+            {
+                break;
+            }
+            yield return null;
+        }
+        callback.Invoke(netID, Mathf.Abs(MAX_TIME - timer));
     }
 
     private void Reset()

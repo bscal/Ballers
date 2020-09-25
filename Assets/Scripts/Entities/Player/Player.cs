@@ -250,6 +250,14 @@ public class Player : NetworkedBehaviour, IBitWritable
         m_roundShotMeter.StopMeter(result);
     }
 
+    public void TriggerRoundShotMeterServer(ulong netID, float speed, float difficulty, Action<float> cb)
+    {
+        if (IsServer)
+        {
+            StartCoroutine(m_roundShotMeter.ServerTimer(netID, speed, difficulty, cb));
+        }
+    }
+
     public float Dist(Vector3 other)
     {
         return Vector3.Distance(transform.position, other);
