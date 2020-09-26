@@ -66,7 +66,7 @@ public class DebugController : MonoBehaviour
         PrintConsole("Testing This 1!", LogType.INFO);
         PrintConsole("Test That 2.", LogType.WARNING);
         PrintConsole("Test These 3?", LogType.ERROR);
-        PrintConsoleValues("TestValues", new object[]{ 1, 5.5, false, null }, LogType.INFO);
+        PrintConsoleValues("TestValues", new object[] { 1, 5.5, false, null }, LogType.INFO);
 
         var TEST_CMD = new DebugCommand("test", "testing", "test - testing", args => Debug.Log("test " + args[0]));
         commandList.Add(TEST_CMD);
@@ -85,7 +85,7 @@ public class DebugController : MonoBehaviour
 
         Rect viewport = new Rect(0, 0, Screen.width - 30, LINE_SIZE * BUFFER_SIZE);
 
-        m_scroll = GUI.BeginScrollView(new Rect(0, y + VIEW_BORDER_SIZE, Screen.width, VIEW_HEIGHT - VIEW_BORDER_SIZE), m_scroll, viewport);
+        m_scroll = GUI.BeginScrollView(new Rect(0, y + VIEW_BORDER_SIZE, Screen.width, LINE_SIZE * VIEW_LENGTH - VIEW_BORDER_SIZE), m_scroll, viewport);
         int i = 0;
         foreach (ConsoleText line in m_buffer)
         {
@@ -98,7 +98,6 @@ public class DebugController : MonoBehaviour
             else style = m_textStyle;
             GUI.Label(labelRect, line.text, style);
             i++;
-            if (i >= VIEW_LENGTH) return;
         }
 
         GUI.EndScrollView();
@@ -108,9 +107,8 @@ public class DebugController : MonoBehaviour
         GUI.Box(new Rect(0, y, Screen.width, LINE_SIZE * 2), "");
 
         m_input = GUI.TextField(new Rect(VIEW_BORDER_SIZE, y + LINE_SIZE / 2, Screen.width - LINE_SIZE, LINE_SIZE), m_input, m_textStyle);
-        
-        y += LINE_SIZE + LINE_SIZE / 2;
 
+        y += LINE_SIZE + LINE_SIZE / 2;
         if (!string.IsNullOrEmpty(m_input))
         {
             m_hintScroll = GUI.BeginScrollView(
@@ -210,6 +208,7 @@ public class DebugController : MonoBehaviour
             (type == LogType.NONE) ? "" : "[" + type.ToString() + "]",
             text);
     }
+
 }
 
 public enum LogType
