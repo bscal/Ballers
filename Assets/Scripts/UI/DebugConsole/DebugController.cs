@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -65,6 +66,7 @@ public class DebugController : MonoBehaviour
         PrintConsole("Testing This 1!", LogType.INFO);
         PrintConsole("Test That 2.", LogType.WARNING);
         PrintConsole("Test These 3?", LogType.ERROR);
+        PrintConsoleValues("TestValues", new object[]{ 1, 5.5, false, null }, LogType.INFO);
 
         var TEST_CMD = new DebugCommand("test", "testing", "test - testing", args => Debug.Log("test " + args[0]));
         commandList.Add(TEST_CMD);
@@ -175,6 +177,25 @@ public class DebugController : MonoBehaviour
     {
         ConsoleText cText = new ConsoleText(FormatLog(text, type, true), type);
         MLAPI.Logging.NetworkLog.LogInfoServer(cText.text);
+
+        if (m_buffer.Count >= BUFFER_SIZE)
+            m_buffer.Dequeue();
+        m_buffer.Enqueue(cText);
+    }
+
+    public void PrintConsoleValues(string text, object[] values, LogType type)
+    {
+        StringBuilder sb = new StringBuilder(text);
+        sb.Append(": ");
+        for (int i = 0; i < values.Length; i++)
+        {
+            if (values[i] == null)
+                sb.Append("NULL");
+            else
+                sb.Append(values[i].GetType().Name + " : " + values[i]);
+            if (i != values.Length - 1) sb.Append(" | ");
+        }
+        ConsoleText cText = new ConsoleText(FormatLog(sb.ToString(), type, false), type);
 
         if (m_buffer.Count >= BUFFER_SIZE)
             m_buffer.Dequeue();
