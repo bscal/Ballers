@@ -174,4 +174,15 @@ public class NetworkEvents : NetworkedBehaviour
         }
     }
 
+    public void ServerKeyInput(ulong clientID, uint keyID, int type)
+    {
+        InvokeServerRpc(ServerKeyInputRPC, clientID, keyID, type);
+    }
+
+    [ServerRPC]
+    private void ServerKeyInputRPC(ulong clientID, uint keyID, int type)
+    {
+        DebugController.Singleton.PrintConsoleValues("ServerKeyInput", new object[] { clientID, keyID, type }, LogType.INFO);
+    }
+
 }

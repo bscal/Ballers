@@ -31,6 +31,12 @@ public class PlayerControls : NetworkedBehaviour
         actions.Keyboard.Pass_4.started += TryPassBall;
         actions.Keyboard.Pass_5.started += TryPassBall;
         actions.Keyboard.Callforball.started += CallForBall;
+
+        actions.Keyboard.Pass_1.canceled += PassReleased;
+        actions.Keyboard.Pass_2.canceled += PassReleased;
+        actions.Keyboard.Pass_3.canceled += PassReleased;
+        actions.Keyboard.Pass_4.canceled += PassReleased;
+        actions.Keyboard.Pass_5.canceled += PassReleased;
     }
 
     private void OnDisable()
@@ -138,9 +144,12 @@ public class PlayerControls : NetworkedBehaviour
             {
                 type = PassType.LOB;
             }
-            print(type);
             GameManager.GetBallHandling().TryPassBall(m_player, passCode, type);
         }
+    }
+
+    private void PassReleased(InputAction.CallbackContext context)
+    {
     }
 
     IEnumerator ShotInput()
