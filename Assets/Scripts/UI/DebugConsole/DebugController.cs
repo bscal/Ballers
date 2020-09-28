@@ -162,7 +162,7 @@ public class DebugController : MonoBehaviour
         return res;
     }
 
-    public void PrintConsole(string text, LogType type)
+    public void PrintConsole(string text, LogType type = LogType.INFO)
     {
         ConsoleText cText = new ConsoleText(FormatLog(text, type, false), type);
 
@@ -171,7 +171,7 @@ public class DebugController : MonoBehaviour
         m_buffer.Enqueue(cText);
     }
 
-    public void PrintConsoleServer(string text, LogType type)
+    public void PrintConsoleServer(string text, LogType type = LogType.INFO)
     {
         ConsoleText cText = new ConsoleText(FormatLog(text, type, true), type);
         MLAPI.Logging.NetworkLog.LogInfoServer(cText.text);
@@ -181,7 +181,7 @@ public class DebugController : MonoBehaviour
         m_buffer.Enqueue(cText);
     }
 
-    public void PrintConsoleValues(string text, object[] values, LogType type)
+    public void PrintConsoleValues(string text, object[] values, LogType type = LogType.INFO)
     {
         StringBuilder sb = new StringBuilder(text);
         sb.Append(": ");
