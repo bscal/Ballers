@@ -33,6 +33,8 @@ public class DebugController : MonoBehaviour
 
     public List<DebugCommandBase> commandList = new List<DebugCommandBase>();
 
+    public Font font;
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -49,24 +51,30 @@ public class DebugController : MonoBehaviour
         };
 
         m_textStyle.fontSize = 14;
+        m_textStyle.font = font;
         m_textStyle.normal.textColor = Color.white;
 
         m_textIStyle.fontSize = 14;
+        m_textIStyle.font = font;
         m_textIStyle.normal.textColor = new Color(.55f, .8f, 1);
 
         m_textWStyle.fontSize = 14;
+        m_textWStyle.font = font;
         m_textWStyle.normal.textColor = new Color(1, .55f, .2f);
 
         m_textEStyle.fontSize = 14;
+        m_textEStyle.font = font;
         m_textEStyle.normal.textColor = new Color(1, .3f, .3f);
 
         m_hintStyle.fontSize = 14;
+        m_hintStyle.font = font;
         m_hintStyle.normal.textColor = new Color(.6f, .6f, .6f);
 
         PrintConsole("Testing This 1!", LogType.INFO);
         PrintConsole("Test That 2.", LogType.WARNING);
         PrintConsole("Test These 3?", LogType.ERROR);
-        PrintConsoleValues("TestValues", new object[] { 1, 5.5, false, null }, LogType.INFO);
+        PrintConsoleTable("", new string[] { "test", "this", "table", "LONG_WORD_STRING" },
+            new object[] { 1, true, 50.50, "this"}, LogType.WARNING);
 
         var TEST_CMD = new DebugCommand("test", "testing", "test - testing", args => Debug.Log("test " + args[0]));
         commandList.Add(TEST_CMD);
@@ -165,20 +173,14 @@ public class DebugController : MonoBehaviour
     public void PrintConsole(string text, LogType type = LogType.INFO)
     {
         ConsoleText cText = new ConsoleText(FormatLog(text, type, false), type);
-
-        if (m_buffer.Count >= BUFFER_SIZE)
-            m_buffer.Dequeue();
-        m_buffer.Enqueue(cText);
+        AddText(cText);
     }
 
     public void PrintConsoleServer(string text, LogType type = LogType.INFO)
     {
         ConsoleText cText = new ConsoleText(FormatLog(text, type, true), type);
         MLAPI.Logging.NetworkLog.LogInfoServer(cText.text);
-
-        if (m_buffer.Count >= BUFFER_SIZE)
-            m_buffer.Dequeue();
-        m_buffer.Enqueue(cText);
+        AddText(cText);
     }
 
     public void PrintConsoleValues(string text, object[] values, LogType type = LogType.INFO)
@@ -194,10 +196,83 @@ public class DebugController : MonoBehaviour
             if (i != values.Length - 1) sb.Append(" | ");
         }
         ConsoleText cText = new ConsoleText(FormatLog(sb.ToString(), type, false), type);
+        AddText(cText);
+    }
 
+    public void PrintConsoleTable(string text, string[] keys, object[] values, LogType type = LogType.INFO)
+    {
+        const int MAX_LENGTH = 32;
+
+        ConsoleText cText = new ConsoleText(GetRepeatedStr('-', MAX_LENGTH), type);
+        AddText(cText);
+
+        for (int i = 0; i < values.Length; i++)
+        {
+            string key;
+            object val;
+
+            if (i >= keys.Length || string.IsNullOrEmpty(keys[i]))
+                key = "";
+            else
+                key = keys[i];
+
+            if (values[i] == null)
+                val = "NULL";
+            else
+                val = values[i];
+
+            ConsoleText ct = new ConsoleText(FormatLogTable(key, val.ToString(), "*", MAX_LENGTH), type);
+            AddText(ct);
+        }
+        AddText(cText);
+    }
+
+    private void AddText(ConsoleText cText)
+    {
         if (m_buffer.Count >= BUFFER_SIZE)
             m_buffer.Dequeue();
         m_buffer.Enqueue(cText);
+    }
+
+    private string FormatLogTable(string key, string val, string border, int length)
+    {
+        int halfLength = length / 2;
+        StringBuilder sb = new StringBuilder();
+
+        sb.Append('|');
+        sb.Append(" ");
+        for (int i = 0; i < halfLength - 4; i++)
+        {
+            if (i < key.Length)
+                sb.Append(key[i]);
+            else
+                sb.Append(" ");
+        }
+        sb.Append(" ");
+        sb.Append('|');
+        sb.Append(" ");
+        for (int i = 0; i < halfLength - 4; i++)
+        {
+            if (i < val.Length)
+                sb.Append(val[i]);
+            else
+                sb.Append(" ");
+        }
+        sb.Append(" ");
+        sb.Append(" ");
+        sb.Append('|');
+
+        return sb.ToString();
+    }
+
+    private string GetRepeatedStr(char chr, int length)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < length; i++)
+        {
+            sb.Append(chr);
+        }
+        return sb.ToString();
     }
 
     private string FormatLog(string text, LogType type, bool isServer)
@@ -208,7 +283,6 @@ public class DebugController : MonoBehaviour
             (type == LogType.NONE) ? "" : "[" + type.ToString() + "]",
             text);
     }
-
 }
 
 public enum LogType
