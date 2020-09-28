@@ -216,12 +216,6 @@ public class BallHandling : NetworkedBehaviour
     }
 
     [ServerRPC]
-    public void OnRelease(ulong pid)
-    {
-        m_shotManager.OnRelease(pid);
-    }
-
-    [ServerRPC]
     public void OnAnimationRelease()
     {
     }

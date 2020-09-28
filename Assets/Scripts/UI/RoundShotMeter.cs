@@ -1,4 +1,5 @@
 ﻿using Ballers;
+using MLAPI;
 using MLAPI.Spawning;
 using System;
 using System.Collections;
@@ -48,20 +49,6 @@ public class RoundShotMeter : MonoBehaviour
     private float m_difficulty;
     private float m_score;
 
-    /*
-     * TODO
-     * A smaller faster round shotmeter.
-     * I think I will use color to tell what type to use
-     * and a static size.
-     * 
-     * red -> green -> red
-     * 
-     * will be easier then shotmeter but overall faster
-     * some way to gradually from colors
-     * 
-     * ? should we think about some way to handle ping from player to server?
-     */
-
 
     void Start()
     {
@@ -76,6 +63,7 @@ public class RoundShotMeter : MonoBehaviour
         if (m_isActive)
         {
             m_timer += Time.deltaTime * m_speed;
+            //NetworkingManager.Singleton.NetworkTime;
 
             if (m_timer < TARGET_TIME)
             {
@@ -115,7 +103,7 @@ public class RoundShotMeter : MonoBehaviour
 
     public void Response(float score)
     {
-        // Reponse from the server timer -> client
+        // Response from the server timer -> client
         StopMeter(score);
     }
 
@@ -132,6 +120,11 @@ public class RoundShotMeter : MonoBehaviour
             yield return null;
         }
         callback.Invoke(netID, MAX_TIME - timer);
+    }
+
+    public float GetTime()
+    {
+        return m_timer;
     }
 
     private void Reset()

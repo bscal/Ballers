@@ -24,6 +24,7 @@ public class ShotManager : MonoBehaviour
     private ShotData m_shotData;
     private ShotBarData m_shotBarData;
     private float m_releaseDist;
+    private float m_rttOffset;
 
     private ShotController m_shotController;
 
@@ -42,7 +43,7 @@ public class ShotManager : MonoBehaviour
     /***
      * Starting a shot starts here.
      */
-    public void OnShoot(ulong netID, Player p)
+    public void OnShoot(ulong netID, Player p, float rttDelay)
     {
         if (!NetworkingManager.Singleton.IsServer) return;
 
@@ -85,12 +86,13 @@ public class ShotManager : MonoBehaviour
         GameManager.GetBallHandling().OnShoot(netID, m_shotData, m_shotBarData);
         p.InvokeClientRpcOnClient(p.ClientShootBall, p.OwnerClientId, netID, m_shotData, m_shotBarData);
         //p.InvokeClientRpcOnEveryone(p.ClientShootBall, m_shotData, m_shotBarData);
-        StartCoroutine(ShotQuality(p));
+        StartCoroutine(ShotQuality(p, rttDelay));
     }
 
-    public void OnRelease(ulong netId)
+    public void OnRelease(ulong netId, float rttOffset)
     {
         m_isShot = false;
+        m_rttOffset = rttOffset;
     }
 
     public ShotData GetShotData() => m_shotData;
@@ -108,17 +110,18 @@ public class ShotManager : MonoBehaviour
     /// Server handling of shot quality<br></br>
     /// Used delta time and speed increment to determine where player's target should be
     /// </summary>
-    private IEnumerator ShotQuality(Player p)
+    private IEnumerator ShotQuality(Player p, float rttDelay)
     {
         yield return null;
-        float timer = 0.0f;
+        // rtt delay is how much input lag was on the StartShot
+        float timer = rttDelay;
         while (m_isShot)
         {
             timer += m_shotBarData.speed * Time.deltaTime;
             yield return null;
         }
-
-        m_releaseDist = Mathf.Abs(m_shotBarData.FinalTargetHeight - timer);
+        // rtt offset is how much the input lag was on the ReleaseShot
+        m_releaseDist = Mathf.Abs(m_shotBarData.FinalTargetHeight - timer - m_rttOffset);
         int grade = m_shotBarData.GetShotGrade(m_releaseDist);
         print("Server: " + m_shotBarData.FinalTargetHeight + ", " + timer + ", dist = " + m_releaseDist + ", grade = " + grade);
 

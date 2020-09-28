@@ -1,14 +1,14 @@
-﻿using System.Collections;
+﻿using System;
+using System.IO;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using MLAPI;
 using MLAPI.Messaging;
-using MLAPI.NetworkedVar.Collections;
 using MLAPI.NetworkedVar;
+using MLAPI.NetworkedVar.Collections;
 using MLAPI.Prototyping;
-using System;
 using MLAPI.Serialization;
-using System.IO;
 using MLAPI.Serialization.Pooled;
 using MLAPI.Spawning;
 using Ballers;
@@ -172,19 +172,30 @@ public class Player : NetworkedBehaviour, IBitWritable
         Shoot?.Invoke(this);
     }
 
+    [ServerRPC]
+    public void ServerShootBall(ulong netID)
+    {
+        ulong clientID = GameManager.GetPlayerByNetworkID(netID).OwnerClientId;
+        ulong rtt = NetworkingManager.Singleton.NetworkConfig.NetworkTransport.GetCurrentRtt(clientID);
+        m_shotManager.OnShoot(netID, this, (rtt / 1000 / 2));
+    }
+
     public void ReleaseBall()
     {
         if (!isShooting) return;
         isShooting = false;
-        GameManager.GetBallHandling().InvokeServerRpc(GameManager.GetBallHandling().OnRelease, NetworkId);
+        InvokeServerRpc(OnRelease, NetworkId);
         Release?.Invoke(this);
     }
 
     [ServerRPC]
-    public void ServerShootBall(ulong netID)
+    public void OnRelease(ulong netID)
     {
-        GameManager.Singleton.GetShotManager().OnShoot(netID, this);
+        ulong clientID = GameManager.GetPlayerByNetworkID(netID).OwnerClientId;
+        ulong rtt = NetworkingManager.Singleton.NetworkConfig.NetworkTransport.GetCurrentRtt(clientID);
+        m_shotManager.OnRelease(netID, (rtt / 1000 / 2));
     }
+
 
     [ClientRPC]
     public void ClientShootBall(ulong netID, ShotData shotData, ShotBarData shotBarData)
@@ -244,16 +255,18 @@ public class Player : NetworkedBehaviour, IBitWritable
         m_roundShotMeter.StartMeter(speed, difficulty);
     }
 
-    [ClientRPC]
-    public void StopRoundShotMeter(float result)
-    {
-        m_roundShotMeter.StopMeter(result);
-    }
 
     [ClientRPC]
-    public void RoundShotMeterResponse(float score)
+    public void ResponseRoundShotMeter(float score)
     {
         m_roundShotMeter.Response(score);
+    }
+
+    [ServerRPC]
+    public void ReleaseRoundShotMeter(ulong clientID, float result)
+    {
+        ulong rtt = NetworkingManager.Singleton.NetworkConfig.NetworkTransport.GetCurrentRtt(clientID);
+        m_roundShotMeter.StopMeter(result - (rtt / 1000 /2));
     }
 
     public void ServerCheckRSM(ulong clientID, ulong netID, float speed, float difficulty, Action<ulong, float> cb)
@@ -263,6 +276,11 @@ public class Player : NetworkedBehaviour, IBitWritable
             InvokeClientRpcOnClient(TriggerRoundShotMeter, clientID, speed, difficulty);
             StartCoroutine(m_roundShotMeter.ServerTimer(netID, speed, difficulty, cb));
         }
+    }
+
+    public void ReleasePass()
+    {
+        InvokeServerRpc(ReleaseRoundShotMeter, OwnerClientId, m_roundShotMeter.GetTime());
     }
 
     public float Dist(Vector3 other)
@@ -357,10 +375,10 @@ public class Player : NetworkedBehaviour, IBitWritable
         float res = dist + mod;
         if (other.isBlocking) res += .5f * other.CData.stats.blocking;
         if (other.isContesting) res += .25f * other.CData.stats.blocking;
-        if (WithinFOV(GetHeadingToTarget(transform, other.transform), 45f)) res += .5f;
-        if (WithinFOV(GetHeadingToTarget(transform, other.transform), 20f)) res += .5f;
+        if (WithinFOV(GetForwardAngle(transform, other.transform), 45f)) res += .5f;
+        if (WithinFOV(GetForwardAngle(transform, other.transform), 20f)) res += .5f;
         DebugController.Singleton.PrintConsoleValues("Contest", new object[] {
-            dist, mod, other.isBlocking, other.isContesting, GetHeadingToTarget(transform, other.transform), WithinFOV(GetHeadingToTarget(transform, other.transform), 5f)
+            dist, mod, other.isBlocking, other.isContesting, GetForwardAngle(transform, other.transform), WithinFOV(GetForwardAngle(transform, other.transform), 5f)
         }, LogType.WARNING);
         return res;
     }
@@ -369,18 +387,18 @@ public class Player : NetworkedBehaviour, IBitWritable
     /// Returns the angle in degrees between source.foward and target.foward.
     /// 180 degrees is front, 90 degrees is side, 0 degrees is behind.
     /// </summary>
-    public static float GetHeadingToTarget(Transform source, Transform target)
+    public static float GetForwardAngle(Transform source, Transform target)
     {
         return Vector3.Angle(target.forward - source.forward, source.forward);
     }
 
     /// <summary>
     /// Returns true if value is greater then 180 - degrees.
-    /// Value and degrees should be between 0 and 180.
+    /// Angle and rangeOfDegrees should be between 0 and 180.
     /// </summary>
-    public static bool WithinFOV(float value, float degrees)
+    public static bool WithinFOV(float angle, float rangeOfDegrees)
     {
-        return Mathf.Clamp(value, 0f, 180f) > 180f - Mathf.Clamp(degrees, 0f, 180f);
+        return Mathf.Clamp(angle, 0f, 180f) > 180f - Mathf.Clamp(rangeOfDegrees, 0f, 180f);
     }
 
     /// <summary>
