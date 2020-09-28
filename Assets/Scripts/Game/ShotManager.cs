@@ -63,7 +63,7 @@ public class ShotManager : MonoBehaviour
         m_shotData.type = m_type;
         m_shotData.leftHanded = p.isBallInLeftHand;
         m_shotData.bankshot = m_bankShot;
-        m_shotData.contest = 0.0f;
+        m_shotData.contest = p.GetContestRating();
         m_shotData.offSkill = 50.0f;
         m_shotData.defSkill = 50.0f;
         m_shotData.passRating = 50.0f;

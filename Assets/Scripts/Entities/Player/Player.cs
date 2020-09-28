@@ -331,6 +331,57 @@ public class Player : NetworkedBehaviour, IBitWritable
         return TeamID == other.TeamID;
     }
 
+    public float GetContestRating()
+    {
+        float result = 0;
+        for (int i = 0; i < Match.MatchSettings.TeamSize; i++)
+        {
+            Player otherPlayer = GameManager.GetPlayerBySlot(OtherTeam, i);
+
+            if (m_outerCollider.bounds.Contains(otherPlayer.transform.position))
+            {
+                result += GetPlayerContestRating(otherPlayer,
+                    Vector3.Distance(otherPlayer.transform.position, transform.position), 0);
+            }
+            if (m_innerCollider.bounds.Contains(otherPlayer.transform.position))
+            {
+                result += GetPlayerContestRating(otherPlayer,
+                    Vector3.Distance(otherPlayer.transform.position, transform.position), 1);
+            }
+        }
+        return result;
+    }
+
+    private float GetPlayerContestRating(Player other, float dist, float mod)
+    {
+        float res = dist + mod;
+        if (other.isBlocking) res += .5f * other.CData.stats.blocking;
+        if (other.isContesting) res += .25f * other.CData.stats.blocking;
+        if (WithinFOV(GetHeadingToTarget(transform, other.transform), 45f)) res += .5f;
+        if (WithinFOV(GetHeadingToTarget(transform, other.transform), 20f)) res += .5f;
+        DebugController.Singleton.PrintConsoleValues("Contest", new object[] {
+            dist, mod, other.isBlocking, other.isContesting, GetHeadingToTarget(transform, other.transform), WithinFOV(GetHeadingToTarget(transform, other.transform), 5f)
+        }, LogType.WARNING);
+        return res;
+    }
+
+    /// <summary>
+    /// Returns the angle in degrees between source.foward and target.foward.
+    /// 180 degrees is front, 90 degrees is side, 0 degrees is behind.
+    /// </summary>
+    public static float GetHeadingToTarget(Transform source, Transform target)
+    {
+        return Vector3.Angle(target.forward - source.forward, source.forward);
+    }
+
+    /// <summary>
+    /// Returns true if value is greater then 180 - degrees.
+    /// Value and degrees should be between 0 and 180.
+    /// </summary>
+    public static bool WithinFOV(float value, float degrees)
+    {
+        return Mathf.Clamp(value, 0f, 180f) > 180f - Mathf.Clamp(degrees, 0f, 180f);
+    }
 
     /// <summary>
     /// Flips a TeamID to other team

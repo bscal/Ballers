@@ -51,7 +51,7 @@ public class AIPlayer : NetworkedBehaviour
             }
             else if (m_player.IsOnDefense() && m_player.Assignment != null)
             {
-                transform.position = m_player.Assignment.gameObject.transform.position + (m_player.Assignment.gameObject.transform.forward * 6);
+                transform.position = m_player.Assignment.gameObject.transform.position + (m_player.Assignment.gameObject.transform.forward * 6) + (m_player.Assignment.gameObject.transform.right * 2); ;
                 transform.LookAt(m_player.Assignment.gameObject.transform);
             }
         }

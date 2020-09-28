@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2291151978259420308}
   - component: {fileID: 5052752517838136703}
   m_Layer: 0
-  m_Name: Small
+  m_Name: Inner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -80,7 +80,7 @@ SpriteRenderer:
   m_Size: {x: 0.36, y: 0.36}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &3624591735662949011
@@ -94,7 +94,7 @@ GameObject:
   - component: {fileID: 9039766153794632096}
   - component: {fileID: 5334113089901180257}
   m_Layer: 0
-  m_Name: Large
+  m_Name: Outer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -163,7 +163,7 @@ SpriteRenderer:
   m_Size: {x: 0.36, y: 0.36}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &4265851905338304955
@@ -175,6 +175,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4265851905338304959}
+  - component: {fileID: 8530364777022413025}
   m_Layer: 0
   m_Name: ContestTracker
   m_TagString: Untagged
@@ -198,6 +199,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8530364777022413025
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4265851905338304955}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4a0a0a0c8aee4e49beb6cc25a5c5bf3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_player: {fileID: 0}
 --- !u!1 &7096096943089188984
 GameObject:
   m_ObjectHideFlags: 0
@@ -209,7 +223,7 @@ GameObject:
   - component: {fileID: 615120178539959852}
   - component: {fileID: 3681901408698120023}
   m_Layer: 0
-  m_Name: ContestCollider
+  m_Name: Collider Inner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -253,7 +267,7 @@ GameObject:
   - component: {fileID: 7271127660225199219}
   - component: {fileID: 6724008778303671311}
   m_Layer: 0
-  m_Name: ContestCollider
+  m_Name: Collider Outer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
