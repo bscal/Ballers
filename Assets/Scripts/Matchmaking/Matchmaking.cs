@@ -109,7 +109,7 @@ public class Matchmaking : MonoBehaviour
         Match.InitMatch();
 
         Match.NetworkLobby.SetSteamIDToConnect(steamid);
-        Match.MatchSettings = new MatchSettings(BallersGamemode.SP_BOTS, 5, 60.0f * 6.0f, 4);
+        Match.MatchSettings = new MatchSettings(BallersGamemode.SP_BOTS, 5, 4, 60.0 * 12.0, 24.0);
         Match.PlayersNeeded = int.Parse(SteamMatchmaking.GetLobbyData(m_lobbyID, "NeededPlayers")); ;
         Match.MatchID = 1;
 

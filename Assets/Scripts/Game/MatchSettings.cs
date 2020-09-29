@@ -17,19 +17,21 @@ public class MatchSettings : IBitWritable
 
     public BallersGamemode GameMode { get; set; }
     public int TeamSize { get; set; }
-    public float QuarterLength { get; set; }
     public int QuartersCount { get; set; }
+    public double QuarterLength { get; set; }
+    public double ShotClockLength { get; set; } 
     public int NumOfAIs { get; set; }
     public AIDifficulty Difficulty { get; set; }
 
 
     public MatchSettings() { }
-    public MatchSettings(BallersGamemode gamemode, int teamSize, float quarterL, int quarterC)
+    public MatchSettings(BallersGamemode gamemode, int teamSize, int quarterC, double quarterL, double shotClockL)
     {
-        this.GameMode = gamemode;
-        this.TeamSize = teamSize;
-        this.QuarterLength = quarterL;
-        this.QuartersCount = quarterC;
+        GameMode = gamemode;
+        TeamSize = teamSize;
+        QuartersCount = quarterC;
+        QuarterLength = quarterL;
+        ShotClockLength = shotClockL;
     }
 
     public void Read(Stream stream)
@@ -38,8 +40,9 @@ public class MatchSettings : IBitWritable
         {
             GameMode = (BallersGamemode)reader.ReadByte();
             TeamSize = reader.ReadByte();
-            QuarterLength = reader.ReadByte();
             QuartersCount = reader.ReadByte();
+            QuarterLength = reader.ReadDoublePacked();
+            ShotClockLength = reader.ReadDoublePacked();
         }
     }
 
@@ -49,8 +52,9 @@ public class MatchSettings : IBitWritable
         {
             writer.WriteByte((byte)GameMode);
             writer.WriteByte((byte)TeamSize);
-            writer.WriteByte((byte)QuarterLength);
             writer.WriteByte((byte)QuartersCount);
+            writer.WriteDoublePacked(QuarterLength);
+            writer.WriteDoublePacked(ShotClockLength);
         }
     }
 }

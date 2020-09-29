@@ -9,24 +9,24 @@ public class BasketballStateManager : NetworkedBehaviour
 
     // Constants
 
-    private const float QUARTER_LENGTH          = 60.0f * 6.0f;
+    // FIX currently uses Match.MatchSettings for times
+    private const float QUARTER_LENGTH          = 60.0f * 12.0f;
     private const float OVERTIME_LENGTH         = QUARTER_LENGTH / 2.0f;
     private const float SHOTCLOCK_LENGTH        = 24.0f;
 
     // Public Actions
 
-    public event Action OnMatchStarted;
-    public event Action OnQuarterEnd;
-    public event Action OnHalfEnd;
-    public event Action OnMatchEnd;
+    public event Action<int, bool> QuarterEnd;
+    public event Action HalfEnd;
+    public event Action ShotClockViolation;
 
     // Public
 
-    private NetworkedVarFloat m_inGameTime = new NetworkedVarFloat(NetworkConstants.GAME_STATE_CHANNEL, Match.MatchSettings.QuarterLength);
-    public float InGameTime { get { return m_inGameTime.Value; } set { m_inGameTime.Value = value; } }
+    private NetworkedVarDouble m_inGameTime = new NetworkedVarDouble(NetworkConstants.GAME_STATE_CHANNEL, Match.MatchSettings.QuarterLength);
+    public double InGameTime { get { return m_inGameTime.Value; } set { m_inGameTime.Value = value; } }
 
-    private NetworkedVarFloat m_shotClock = new NetworkedVarFloat(NetworkConstants.GAME_STATE_CHANNEL, SHOTCLOCK_LENGTH);
-    public float ShotClock { get { return m_shotClock.Value; } set { m_shotClock.Value = (byte)value; } }
+    private NetworkedVarDouble m_shotClock = new NetworkedVarDouble(NetworkConstants.GAME_STATE_CHANNEL, SHOTCLOCK_LENGTH);
+    public double ShotClock { get { return m_shotClock.Value; } set { m_shotClock.Value = value; } }
 
     public NetworkedVarByte m_state = new NetworkedVarByte(NetworkConstants.GAME_STATE_CHANNEL, (byte)EMatchState.PREGAME);
     public EMatchState MatchStateValue { get { return (EMatchState)Enum.ToObject(typeof(EMatchState), m_state.Value); } set { m_state.Value = (byte)value; } }
@@ -54,7 +54,7 @@ public class BasketballStateManager : NetworkedBehaviour
     private byte m_OvertimeCount = 0;
     private bool m_shotclockOff = false;
 
-    private void Start()
+    private void Awake()
     {
         m_UIHomeName.text = "Home";
         m_UIAwayName.text = "Away";
@@ -62,11 +62,6 @@ public class BasketballStateManager : NetworkedBehaviour
 
     public override void NetworkStart()
     {
-        //m_inGameTime = new NetworkedVarFloat(STATE_SETTINGS, Match.MatchSettings.QuarterLength);
-        //m_shotClock = new NetworkedVarFloat(STATE_SETTINGS, SHOTCLOCK_LENGTH);
-        //m_state = new NetworkedVarByte(STATE_SETTINGS, (byte)EMatchState.PREGAME);
-        //m_quarter = new NetworkedVarByte(STATE_SETTINGS, 1);
-
         if (IsServer)
         {
             GameManager.Singleton.GameStarted += OnGameStarted;
@@ -97,7 +92,7 @@ public class BasketballStateManager : NetworkedBehaviour
 
         if (!m_shotclockOff && ShotClock < 0.00f)
         {
-            //ShotClock violation
+            ShotClockViolation?.Invoke();
         }
         else
         {
@@ -134,11 +129,6 @@ public class BasketballStateManager : NetworkedBehaviour
         MatchStateValue = EMatchState.INPROGRESS;
     }
 
-    private void OnPlayerLoaded(ulong pid)
-    {
-
-    }
-
     private void EndQuarter()
     {
         Quarter++;
@@ -160,19 +150,18 @@ public class BasketballStateManager : NetworkedBehaviour
                 m_OvertimeCount++;
             }
             // End of regulation
-            OnMatchEnd();
 
         }
         else
         {
             InGameTime = (m_OvertimeCount > 0) ? Mathf.Round(OVERTIME_LENGTH) : Mathf.Round(QUARTER_LENGTH);
-            OnQuarterEnd();
+            QuarterEnd?.Invoke(Quarter, m_OvertimeCount > 0);
         }
     }
 
     private void EndHalf()
     {
-        OnHalfEnd();
+        HalfEnd?.Invoke();
     }
 
     private void UpdateUI()
@@ -180,10 +169,13 @@ public class BasketballStateManager : NetworkedBehaviour
         m_UIHomeScore.text = GameManager.Singleton.TeamHome.TeamData.points.ToString();
         m_UIAwayScore.text = GameManager.Singleton.TeamAway.TeamData.points.ToString();
         m_UIQuarter.text = (m_OvertimeCount > 0) ? "OT" + m_OvertimeCount : Quarter.ToString();
-        m_UIClock.text = string.Format("{0}:{1}", Mathf.Floor(InGameTime / 60), Mathf.RoundToInt(InGameTime % 60));
+        if (InGameTime < 60.0)
+            m_UIClock.text = TimeSpan.FromSeconds(InGameTime).ToString("ss\\:f");
+        else
+            m_UIClock.text = TimeSpan.FromSeconds(InGameTime).ToString("mm\\:ss"); 
         if (m_shotclockOff)
             m_UIShotClock.text = "";
         else
-            m_UIShotClock.text = (ShotClock > 1.0f) ? ShotClock.ToString("F0") : ShotClock.ToString("F1");
+            m_UIShotClock.text = (ShotClock > 1.0) ? ShotClock.ToString("F0") : ShotClock.ToString("F1");
     }
 }
