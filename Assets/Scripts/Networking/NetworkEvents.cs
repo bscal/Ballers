@@ -1,7 +1,9 @@
 ﻿using MLAPI;
 using MLAPI.Messaging;
+using MLAPI.Serialization;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 /**
@@ -14,6 +16,24 @@ public enum NetworkEvent
     GAME_START,
     PLAYER_SHOOT,
     PLAYER_RELEASE
+}
+
+/// <summary>
+/// Does nothing. Just creating the class to test it out a bit.
+/// </summary>
+public abstract class NetworkedEventBase : IBitWritable
+{
+    public readonly int id;
+    public event Action<NetworkedEventBase> Performed;
+
+    protected NetworkedEventBase(int id)
+    {
+        this.id = id;
+    }
+
+    public abstract bool Invoke();
+    public abstract void Read(Stream stream);
+    public abstract void Write(Stream stream);
 }
 
 /**
@@ -37,7 +57,6 @@ public class NetworkEvents : NetworkedBehaviour
     public static NetworkEvents Singleton { get; private set; }
 
     private Dictionary<NetworkEvent, Dictionary<string, Action>> m_eventTable = new Dictionary<NetworkEvent, Dictionary<string, Action>>();
-    //private Dictionary<string, Action> m_eventTable = new Dictionary<string, Action>();
 
     void Awake()
     {
@@ -149,7 +168,7 @@ public class NetworkEvents : NetworkedBehaviour
         }
         foreach (var pair in e)
         {
-            if (pair.Value != null) pair.Value.Invoke();
+            pair.Value?.Invoke();
             print(string.Format("[ NetworkEvent ] Calling Event: {0} from class {1}", eName.ToString(), pair.Key));
         }
     }
@@ -169,7 +188,7 @@ public class NetworkEvents : NetworkedBehaviour
         }
         foreach (var pair in e)
         {
-            if (pair.Value != null) pair.Value.Invoke();
+            pair.Value?.Invoke();
             print(string.Format("[ NetworkEvent ] Calling Event: {0} from class {1}", eName.ToString(), pair.Key));
         }
     }
