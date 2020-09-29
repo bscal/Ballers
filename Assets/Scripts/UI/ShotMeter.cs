@@ -90,9 +90,9 @@ public class ShotMeter : MonoBehaviour
         //StartCoroutine(ShootingTimeout());
     }
 
-    public void OnRelease(Player player)
+    public void OnRelease(float dist)
     {
-        float dist = Mathf.Abs(m_shotBarData.FinalTargetHeight - m_timer);
+        //float dist = Mathf.Abs(m_shotBarData.FinalTargetHeight - m_timer);
         if (dist < m_shotBarData.PerfectLength)
         {
             glow.gameObject.SetActive(true);

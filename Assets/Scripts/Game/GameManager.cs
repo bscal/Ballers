@@ -25,12 +25,13 @@ public class GameManager : NetworkedBehaviour
 
     public event Action Pregame;
     public event Action GameStarted;
-    public event Action GameBegin;
+    public event Action GameTipoff;
     public event Action GameEnd;
     public event Action<Player> PlayerLoaded;
     public event Action<Player> LocalPlayerLoaded;
     public event Action<ulong> PlayerConnected;
     public event Action<ulong> AllPlayersConnected;
+    public event Action<ulong> PlayerDisconnected;
 
     private static BallHandling m_ballhandling;
     private readonly static NetworkedList<Player> m_players = new NetworkedList<Player>(NetworkConstants.PLAYER_CHANNEL);
@@ -92,7 +93,7 @@ public class GameManager : NetworkedBehaviour
         NetworkingManager.Singleton.OnClientConnectedCallback += OnConnected;
         NetworkingManager.Singleton.OnClientDisconnectCallback += OnDisconnected;
 
-        GameState.OnHalfEnd += EndHalf;
+        GameState.HalfEnd += OnHalfEnd;
 
         //m_players.ForEach((p) => { p.StartLoad(); });
     }
@@ -304,7 +305,7 @@ public class GameManager : NetworkedBehaviour
         print("turnover");
     }
 
-    public void EndHalf()
+    public void OnHalfEnd()
     {
         Basket homeb = baskets[0];
         Basket awayb = baskets[1];

@@ -18,8 +18,10 @@ public class Player : NetworkedBehaviour, IBitWritable
 
     // Local Player Events
     //  These are not synced over the network and only used by local client.
-    public event Action<Player> Shoot;
-    public event Action<Player> Release;
+    public event Action<ShotData, ShotBarData> Shoot;
+    public event Action<float> Release;
+    public event Action<float, float> StartRoundMeter;
+    public event Action<float> StopRoundMeter;
 
     [Header("User Ids")]
     public int id;
@@ -169,7 +171,6 @@ public class Player : NetworkedBehaviour, IBitWritable
     public void ShootBall()
     {
         InvokeServerRpc(ServerShootBall, NetworkId);
-        Shoot?.Invoke(this);
     }
 
     [ServerRPC]
@@ -185,7 +186,6 @@ public class Player : NetworkedBehaviour, IBitWritable
         if (!isShooting) return;
         isShooting = false;
         InvokeServerRpc(OnRelease, NetworkId);
-        Release?.Invoke(this);
     }
 
     [ServerRPC]
@@ -208,11 +208,13 @@ public class Player : NetworkedBehaviour, IBitWritable
         if (!p.isAI)
             m_shotmeter.OnShoot(p, shotData, shotBarData);
         p.PlayAnimationForType(shotData.type, shotData.leftHanded);
+        Shoot?.Invoke(shotData, shotBarData);
     }
 
     [ClientRPC]
     public void ClientReleaseBall(float distance)
     {
+        Release?.Invoke(distance);
     }
 
     /// <summary>
@@ -253,6 +255,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     public void TriggerRoundShotMeter(float speed, float difficulty)
     {
         m_roundShotMeter.StartMeter(speed, difficulty);
+        StartRoundMeter?.Invoke(speed, difficulty);
     }
 
 
@@ -260,6 +263,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     public void ResponseRoundShotMeter(float score)
     {
         m_roundShotMeter.Response(score);
+        StopRoundMeter?.Invoke(score);
     }
 
     [ServerRPC]

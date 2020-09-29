@@ -42,10 +42,12 @@ public class BallHandling : NetworkedBehaviour
 
     // =================================== Events ===================================
 
-    public event Action<Player> ShotMade;
-    public event Action<Player> ShotMissed;
+    public event Action<ulong> ShotMade;
+    public event Action<ulong> ShotMissed;
     public event Action<BallState> BallStateChange;
-    public event Action<int> BallPossesionChange;
+    public event Action<ulong, ulong> BallPossesionChange;
+    public event Action<ulong, ulong, float, PassType> PassBall;
+    public event Action<ulong, ulong, float, PassType> CatchBall;
 
     // =================================== Networking Variables ===================================
 
@@ -666,7 +668,7 @@ public class BallHandling : NetworkedBehaviour
                     Basket basket = other.GetComponentInParent<Basket>();
                     // move the ball to avoid it bouncing out of the net
                     LeanTween.move(m_ball, basket.bottomOfNet.position, .25f);
-                    ShotMade?.Invoke(GameManager.GetPlayerByNetworkID(PlayerLastTouched));
+                    ShotMade?.Invoke(PlayerLastTouched);
                     OnBasketScored();
                     GameManager.Singleton.AddScore(basket.id, 2);
                     basket.netCloth.externalAcceleration = new Vector3() {
