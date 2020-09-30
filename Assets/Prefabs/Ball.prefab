@@ -320,9 +320,10 @@ GameObject:
   - component: {fileID: 6110922978746903066}
   - component: {fileID: 6110922978746903067}
   - component: {fileID: 1952076212}
+  - component: {fileID: 1601076309029985891}
   m_Layer: 0
   m_Name: Hitbox
-  m_TagString: Untagged
+  m_TagString: Ball
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -366,6 +367,19 @@ SphereCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.33
+  m_Center: {x: 0.3, y: 0.3, z: 0.3}
+--- !u!135 &1601076309029985891
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6110922978746903064}
+  m_Material: {fileID: 13400000, guid: a61db1e987a15aa49b74e59b18fcffa5, type: 2}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.4
   m_Center: {x: 0.3, y: 0.3, z: 0.3}
 --- !u!1 &7959070845005647736
 GameObject:
@@ -473,5 +487,5 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/ball.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 396056
+  thisInstanceId: 91072
   Undone: 1

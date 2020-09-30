@@ -11,6 +11,9 @@ TagManager:
   - Bounds Trigger
   - Ball
   - AI
+  - Backboard
+  - Rim
+  - AboveRim
   layers:
   - Default
   - TransparentFX

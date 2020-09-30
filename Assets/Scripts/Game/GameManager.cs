@@ -300,8 +300,9 @@ public class GameManager : NetworkedBehaviour
         }
     }
 
-    public void Turnover()
+    public void HandleTurnover(Player p)
     {
+        m_ballhandling.ChangePossession(p.OtherTeam, true, false);
         print("turnover");
     }
 
@@ -427,6 +428,26 @@ public class GameManager : NetworkedBehaviour
     public static void RemoveAI(AIPlayer ai)
     {
         m_ais.Remove(ai);
+    }
+
+    public void OutOfBounds()
+    {
+        Player p;
+        if (m_ballhandling.PlayerWithBall == BallHandling.NO_PLAYER)
+        {
+            if (m_ballhandling.PlayerLastTouched == BallHandling.NO_PLAYER)
+            {
+                // If this happens something probably went wrong. We just handle with a jumpball.
+                Debug.LogError("Both PlayerWithBall and PlayerLastTouched = NO_PLAYER");
+                return;
+            }
+            p = GetPlayerByNetworkID(m_ballhandling.PlayerLastTouched);
+            HandleTurnover(p);
+            return;
+        }
+        p = GetPlayerByNetworkID(m_ballhandling.PlayerWithBall);
+        if (!p.HasBall && p.transform.position.y > 0.1f) return;
+        HandleTurnover(p);
     }
 
     public ShotManager GetShotManager()

@@ -8,6 +8,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 
 public enum BallState
 {
@@ -88,9 +89,13 @@ public class BallHandling : NetworkedBehaviour
     private ShotData m_shotData;
     private ShotBarData m_shotBarData;
 
-    private float m_timer;
     private int m_grade;
+    private float m_timer;
     private float m_passScore;
+    private bool m_hitBackboard;
+    private bool m_hitRim;
+    private bool m_hitFloor;
+    private bool m_isAboveRim;
     private bool m_shotPastArc;
 
     private Dictionary<ulong, float> m_playerDistances;
@@ -308,15 +313,6 @@ public class BallHandling : NetworkedBehaviour
         {
             if (fracComplete < .5f) m_shotPastArc = true;
 
-            // OLD way to arc updated to newer
-            //Vector3 center = (start + end) * 0.5F;
-            //center -= Vector3.up * height;
-            //Vector3 riseRelCenter = start - center;
-            //Vector3 setRelCenter = end - center;
-            //fracComplete = (Time.time - startTime) / duration;
-            //transform.position = Vector3.Slerp(riseRelCenter, setRelCenter, fracComplete);
-            //transform.position += center;
-
             // Fraction of journey completed equals current distance divided by total distance.
             fracComplete = (Time.time - startTime) / duration;
             // Calculate arc
@@ -334,13 +330,6 @@ public class BallHandling : NetworkedBehaviour
     private IEnumerator FollowBackboard(ShotData shot, Vector3 start, Vector3 end, float height, float duration)
     {
         Vector3 bankPos = GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[(int)shot.bankshot].transform.position;
-        // Sets the center
-        //Vector3 center = (start + bankPos) * 0.5f;
-        // Adjusts the height of the center point based on shot type
-        //center -= (shot.type == ShotType.SHOT) ? Vector3.up * height : Vector3.up;
-        // Gets the points to Slerp with based on center
-        //Vector3 riseRelCenter = start - center;
-        //Vector3 setRelCenter = bankPos - center;
 
         float startTime = Time.time;
         float fracComplete = 0;
@@ -748,6 +737,50 @@ public class BallHandling : NetworkedBehaviour
         // Setup Inbound Coroutine
     }
 
+    const string BACKBOARD_TAG = "Backboard";
+    const string RIM_TAG = "Rim";
+    const string FLOOR_TAG = "Floor";
+    private void OnCollisionEnter(Collision collision)
+    {
+        // backboard is stored in several chunk objects. its
+        // parents "Chunks" is tagged.
+        GameObject parent = collision.transform.parent.gameObject;
+        if (parent.CompareTag(BACKBOARD_TAG))
+        {
+            m_hitBackboard = true;
+        }
+        else if (parent.CompareTag(RIM_TAG))
+        {
+            m_hitRim = true;
+        }
+        else if (parent.CompareTag(FLOOR_TAG))
+        {
+            m_hitFloor = true;
+        }
+
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        // Ball Rigidbody -> AboveRim Collider
+        if (collision.gameObject.CompareTag("AboveRim"))
+        {
+            m_isAboveRim = true;
+            // Ball Collider -> Player Rigidboy
+            if (collision.gameObject.CompareTag("Player"))
+            {
+                // If both then goaltend
+                print("goaltend");
+            }
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        m_isAboveRim = false;
+    }
+
+
     public void ChangePossession(int team, bool inbound, bool loose)
     {
         GameObject inboundObj = GameManager.Singleton.GetClosestInbound(m_ball.transform.position);
@@ -782,4 +815,5 @@ public class BallHandling : NetworkedBehaviour
     {
         return (UnityEngine.Random.value > .5f) ? 1 : -1;
     }
+
 }

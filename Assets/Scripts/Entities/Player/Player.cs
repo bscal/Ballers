@@ -68,7 +68,6 @@ public class Player : NetworkedBehaviour, IBitWritable
     public bool isDribbling;
     public bool isInsideThree;
     public bool isInbounds;
-
     public bool isPostShot;
     public bool isPostMove;
 
