@@ -116,6 +116,19 @@ public class Team
         return SLOT_NULL;
     }
 
+    public void SetSlot(int slotID, Player p)
+    {
+        teamSlots[slotID] = p;
+        p.slot = slotID;
+    }
+
+    public void ReplaceSlots(Player p1, Player p2)
+    {
+        int tempSlot = p1.slot;
+        SetSlot(p2.slot, p1);
+        SetSlot(tempSlot, p2);
+    }
+
     public void SetPoints(int points)
     {
         TeamData.points = points;
