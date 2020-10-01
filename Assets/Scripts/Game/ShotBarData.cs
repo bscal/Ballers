@@ -4,6 +4,14 @@ using System;
 using System.IO;
 using UnityEngine;
 
+public enum SpeedVariations
+{
+    NONE = 0,
+    LINEAR = 1, // Linear increase of speed
+    CURVED = 2, // Slow -> fast -> slow
+    WAVE = 3,   // Linear increase with wave variation
+}
+
 [Serializable]
 public class ShotBarData : IBitWritable
 {
@@ -17,6 +25,8 @@ public class ShotBarData : IBitWritable
     public float startOffset;
     public float endOffset;
     public float targetFadeSpd;
+    public float barShake;
+    public int spdVariationID;
     
     // % of bar per shot grade
     public float bad;
@@ -60,6 +70,8 @@ public class ShotBarData : IBitWritable
             perfect         = reader.ReadSinglePacked();
             targetSize      = reader.ReadSinglePacked();
             targetHeight    = reader.ReadSinglePacked();
+            barShake        = reader.ReadSinglePacked();
+            spdVariationID  = reader.ReadByte();
 
             bad = Mathf.Clamp(ok + good + perfect - 1f, 0f, 1f);
         }
@@ -78,6 +90,8 @@ public class ShotBarData : IBitWritable
             writer.WriteSinglePacked(perfect);
             writer.WriteSinglePacked(targetSize);
             writer.WriteSinglePacked(targetHeight);
+            writer.WriteSinglePacked(barShake);
+            writer.WriteByte((byte)spdVariationID);
         }
     }
 }

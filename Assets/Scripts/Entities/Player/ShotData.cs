@@ -13,10 +13,11 @@ using UnityEngine;
 [Serializable]
 public class ShotData : IBitWritable
 {
+    public Vector3 position;
     public ShotType type;
+    public ShotStyle style;
     public ShotDirection direction;
     public BankType bankshot;
-    public Vector3 position;
     public ulong shooter;
     public bool leftHanded;
     public float distance;
@@ -30,8 +31,9 @@ public class ShotData : IBitWritable
         using (PooledBitReader reader = PooledBitReader.Get(stream))
         {
             position = reader.ReadVector3Packed();
-            type = (ShotType)reader.ReadSByte();
-            direction = (ShotDirection)reader.ReadSByte();
+            type = (ShotType)reader.ReadByte();
+            style = (ShotStyle)reader.ReadByte();
+            direction = (ShotDirection)reader.ReadByte();
             bankshot = (BankType)reader.ReadSByte();
             shooter = reader.ReadUInt64Packed();
             leftHanded = reader.ReadBool();
@@ -48,8 +50,9 @@ public class ShotData : IBitWritable
         using (PooledBitWriter writer = PooledBitWriter.Get(stream))
         {
             writer.WriteVector3Packed(position);
-            writer.WriteSByte((sbyte)type);
-            writer.WriteSByte((sbyte)direction);
+            writer.WriteByte((byte)type);
+            writer.WriteByte((byte)style);
+            writer.WriteByte((byte)direction);
             writer.WriteSByte((sbyte)bankshot);
             writer.WriteUInt64Packed(shooter);
             writer.WriteBool(leftHanded);

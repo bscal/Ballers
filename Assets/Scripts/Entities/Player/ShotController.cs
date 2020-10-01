@@ -10,7 +10,46 @@ public enum ShotType
     SHOT,
     SHOT_CLOSE,
     POST_MOVE,
-    POST_SHOT
+    POST_SHOT,
+    FREETHROW,
+    ALLEY_OOP
+}
+
+public enum ShotStyle
+{
+    LAYUP,
+    LAYUP_FINGER_ROLL,
+    LAYUP_EURO_STEP,
+    LAYUP_SPIN,
+    LAYUP_CONTACT,
+    LAYUP_FLASHY,
+    LAYUP_FLOATER,
+
+    DUNK_ONE_H,
+    DUNK_TWO_H,
+    DUNK_FLASHY,
+    DUNK_CONTACT,
+    DUNK_SPIN,
+    DUNK_EURO_STEP,
+
+    SHOT,
+    SHOT_CLOSE,
+    SHOT_LONG,
+    SHOT_FADE,
+    SHOT_CONTESTED,
+    SHOT_MOVING,
+    SHOT_STEPBACK,
+    SHOT_CATCH_SHOOT,
+
+    POST_MOVE,
+    POST_HOOK,
+    POST_SPIN,
+    POST_FADE,
+    POST_STEPBACK,
+
+    FREETHROW,
+    ALLEY_LAYUP,
+    ALLEY_DUNK
 }
 
 public enum ShotDirection
@@ -23,13 +62,14 @@ public enum ShotDirection
 public enum ShotRange
 {
     CLOSE,
+    MID,
     LONG
 }
 
 public enum BankType
 {
-    NONE = -1,
-    LEFT = 0,
+    NONE = 0,
+    LEFT = -1,
     RIGHT = 1
 }
 
@@ -42,7 +82,7 @@ public class ShotController : MonoBehaviour
     /// <summary>
     /// Returns the type of shot the player should take. 
     /// </summary>
-    public ShotType GetTypeOfShot(Player p, float dist, ShotDirection direction)
+    public ShotType GetShotType(Player p, float dist, ShotDirection direction)
     {
         if (p.isPostShot)
             return ShotType.POST_SHOT;
@@ -60,6 +100,11 @@ public class ShotController : MonoBehaviour
             return ShotType.SHOT_CLOSE;
 
         return ShotType.SHOT;
+    }
+
+    public ShotStyle GetShotStyle(Player p, float dist, ShotDirection dir, ShotType type)
+    {
+        return ShotStyle.LAYUP;
     }
 
     public static ShotRange GetShotRange(ShotType type)
