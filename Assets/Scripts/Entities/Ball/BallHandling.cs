@@ -142,7 +142,7 @@ public class BallHandling : NetworkedBehaviour
 
                 if (player.GetComponent<BoxCollider>().bounds.Intersects(m_ball.GetComponentInChildren<SphereCollider>().bounds))
                 {
-                    PlayerLastPossesion = player.NetworkId;
+                    PlayerLastTouched = player.NetworkId;
                 }
             }
             // ============ Sorts Closest Players ============
@@ -254,6 +254,8 @@ public class BallHandling : NetworkedBehaviour
         Vector3 offset = Vector3.zero;
 
         m_grade = m_shotBarData.GetShotGrade(releaseDist);
+
+
         if (m_grade == ShotBarData.GRADE_GOOD)
         {
             offset.x = UnityEngine.Random.Range(.1f, .2f);
@@ -637,10 +639,14 @@ public class BallHandling : NetworkedBehaviour
         }
     }
 
-    private void SetBallHandler(ulong id)
+    private void SetPlayerIDs(ulong netId)
     {
-        PlayerWithBall = id;
-        m_currentPlayer = GameManager.GetPlayerByNetworkID(PlayerWithBall);
+        if (netId != NO_PLAYER)
+        {
+            PlayerLastPossesion = PlayerWithBall;
+            PlayerLastTouched = PlayerWithBall;
+        }
+        PlayerWithBall = netId;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -696,8 +702,7 @@ public class BallHandling : NetworkedBehaviour
     {
         //if (newNetworkID == PlayerWithBall) return;
 
-        PlayerLastPossesion = PlayerWithBall;
-        PlayerWithBall = newNetworkID;
+        SetPlayerIDs(newNetworkID);
 
         if (newNetworkID == DUMMY_PLAYER) return;
 
@@ -744,16 +749,15 @@ public class BallHandling : NetworkedBehaviour
     {
         // backboard is stored in several chunk objects. its
         // parents "Chunks" is tagged.
-        GameObject parent = collision.transform.parent.gameObject;
-        if (parent.CompareTag(BACKBOARD_TAG))
+        if (collision.gameObject.CompareTag(BACKBOARD_TAG))
         {
             m_hitBackboard = true;
         }
-        else if (parent.CompareTag(RIM_TAG))
+        else if (collision.gameObject.CompareTag(RIM_TAG))
         {
             m_hitRim = true;
         }
-        else if (parent.CompareTag(FLOOR_TAG))
+        else if (collision.gameObject.CompareTag(FLOOR_TAG))
         {
             m_hitFloor = true;
         }
