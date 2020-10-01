@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using MLAPI;
 using MLAPI.NetworkedVar;
+using UnityEditor.Experimental.GraphView;
 
 public class ShotManager : MonoBehaviour
 {
@@ -18,9 +19,6 @@ public class ShotManager : MonoBehaviour
     // =================================== Private Varibles ===================================
 
     private bool m_isShot = false;
-    private BankType m_bankShot;
-    private ShotType m_type;
-    private ShotDirection m_direction;
     private ShotData m_shotData;
     private ShotBarData m_shotBarData;
     private float m_releaseDist;
@@ -51,19 +49,15 @@ public class ShotManager : MonoBehaviour
         float angle = Quaternion.Angle(transform.rotation, p.LookRotation);
 
         m_isShot = true;
-        m_direction = GetShotDirection(angle);
-        m_type = m_shotController.GetTypeOfShot(p, dist, m_direction);
-        m_bankShot = IsBankShot(p);
-
-        float contest = GetContestRating(p);
 
         m_shotData.shooter = netID;
         m_shotData.position = p.transform.position;
         m_shotData.distance = dist;
-        m_shotData.direction = m_direction;
-        m_shotData.type = m_type;
+        m_shotData.direction = GetShotDirection(angle);
+        m_shotData.type = m_shotController.GetShotType(p, dist, m_shotData.direction);
+        m_shotData.style = m_shotController.GetShotStyle(p, dist, m_shotData.direction, m_shotData.type);
+        m_shotData.bankshot = IsBankShot(p, m_shotData.type);
         m_shotData.leftHanded = p.isBallInLeftHand;
-        m_shotData.bankshot = m_bankShot;
         m_shotData.contest = p.GetContestRating();
         m_shotData.offSkill = 50.0f;
         m_shotData.defSkill = 50.0f;
@@ -73,6 +67,8 @@ public class ShotManager : MonoBehaviour
         m_shotBarData.startOffset = 0f;
         m_shotBarData.endOffset = 0f;
         m_shotBarData.targetFadeSpd = 0f;
+        m_shotBarData.barShake = 0f;
+        m_shotBarData.spdVariationID = (int)SpeedVariations.NONE;
 
         m_shotBarData.bad = .5f;
         m_shotBarData.ok = .35f;
@@ -148,15 +144,15 @@ public class ShotManager : MonoBehaviour
         }
     }
 
-    private BankType IsBankShot(Player p)
+    private BankType IsBankShot(Player p, ShotType type)
     {
-        if (m_type == ShotType.LAYUP && ShotController.GetShotRange(m_type) == ShotRange.CLOSE)
+        if (type == ShotType.LAYUP && ShotController.GetShotRange(type) == ShotRange.CLOSE)
         {
             if (p.isDribLeft) return BankType.LEFT;
             else if (p.isDribRight) return BankType.RIGHT;
             else return GetClosestBank(p.transform.position);
         }
-        else if (m_type == ShotType.SHOT && p.isCtrlDown)
+        else if (type == ShotType.SHOT && p.isCtrlDown)
         {
             return GetClosestBank(p.transform.position);
         }
