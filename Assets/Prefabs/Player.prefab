@@ -955,7 +955,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/upperarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 51072
+  thisInstanceId: 94912
   Undone: 1
 --- !u!1 &839673004282485492
 GameObject:
@@ -1102,7 +1102,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/foot.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 49986
+  thisInstanceId: 93822
   Undone: 1
 --- !u!1 &855668793950629865
 GameObject:
@@ -5053,7 +5053,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/upperchest.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 50760
+  thisInstanceId: 94600
   Undone: 1
 --- !u!1 &2938245477022681954
 GameObject:
@@ -5382,7 +5382,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/calf.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 49904
+  thisInstanceId: 93740
   Undone: 1
 --- !u!1 &3249661851278890336
 GameObject:
@@ -6593,7 +6593,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/leg.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 50768
+  thisInstanceId: 94608
   Undone: 1
 --- !u!1 &3916156810308084338
 GameObject:
@@ -7691,7 +7691,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/lowerchest.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 50298
+  thisInstanceId: 94136
   Undone: 1
 --- !u!1 &4601289110702898129
 GameObject:
@@ -9070,7 +9070,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/calf.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 51050
+  thisInstanceId: 94890
   Undone: 1
 --- !u!1 &5325683939739797947
 GameObject:
@@ -9641,7 +9641,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/leg.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 49948
+  thisInstanceId: 93784
   Undone: 1
 --- !u!1 &5647321667379715171
 GameObject:
@@ -9801,7 +9801,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/lowerarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 50362
+  thisInstanceId: 94200
   Undone: 1
 --- !u!1 &5690431781121862110
 GameObject:
@@ -10597,7 +10597,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/lowerarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 50480
+  thisInstanceId: 94318
   Undone: 1
 --- !u!1 &5965997991029536111
 GameObject:
@@ -11137,7 +11137,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/head.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 49954
+  thisInstanceId: 93790
   Undone: 1
 --- !u!1 &6166792760984548341
 GameObject:
@@ -12501,7 +12501,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/upperarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 51014
+  thisInstanceId: 94854
   Undone: 1
 --- !u!1 &6927265981159084006
 GameObject:
@@ -13798,7 +13798,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/foot.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 50044
+  thisInstanceId: 93880
   Undone: 1
 --- !u!1 &7765132884196620524
 GameObject:
@@ -15359,6 +15359,8 @@ MonoBehaviour:
   isDribbling: 0
   isInsideThree: 0
   isInbounds: 0
+  isPostShot: 0
+  isPostMove: 0
   m_rightHand: {fileID: 1367100140280164334}
   m_leftHand: {fileID: 5912948185960104492}
 --- !u!114 &648187691570040564
@@ -15550,7 +15552,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 8530364777022413025, guid: f7e1b6aa4ac338148879d0d23989231c, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: f7e1b6aa4ac338148879d0d23989231c, type: 3}
 --- !u!4 &8433254836191314215 stripped
 Transform:

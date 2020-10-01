@@ -14,6 +14,7 @@ TagManager:
   - Backboard
   - Rim
   - AboveRim
+  - Floor
   layers:
   - Default
   - TransparentFX
