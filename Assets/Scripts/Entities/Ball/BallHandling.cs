@@ -43,7 +43,7 @@ public class BallHandling : NetworkedBehaviour
 
     // =================================== Events ===================================
 
-    public event Action<ulong> ShotMade;
+    public event Action<uint, ShotData> ShotMade;
     public event Action<ulong> ShotMissed;
     public event Action<BallState> BallStateChange;
     public event Action<ulong, ulong> BallPossesionChange;
@@ -97,6 +97,7 @@ public class BallHandling : NetworkedBehaviour
     private bool m_hitFloor;
     private bool m_isAboveRim;
     private bool m_shotPastArc;
+    private bool m_hitTopTrigger;
 
     private Dictionary<ulong, float> m_playerDistances;
     private IOrderedEnumerable<KeyValuePair<ulong, float>> m_pairs;
@@ -106,6 +107,7 @@ public class BallHandling : NetworkedBehaviour
     private void Awake()
     {
         GameManager.Singleton.GameStarted += OnGameStarted;
+        ShotMade += OnShotMade;
     }
 
     public override void NetworkStart()
@@ -248,7 +250,7 @@ public class BallHandling : NetworkedBehaviour
         State = BallState.SHOT;
         m_body.isKinematic = false;
 
-        float h = ShotController.GetShotRange(m_shotData.type) == ShotRange.LONG ? UnityEngine.Random.Range(2f, 4f) : UnityEngine.Random.Range(.3f, .8f);
+        float h = ShotController.GetShotRange(m_shotData.type) == ShotRange.LONG ? UnityEngine.Random.Range(5f, 8f) : UnityEngine.Random.Range(.5f, 1f);
         float d = SHOT_SPEED + UnityEngine.Random.value / m_shotData.distance;
 
         Vector3 offset = Vector3.zero;
@@ -660,25 +662,41 @@ public class BallHandling : NetworkedBehaviour
                 // Detect if coming from above the collider.
                 if (dir.y > 0)
                 {
+                    m_body.AddForce(new Vector3(0, -5));
+                    m_hitTopTrigger = true;
+                }
+            }
+            else if (other.gameObject.name == "Hitbox Bot" && m_hitTopTrigger)
+            {
+                Vector3 dir = (transform.position - other.transform.position).normalized;
+
+                // Detect if coming from above the collider.
+                if (dir.y > 0)
+                {
                     Basket basket = other.GetComponentInParent<Basket>();
-                    // move the ball to avoid it bouncing out of the net
-                    LeanTween.move(m_ball, basket.bottomOfNet.position, .25f);
-                    ShotMade?.Invoke(PlayerLastTouched);
-                    OnBasketScored();
-                    GameManager.Singleton.AddScore(basket.id, 2);
+                    ShotMade?.Invoke(basket.id, m_shotData);
                     basket.netCloth.externalAcceleration = new Vector3() {
                         x = UnityEngine.Random.Range(5, 12),
                         y = UnityEngine.Random.Range(32, 48),
                         z = UnityEngine.Random.Range(5, 12),
                     };
-                    LeanTween.delayedCall(.25f, () => basket.netCloth.externalAcceleration = Vector3.zero);
+                    LeanTween.delayedCall(.5f, () => basket.netCloth.externalAcceleration = Vector3.zero);
                 }
             }
         }
     }
 
-    private void OnBasketScored()
-    { 
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.name == "Hitbox Top" || other.gameObject.name == "Hitbox Bot")
+        {
+            m_hitTopTrigger = false;
+        }
+    }
+
+    private void OnShotMade(uint teamID, ShotData shotData)
+    {
+        GameManager.Singleton.AddScore(teamID, shotData.shotValue);
     }
 
     [ClientRPC]
