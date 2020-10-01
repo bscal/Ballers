@@ -73,7 +73,7 @@ public enum BankType
     RIGHT = 1
 }
 
-public class ShotController : MonoBehaviour
+public static class ShotController
 {
     private const float RIM_RANGE = 6.0f;
     private const float CLOSE_RANGE = 9.0f;
@@ -82,7 +82,7 @@ public class ShotController : MonoBehaviour
     /// <summary>
     /// Returns the type of shot the player should take. 
     /// </summary>
-    public ShotType GetShotType(Player p, float dist, ShotDirection direction)
+    public static ShotType GetShotType(Player p, float dist, ShotDirection direction)
     {
         if (p.isPostShot)
             return ShotType.POST_SHOT;
@@ -102,7 +102,7 @@ public class ShotController : MonoBehaviour
         return ShotType.SHOT;
     }
 
-    public ShotStyle GetShotStyle(Player p, float dist, ShotDirection dir, ShotType type)
+    public static ShotStyle GetShotStyle(Player p, float dist, ShotDirection dir, ShotType type)
     {
         return ShotStyle.LAYUP;
     }

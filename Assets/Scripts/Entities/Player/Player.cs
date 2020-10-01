@@ -106,7 +106,6 @@ public class Player : NetworkedBehaviour, IBitWritable
     private ShotMeter m_shotmeter;
     private RoundShotMeter m_roundShotMeter;
     private Animator m_animator;
-    private ShotController m_shotController;
     private ShotManager m_shotManager;
     private SpriteRenderer m_playerCircle;
 
@@ -124,7 +123,6 @@ public class Player : NetworkedBehaviour, IBitWritable
                     GameManager.Singleton.InitLocalPlayer(OwnerClientId);
                     //NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, this, OnGameStarted);
                     m_shotmeter = GetComponent<ShotMeter>();
-                    m_shotController = GetComponent<ShotController>();
                     m_roundShotMeter = GameObject.Find("HUD/Canvas/RoundShotMeter").GetComponent<RoundShotMeter>();
                 }
             }
@@ -162,8 +160,6 @@ public class Player : NetworkedBehaviour, IBitWritable
 
         Debugger.Instance.Print(string.Format("{0} : {1}", transform.position.ToString(), Vector3.Distance(transform.position, LookTarget)), 0);
         Debugger.Instance.Print(string.Format("2pt:{0}", isInsideThree), 3);
-
-        GameObject.Find("Cube").transform.position = transform.position + transform.forward * 3 + transform.up * 3;
 
         m_target = GameManager.Singleton.baskets[GameManager.Singleton.Possession].gameObject.transform.position;
     }
