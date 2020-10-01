@@ -10,9 +10,9 @@ public class ShotMeter : MonoBehaviour
 {
     public const float BASE_TARGET = 3.0f;
 
-    public static float MAX_TARGET_HEIGHT;
-    public static float BASE_TARGET_HEIGHT;
-    public static float TARGET_OFFSET;
+    public static float MAX_TARGET_HEIGHT { get; private set; }
+    public static float BASE_TARGET_HEIGHT { get; private set; }
+    public static float TARGET_OFFSET { get; private set; }
 
     public GameObject meter;
     public RawImage background;

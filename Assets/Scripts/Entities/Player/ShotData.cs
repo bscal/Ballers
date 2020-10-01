@@ -19,6 +19,7 @@ public class ShotData : IBitWritable
     public ShotDirection direction;
     public BankType bankshot;
     public ulong shooter;
+    public int shotValue;
     public bool leftHanded;
     public float distance;
     public float contest;
@@ -36,6 +37,7 @@ public class ShotData : IBitWritable
             direction = (ShotDirection)reader.ReadByte();
             bankshot = (BankType)reader.ReadSByte();
             shooter = reader.ReadUInt64Packed();
+            shotValue = reader.ReadInt32Packed();
             leftHanded = reader.ReadBool();
             distance = reader.ReadSinglePacked();
             contest = reader.ReadSinglePacked();
@@ -55,6 +57,7 @@ public class ShotData : IBitWritable
             writer.WriteByte((byte)direction);
             writer.WriteSByte((sbyte)bankshot);
             writer.WriteUInt64Packed(shooter);
+            writer.WriteInt32Packed(shotValue);
             writer.WriteBool(leftHanded);
             writer.WriteDoublePacked(distance);
             writer.WriteDoublePacked(contest);

@@ -24,14 +24,11 @@ public class ShotManager : MonoBehaviour
     private float m_releaseDist;
     private float m_rttOffset;
 
-    private ShotController m_shotController;
-
     // =================================== MonoBehaviour Functions ===================================
 
     private void Awake()
     {
         Singleton = this;
-        m_shotController = GetComponent<ShotController>();
         m_shotData = new ShotData();
         m_shotBarData = new ShotBarData();
     }
@@ -54,11 +51,12 @@ public class ShotManager : MonoBehaviour
         m_shotData.position = p.transform.position;
         m_shotData.distance = dist;
         m_shotData.direction = GetShotDirection(angle);
-        m_shotData.type = m_shotController.GetShotType(p, dist, m_shotData.direction);
-        m_shotData.style = m_shotController.GetShotStyle(p, dist, m_shotData.direction, m_shotData.type);
+        m_shotData.type = ShotController.GetShotType(p, dist, m_shotData.direction);
+        m_shotData.style = ShotController.GetShotStyle(p, dist, m_shotData.direction, m_shotData.type);
         m_shotData.bankshot = IsBankShot(p, m_shotData.type);
         m_shotData.leftHanded = p.isBallInLeftHand;
         m_shotData.contest = p.GetContestRating();
+        m_shotData.shotValue = GetShotValue(p);
         m_shotData.offSkill = 50.0f;
         m_shotData.defSkill = 50.0f;
         m_shotData.passRating = 50.0f;
@@ -100,6 +98,16 @@ public class ShotManager : MonoBehaviour
     private void HandleShot(ulong netID)
     {
         GameManager.GetBallHandling().BallFollowArc(netID, m_releaseDist);
+    }
+
+    private int GetShotValue(Player p)
+    {
+        if (GameManager.Singleton.isFreeThrow)
+            return 1;
+        else if (p.isInsideThree)
+            return 2;
+        else
+            return 3;
     }
 
     /// <summary>

@@ -50,8 +50,8 @@ public class GameManager : NetworkedBehaviour
     public bool HasStarted { get; private set; }
     public BasketballStateManager GameState { get; private set; }
 
-    public int teamSize = 5;
-    public bool lastShotMade = false;
+    public bool lastShotMade;
+    public bool isFreeThrow;
     public GameObject ball;
     public Vector3 centerCourt;
     public List<Vector3> inboundPositions;
@@ -82,8 +82,8 @@ public class GameManager : NetworkedBehaviour
         centerCourt = GameObject.Find("CenterCourt").transform.position;
 
         teams = new Team[2];
-        teams[0] = new Team((int)TeamType.HOME, teamSize);
-        teams[1] = new Team((int)TeamType.AWAY, teamSize);
+        teams[0] = new Team((int)TeamType.HOME, Match.MatchSettings.TeamSize);
+        teams[1] = new Team((int)TeamType.AWAY, Match.MatchSettings.TeamSize);
 
         inbounds = GameObject.FindGameObjectsWithTag("Inbound");
     }
