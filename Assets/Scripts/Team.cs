@@ -112,7 +112,7 @@ public class Team
                 return i;
             }
         }
-        Assert.IsTrue(true, "No slots opens");
+        Assert.IsTrue(false, "Slot id should never be NULL");
         return SLOT_NULL;
     }
 

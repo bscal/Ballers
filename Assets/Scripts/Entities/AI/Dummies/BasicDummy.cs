@@ -23,7 +23,7 @@ public class BasicDummy : MonoBehaviour
     protected void Awake()
     {
         m_player = GetComponent<Player>();
-        m_player.TeamID = (int)TeamType.AWAY;
+        m_player.teamID = (int)TeamType.AWAY;
     }
 
     protected void Start()

@@ -44,13 +44,13 @@ public class PlayerHandler : MonoBehaviour
     {
         if (!NetworkingManager.Singleton.IsServer) return;
 
-        if (!ServerManager.Singleton.players.TryGetValue(player.SteamID, out ServerPlayer sPlayer)) return;
+        if (!ServerManager.Singleton.players.TryGetValue(player.steamID, out ServerPlayer sPlayer)) return;
 
-        StartCoroutine(BackendManager.FetchCharacterFromServer(player.SteamID, sPlayer.cid, (cData, status) => {
+        StartCoroutine(BackendManager.FetchCharacterFromServer(player.steamID, sPlayer.cid, (cData, status) => {
             if (status == BackendManager.STATUS_OK)
             {
                 m_focusedPlayer = cData;
-                CharacterFetched?.Invoke(player.SteamID, cData);
+                CharacterFetched?.Invoke(player.steamID, cData);
             }
             else
             {
@@ -68,12 +68,12 @@ public class PlayerHandler : MonoBehaviour
         {
             if (!player.isAI)
             {
-                ServerPlayer sp = ServerManager.Singleton.GetPlayer(player.SteamID);
-                StartCoroutine(BackendManager.FetchCharacterFromServer(player.SteamID, sp.cid, (cData, status) => {
+                ServerPlayer sp = ServerManager.Singleton.GetPlayer(player.steamID);
+                StartCoroutine(BackendManager.FetchCharacterFromServer(player.steamID, sp.cid, (cData, status) => {
                     if (status == BackendManager.STATUS_OK)
                     {
-                        player.CData = cData;
-                        CharacterFetched?.Invoke(player.SteamID, cData);
+                        player.cData = cData;
+                        CharacterFetched?.Invoke(player.steamID, cData);
                     }
                     else
                     {
@@ -87,8 +87,8 @@ public class PlayerHandler : MonoBehaviour
                 StartCoroutine(BackendManager.FetchAIFromServer(player.aiPlayerID, (cData, status) => {
                     if (status == BackendManager.STATUS_OK)
                     {
-                        player.CData = cData;
-                        CharacterFetched?.Invoke(player.SteamID, cData);
+                        player.cData = cData;
+                        CharacterFetched?.Invoke(player.steamID, cData);
                     }
                     else
                     {
