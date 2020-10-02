@@ -17,12 +17,6 @@ public class AIPlayer : NetworkedBehaviour
         m_difficulty = AIDifficulty.PRO;
     }
 
-    public override void NetworkStart()
-    {
-        m_player = GetComponent<Player>();
-        GameManager.AddAI(this);
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -55,6 +49,16 @@ public class AIPlayer : NetworkedBehaviour
                 transform.LookAt(m_player.Assignment.gameObject.transform);
             }
         }
+    }
+
+    public void InitPlayer(Player p, int teamID)
+    {
+        SetPlayer(p);
+        m_player.isAI = true;
+        m_player.teamID = teamID;
+        m_player.hasReadyUp = true;
+
+        GameManager.AddAI(this);
     }
 
     // An AI shooting method

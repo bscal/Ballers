@@ -54,26 +54,20 @@ public class GameSetup : NetworkedBehaviour
                 for (int i = 0; i < aiToCreate; i++)
                 {
                     GameObject go = Instantiate(aiPrefab, Vector3.zero, Quaternion.identity);
-                    AIPlayer aiLogic = go.GetComponent<AIPlayer>();
-                    Assert.IsNotNull(aiLogic, "aiPrefab in GameSetup does not have AIPlayer component");
+                    go.GetComponent<NetworkedObject>().Spawn();
 
                     Player p = go.GetComponent<Player>();
-                    p.isAI = true;
-                    p.TeamID = tid;
-                    //p.slot = GameManager.Singleton.teams[tid].GetOpenSlot();
+                    Assert.IsNotNull(p, "aiLogic's Player component is null.");
 
-                    //GameManager.AddAI(aiLogic);
-
-                    go.GetComponent<NetworkedObject>().Spawn();
+                    AIPlayer aiLogic = go.GetComponent<AIPlayer>();
+                    Assert.IsNotNull(aiLogic, "aiPrefab in GameSetup does not have AIPlayer component");
+                    
+                    aiLogic.InitPlayer(p, tid);
                 }
             }
-
-
         }
 
         m_hasClientLoaded = true;
-        print("creating player");
-
         InvokeServerRpc(PlayerLoaded, NetworkingManager.Singleton.LocalClientId);
     }
 
