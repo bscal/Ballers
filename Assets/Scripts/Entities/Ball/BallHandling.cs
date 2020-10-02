@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 
+[Serializable]
 public enum BallState
 {
     NONE,
@@ -22,6 +23,7 @@ public enum BallState
     DEAD_BALL
 }
 
+[Serializable]
 public enum PassType
 {
     CHESS,
@@ -43,12 +45,13 @@ public class BallHandling : NetworkedBehaviour
 
     // =================================== Events ===================================
 
-    public event Action<uint, ShotData> ShotMade;
-    public event Action<ulong> ShotMissed;
+    public event Action<int, ShotData> ShotMade;
+    public event Action<ShotData> ShotMissed;
     public event Action<BallState> BallStateChange;
-    public event Action<ulong, ulong> BallPossesionChange;
-    public event Action<ulong, ulong, float, PassType> PassBall;
-    public event Action<ulong, ulong, float, PassType> CatchBall;
+    public event Action<int> PossessionChange;
+    public event Action<ulong, ulong> BallHandlerChange;
+    public event Action<Player, Player, float, PassType> PassBall;
+    public event Action<Player, PassType> CatchBall;
 
     // =================================== Networking Variables ===================================
 
@@ -66,7 +69,7 @@ public class BallHandling : NetworkedBehaviour
 
     // BallState
     private readonly NetworkedVarByte m_state = new NetworkedVarByte(NetworkConstants.BALL_CHANNEL, 0);
-    public BallState State { get { return (BallState) Enum.ToObject(typeof(BallState), m_state.Value); } set { m_state.Value = (byte)value; } }
+    public BallState State { get { return (BallState) Enum.ToObject(typeof(BallState), m_state.Value); } set { m_state.Value = (byte)value; BallStateChange?.Invoke(value); } }
 
     // TeamID with possession
     private readonly NetworkedVarSByte m_possession = new NetworkedVarSByte(NetworkConstants.BALL_CHANNEL, -1);
@@ -89,6 +92,7 @@ public class BallHandling : NetworkedBehaviour
     private ShotData m_shotData;
     private ShotBarData m_shotBarData;
 
+    private ulong m_shooter;
     private int m_grade;
     private float m_timer;
     private float m_passScore;
@@ -98,6 +102,7 @@ public class BallHandling : NetworkedBehaviour
     private bool m_isAboveRim;
     private bool m_shotPastArc;
     private bool m_hitTopTrigger;
+    private bool m_shotInAction;
 
     private Dictionary<ulong, float> m_playerDistances;
     private IOrderedEnumerable<KeyValuePair<ulong, float>> m_pairs;
@@ -108,6 +113,8 @@ public class BallHandling : NetworkedBehaviour
     {
         GameManager.Singleton.GameStarted += OnGameStarted;
         ShotMade += OnShotMade;
+        ShotMissed += OnShotMissed;
+        BallHandlerChange += OnChangeBallHandler;
     }
 
     public override void NetworkStart()
@@ -151,11 +158,6 @@ public class BallHandling : NetworkedBehaviour
             m_pairs = from pair in m_playerDistances orderby pair.Value descending select pair;
         }
 
-        if (IsServer)
-        {
-        }
-
-        
     }
 
     // FixedUpdate is called 50x per frame
@@ -213,13 +215,20 @@ public class BallHandling : NetworkedBehaviour
             gameObject.transform.position = new Vector3(5, 3, 5);
             ChangeBallHandler(NO_PLAYER);
         }
+    }
 
-
+    public void OnChangeBallHandler(ulong lastPlayer, ulong newPlayer)
+    {
+        if (m_shotInAction)
+        {
+            ShotMissed?.Invoke(m_shotData);
+        }
     }
 
     // =================================== RPCs ===================================
     public void OnShoot(ulong netID, ShotData shotData, ShotBarData shotBarData)
     {
+        m_shooter = netID;
         m_shotData = shotData;
         m_shotBarData = shotBarData;
     }
@@ -248,6 +257,7 @@ public class BallHandling : NetworkedBehaviour
         Player player = GameManager.GetPlayerByNetworkID(netID);
 
         State = BallState.SHOT;
+        m_shotInAction = true;
         m_body.isKinematic = false;
 
         float h = ShotController.GetShotRange(m_shotData.type) == ShotRange.LONG ? UnityEngine.Random.Range(5f, 8f) : UnityEngine.Random.Range(.5f, 1f);
@@ -301,7 +311,7 @@ public class BallHandling : NetworkedBehaviour
 
         print(offset);
 
-        Vector3 basketPos = GameManager.Singleton.baskets[player.TeamID].netPos.position;
+        Vector3 basketPos = GameManager.Singleton.baskets[player.teamID].netPos.position;
         if (m_shotData.bankshot == BankType.NONE)
             StartCoroutine(FollowArc(m_ball.transform.position, basketPos + offset, h, d));
         else
@@ -386,7 +396,7 @@ public class BallHandling : NetworkedBehaviour
         if (!passer.HasBall) return;
         if (passer.slot == playerSlot) return; //TODO fake pass? here because i have not decides on how to handle this
 
-        Player target = GameManager.GetPlayerBySlot(passer.TeamID, playerSlot);
+        Player target = GameManager.GetPlayerBySlot(passer.teamID, playerSlot);
         InvokeServerRpc(PassBallServer, passer, target, type);
     }
 
@@ -421,7 +431,7 @@ public class BallHandling : NetworkedBehaviour
                 print("Pass Score: " + score);
             });
         }
-
+        PassBall?.Invoke(passer, target, m_passScore, type);
         Vector3 endPosition = GetPassPosition(target, 1);
         StartCoroutine(PassDelay(passer, target, endPosition, pass_speed, type));
     }
@@ -429,7 +439,7 @@ public class BallHandling : NetworkedBehaviour
     [ClientRPC]
     public void PassBallClient(ulong targetPid, Vector3 pos, PassType type)
     {
-        StartCoroutine(AutoCatchPass(GameManager.GetPlayerByNetworkID(targetPid), pos));
+        StartCoroutine(AutoCatchPass(GameManager.GetPlayerByNetworkID(targetPid), pos, type));
     }
 
     private IEnumerator PassDelay(Player passer, Player target, Vector3 endPosition, float speed, PassType type)
@@ -575,8 +585,9 @@ public class BallHandling : NetworkedBehaviour
         return pos;
     }
 
-    private IEnumerator AutoCatchPass(Player target, Vector3 pos)
+    private IEnumerator AutoCatchPass(Player target, Vector3 pos, PassType type)
     {
+        Vector3 start = target.transform.position;
         Vector3 truePos = pos - new Vector3(0, target.height, 0);
 
         while (State == BallState.PASS)
@@ -585,12 +596,13 @@ public class BallHandling : NetworkedBehaviour
             target.isMovementFrozen = true;
             if (dist > .2)
             {
-                target.transform.position = Vector3.Lerp(target.transform.position, truePos, Time.deltaTime * 6.0f);
+                target.transform.position = Vector3.Lerp(start, pos, Time.deltaTime * 6.0f);
             }
 
             yield return null;
         }
         target.isMovementFrozen = false;
+        CatchBall?.Invoke(target, type);
     }
 
     [ServerRPC]
@@ -607,39 +619,6 @@ public class BallHandling : NetworkedBehaviour
     // =================================== End Passing ===================================
 
     // =================================== Private Functions ===================================
-
-    /// <summary>
-    /// Deprecated. Moved into Update loop. 
-    /// </summary>
-    private IEnumerator UpdatePlayerDistances()
-    {
-        while (true)
-        {
-            if (!Match.HasGameStarted)
-            {
-                yield return new WaitForSeconds(.33f);
-                continue;
-            }
-            // ============ Lists Closest Players ============
-            foreach (Player player in GameManager.GetPlayers())
-            {
-                if (player == null) continue;
-                float dist = Vector3.Distance(m_ball.transform.position, player.transform.position);
-
-                m_playerDistances[player.NetworkId] = dist;
-
-                if (player.GetComponent<BoxCollider>().bounds.Intersects(m_ball.GetComponentInChildren<SphereCollider>().bounds))
-                {
-                    PlayerLastPossesion = player.NetworkId;
-                }
-            }
-
-            // ============ Sorts Closest Players ============
-            m_pairs = from pair in m_playerDistances orderby pair.Value descending select pair;
-
-            yield return new WaitForSeconds(.1f);
-        }
-    }
 
     private void SetPlayerIDs(ulong netId)
     {
@@ -674,7 +653,7 @@ public class BallHandling : NetworkedBehaviour
                 if (dir.y > 0)
                 {
                     Basket basket = other.GetComponentInParent<Basket>();
-                    ShotMade?.Invoke(basket.id, m_shotData);
+                    ShotMade?.Invoke((int)basket.id, m_shotData);
                     basket.netCloth.externalAcceleration = new Vector3() {
                         x = UnityEngine.Random.Range(5, 12),
                         y = UnityEngine.Random.Range(32, 48),
@@ -694,9 +673,17 @@ public class BallHandling : NetworkedBehaviour
         }
     }
 
-    private void OnShotMade(uint teamID, ShotData shotData)
+    private void OnShotMade(int teamID, ShotData shotData)
     {
+        m_shotInAction = false;
         GameManager.Singleton.AddScore(teamID, shotData.shotValue);
+        print("made");
+    }
+
+    private void OnShotMissed(ShotData shotData)
+    {
+        m_shotInAction = false;
+        print("missed");
     }
 
     [ClientRPC]
@@ -734,19 +721,22 @@ public class BallHandling : NetworkedBehaviour
         if (newNetworkID == NO_PLAYER)
         {
             State = BallState.LOOSE;
+            return;
         }
         else
         {
             m_currentPlayer = GameManager.GetPlayerByNetworkID(newNetworkID);
             InvokeClientRpcOnClient(SetPlayerHandler, m_currentPlayer.OwnerClientId, m_currentPlayer.NetworkId, true);
+            BallHandlerChange?.Invoke(PlayerLastPossesion, PlayerWithBall);
+
             // if old id and new id are same don't change teams.
-            if (Possession == m_currentPlayer.TeamID) return;
+            if (Possession == m_currentPlayer.teamID) return;
 
             // Temp like this in case i want to change something.
             if (IsBallLoose())
-                teamToSwitch = m_currentPlayer.TeamID;
+                teamToSwitch = m_currentPlayer.teamID;
             else
-                teamToSwitch = m_currentPlayer.TeamID;
+                teamToSwitch = m_currentPlayer.teamID;
         }
         ChangePossession(teamToSwitch, false, false);
     }
@@ -778,6 +768,7 @@ public class BallHandling : NetworkedBehaviour
         else if (collision.gameObject.CompareTag(FLOOR_TAG))
         {
             m_hitFloor = true;
+            if (m_shotInAction) ShotMissed?.Invoke(m_shotData);
         }
 
     }
@@ -821,6 +812,7 @@ public class BallHandling : NetworkedBehaviour
         {
             State = BallState.LOOSE;
         }
+        PossessionChange?.Invoke(team);
     }
 
     public bool IsBallLoose()
