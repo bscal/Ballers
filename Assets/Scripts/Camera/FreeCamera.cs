@@ -3,6 +3,7 @@ using MLAPI.Spawning;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class FreeCamera : MonoBehaviour
 {
@@ -15,40 +16,47 @@ public class FreeCamera : MonoBehaviour
 
     Camera m_camera;
     Movement m_movement;
+    Controls m_controls;
 
-    void Start()
+    private void Awake()
     {
-        if (NetworkingManager.Singleton.IsServer && !NetworkingManager.Singleton.IsHost)
-        {
-            Destroy(this);
-        }
+        m_controls = new Controls();
+        m_controls.Enable();
 
         m_camera = GetComponent<Camera>();
-        m_movement = SpawnManager.GetLocalPlayerObject()?.GetComponentInChildren<Movement>();
-        m_camera.enabled = false;
+        gameObject.SetActive(false);
     }
 
     void Update()
     {
-        if (m_movement == null)
-            m_movement = SpawnManager.GetLocalPlayerObject()?.GetComponentInChildren<Movement>();
-
-        if (m_camera.enabled)
+        if (gameObject.activeSelf)
         {
-            m_horizontal = Input.GetAxis("Horizontal") * (turnspeed * Time.deltaTime);
-            transform.Rotate(0f, m_horizontal, 0f);
-            m_vertical = Input.GetAxis("Vertical") * (speed * Time.deltaTime);
-            transform.Translate(0.0f, 0.0f, m_vertical);
+            Vector2 move = m_controls.Keyboard.Move.ReadValue<Vector2>();
 
-            if (Input.GetKey(KeyCode.Space))
+            transform.position += new Vector3(move.x, 0, move.y) * speed * Time.deltaTime;
+
+            if (Keyboard.current.leftShiftKey.ReadValue() > 0)
                 transform.Translate(0.0f, upSpeed * Time.deltaTime, 0.0f);
-            else if (Input.GetKey(KeyCode.LeftShift))
+            else if (Keyboard.current.leftCtrlKey.ReadValue() > 0)
                 transform.Translate(0.0f, -upSpeed * Time.deltaTime, 0.0f);
         }
     }
 
+    private void OnEnable()
+    {
+        if (GameManager.GetPlayer() == null)
+            return;
+        if (m_movement == null)
+            m_movement = GameManager.GetPlayer().GetComponentInChildren<Movement>();
+        m_movement.isMovementEnabled = false;
+    }
+
     private void OnDisable()
     {
-        m_movement.isEnabled = true;
+        if (GameManager.GetPlayer() == null)
+            return;
+        if (m_movement == null)
+            m_movement = GameManager.GetPlayer().GetComponentInChildren<Movement>();
+        m_movement.isMovementEnabled = true;
     }
 }

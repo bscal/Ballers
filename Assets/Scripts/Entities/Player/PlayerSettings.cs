@@ -34,17 +34,18 @@ namespace Ballers
 
         private void Start()
         {
-            follow.enabled = false;
-            side.enabled = false;
-            free.enabled = false;
+            follow.gameObject.SetActive(false);
+            side.gameObject.SetActive(false);
+            free.gameObject.SetActive(false);
             OnCameraChanged(FOCUS_CAM);
         }
 
         public void OnCameraChanged(int id)
         {
-            if (Current != null) Current.enabled = false;
+            if (Current != null)
+                Current.gameObject.SetActive(false);
             Current = IntToCamera(id);
-            Current.enabled = true;
+            Current.gameObject.SetActive(true);
         }
 
         private Camera IntToCamera(int id)
