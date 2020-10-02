@@ -18,10 +18,10 @@ public class BasketballStateManager : NetworkedBehaviour
 
     public event Action<int, bool> QuarterEnd;
     public event Action HalfEnd;
+    public event Action GameEnd;
     public event Action ShotClockViolation;
 
     // Public
-
     private NetworkedVarDouble m_inGameTime = new NetworkedVarDouble(NetworkConstants.GAME_STATE_CHANNEL, Match.MatchSettings.QuarterLength);
     public double InGameTime { get { return m_inGameTime.Value; } set { m_inGameTime.Value = value; } }
 
@@ -150,7 +150,7 @@ public class BasketballStateManager : NetworkedBehaviour
                 m_OvertimeCount++;
             }
             // End of regulation
-
+            GameEnd?.Invoke();
         }
         else
         {
