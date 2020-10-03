@@ -260,7 +260,7 @@ public class BallHandling : NetworkedBehaviour
         m_shotInAction = true;
         m_body.isKinematic = false;
 
-        float h = ShotController.GetShotRange(m_shotData.type) == ShotRange.LONG ? UnityEngine.Random.Range(5f, 8f) : UnityEngine.Random.Range(.5f, 1f);
+        float h = ShotController.GetShotRange(m_shotData.type) == ShotRange.LONG ? UnityEngine.Random.Range(5f, 8f) : UnityEngine.Random.Range(1.5f, 2f);
         float d = SHOT_SPEED + UnityEngine.Random.value / m_shotData.distance;
 
         Vector3 offset = Vector3.zero;
@@ -634,18 +634,24 @@ public class BallHandling : NetworkedBehaviour
     {
         if (IsServer)
         {
+            if (other.gameObject.name == "Hitbox Net")
+            {
+                Vector3 dir = (transform.position - other.transform.position).normalized;
+
+                // Detect if coming from above the collider.
+                if (dir.y > 0)
+                    m_hitTopTrigger = true;
+
+            }
             if (other.gameObject.name == "Hitbox Top")
             {
                 Vector3 dir = (transform.position - other.transform.position).normalized;
 
                 // Detect if coming from above the collider.
                 if (dir.y > 0)
-                {
                     m_body.AddForce(new Vector3(0, -5));
-                    m_hitTopTrigger = true;
-                }
             }
-            else if (other.gameObject.name == "Hitbox Bot" && m_hitTopTrigger)
+            if (other.gameObject.name == "Hitbox Bot" && m_hitTopTrigger)
             {
                 Vector3 dir = (transform.position - other.transform.position).normalized;
 
@@ -665,9 +671,14 @@ public class BallHandling : NetworkedBehaviour
         }
     }
 
+    private void OnTriggerStay(Collider other)
+    {
+
+    }
+
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.name == "Hitbox Top" || other.gameObject.name == "Hitbox Bot")
+        if (other.gameObject.name == "Hitbox Net")
         {
             m_hitTopTrigger = false;
         }
@@ -676,6 +687,7 @@ public class BallHandling : NetworkedBehaviour
     private void OnShotMade(int teamID, ShotData shotData)
     {
         m_shotInAction = false;
+        m_hitTopTrigger = false;
         GameManager.Singleton.AddScore(teamID, shotData.shotValue);
         print("made");
     }
@@ -683,6 +695,7 @@ public class BallHandling : NetworkedBehaviour
     private void OnShotMissed(ShotData shotData)
     {
         m_shotInAction = false;
+        m_hitTopTrigger = false;
         print("missed");
     }
 
