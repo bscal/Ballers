@@ -35,7 +35,7 @@ public class ShotData : IBitWritable
             type = (ShotType)reader.ReadByte();
             style = (ShotStyle)reader.ReadByte();
             direction = (ShotDirection)reader.ReadByte();
-            bankshot = (BankType)reader.ReadSByte();
+            bankshot = (BankType)reader.ReadByte();
             shooter = reader.ReadUInt64Packed();
             shotValue = reader.ReadInt32Packed();
             leftHanded = reader.ReadBool();
@@ -55,7 +55,7 @@ public class ShotData : IBitWritable
             writer.WriteByte((byte)type);
             writer.WriteByte((byte)style);
             writer.WriteByte((byte)direction);
-            writer.WriteSByte((sbyte)bankshot);
+            writer.WriteByte((byte)bankshot);
             writer.WriteUInt64Packed(shooter);
             writer.WriteInt32Packed(shotValue);
             writer.WriteBool(leftHanded);

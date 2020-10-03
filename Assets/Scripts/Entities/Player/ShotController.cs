@@ -68,9 +68,9 @@ public enum ShotRange
 
 public enum BankType
 {
-    NONE = 0,
-    LEFT = -1,
-    RIGHT = 1
+    LEFT = 0,
+    RIGHT = 1,
+    NONE = 2,
 }
 
 public static class ShotController
