@@ -10,7 +10,7 @@ public class Movement : MonoBehaviour
 
     public Animator animator;
 
-    public bool isEnabled = true;
+    public bool isMovementEnabled = true;
 
     private float m_horizontal;
     private float m_vertical;
@@ -53,7 +53,7 @@ public class Movement : MonoBehaviour
     void Update()
     {
         if (!m_player.IsOwner) return;
-        if (m_player.isMovementFrozen || !isEnabled) return;
+        if (m_player.isMovementFrozen || !isMovementEnabled) return;
 
         int possesion = GameManager.GetBallHandling().PossessionOrHome;
 
