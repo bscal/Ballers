@@ -82,6 +82,7 @@ public class GameManager : NetworkedBehaviour
 
         inbounds = GameObject.FindGameObjectsWithTag("Inbound");
 
+        NetworkingManager.Singleton.OnServerStarted += OnServerStarted;
         NetworkingManager.Singleton.OnClientConnectedCallback += OnConnected;
         NetworkingManager.Singleton.OnClientDisconnectCallback += OnDisconnected;
         //GameState.GameEnd += OnGameEnd;
@@ -191,6 +192,8 @@ public class GameManager : NetworkedBehaviour
     {
         const float TIMEOUT = 30;
         float timer = 0;
+
+        DebugController.Singleton.PrintConsole($"Starting pregame... Game starts in {TIMEOUT} seconds or all players ready.");
         while (GameState.MatchStateValue == EMatchState.PREGAME)
         {
             yield return new WaitForSeconds(1);
@@ -497,13 +500,25 @@ public class GameManager : NetworkedBehaviour
     {
         if (IsServer)
         {
-            if (NetworkingManager.Singleton.ConnectedClientsList.Count == Match.MatchSettings.TeamSize)
+            print(Match.PlayersNeeded);
+            if (NetworkingManager.Singleton.ConnectedClientsList.Count == Match.PlayersNeeded)
             {
+                DebugController.Singleton.PrintConsole("Triggering AllPlayersConnect.");
                 AllPlayersConnected?.Invoke();
             }
         }
-        
     }
+
+    private void OnServerStarted()
+    {
+        if (IsHost)
+        {
+            // OnClientConnected doesnt run for host so we run it when server starts and we are a host.
+            OnConnected(OwnerClientId);
+        }
+
+    }
+
 
     public bool AreAllPlayersReady()
     {
