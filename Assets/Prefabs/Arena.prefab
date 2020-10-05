@@ -516,6 +516,7 @@ Transform:
   m_Children:
   - {fileID: 1754227361445257073}
   - {fileID: 329124726397936725}
+  - {fileID: 7678098331384070213}
   m_Father: {fileID: 7193370903862704258}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1647,7 +1648,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/courtfloor.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 193078
+  thisInstanceId: 79436
   Undone: 1
 --- !u!1 &3853342065544537922
 GameObject:
@@ -2286,14 +2287,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 329124726397936725}
-  - component: {fileID: 1197709621480407481}
   - component: {fileID: 2143481407995430473}
   - component: {fileID: 7367519515999286707}
   - component: {fileID: 3744583953724085250}
   - component: {fileID: 7064451111712303355}
   m_Layer: 0
   m_Name: Court Bounds
-  m_TagString: Bounds Trigger
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2312,18 +2312,6 @@ Transform:
   m_Father: {fileID: 7112816286196150662}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1197709621480407481
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7204842855535596036}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2304d398ff5bd78419f2b0d77af24c95, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!65 &2143481407995430473
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2743,6 +2731,105 @@ MonoBehaviour:
   AssetGuid: aa761901-2607-427d-a4bb-9e828c507a21
   bserializedVoxels: 1f8b0800000000000400ecbd07601c499625262f6dca7b7f4af54ad7e074a10880601324d8904010ecc188cde692ec1d69472329ab2a81ca6556655d661640cced9dbcf7de7befbdf7de7befbdf7ba3b9d4e27f7dfff3f5c6664016cf6ce4adac99e2180aac81f3f7e7c1f3f227ecd3fe8dffff7fffdfffb47fffee8df6fe2df3ffbfc5ee7df7feecf3edff0ef87b77fdf7f87f01cc2e1366d6e8367bfdff785f0f530917edfb7976f0ab7dbc31ce2a2cd6f7d53ffdea6c79fbdd9bc0d86f2ef6db8f7ebf5b5f9adcd5cf4f560dea6fdfbc2ff105d747bccbf2998b769f321ff0ec1bf3d17dd665c1f328adb40bb3df56ef3ef6de0dcc6d27df8bf1f328a0f19ddeddfddfcefd71bc56d200fc1bccd5bef0be73633f5e1fffeec8d65732fefdbd76d667033ccf77d773317bd6f2fb71fdd6da06deea52fcbb7f9f77d71eecfefed317f5f4ce4dfdb8ceb3654fa707c6ed3c6c7f97d7b7fdff6b77977f35bf2ef6d64f6f638df06cf0f9fd3db8ceb36bd7fb3a3bbfd586ed3fe9bd2a21f8ec950fbdb53f27dffbdcdecdf868b6e0fedebbd7b9b99fad9ebf736ff0ee9ea6faac70f81737bceb90db4aff7ef668bf6cdfe7b1b4ade869f6ff3ef6dfabafdbf5fcf2ffad9c6f0ebd1ea43fabd0d177d3d085f0fabcd6f0de1739b1e6f83c36ddeeae3731bc8effbef6d7aeff7b599abdf17cf0f6f7f7b4fec7dffbd0d0d8730fc6675e36db0ddfcef6da4ec43e6e5f6d84a9bdbcfd7d783ffbeff7e3817dda697db53ac8fdb6ddefa104c6e33c60fd745b7e96533cccd980cbd7b9b361f42551fabdb70d1edfbbd0d0eb779b74fb7dbccd787f43504e136bae8f6d0bedebf5f0f870fc7e73674f3b968339ed27e3356b7e9f17d47741b0ebf0dfcdbbcb5994aefdbe3fb52ef367478dfb1dc06f2ed711ea2ccd7e39f6f16e7dbc0b98d24dee6dff7c5dfa7d56d28701b98ef8bdb6d7abf0dfc0fa1c06d66e77de7e836d4bb4defb76f7f1b4ade06cefbe220ffbe6fef5faf976faaf70ffff77df11fe2a2a196fe9cf6dbf77d986f8a3fdf17ce6dfebd0df5bede28bed97fdfd7526c86d3a7eafbcef510e49fab7f6f2317df142f6d86bcb9fdd7c3f6ebfdfb21fce363fb73f5efed4777fb7f378ff47dfb1a7aeb36987cc8bf43b3791baef8100c6f332f43b41d82791b089b711eeaf1e7f6dfcd94bc0d7d6e4393db53a93f8fb791b59f0dacde971f6e43ed9fed7f3f9c1a43eff6e1fbf4b90d47f5e1bc2f3fdcfedf3e3e43d8de8626ef8b619f2b36c3dc8cedd027fdbe6ef3efed2936f4ed6de8d66f33f4d66d3edf8cf36d46fdbe34f1e9707b6c3f645e86febdcd18df9786b7e7aef7e581cd5cb499ceb7a7deede10c7dbb997a9b71fe107cfa34bcfdbbef8b557f8c9b29707beabd2f356e0367884a9bc7759b51dc7eae37f7789b6f6f3f23b799cd7e8f7e2f43bf6fa6f6fb62757b0afbd80ecde9100eb799ebdbcba9dffe36f3b219dbdb8fe2f6941f1acb6ddebdfdbf9bb9620893a1b736536c3326ef4bdba17f87f8e4367036cfddd0b886b8e836ffde86ab37f7bb99c243f06fdfef50ef9be936c433fd4fde7744b7f977336d6f33f6dbb419c2f336eff6fffdeaabafecbbb71ffb10dd367f7e9b36b719d16de0df7e366fc30fb7d13cef8bd5d7a3cf6d7ad9dce636b41d9af1cd3dde06b7cd38c4206f82b9b9c7cd12f1f5e465333536734efff7af87cf6d687b1b0adf867a7d987dc8ef4bff219c7d2eba0d1d6ec33fb7f9f73674b83d0e5f6fd66e43799f3e43f4ef8fe536b86dc67633ccdbf0d86d7afc101c86a8b4f9dbcdb80df5bb19f2ed3f7fdf365fefdf21dedefcf96d20f7ffbd0d576f6effbe34bcfdecf4dff2ff1dc26448cabea97f87f0efe3f0be706e335fef3bae3e4dfabf6fa6d887f4be79bc9bb11d7aeb36dc727b3c6fc3693fcc7f6f332e7f743e7d6ed37ef3d86f43bd3eceef0bf936ff6eeefdf6efde86e63fdbffde860f6ff3ef6da8b4991f3e84aab7a1f6fbfefb21dcfbbe9419eaf7f6303f844ab7c7ad8fe7cfd5bfb7c1f0f6f4b90db421ca6f8633d4ef8743fe66f9e1ff0d73ba9932febc0f8daecf1b43dc721b9af429731b385fafcdfbcee66608b7f9f7f658f5c7bef9dddbd3f036f33844f93e9c0fa1d26d78e036ff6e7ef73663b90dfcf7edf77d7bdf4c8df7a5923fa7b781f3c3f97708c3f7c5f39ba2de66f8fe27b7d745b7f9f736fc30c445df14ccdbff7b7b1eeefffb4dcdda6d30f4ffbd3d561fd2ef6da0f569789b5e6e83dbfbfe7b7b29fb7a23bdcdbf9bbd8ecd7ddda6fd6de6ab0f7fc82f7a5ffadc1ef3dbb4e9ff7b1bde7edf7fdf778c1f82c3fb52753317dd06e6d7837f1b3a6ca6cf374ba5dbb4b90dce1fcedbb7c779f3bf9bf5c06d207cf8bf3e4d7eae7018fab7af8b3e84fe1ff26e1fabdbc0bc7d5fb7796be8dff795b20fa1d26dfe7d5f7c6e8fdbed71eecfd76da4fe67ef5f6015a3d2d77bb73fd2dbd07633857f36b8fa43febd3d7dbe1ec5def7dff7b568ef8bd5ed319436b7a7cf87f4f5be306f4f9f6ff6dfdbccdd6de0fc6cff3ba48b6e33a2dbb4b9fd7c7d53fcf3f5f0d9dcd7e6f9ba0d9caff7ef6d46777b3d799b1e3f0487f7a5d26d66f03698dfa6f7dbfffb21d4d8fcef6d307cdfdedfb7fd6d30dc2c89b7c1e1ebb5f9f079dc4c8dfebfb719ef6d307fdf91beefbf7d9c6f03ff7d31b9cdd8dff7dfdbcce96de0dcfedfdbf4f8beffbe6f2fb7c1f3f6ffde06e6fbe2f0cdd2e77d7bbf0d84a17ffb94bf0d0ddf1707bf979fbd7f3f04c3db8cf1ebf1c6edffbdcd287e38987cc8bfb799a90ffff736bcfdbed4bb3d9cdbbcf5cdfe7b7b1c6e4f9f9fdb7fdf77766ec37bb781731b8df12198df1ece6d60fa78de06ce6dfebd0dceb7e7a2dbd0e1f6ffbeaf0efc6629739b7f7d3cfb54ba0db6b7c7f936706ef3efe6d9bc0d84dbe3ecff7b7b2e7adf7f6f33dedb8ce836ff7e0826b7a1cf8ffefdd1bf1ffaefff130000ffff141b7cd97e780000
   HasDeserialized: 1
+--- !u!1 &7776434643655570658
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7678098331384070213}
+  - component: {fileID: 4062529306834773419}
+  - component: {fileID: 3286082352508256910}
+  - component: {fileID: 7316706938562451895}
+  - component: {fileID: 5301979009299648493}
+  - component: {fileID: 833747334306791457}
+  m_Layer: 0
+  m_Name: Hitbox
+  m_TagString: Bounds Trigger
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 4294967295
+  m_IsActive: 1
+--- !u!4 &7678098331384070213
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7776434643655570658}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.05, z: -4.85}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 7112816286196150662}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &4062529306834773419
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7776434643655570658}
+  m_Material: {fileID: 13400000, guid: 9155eeefff1752343b8a57f59645be23, type: 2}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.5, y: 0.1, z: 10.7}
+  m_Center: {x: 2.8, y: 0.05, z: 4.85}
+--- !u!65 &3286082352508256910
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7776434643655570658}
+  m_Material: {fileID: 13400000, guid: 9155eeefff1752343b8a57f59645be23, type: 2}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.5, y: 0.1, z: 10.7}
+  m_Center: {x: -2.8, y: 0.05, z: 4.85}
+--- !u!65 &7316706938562451895
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7776434643655570658}
+  m_Material: {fileID: 13400000, guid: 9155eeefff1752343b8a57f59645be23, type: 2}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 6, y: 0.1, z: 0.5}
+  m_Center: {x: 0, y: 0.05, z: -0.15}
+--- !u!65 &5301979009299648493
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7776434643655570658}
+  m_Material: {fileID: 13400000, guid: 9155eeefff1752343b8a57f59645be23, type: 2}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 6, y: 0.1, z: 0.5}
+  m_Center: {x: 0, y: 0.05, z: 9.95}
+--- !u!114 &833747334306791457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7776434643655570658}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2304d398ff5bd78419f2b0d77af24c95, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7861934999851006114
 GameObject:
   m_ObjectHideFlags: 0
