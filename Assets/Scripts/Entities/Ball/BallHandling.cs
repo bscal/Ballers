@@ -52,6 +52,7 @@ public class BallHandling : NetworkedBehaviour
     public event Action<ulong, ulong> BallHandlerChange;
     public event Action<Player, Player, float, PassType> PassBall;
     public event Action<Player, PassType> CatchBall;
+    public event Action<Player, float> TouchedBall;
 
     // =================================== Networking Variables ===================================
 
@@ -103,6 +104,7 @@ public class BallHandling : NetworkedBehaviour
     private bool m_shotPastArc;
     private bool m_hitTopTrigger;
     private bool m_shotInAction;
+    private bool m_insideHitboxShot;
 
     private Dictionary<ulong, float> m_playerDistances;
     private IOrderedEnumerable<KeyValuePair<ulong, float>> m_pairs;
@@ -145,12 +147,13 @@ public class BallHandling : NetworkedBehaviour
             foreach (Player player in GameManager.GetPlayers())
             {
                 if (player == null) continue;
-                float dist = Vector3.Distance(m_ball.transform.position, player.transform.position);
 
+                float dist = Vector3.Distance(m_ball.transform.position, player.transform.position);
                 m_playerDistances[player.NetworkId] = dist;
 
                 if (player.GetComponent<BoxCollider>().bounds.Intersects(m_ball.GetComponentInChildren<SphereCollider>().bounds))
                 {
+                    TouchedBall?.Invoke(player, dist);
                     PlayerLastTouched = player.NetworkId;
                 }
             }
@@ -175,11 +178,15 @@ public class BallHandling : NetworkedBehaviour
             {
                 if (pair.Value < 1.5f)
                 {
-                    Debug.Log(pair.Key + " picked up ball");
-                    // Player closest to ball picks up the ball.
-                    State = BallState.HELD;
-                    ChangeBallHandler(pair.Key);
-                    break;
+                    if (!m_insideHitboxShot)
+                    {
+                        Debug.Log(pair.Key + " picked up ball");
+                        // Player closest to ball picks up the ball.
+                        State = BallState.HELD;
+                        ChangeBallHandler(pair.Key);
+                        break;
+                    }
+
                 }
             }
         }
@@ -210,7 +217,6 @@ public class BallHandling : NetworkedBehaviour
 
         if (IsServer)
         {
-            //StartCoroutine(UpdatePlayerDistances());
             StopBall();
             gameObject.transform.position = new Vector3(5, 3, 5);
             ChangeBallHandler(NO_PLAYER);
@@ -668,12 +674,11 @@ public class BallHandling : NetworkedBehaviour
                     LeanTween.delayedCall(.5f, () => basket.netCloth.externalAcceleration = Vector3.zero);
                 }
             }
+            if (other.gameObject.name.Equals("Hitbox Shot"))
+            {
+                m_insideHitboxShot = true;
+            }
         }
-    }
-
-    private void OnTriggerStay(Collider other)
-    {
-
     }
 
     private void OnTriggerExit(Collider other)
@@ -681,6 +686,10 @@ public class BallHandling : NetworkedBehaviour
         if (other.gameObject.name == "Hitbox Net")
         {
             m_hitTopTrigger = false;
+        }
+        if (other.gameObject.name.Equals("Hitbox Shot"))
+        {
+            m_insideHitboxShot = false;
         }
     }
 
@@ -774,16 +783,15 @@ public class BallHandling : NetworkedBehaviour
         {
             m_hitBackboard = true;
         }
-        else if (collision.gameObject.CompareTag(RIM_TAG))
+        if (collision.gameObject.CompareTag(RIM_TAG))
         {
             m_hitRim = true;
         }
-        else if (collision.gameObject.CompareTag(FLOOR_TAG))
+        if (collision.gameObject.CompareTag(FLOOR_TAG))
         {
             m_hitFloor = true;
             if (m_shotInAction) ShotMissed?.Invoke(m_shotData);
         }
-
     }
 
     private void OnCollisionStay(Collision collision)
@@ -803,7 +811,10 @@ public class BallHandling : NetworkedBehaviour
 
     private void OnCollisionExit(Collision collision)
     {
-        m_isAboveRim = false;
+        if (collision.gameObject.CompareTag("AboveRim"))
+        {
+            m_isAboveRim = false;
+        }  
     }
 
 
