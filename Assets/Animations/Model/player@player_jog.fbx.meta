@@ -1,11 +1,11 @@
 fileFormatVersion: 2
-guid: a8bb88840cddd724fa07025ea4a55576
+guid: ab2bc9bed158473459ce60d82cbd0b5e
 ModelImporter:
   serializedVersion: 20101
   internalIDToNameTable:
   - first:
       74: -4791504522942941401
-    second: player_walk
+    second: player_jog
   externalObjects: {}
   materials:
     materialImportMode: 1
@@ -35,11 +35,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: player_walk
+      name: player_jog
       takeName: Armature|Armature|mixamo.com|Layer0
       internalID: 0
       firstFrame: 0
-      lastFrame: 19
+      lastFrame: 39
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
