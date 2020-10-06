@@ -4,8 +4,8 @@ ModelImporter:
   serializedVersion: 20101
   internalIDToNameTable:
   - first:
-      74: -4791504522942941401
-    second: player_walk
+      74: -6201834280730877740
+    second: walk
   externalObjects: {}
   materials:
     materialImportMode: 1
@@ -26,7 +26,7 @@ ModelImporter:
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
     importConstraints: 0
-    animationCompression: 3
+    animationCompression: 1
     animationRotationError: 0.5
     animationPositionError: 0.5
     animationScaleError: 0.5
@@ -35,8 +35,8 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: player_walk
-      takeName: Armature|Armature|mixamo.com|Layer0
+      name: walk
+      takeName: Armature|Armature|Armature|Armature|mixamo.com|Layer0|Armature|Armature|
       internalID: 0
       firstFrame: 0
       lastFrame: 19
