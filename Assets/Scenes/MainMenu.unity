@@ -1042,6 +1042,11 @@ PrefabInstance:
       propertyPath: NetworkConfig.EnsureNetworkedVarLengthSafety
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3826671062112935201, guid: 2cf0204740b240345837345804dbec80,
+        type: 3}
+      propertyPath: NetworkConfig.RpcHashSize
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3826671062112935203, guid: 2cf0204740b240345837345804dbec80,
         type: 3}
       propertyPath: m_Name
