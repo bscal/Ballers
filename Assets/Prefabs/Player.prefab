@@ -955,7 +955,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/upperarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 94912
+  thisInstanceId: 79626
   Undone: 1
 --- !u!1 &839673004282485492
 GameObject:
@@ -1102,7 +1102,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/foot.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 93822
+  thisInstanceId: 78526
   Undone: 1
 --- !u!1 &855668793950629865
 GameObject:
@@ -5053,7 +5053,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/upperchest.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 94600
+  thisInstanceId: 79310
   Undone: 1
 --- !u!1 &2938245477022681954
 GameObject:
@@ -5382,7 +5382,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/calf.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 93740
+  thisInstanceId: 78444
   Undone: 1
 --- !u!1 &3249661851278890336
 GameObject:
@@ -6593,7 +6593,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/leg.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 94608
+  thisInstanceId: 79318
   Undone: 1
 --- !u!1 &3916156810308084338
 GameObject:
@@ -7691,7 +7691,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/lowerchest.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 94136
+  thisInstanceId: 78844
   Undone: 1
 --- !u!1 &4601289110702898129
 GameObject:
@@ -9070,7 +9070,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/calf.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 94890
+  thisInstanceId: 79604
   Undone: 1
 --- !u!1 &5325683939739797947
 GameObject:
@@ -9641,7 +9641,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/leg.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 93784
+  thisInstanceId: 78488
   Undone: 1
 --- !u!1 &5647321667379715171
 GameObject:
@@ -9801,7 +9801,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/lowerarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 94200
+  thisInstanceId: 78908
   Undone: 1
 --- !u!1 &5690431781121862110
 GameObject:
@@ -10597,7 +10597,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/lowerarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 94318
+  thisInstanceId: 79026
   Undone: 1
 --- !u!1 &5965997991029536111
 GameObject:
@@ -11137,7 +11137,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/head.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 93790
+  thisInstanceId: 78494
   Undone: 1
 --- !u!1 &6166792760984548341
 GameObject:
@@ -12501,7 +12501,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/upperarm.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 94854
+  thisInstanceId: 79568
   Undone: 1
 --- !u!1 &6927265981159084006
 GameObject:
@@ -13798,7 +13798,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/player/foot.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 93880
+  thisInstanceId: 78586
   Undone: 1
 --- !u!1 &7765132884196620524
 GameObject:
@@ -13914,7 +13914,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5109841824685337752
 Transform:
   m_ObjectHideFlags: 0
@@ -13999,7 +13999,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 241702298840052630}
-  isEnabled: 1
+  m_player: {fileID: 0}
+  m_parent: {fileID: 0}
+  isMovementEnabled: 1
 --- !u!1 &7931876022051427526
 GameObject:
   m_ObjectHideFlags: 0
@@ -15263,13 +15265,15 @@ GameObject:
   m_Component:
   - component: {fileID: 7864292228048945127}
   - component: {fileID: 5805129176901056585}
+  - component: {fileID: 5977831723216924839}
   - component: {fileID: 7447245464667065532}
-  - component: {fileID: 648187691570040564}
   - component: {fileID: 5179076237109872503}
   - component: {fileID: 8400331195150798432}
   - component: {fileID: 5179076237109872492}
-  - component: {fileID: 5977831723216924839}
   - component: {fileID: 2128526360333151305}
+  - component: {fileID: 5400875483028027819}
+  - component: {fileID: -258293390516097271}
+  - component: {fileID: 429915856476162270}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -15315,6 +15319,22 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 3.7768326, z: 1}
   m_Center: {x: 0, y: 2.1679935, z: 0}
+--- !u!54 &5977831723216924839
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9132637102776717737}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 90
+  m_CollisionDetection: 0
 --- !u!114 &7447245464667065532
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15333,6 +15353,9 @@ MonoBehaviour:
   aiPlayerID: 0
   slot: 3
   height: 2.35
+  teamID: 0
+  hasReadyUp: 0
+  isAI: 0
   m_screenHitboxes: {fileID: 465271389445967199}
   m_screenCollider: {fileID: 8285789891948093697}
   m_hardScreenCollider: {fileID: 499513842373943136}
@@ -15355,7 +15378,7 @@ MonoBehaviour:
   isDribRight: 0
   isContesting: 0
   isBlocking: 0
-  isAI: 0
+  isStealing: 0
   isDribbling: 0
   isInsideThree: 0
   isInbounds: 0
@@ -15363,18 +15386,6 @@ MonoBehaviour:
   isPostMove: 0
   m_rightHand: {fileID: 1367100140280164334}
   m_leftHand: {fileID: 5912948185960104492}
---- !u!114 &648187691570040564
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9132637102776717737}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d99b38d3dd5bfe4282398ba133d626e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &5179076237109872503
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15457,22 +15468,6 @@ MonoBehaviour:
   fill: {fileID: 0}
   target: {fileID: 0}
   glow: {fileID: 0}
---- !u!54 &5977831723216924839
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9132637102776717737}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0
-  m_UseGravity: 1
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 90
-  m_CollisionDetection: 0
 --- !u!114 &2128526360333151305
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15483,6 +15478,47 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f75eec2c88bd25f4f92b76326b606f45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &5400875483028027819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9132637102776717737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9809e9acbdff3b34b949bb366e59a0db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 3079357640688713583, guid: 0ef8b220239795f4c953f855be37545f,
+    type: 3}
+  m_player: {fileID: 0}
+  m_parent: {fileID: 0}
+  isMovementEnabled: 1
+--- !u!114 &-258293390516097271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9132637102776717737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24285f392cbd857418a61365e8923075, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &429915856476162270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9132637102776717737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d99b38d3dd5bfe4282398ba133d626e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &5637285327473977496
