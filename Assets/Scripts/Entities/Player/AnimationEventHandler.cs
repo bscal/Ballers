@@ -8,7 +8,7 @@ public class AnimationEventHandler : MonoBehaviour
     public Player player;
     public PlayerControls pControls;
 
-    public void ShootAnimationHighest(int seconds)
+    public void ShootAnimationHighest()
     {
         GameManager.GetBallHandling().InvokeServerRpc(GameManager.GetBallHandling().OnAnimationRelease);
     }
