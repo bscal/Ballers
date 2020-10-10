@@ -293,6 +293,8 @@ GameObject:
   m_Component:
   - component: {fileID: 2589662171381328061}
   - component: {fileID: 2628674445970811501}
+  - component: {fileID: 3037654956912278558}
+  - component: {fileID: -3945977296943855769}
   m_Layer: 0
   m_Name: model_player_blue
   m_TagString: Untagged
@@ -307,15 +309,15 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2935085450790121991}
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 0.342, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.25, z: 0}
+  m_LocalScale: {x: 10, y: 10, z: 10}
   m_Children:
   - {fileID: 6863628033175631907}
   - {fileID: 7258949929300578875}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &2628674445970811501
 Animator:
   serializedVersion: 3
@@ -335,6 +337,42 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &3037654956912278558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2935085450790121991}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d11194e4154428409a481699fc52fe2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 0}
+  pControls: {fileID: 0}
+--- !u!114 &-3945977296943855769
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2935085450790121991}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 623367494, guid: 01701b64234b4d523d8045142cbc73fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  EnableProximity: 0
+  ProximityRange: 50
+  _animator: {fileID: 2628674445970811501}
+  parameterSendBits: 31
+  param0: 
+  param1: 
+  param2: 
+  param3: 
+  param4: 
+  param5: 
 --- !u!1 &2975530746618077791
 GameObject:
   m_ObjectHideFlags: 0
