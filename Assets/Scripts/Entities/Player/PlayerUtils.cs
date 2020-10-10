@@ -9,7 +9,7 @@ public class PlayerUtils : MonoBehaviour
 
     public static IEnumerator Dunk(Player p, Basket b)
     {
-        p.isMovementFrozen = true;
+        p.GetMovement().isMovementEnabled = false;
 
         m_tempTrans.position = b.netPos.position;
         m_tempTrans.LookAt(p.transform);
@@ -23,7 +23,7 @@ public class PlayerUtils : MonoBehaviour
         while (fracComplete < .99)
         {
             fracComplete = (Time.time - startTime) / .33f;
-            p.transform.position = Vector3.Lerp(p.GetHand, m_tempTrans.position, fracComplete) - (p.GetHand - p.transform.position);
+            p.transform.position = Vector3.Lerp(p.CurHandPos, m_tempTrans.position, fracComplete) - (p.CurHandPos - p.transform.position);
             yield return null;
         }
 
@@ -40,7 +40,7 @@ public class PlayerUtils : MonoBehaviour
         }
         p.transform.position = endPos;
 
-        p.isMovementFrozen = false;
+        p.GetMovement().isMovementEnabled = false;
     }
 
 }

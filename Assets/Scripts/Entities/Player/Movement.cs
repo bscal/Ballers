@@ -55,11 +55,15 @@ public class Movement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!m_player.IsOwner) return;
-        if (m_player.isMovementFrozen || !isMovementEnabled) return;
+        if (!m_player.IsOwner || !isMovementEnabled || m_player.isShooting) return;
+        HandleTargetDirection();
+        MovePlayer();
+        RotatePlayer();
+    }
 
+    private void HandleTargetDirection()
+    {
         int possesion = GameManager.GetBallHandling().PossessionOrHome;
-
         if (m_player.HasBall && possesion != -1)
         {
             m_targetDirection = GameManager.Singleton.baskets[possesion].gameObject.transform.position - m_parent.transform.position;
@@ -72,53 +76,6 @@ public class Movement : MonoBehaviour
         {
             m_targetDirection = GameManager.Singleton.baskets[possesion].gameObject.transform.position - m_parent.transform.position;
         }
-
-
-        //         if (m_player.isMoving)
-        //         {
-        //             if (m_player.isSprinting)
-        //             {
-        //                 m_horizontal = Input.GetAxis("Horizontal") * (m_turningSpeed * Time.deltaTime);
-        //                 m_parent.transform.Rotate(0f, m_horizontal, 0f);
-        //                 m_vertical = Input.GetAxis("Vertical") * (m_sprintSpeed * Time.deltaTime);
-        //                 m_strafe = 0f;
-        //             }
-        //             else
-        //             {
-        //                 if (m_targetDirection != null)
-        //                 {
-        //                     m_targetDirection.y = 0f;
-        //                     // Rotate the forward vector towards the target direction by one step
-        //                     Vector3 newDirection = Vector3.RotateTowards(m_parent.transform.forward, m_targetDirection, AUTO_TURN_SPEED * Time.deltaTime, 0.0f);
-        //                     // Calculate a rotation a step closer to the target and applies rotation to this object
-        //                     m_parent.transform.rotation = Quaternion.LookRotation(newDirection);
-        //                 }
-        //                 m_vertical = Input.GetAxis("Vertical") * (m_movementSpeed * Time.deltaTime);
-        //                 m_strafe = Input.GetAxis("Horizontal") * (m_movementSpeed * Time.deltaTime);
-        //                 if (Input.GetAxis("Horizontal") > 0)
-        //                 {
-        //                     //animator.CrossFade("strafeRight");
-        //                 }
-        //                 else if (Input.GetAxis("Horizontal") < 0)
-        //                 {
-        //                     //animator.CrossFade("strafeLeft");
-        //                 }
-        //             }
-        //             m_parent.transform.Translate(m_strafe, 0f, m_vertical);
-        //         }
-    MovePlayer();
-    RotatePlayer();
-    /*
-            else if (!m_skipRotate)
-            {
-                m_targetDirection.y = 0f;
-                // Rotate the forward vector towards the target direction by one step
-                Vector3 newDirection = Vector3.RotateTowards(m_parent.transform.forward, m_targetDirection, AUTO_TURN_SPEED * Time.deltaTime, 0.0f);
-                // Calculate a rotation a step closer to the target and applies rotation to this object
-                m_parent.transform.rotation = Quaternion.LookRotation(newDirection);
-
-            }*/
-    m_skipRotate = false;
     }
 
     private void MovePlayer()
@@ -167,7 +124,7 @@ public class Movement : MonoBehaviour
         }
     }
 
-    private void StrafePlayer()
+    private void HandleDribblingMovement()
     {
 
     }

@@ -599,7 +599,7 @@ public class BallHandling : NetworkedBehaviour
         while (State == BallState.PASS)
         {
             float dist = Vector3.Distance(target.CenterPos, pos);
-            target.isMovementFrozen = true;
+            target.GetMovement().isMovementEnabled = false;
             if (dist > .2)
             {
                 target.transform.position = Vector3.Lerp(start, pos, Time.deltaTime * 6.0f);
@@ -607,7 +607,7 @@ public class BallHandling : NetworkedBehaviour
 
             yield return null;
         }
-        target.isMovementFrozen = false;
+        target.GetMovement().isMovementEnabled = true;
         CatchBall?.Invoke(target, type);
     }
 

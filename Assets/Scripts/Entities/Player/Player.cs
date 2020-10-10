@@ -49,7 +49,6 @@ public class Player : NetworkedBehaviour, IBitWritable
     public bool isHardScreening;
     public bool isShooting;
     public bool isHelping;
-    public bool isMovementFrozen;
     public bool isBallInLeftHand;
     public bool isCtrlDown;
     public bool isAltDown;
@@ -75,16 +74,16 @@ public class Player : NetworkedBehaviour, IBitWritable
     /// </summary>
     public bool IsNpc { get { return isAI || isDummy; } }
     public bool HasBall { get { return NetworkId == GameManager.GetBallHandling().PlayerWithBall; } }
-    public Vector3 RightHand { get { return m_rightHand.transform.position; } }
-    public Vector3 LeftHand { get { return m_leftHand.transform.position; } }
-    public Vector3 GetHand { get { return (isBallInLeftHand) ? LeftHand : RightHand; } }
+    public Vector3 RightHandPos { get { return m_rightHand.transform.position; } }
+    public Vector3 LeftHandPos { get { return m_leftHand.transform.position; } }
+    public Vector3 CurHandPos { get { return (isBallInLeftHand) ? LeftHandPos : RightHandPos; } }
     public Vector3 CenterPos { get { return m_center.transform.position; } }
     public Transform OwnBasket { get { return GameManager.Singleton.baskets[teamID].transform; } }
     public Transform OtherBasket { get { return GameManager.Singleton.baskets[FlipTeamID(teamID)].transform; } }
     public bool OnLeftSide { get { return transform.position.x < 0; } }
     private Vector3 m_target;
-    public Vector3 LookTarget { get { return m_target; } }
-    public Quaternion LookRotation { get { return Quaternion.LookRotation(m_target); } }
+    public Vector3 TargetPos { get { return m_target; } }
+    public Quaternion TargetRotation { get { return Quaternion.LookRotation(m_target); } }
     public float DistanceFromTarget { get { return Vector3.Distance(transform.position, m_target); } }
     private Player m_assignment;
     public Player Assignment
@@ -108,6 +107,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     private RoundShotMeter m_roundShotMeter;
     private Animator m_animator;
     private PlayerAnimHandler m_animHandler;
+    private Movement m_movement;
     private ShotManager m_shotManager;
     private SpriteRenderer m_playerCircle;
 
@@ -125,6 +125,7 @@ public class Player : NetworkedBehaviour, IBitWritable
         m_playerCircle = GetComponentInChildren<SpriteRenderer>();
         m_center = transform.Find("Center").gameObject;
         m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
+        m_movement = GetComponent<Movement>();
         id = username.GetHashCode();
 
         if (!IsNpc)
@@ -152,7 +153,7 @@ public class Player : NetworkedBehaviour, IBitWritable
             //m_animator.SetBool("hasBall", HasBall);
             //m_animator.SetBool("hasBallInLeft", isBallInLeftHand);
 
-            Debugger.Instance.Print(string.Format("{0} : {1}", transform.position.ToString(), Vector3.Distance(transform.position, LookTarget)), 0);
+            Debugger.Instance.Print(string.Format("{0} : {1}", transform.position.ToString(), Vector3.Distance(transform.position, TargetPos)), 0);
             Debugger.Instance.Print(string.Format("2pt:{0}", isInsideThree), 3);
 
             m_target = GameManager.Singleton.baskets[GameManager.Singleton.Possession].gameObject.transform.position;
@@ -423,6 +424,8 @@ public class Player : NetworkedBehaviour, IBitWritable
         return Vector3.Angle(target.forward - source.forward, source.forward);
     }
 
+    public Movement GetMovement() => m_movement;
+
     /// <summary>
     /// Returns true if value is greater then 180 - degrees.
     /// Angle and rangeOfDegrees should be between 0 and 180.
@@ -479,15 +482,14 @@ public class Player : NetworkedBehaviour, IBitWritable
             isShooting = reader.ReadBool();
 
             isHelping = reader.ReadBool();
-            isMovementFrozen = reader.ReadBool();
             isBallInLeftHand = reader.ReadBool();
             isCtrlDown = reader.ReadBool();
             isAltDown = reader.ReadBool();
             isDribUp = reader.ReadBool();
             isDribDown = reader.ReadBool();
             isDribLeft = reader.ReadBool();
-
             isDribRight = reader.ReadBool();
+
             isContesting = reader.ReadBool();
             isBlocking = reader.ReadBool();
             isStealing = reader.ReadBool();
@@ -512,15 +514,14 @@ public class Player : NetworkedBehaviour, IBitWritable
             writer.WriteBool(isShooting);
 
             writer.WriteBool(isHelping);
-            writer.WriteBool(isMovementFrozen);
             writer.WriteBool(isBallInLeftHand);
             writer.WriteBool(isCtrlDown);
             writer.WriteBool(isAltDown);
             writer.WriteBool(isDribUp);
             writer.WriteBool(isDribDown);
             writer.WriteBool(isDribLeft);
-
             writer.WriteBool(isDribRight);
+
             writer.WriteBool(isContesting);
             writer.WriteBool(isBlocking);
             writer.WriteBool(isStealing);

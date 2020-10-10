@@ -42,8 +42,8 @@ public class ShotManager : MonoBehaviour
     {
         if (!NetworkingManager.Singleton.IsServer) return;
 
-        float dist = Vector3.Distance(p.transform.position, p.LookTarget);
-        float angle = Quaternion.Angle(transform.rotation, p.LookRotation);
+        float dist = Vector3.Distance(p.transform.position, p.TargetPos);
+        float angle = Quaternion.Angle(transform.rotation, p.TargetRotation);
 
         m_isShot = true;
 
