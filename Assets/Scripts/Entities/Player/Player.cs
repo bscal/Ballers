@@ -26,6 +26,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     public float height = 2.35f;
     public int teamID;
     public bool hasReadyUp;
+    public bool isAI;
     [NonSerialized]
     public ulong steamID;
     [NonSerialized]
@@ -58,7 +59,8 @@ public class Player : NetworkedBehaviour, IBitWritable
     public bool isDribRight;
     public bool isContesting;
     public bool isBlocking;
-    public bool isAI;
+    public bool isStealing;
+
 
     // Server values
     public bool isDribbling;
@@ -105,6 +107,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     private ShotMeter m_shotmeter;
     private RoundShotMeter m_roundShotMeter;
     private Animator m_animator;
+    private PlayerAnimHandler m_animHandler;
     private ShotManager m_shotManager;
     private SpriteRenderer m_playerCircle;
 
@@ -120,9 +123,6 @@ public class Player : NetworkedBehaviour, IBitWritable
 
         // Initialize Player values
         m_playerCircle = GetComponentInChildren<SpriteRenderer>();
-        m_animator = GetComponentInChildren<Animator>();
-        m_rightHand = transform.Find("root/body/right arm/forearm/hand").gameObject;
-        m_leftHand = transform.Find("root/body/left arm/forearm/hand").gameObject;
         m_center = transform.Find("Center").gameObject;
         m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
         id = username.GetHashCode();
@@ -149,8 +149,8 @@ public class Player : NetworkedBehaviour, IBitWritable
 
         if (IsOwner)
         {
-            m_animator.SetBool("hasBall", HasBall);
-            m_animator.SetBool("hasBallInLeft", isBallInLeftHand);
+            //m_animator.SetBool("hasBall", HasBall);
+            //m_animator.SetBool("hasBallInLeft", isBallInLeftHand);
 
             Debugger.Instance.Print(string.Format("{0} : {1}", transform.position.ToString(), Vector3.Distance(transform.position, LookTarget)), 0);
             Debugger.Instance.Print(string.Format("2pt:{0}", isInsideThree), 3);
@@ -159,6 +159,41 @@ public class Player : NetworkedBehaviour, IBitWritable
         }
 
     }
+
+    /// <summary>
+    /// Called when the model is Instantiated
+    /// </summary>
+    public void InitilizeModel()
+    {
+        m_animator = GetComponentInChildren<Animator>();
+        m_animHandler = GetComponent<PlayerAnimHandler>();
+        m_animHandler.SetAnimator(m_animator);
+        m_rightHand = FindTransformInChild(transform, "RightBallPos").gameObject;
+        m_leftHand = FindTransformInChild(transform, "LeftBallPos").gameObject;
+        Movement movement = gameObject.GetComponent<Movement>();
+        if (!IsNpc && movement != null)
+        {
+            movement.animator = m_animator;
+        }
+    }
+
+    public static Transform FindTransformInChild(Transform transform, string objectName)
+    {
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            if (transform.GetChild(i).name.Equals(objectName))
+            {
+                return transform.GetChild(i);
+            }
+
+            Transform res = FindTransformInChild(transform.GetChild(i), objectName);
+            if (res != null)
+                return res;
+        }
+        return null;
+    }
+
+
     public void ShootBall()
     {
         InvokeServerRpc(ServerShootBall, NetworkId);
@@ -167,6 +202,8 @@ public class Player : NetworkedBehaviour, IBitWritable
     [ServerRPC]
     public void ServerShootBall(ulong netID)
     {
+        if (isShooting && !HasBall) return;
+        isShooting = true;
         ulong clientID = GameManager.GetPlayerByNetworkID(netID).OwnerClientId;
         ulong rtt = NetworkingManager.Singleton.NetworkConfig.NetworkTransport.GetCurrentRtt(clientID);
         m_shotManager.OnShoot(netID, this, (rtt / 1000 / 2));
@@ -174,7 +211,7 @@ public class Player : NetworkedBehaviour, IBitWritable
 
     public void ReleaseBall()
     {
-        if (!isShooting) return;
+        if (!isShooting && !HasBall) return;
         isShooting = false;
         InvokeServerRpc(OnRelease, NetworkId);
     }
@@ -192,7 +229,6 @@ public class Player : NetworkedBehaviour, IBitWritable
     public void ClientShootBall(ulong netID, ShotData shotData, ShotBarData shotBarData)
     {
         Player p = GameManager.GetPlayerByNetworkID(netID);
-        p.isShooting = true;
         if (p.isCtrlDown)
             p.ChangeHand();
         
@@ -216,7 +252,7 @@ public class Player : NetworkedBehaviour, IBitWritable
         switch (type)
         {
             case ShotType.SHOT:
-                m_animator.Play("Shoot");
+                m_animHandler.PlayAnim(AnimNames.REG_JUMPSHOT);
                 break;
             case ShotType.LAYUP:
                 if (leftHanded) m_animator.Play("LayupL");
@@ -433,6 +469,7 @@ public class Player : NetworkedBehaviour, IBitWritable
         {
             teamID = reader.ReadInt32Packed();
 
+            isAI = reader.ReadBool();
             isRightHanded = reader.ReadBool();
             isMoving = reader.ReadBool();
             isSprinting = reader.ReadBool();
@@ -440,8 +477,8 @@ public class Player : NetworkedBehaviour, IBitWritable
             isScreening = reader.ReadBool();
             isHardScreening = reader.ReadBool();
             isShooting = reader.ReadBool();
-            isHelping = reader.ReadBool();
 
+            isHelping = reader.ReadBool();
             isMovementFrozen = reader.ReadBool();
             isBallInLeftHand = reader.ReadBool();
             isCtrlDown = reader.ReadBool();
@@ -449,9 +486,11 @@ public class Player : NetworkedBehaviour, IBitWritable
             isDribUp = reader.ReadBool();
             isDribDown = reader.ReadBool();
             isDribLeft = reader.ReadBool();
-            isDribRight = reader.ReadBool();
 
-            isAI = reader.ReadBool();
+            isDribRight = reader.ReadBool();
+            isContesting = reader.ReadBool();
+            isBlocking = reader.ReadBool();
+            isStealing = reader.ReadBool();
 
             m_target = reader.ReadVector3Packed();
         }
@@ -463,6 +502,7 @@ public class Player : NetworkedBehaviour, IBitWritable
         {
             writer.WriteInt32Packed(teamID);
 
+            writer.WriteBool(isAI);
             writer.WriteBool(isRightHanded);
             writer.WriteBool(isMoving);
             writer.WriteBool(isSprinting);
@@ -470,8 +510,8 @@ public class Player : NetworkedBehaviour, IBitWritable
             writer.WriteBool(isScreening);
             writer.WriteBool(isHardScreening);
             writer.WriteBool(isShooting);
-            writer.WriteBool(isHelping);
 
+            writer.WriteBool(isHelping);
             writer.WriteBool(isMovementFrozen);
             writer.WriteBool(isBallInLeftHand);
             writer.WriteBool(isCtrlDown);
@@ -479,9 +519,11 @@ public class Player : NetworkedBehaviour, IBitWritable
             writer.WriteBool(isDribUp);
             writer.WriteBool(isDribDown);
             writer.WriteBool(isDribLeft);
-            writer.WriteBool(isDribRight);
 
-            writer.WriteBool(isAI);
+            writer.WriteBool(isDribRight);
+            writer.WriteBool(isContesting);
+            writer.WriteBool(isBlocking);
+            writer.WriteBool(isStealing);
 
             writer.WriteVector3Packed(m_target);
         }

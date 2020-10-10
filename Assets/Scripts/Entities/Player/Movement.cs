@@ -9,6 +9,8 @@ public class Movement : MonoBehaviour
     public const float AUTO_TURN_SPEED = 3.0f;
 
     public Animator animator;
+    public Player m_player;
+    public GameObject m_parent;
 
     public bool isMovementEnabled = true;
 
@@ -16,11 +18,10 @@ public class Movement : MonoBehaviour
     private float m_vertical;
     private float m_strafe;
 
-    private Player m_player;
-    private GameObject m_parent;
+
+
     private Vector3 m_targetDirection;
     private bool m_skipRotate = false;
-
     private readonly float m_movementSpeed  = 8.0f;
     private readonly float m_sprintSpeed    = 16.0f;
     private readonly float m_turningSpeed   = 200.0f;
@@ -45,8 +46,10 @@ public class Movement : MonoBehaviour
             Destroy(this);
         }
 
-        m_player = GetComponentInParent<Player>();
-        m_parent = m_player.gameObject;
+        if (m_player == null)
+            m_player = GetComponentInParent<Player>();
+        if (m_parent == null)
+            m_parent = m_player.gameObject;
     }
 
     // Update is called once per frame
@@ -149,6 +152,7 @@ public class Movement : MonoBehaviour
         {
             m_parent.transform.position -= mov;
         }
+
     }
 
     private void RotatePlayer()

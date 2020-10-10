@@ -13,6 +13,7 @@ public class PlayerControls : NetworkedBehaviour
 
     private Player m_player;
     private Animator m_animator;
+    private PlayerAnimHandler m_animHandler;
     private GameObject m_menu;
 
     private bool m_shootCooldown = false;
@@ -37,6 +38,10 @@ public class PlayerControls : NetworkedBehaviour
         actions.Keyboard.Pass_3.canceled += ReleasePass;
         actions.Keyboard.Pass_4.canceled += ReleasePass;
         actions.Keyboard.Pass_5.canceled += ReleasePass;
+
+        actions.Keyboard.Shoot.performed += StartShot;
+        actions.Keyboard.Release.performed += StopShot;
+        actions.Keyboard.Pumpfake.performed += Pumpfake;
     }
 
     private void OnDisable()
@@ -51,6 +56,7 @@ public class PlayerControls : NetworkedBehaviour
 
         m_player = GetComponent<Player>();
         m_animator = GetComponentInChildren<Animator>();
+        m_animHandler = GetComponent<PlayerAnimHandler>();
         m_menu = GameObject.Find("Menu Panel");
         StartCoroutine(ShotInput());
     }
@@ -64,7 +70,6 @@ public class PlayerControls : NetworkedBehaviour
         m_player.isCtrlDown = Keyboard.current.ctrlKey.ReadValue() > 0.0f;
         m_player.isAltDown = Keyboard.current.altKey.ReadValue() > 0.0f;
 
-
         Vector2 dribVec = actions.Keyboard.Dribble.ReadValue<Vector2>();
         m_player.isDribUp = dribVec.y > 0; //1
         m_player.isDribDown = dribVec.y < 0; //-1
@@ -77,23 +82,33 @@ public class PlayerControls : NetworkedBehaviour
             StartCoroutine(WaitJump(1.5f));
         }
 
-
-        //TryPassBall();
-
-//         if (IsKeyPressed(actions.Keyboard.Callforball))
-//         {
-//             if (!m_player.HasBall && m_player.IsOnOffense())
-//             {
-//                 m_player.CallForBall();
-//             }
-//         }
-
         if (Keyboard.current.escapeKey.isPressed)
             m_menu.SetActive(!m_menu.activeSelf);
 
-        m_animator.SetBool("isDribbling", m_player.isDribbling);
-        m_animator.SetBool("isSprinting", m_player.isSprinting);
-        m_animator.SetBool("isWalking", m_player.isMoving);
+        if (m_player.isMoving)
+        {
+            if (m_player.isSprinting)
+            {
+                if (m_player.isDribbling)
+                    m_animHandler.PlayAnim(AnimNames.RUN_DRIB);
+                else
+                    m_animHandler.PlayAnim(AnimNames.RUN);
+            }
+            else
+            {
+                if (m_player.isDribbling)
+                    m_animHandler.PlayAnim(AnimNames.JOG_DRIB);
+                else
+                    m_animHandler.PlayAnim(AnimNames.JOG);
+            }
+        }
+        else
+        {
+            if (m_player.isDribbling)
+                m_animHandler.PlayAnim(AnimNames.IDLE_DRIB);
+            else
+                m_animHandler.PlayAnim(AnimNames.IDLE);
+        }
 
         if (Keyboard.current.uKey.isPressed) m_animator.SetTrigger("Crossover");
     }
@@ -216,7 +231,7 @@ public class PlayerControls : NetworkedBehaviour
     IEnumerator OnKeyPressedOnly()
     {
 
-        Pumpfake();
+        //Pumpfake();
 
         yield return null;
     }
@@ -225,7 +240,7 @@ public class PlayerControls : NetworkedBehaviour
     IEnumerator OnKeyHeldDown()
     {
 
-        StartShot();
+        //StartShot();
 
         //Move 1 unit every frame until edge detection is reached!
         while (pressTimer < MAX_TIME)
@@ -239,28 +254,28 @@ public class PlayerControls : NetworkedBehaviour
             yield return null;
         }
 
-        StopShot();
+        //StopShot();
         pressTimer = 0f;
         yield return null;
     }
 
-    void Pumpfake()
+    void Pumpfake(InputAction.CallbackContext context)
     {
-        m_animator.SetTrigger("Pumpfake");
+        m_animHandler.PlayAnim(AnimNames.REG_PUMPFAKE);
         StartCoroutine(WaitShoot(0.20f));
     }
 
-    void StartShot()
+    void StartShot(InputAction.CallbackContext context)
     {
         m_player.ShootBall();
         //m_animator.SetTrigger("Shoot");
         StartCoroutine(WaitShoot(0.20f));
     }
 
-    void StopShot()
+    void StopShot(InputAction.CallbackContext context)
     {
         m_player.ReleaseBall();
-        m_animator.ResetTrigger("Shoot");
+        //m_animator.ResetTrigger("Shoot");
         StartCoroutine(WaitShoot(0.20f));
     }
 

@@ -27,6 +27,9 @@ public class GameSetup : NetworkedBehaviour
     public GameObject playerPrefab;
     public GameObject aiPrefab;
 
+    public GameObject redPrefab;
+    public GameObject bluePrefab;
+
     private bool m_hasClientLoaded = false;
     private bool m_hasClientConnected = false;
 
@@ -54,21 +57,26 @@ public class GameSetup : NetworkedBehaviour
                 for (int i = 0; i < aiToCreate; i++)
                 {
                     GameObject go = Instantiate(aiPrefab, Vector3.zero, Quaternion.identity);
-                    go.GetComponent<NetworkedObject>().Spawn();
+                    GameObject modelObj = Instantiate(PrefabFromTeamID(tid), go.transform);
 
                     Player p = go.GetComponent<Player>();
                     Assert.IsNotNull(p, "aiLogic's Player component is null.");
+
+                    p.InitilizeModel();
 
                     AIPlayer aiLogic = go.GetComponent<AIPlayer>();
                     Assert.IsNotNull(aiLogic, "aiPrefab in GameSetup does not have AIPlayer component");
                     
                     aiLogic.InitPlayer(p, tid);
+
+                    go.GetComponent<NetworkedObject>().Spawn();
                 }
             }
         }
 
         m_hasClientLoaded = true;
-        InvokeServerRpc(PlayerLoaded, NetworkingManager.Singleton.LocalClientId);
+
+        InvokeServerRpc(PlayerLoaded, NetworkingManager.Singleton.LocalClientId, ClientPlayer.Singleton.SteamID);
     }
 
     void Update()
@@ -92,14 +100,12 @@ public class GameSetup : NetworkedBehaviour
     }
 
     [ServerRPC]
-    public void PlayerLoaded(ulong pid)
+    public void PlayerLoaded(ulong pid, ulong steamID)
     {
-        if (Match.HostServer)
-        {
-            //GameObject go = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
-            //NetworkedObject no = go.GetComponent<NetworkedObject>();
-            //no.SpawnAsPlayerObject(OwnerClientId);
-        }
+        NetworkedObject netObj = SpawnManager.GetPlayerObject(pid);
+        GameObject modelObj = Instantiate(PrefabFromTeamID(Match.GetPlayersTeam(steamID)), netObj.transform);
+        netObj.GetComponent<Player>().InitilizeModel();
+
         InvokeClientRpcOnClient(PlayerLoaded, pid);
     }
 
@@ -110,15 +116,11 @@ public class GameSetup : NetworkedBehaviour
         GameManager.Singleton.LocalPlayerInitilized();
     }
 
-    [ClientRPC]
-    public void AllPlayersLoaded()
+    private GameObject PrefabFromTeamID(int teamID)
     {
-
-    }
-
-    private IEnumerator LoadCoroutine()
-    {
-        yield return null;
-        InvokeServerRpc(PlayerLoaded, NetworkingManager.Singleton.LocalClientId);
+        if (teamID == 1)
+            return bluePrefab;
+        else
+            return redPrefab;
     }
 }
