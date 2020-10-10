@@ -52,8 +52,24 @@ public class @Controls : IInputActionCollection, IDisposable
                 },
                 {
                     ""name"": ""Shoot"",
-                    ""type"": ""Value"",
+                    ""type"": ""Button"",
                     ""id"": ""50e3957e-782e-4c6e-9349-d842fdb7dfca"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Release"",
+                    ""type"": ""Button"",
+                    ""id"": ""7cb72505-e7e3-4349-83cc-d6abf169a65f"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Pumpfake"",
+                    ""type"": ""Button"",
+                    ""id"": ""5dcb3193-c06c-437e-9716-858ecf9dcb80"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
@@ -183,9 +199,9 @@ public class @Controls : IInputActionCollection, IDisposable
                     ""name"": """",
                     ""id"": ""a28d9e71-7297-4792-b543-ca56cd24f4b5"",
                     ""path"": ""<Keyboard>/space"",
-                    ""interactions"": """",
+                    ""interactions"": ""Hold"",
                     ""processors"": """",
-                    ""groups"": ""Keyboard"",
+                    ""groups"": """",
                     ""action"": ""Shoot"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -354,6 +370,28 @@ public class @Controls : IInputActionCollection, IDisposable
                     ""action"": ""Cancel"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""43edd7ca-e09d-48bc-8861-b3159c2894cc"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": ""Tap"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Pumpfake"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""196214a5-54af-4def-8bb5-eed42eb10afc"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": ""Press(behavior=1)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Release"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -504,6 +542,8 @@ public class @Controls : IInputActionCollection, IDisposable
         m_Keyboard_Cancel = m_Keyboard.FindAction("Cancel", throwIfNotFound: true);
         m_Keyboard_Move = m_Keyboard.FindAction("Move", throwIfNotFound: true);
         m_Keyboard_Shoot = m_Keyboard.FindAction("Shoot", throwIfNotFound: true);
+        m_Keyboard_Release = m_Keyboard.FindAction("Release", throwIfNotFound: true);
+        m_Keyboard_Pumpfake = m_Keyboard.FindAction("Pumpfake", throwIfNotFound: true);
         m_Keyboard_Dribble = m_Keyboard.FindAction("Dribble", throwIfNotFound: true);
         m_Keyboard_Pass_1 = m_Keyboard.FindAction("Pass_1", throwIfNotFound: true);
         m_Keyboard_Pass_2 = m_Keyboard.FindAction("Pass_2", throwIfNotFound: true);
@@ -573,6 +613,8 @@ public class @Controls : IInputActionCollection, IDisposable
     private readonly InputAction m_Keyboard_Cancel;
     private readonly InputAction m_Keyboard_Move;
     private readonly InputAction m_Keyboard_Shoot;
+    private readonly InputAction m_Keyboard_Release;
+    private readonly InputAction m_Keyboard_Pumpfake;
     private readonly InputAction m_Keyboard_Dribble;
     private readonly InputAction m_Keyboard_Pass_1;
     private readonly InputAction m_Keyboard_Pass_2;
@@ -590,6 +632,8 @@ public class @Controls : IInputActionCollection, IDisposable
         public InputAction @Cancel => m_Wrapper.m_Keyboard_Cancel;
         public InputAction @Move => m_Wrapper.m_Keyboard_Move;
         public InputAction @Shoot => m_Wrapper.m_Keyboard_Shoot;
+        public InputAction @Release => m_Wrapper.m_Keyboard_Release;
+        public InputAction @Pumpfake => m_Wrapper.m_Keyboard_Pumpfake;
         public InputAction @Dribble => m_Wrapper.m_Keyboard_Dribble;
         public InputAction @Pass_1 => m_Wrapper.m_Keyboard_Pass_1;
         public InputAction @Pass_2 => m_Wrapper.m_Keyboard_Pass_2;
@@ -622,6 +666,12 @@ public class @Controls : IInputActionCollection, IDisposable
                 @Shoot.started -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnShoot;
                 @Shoot.performed -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnShoot;
                 @Shoot.canceled -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnShoot;
+                @Release.started -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnRelease;
+                @Release.performed -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnRelease;
+                @Release.canceled -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnRelease;
+                @Pumpfake.started -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnPumpfake;
+                @Pumpfake.performed -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnPumpfake;
+                @Pumpfake.canceled -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnPumpfake;
                 @Dribble.started -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnDribble;
                 @Dribble.performed -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnDribble;
                 @Dribble.canceled -= m_Wrapper.m_KeyboardActionsCallbackInterface.OnDribble;
@@ -665,6 +715,12 @@ public class @Controls : IInputActionCollection, IDisposable
                 @Shoot.started += instance.OnShoot;
                 @Shoot.performed += instance.OnShoot;
                 @Shoot.canceled += instance.OnShoot;
+                @Release.started += instance.OnRelease;
+                @Release.performed += instance.OnRelease;
+                @Release.canceled += instance.OnRelease;
+                @Pumpfake.started += instance.OnPumpfake;
+                @Pumpfake.performed += instance.OnPumpfake;
+                @Pumpfake.canceled += instance.OnPumpfake;
                 @Dribble.started += instance.OnDribble;
                 @Dribble.performed += instance.OnDribble;
                 @Dribble.canceled += instance.OnDribble;
@@ -774,6 +830,8 @@ public class @Controls : IInputActionCollection, IDisposable
         void OnCancel(InputAction.CallbackContext context);
         void OnMove(InputAction.CallbackContext context);
         void OnShoot(InputAction.CallbackContext context);
+        void OnRelease(InputAction.CallbackContext context);
+        void OnPumpfake(InputAction.CallbackContext context);
         void OnDribble(InputAction.CallbackContext context);
         void OnPass_1(InputAction.CallbackContext context);
         void OnPass_2(InputAction.CallbackContext context);

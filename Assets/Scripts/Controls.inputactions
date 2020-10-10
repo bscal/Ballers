@@ -39,8 +39,24 @@
                 },
                 {
                     "name": "Shoot",
-                    "type": "Value",
+                    "type": "Button",
                     "id": "50e3957e-782e-4c6e-9349-d842fdb7dfca",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Release",
+                    "type": "Button",
+                    "id": "7cb72505-e7e3-4349-83cc-d6abf169a65f",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Pumpfake",
+                    "type": "Button",
+                    "id": "5dcb3193-c06c-437e-9716-858ecf9dcb80",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
@@ -170,9 +186,9 @@
                     "name": "",
                     "id": "a28d9e71-7297-4792-b543-ca56cd24f4b5",
                     "path": "<Keyboard>/space",
-                    "interactions": "",
+                    "interactions": "Hold",
                     "processors": "",
-                    "groups": "Keyboard",
+                    "groups": "",
                     "action": "Shoot",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -339,6 +355,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "Cancel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "43edd7ca-e09d-48bc-8861-b3159c2894cc",
+                    "path": "<Keyboard>/space",
+                    "interactions": "Tap",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pumpfake",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "196214a5-54af-4def-8bb5-eed42eb10afc",
+                    "path": "<Keyboard>/space",
+                    "interactions": "Press(behavior=1)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Release",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
