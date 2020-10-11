@@ -50,6 +50,7 @@ public class DebugController : MonoBehaviour
             m_input = "";
         };
 
+
         m_textStyle.fontSize = 14;
         m_textStyle.font = font;
         m_textStyle.normal.textColor = Color.white;
@@ -227,11 +228,49 @@ public class DebugController : MonoBehaviour
         AddText(cText);
     }
 
+    public void PrintObjAsTable(object obj, LogType type = LogType.INFO)
+    {
+        const int MAX_LENGTH = 48;
+
+        ConsoleText cText = new ConsoleText(GetRepeatedStr('-', MAX_LENGTH), type);
+        AddText(cText);
+
+        ConsoleText headText = new ConsoleText(FormatHeaderTable(obj.GetType().Name, "", MAX_LENGTH), type);
+        AddText(headText);
+
+        AddText(cText);
+
+        var fields = obj.GetType().GetFields();
+
+        for (int i = 0; i < fields.Length; i++)
+        {
+            string val = "";
+            if (fields[i].GetValue(obj) != null) val = fields[i].GetValue(obj).ToString();
+
+            ConsoleText ct = new ConsoleText(FormatLogTable(fields[i].Name, val, "*", MAX_LENGTH), type);
+            AddText(ct);
+        }
+        AddText(cText);
+    }
+
     private void AddText(ConsoleText cText)
     {
         if (m_buffer.Count >= BUFFER_SIZE)
             m_buffer.Dequeue();
         m_buffer.Enqueue(cText);
+    }
+
+    private string FormatHeaderTable(string text, string border, int length)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("| ");
+        sb.Append(text);
+        for (int i = sb.Length; i < length - 1; i++)
+        {
+            sb.Append(" ");
+        }
+        sb.Append('|');
+        return sb.ToString();
     }
 
     private string FormatLogTable(string key, string val, string border, int length)
@@ -303,4 +342,9 @@ struct ConsoleText
         this.text = text;
         this.type = type;
     }
+}
+
+interface IPrintable
+{
+    void Print();
 }
