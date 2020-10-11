@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class DebugController : MonoBehaviour
 {
@@ -15,17 +16,22 @@ public class DebugController : MonoBehaviour
     private const float VIEW_HEIGHT = VIEW_LENGTH * LINE_SIZE;
     private const float VIEW_BORDER_SIZE = LINE_SIZE / 2;
 
+    private const int LAST_LIST_SIZE = 8;
+    private const int TABLE_WIDTH_SIZE = 48;
+
     public static DebugController Singleton { get; private set; }
 
     private Controls m_controls;
     private bool m_showConsole;
 
     private string m_input;
+    private string m_current;
     private int m_index = -1;
     private Vector2 m_scroll;
     private Vector2 m_hintScroll;
     private Queue<ConsoleText> m_buffer = new Queue<ConsoleText>(BUFFER_SIZE);
     private List<string> m_hints;
+    private List<string> m_last = new List<string>();
 
     private GUIStyle m_textStyle = new GUIStyle();
     private GUIStyle m_textIStyle = new GUIStyle();
@@ -51,24 +57,44 @@ public class DebugController : MonoBehaviour
         m_controls.Keyboard.Return.performed += ctx => {
             if (string.IsNullOrEmpty(m_input)) return;
             HandleInput();
-            m_index = -1;
+
+            m_last.Add(m_input);
+
+            m_index = 0;
             m_input = "";
+            m_current = "";
         };
 
         m_controls.UI.Arrows.performed += ctx => {
             if (m_hints == null) return;
             var val = ctx.ReadValue<Vector2>();
-            if (val.y < .5)
-                m_index++;
-            else if (val.y > -.5f)
-                m_index--;
 
-            m_index = Mathf.Clamp(m_index, 0, m_hints.Count - 1);
+            if (val.y < .5)
+            {
+                if (m_index >= m_hints.Count) return;
+                m_index++;
+            }
+            else if (val.y > -.5f)
+            {
+                if (m_index <= -m_last.Count) return;
+                m_index--;
+            }
+
+            int i = m_last.Count - Mathf.Abs(m_index);
+            if (m_index < 0 && !string.IsNullOrEmpty(m_last[i]))
+                m_input = m_last[i];
+            else if (m_index == 0)
+                m_input = m_current;
         };
 
         m_controls.UI.Tab.performed += ctx => {
             if (m_hints == null || m_hints.Count < 1) return;
             m_input = m_hints[m_index].Split(new char[] { ' ' })[0];
+        };
+
+        Keyboard.current.onTextInput += text => {
+            if (m_index == 0)
+                m_current = m_input;
         };
 
 
@@ -156,7 +182,7 @@ public class DebugController : MonoBehaviour
                 if (m_hints[j] == null || string.IsNullOrEmpty(m_hints[j])) continue;
                 GUI.Box(new Rect(0, (LINE_SIZE + 10) * j, Screen.width - 30, LINE_SIZE + 10), "");
                 Rect labelRect = new Rect(VIEW_BORDER_SIZE, (LINE_SIZE + 10) * j + 5, viewport.width - 100, LINE_SIZE);
-                if (j == m_index)
+                if (j == m_index - 1)
                     GUI.Label(labelRect, m_hints[j], m_hintSelectStyle);
                 else
                     GUI.Label(labelRect, m_hints[j], m_hintStyle);
