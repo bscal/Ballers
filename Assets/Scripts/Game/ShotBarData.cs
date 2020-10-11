@@ -22,8 +22,7 @@ public class ShotBarData : IBitWritable
 
     // ShotMeter fields
     public float speed;
-    public float startOffset;
-    public float endOffset;
+    public float targetOffset;
     public float targetFadeSpd;
     public float barShake;
     public int spdVariationID;
@@ -43,7 +42,7 @@ public class ShotBarData : IBitWritable
     public float GoodLength => ShotMeter.MAX_TARGET_HEIGHT * good;
     public float PerfectLength => ShotMeter.MAX_TARGET_HEIGHT * perfect;
     public float BonusHeight => good + perfect;
-    public float FinalTargetHeight => targetHeight + endOffset - startOffset;
+    public float FinalTargetHeight => targetHeight + targetOffset;
 
     public int GetShotGrade(float distance)
     {
@@ -61,10 +60,8 @@ public class ShotBarData : IBitWritable
         using (PooledBitReader reader = PooledBitReader.Get(stream))
         {
             speed           = reader.ReadSinglePacked();
-            startOffset     = reader.ReadSinglePacked();
-            endOffset       = reader.ReadSinglePacked();
+            targetOffset    = reader.ReadSinglePacked();
             targetFadeSpd   = reader.ReadSinglePacked();
-            //bad             = reader.ReadSinglePacked();
             ok              = reader.ReadSinglePacked();
             good            = reader.ReadSinglePacked();
             perfect         = reader.ReadSinglePacked();
@@ -81,10 +78,8 @@ public class ShotBarData : IBitWritable
         using (PooledBitWriter writer = PooledBitWriter.Get(stream))
         {
             writer.WriteSinglePacked(speed);
-            writer.WriteSinglePacked(startOffset);
-            writer.WriteSinglePacked(endOffset);
+            writer.WriteSinglePacked(targetOffset);
             writer.WriteSinglePacked(targetFadeSpd);
-            //writer.WriteSinglePacked(bad);
             writer.WriteSinglePacked(ok);
             writer.WriteSinglePacked(good);
             writer.WriteSinglePacked(perfect);

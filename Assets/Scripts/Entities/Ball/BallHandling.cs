@@ -45,8 +45,8 @@ public class BallHandling : NetworkedBehaviour
 
     // =================================== Events ===================================
 
-    public event Action<int, ShotData> ShotMade;
-    public event Action<ShotData> ShotMissed;
+    public event Action<int, ShotData, ShotResultData> ShotMade;
+    public event Action<ShotData, ShotResultData> ShotMissed;
     public event Action<BallState> BallStateChange;
     public event Action<int> PossessionChange;
     public event Action<ulong, ulong> BallHandlerChange;
@@ -89,6 +89,7 @@ public class BallHandling : NetworkedBehaviour
     private Player m_currentPlayer;
     private GameObject m_ball;
     private Rigidbody m_body;
+    private SphereCollider m_collider;
 
     private ShotData m_shotData;
     private ShotBarData m_shotBarData;
@@ -97,6 +98,8 @@ public class BallHandling : NetworkedBehaviour
     private int m_grade;
     private float m_timer;
     private float m_passScore;
+    private float m_releaseDiff;
+    private float m_shotDifficulty;
     private bool m_hitBackboard;
     private bool m_hitRim;
     private bool m_hitFloor;
@@ -114,8 +117,6 @@ public class BallHandling : NetworkedBehaviour
     private void Awake()
     {
         GameManager.Singleton.GameStarted += OnGameStarted;
-        ShotMade += OnShotMade;
-        ShotMissed += OnShotMissed;
         BallHandlerChange += OnChangeBallHandler;
     }
 
@@ -132,12 +133,12 @@ public class BallHandling : NetworkedBehaviour
 
         m_body = gameObject.GetComponent<Rigidbody>();
         m_body.AddForce(new Vector3(1, 1, 1), ForceMode.Impulse);
+
+        m_collider = GetComponentInChildren<SphereCollider>();
     }
 
     void Update()
     {
-        Debugger.Instance.Print(string.Format("1:{0} 2:{1} bs:{2}", m_playerWithBall.Value, m_playerLastPossesion.Value, State), 2);
-
         m_timer += Time.deltaTime;
 
         if (Match.HasGameStarted && IsServer && m_timer > .1)
@@ -151,7 +152,7 @@ public class BallHandling : NetworkedBehaviour
                 float dist = Vector3.Distance(m_ball.transform.position, player.transform.position);
                 m_playerDistances[player.NetworkId] = dist;
 
-                if (player.GetComponent<BoxCollider>().bounds.Intersects(m_ball.GetComponentInChildren<SphereCollider>().bounds))
+                if (player.playerCollider.bounds.Intersects(m_collider.bounds))
                 {
                     TouchedBall?.Invoke(player, dist);
                     PlayerLastTouched = player.NetworkId;
@@ -227,7 +228,7 @@ public class BallHandling : NetworkedBehaviour
     {
         if (m_shotInAction)
         {
-            ShotMissed?.Invoke(m_shotData);
+            OnShotMissed(m_shotData);
         }
     }
 
@@ -250,7 +251,7 @@ public class BallHandling : NetworkedBehaviour
         m_body.velocity = Vector3.zero;
     }
 
-    public void BallFollowArc(ulong netID, float releaseDist)
+    public void BallFollowArc(ulong netID, float releaseDist, float releaseDiff)
     {
         if (!IsServer) return;
 
@@ -272,7 +273,8 @@ public class BallHandling : NetworkedBehaviour
         Vector3 offset = Vector3.zero;
 
         m_grade = m_shotBarData.GetShotGrade(releaseDist);
-
+        m_releaseDiff = releaseDiff;
+        m_shotDifficulty = 0;
 
         if (m_grade == ShotBarData.GRADE_GOOD)
         {
@@ -665,7 +667,7 @@ public class BallHandling : NetworkedBehaviour
                 if (dir.y > 0)
                 {
                     Basket basket = other.GetComponentInParent<Basket>();
-                    ShotMade?.Invoke((int)basket.id, m_shotData);
+                    OnShotMade((int)basket.id, m_shotData);
                     basket.netCloth.externalAcceleration = new Vector3() {
                         x = UnityEngine.Random.Range(5, 12),
                         y = UnityEngine.Random.Range(32, 48),
@@ -698,6 +700,9 @@ public class BallHandling : NetworkedBehaviour
         m_shotInAction = false;
         m_hitTopTrigger = false;
         GameManager.Singleton.AddScore(teamID, shotData.shotValue);
+        ShotResultData result = GetShotResultData(ShotResultType.MADE);
+        DebugController.Singleton.PrintObjAsTable(result);
+        ShotMade?.Invoke(teamID, shotData, result);
         print("made");
     }
 
@@ -705,7 +710,20 @@ public class BallHandling : NetworkedBehaviour
     {
         m_shotInAction = false;
         m_hitTopTrigger = false;
+
+        ShotResultData result = GetShotResultData(ShotResultType.MISSED);
+        ShotMissed?.Invoke(shotData, result);
         print("missed");
+    }
+
+    private ShotResultData GetShotResultData(ShotResultType type)
+    {
+        return new ShotResultData() {
+            shotMissedType = type,
+            grade = m_grade,
+            releaseDiff = m_releaseDiff,
+            shotDifficulty = m_shotDifficulty
+        };
     }
 
     [ClientRPC]
@@ -790,7 +808,7 @@ public class BallHandling : NetworkedBehaviour
         if (collision.gameObject.CompareTag(FLOOR_TAG))
         {
             m_hitFloor = true;
-            if (m_shotInAction) ShotMissed?.Invoke(m_shotData);
+            if (m_shotInAction) OnShotMissed(m_shotData);
         }
     }
 

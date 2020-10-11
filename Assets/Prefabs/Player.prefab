@@ -15361,6 +15361,7 @@ MonoBehaviour:
   m_hardScreenCollider: {fileID: 499513842373943136}
   m_innerCollider: {fileID: 9017073906844803023}
   m_outerCollider: {fileID: 1399444623876531351}
+  playerCollider: {fileID: 5805129176901056585}
   isRightHanded: 1
   isMoving: 0
   isSprinting: 0
@@ -15368,7 +15369,6 @@ MonoBehaviour:
   isHardScreening: 0
   isShooting: 0
   isHelping: 0
-  isMovementFrozen: 0
   isBallInLeftHand: 0
   isCtrlDown: 0
   isAltDown: 0

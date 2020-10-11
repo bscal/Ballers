@@ -12,7 +12,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     // Local Player Events
     //  These are not synced over the network and only used by local client.
     public event Action<ShotData, ShotBarData> Shoot;
-    public event Action<float> Release;
+    public event Action<float, float> Release;
     public event Action<float, float> StartRoundMeter;
     public event Action<float> StopRoundMeter;
 
@@ -40,6 +40,9 @@ public class Player : NetworkedBehaviour, IBitWritable
     [Header("Contest Hitbox")]
     public SphereCollider m_innerCollider;
     public SphereCollider m_outerCollider;
+
+    [Header("Player Collider")]
+    public BoxCollider playerCollider;
 
     // Client Values
     public bool isRightHanded;
@@ -240,9 +243,9 @@ public class Player : NetworkedBehaviour, IBitWritable
     }
 
     [ClientRPC]
-    public void ClientReleaseBall(float distance)
+    public void ClientReleaseBall(float distance, float difference)
     {
-        Release?.Invoke(distance);
+        Release?.Invoke(distance, difference);
     }
 
     /// <summary>

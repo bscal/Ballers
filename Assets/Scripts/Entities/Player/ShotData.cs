@@ -65,6 +65,7 @@ public class ShotData : IBitWritable
             writer.WriteDoublePacked(defSkill);
             writer.WriteDoublePacked(passRating);
         }
+        Debug.LogWarning("ShotData size: " + stream.Length);
     }
 }
 

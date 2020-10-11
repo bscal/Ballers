@@ -22,6 +22,7 @@ public class ShotManager : MonoBehaviour
     private ShotData m_shotData;
     private ShotBarData m_shotBarData;
     private float m_releaseDist;
+    private float m_releaseDiff;
     private float m_rttOffset;
 
     // =================================== MonoBehaviour Functions ===================================
@@ -62,8 +63,7 @@ public class ShotManager : MonoBehaviour
         m_shotData.passRating = 50.0f;
 
         m_shotBarData.speed = UnityEngine.Random.Range(2, 2) * BASE_SPEED;
-        m_shotBarData.startOffset = 0f;
-        m_shotBarData.endOffset = 0f;
+        m_shotBarData.targetOffset = 0f;
         m_shotBarData.targetFadeSpd = 0f;
         m_shotBarData.barShake = 0f;
         m_shotBarData.spdVariationID = (int)SpeedVariations.NONE;
@@ -75,7 +75,7 @@ public class ShotManager : MonoBehaviour
 
         // ShotMeter constants are set in ShotMeter script. These have to do with size of ui elements.
         m_shotBarData.targetSize = (ShotMeter.MAX_TARGET_HEIGHT * m_shotBarData.BonusHeight) + ShotMeter.BASE_TARGET;
-        m_shotBarData.targetHeight = (ShotMeter.BASE_TARGET_HEIGHT + m_shotBarData.endOffset);
+        m_shotBarData.targetHeight = (ShotMeter.BASE_TARGET_HEIGHT + m_shotBarData.targetOffset);
 
         GameManager.GetBallHandling().OnShoot(netID, m_shotData, m_shotBarData);
         p.InvokeClientRpcOnClient(p.ClientShootBall, p.OwnerClientId, netID, m_shotData, m_shotBarData);
@@ -97,7 +97,7 @@ public class ShotManager : MonoBehaviour
 
     private void HandleShot(ulong netID)
     {
-        GameManager.GetBallHandling().BallFollowArc(netID, m_releaseDist);
+        GameManager.GetBallHandling().BallFollowArc(netID, m_releaseDist, m_releaseDiff);
     }
 
     private int GetShotValue(Player p)
@@ -125,11 +125,13 @@ public class ShotManager : MonoBehaviour
             yield return null;
         }
         // rtt offset is how much the input lag was on the ReleaseShot
-        m_releaseDist = Mathf.Abs(m_shotBarData.FinalTargetHeight - timer - m_rttOffset);
+        m_releaseDiff = m_shotBarData.FinalTargetHeight - timer - m_rttOffset;
+        m_releaseDist = Mathf.Abs(m_releaseDiff);
         int grade = m_shotBarData.GetShotGrade(m_releaseDist);
-        print("Server: " + m_shotBarData.FinalTargetHeight + ", " + timer + ", dist = " + m_releaseDist + ", grade = " + grade);
 
-        p.InvokeClientRpcOnClient(p.ClientReleaseBall, p.OwnerClientId, m_releaseDist);
+        print("Server: " + m_shotBarData.FinalTargetHeight + ", " + timer + ", dist = " + m_releaseDist + ", grade = " + grade + ", diff = " + m_releaseDiff);
+
+        p.InvokeClientRpcOnClient(p.ClientReleaseBall, p.OwnerClientId, m_releaseDist, m_releaseDiff);
         HandleShot(p.NetworkId);
     }
 

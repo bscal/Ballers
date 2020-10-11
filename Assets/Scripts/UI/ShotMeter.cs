@@ -90,7 +90,7 @@ public class ShotMeter : MonoBehaviour
         //StartCoroutine(ShootingTimeout());
     }
 
-    public void OnRelease(float dist)
+    public void OnRelease(float dist, float diff)
     {
         //float dist = Mathf.Abs(m_shotBarData.FinalTargetHeight - m_timer);
         if (dist < m_shotBarData.PerfectLength)
