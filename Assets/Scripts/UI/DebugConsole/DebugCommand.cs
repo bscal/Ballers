@@ -15,9 +15,10 @@ public class DebugCommand : DebugCommandBase
         m_cmd = cmd;
     }
 
-    public void Invoke(string[] args)
+    public virtual bool Invoke(string cmdName, string[] split)
     {
-        m_cmd.Invoke(args);
+        m_cmd.Invoke(split);
+        return true;
     }
 
 }

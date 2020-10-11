@@ -2,6 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum DebugCommandError
+{
+    ERROR,
+    ARG
+}
+
 public abstract class DebugCommandBase
 {
     private readonly string m_name;
@@ -17,5 +23,10 @@ public abstract class DebugCommandBase
         m_name = name;
         m_desc = desc;
         m_formatted = format;
+    }
+
+    public virtual void HandleError(string err)
+    {
+        DebugController.Singleton.PrintConsole(err, LogType.ERROR);
     }
 }

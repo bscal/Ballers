@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -20,16 +21,18 @@ public class DebugController : MonoBehaviour
     private bool m_showConsole;
 
     private string m_input;
+    private int m_index = -1;
     private Vector2 m_scroll;
     private Vector2 m_hintScroll;
     private Queue<ConsoleText> m_buffer = new Queue<ConsoleText>(BUFFER_SIZE);
+    private List<string> m_hints;
 
     private GUIStyle m_textStyle = new GUIStyle();
     private GUIStyle m_textIStyle = new GUIStyle();
     private GUIStyle m_textWStyle = new GUIStyle();
     private GUIStyle m_textEStyle = new GUIStyle();
-
     private GUIStyle m_hintStyle = new GUIStyle();
+    private GUIStyle m_hintSelectStyle = new GUIStyle();
 
     public List<DebugCommandBase> commandList = new List<DebugCommandBase>();
 
@@ -46,8 +49,26 @@ public class DebugController : MonoBehaviour
         };
 
         m_controls.Keyboard.Return.performed += ctx => {
+            if (string.IsNullOrEmpty(m_input)) return;
             HandleInput();
+            m_index = -1;
             m_input = "";
+        };
+
+        m_controls.UI.Arrows.performed += ctx => {
+            if (m_hints == null) return;
+            var val = ctx.ReadValue<Vector2>();
+            if (val.y < .5)
+                m_index++;
+            else if (val.y > -.5f)
+                m_index--;
+
+            m_index = Mathf.Clamp(m_index, 0, m_hints.Count - 1);
+        };
+
+        m_controls.UI.Tab.performed += ctx => {
+            if (m_hints == null || m_hints.Count < 1) return;
+            m_input = m_hints[m_index].Split(new char[] { ' ' })[0];
         };
 
 
@@ -71,16 +92,20 @@ public class DebugController : MonoBehaviour
         m_hintStyle.font = font;
         m_hintStyle.normal.textColor = new Color(.6f, .6f, .6f);
 
+        m_hintSelectStyle.fontSize = 14;
+        m_hintSelectStyle.font = font;
+        m_hintSelectStyle.normal.textColor = new Color(200 / 255, 200 / 255, 200 / 255);
+
         PrintConsole("Testing This 1!", LogType.INFO);
         PrintConsole("Test That 2.", LogType.WARNING);
         PrintConsole("Test These 3?", LogType.ERROR);
         PrintConsoleTable("", new string[] { "test", "this", "table", "LONG_WORD_STRING" },
             new object[] { 1, true, 50.50, "this"}, LogType.WARNING);
 
-        var TEST_CMD = new DebugCommand("test", "testing", "test - testing", args => Debug.Log("test " + args[0]));
+        var TEST_CMD = new DebugCommand("test", "testing", "test - testing", args => Debug.Log("testing command"));
         commandList.Add(TEST_CMD);
 
-        var TESTDEBUG_CMD = new DebugCommand("test_this", "testing", "test_this <value>", args => Debug.Log("test " + args[1]));
+        var TESTDEBUG_CMD = new DebugArgsCommand("test_this", "testing", "test_this <value>", args => Debug.Log("test " + args[0]), 1);
         commandList.Add(TESTDEBUG_CMD);
     }
 
@@ -125,13 +150,16 @@ public class DebugController : MonoBehaviour
                 m_hintScroll,
                 new Rect(0, 0, Screen.width - 30, LINE_SIZE * 8));
 
-            List<string> hints = MatchStringToCommand(m_input);
-            for (int j = 0; j < hints.Count; j++)
+            m_hints = MatchStringToCommand(m_input);
+            for (int j = 0; j < m_hints.Count; j++)
             {
-                if (hints[j] == null || string.IsNullOrEmpty(hints[j])) continue;
+                if (m_hints[j] == null || string.IsNullOrEmpty(m_hints[j])) continue;
                 GUI.Box(new Rect(0, (LINE_SIZE + 10) * j, Screen.width - 30, LINE_SIZE + 10), "");
                 Rect labelRect = new Rect(VIEW_BORDER_SIZE, (LINE_SIZE + 10) * j + 5, viewport.width - 100, LINE_SIZE);
-                GUI.Label(labelRect, hints[j], m_hintStyle);
+                if (j == m_index)
+                    GUI.Label(labelRect, m_hints[j], m_hintSelectStyle);
+                else
+                    GUI.Label(labelRect, m_hints[j], m_hintStyle);
             }
             GUI.EndScrollView();
         }
@@ -144,12 +172,28 @@ public class DebugController : MonoBehaviour
         for (int i = 0; i < commandList.Count; i++)
         {
             DebugCommandBase cmd = commandList[i];
-            string[] args = m_input.Split(new char[] { ' ' });
-            if (args[0].Equals(cmd.Name, StringComparison.OrdinalIgnoreCase))
+            string[] split = m_input.Split(new char[] { ' ' });
+            string cmdName = split[0];
+
+            List<string> args = new List<string>();
+            if (split.Length > 1) // Has a cmdName and args
+            {
+                for (int j = 1; j < split.Length; j++)
+                {
+                    if (string.IsNullOrEmpty(split[j])) continue;
+                    args.Add(split[j]);
+                }
+            }
+
+            if (cmdName.Equals(cmd.Name, StringComparison.OrdinalIgnoreCase))
             {
                 if (cmd.GetType() == typeof(DebugCommand))
                 {
-                    ((DebugCommand)cmd).Invoke(args);
+                    ((DebugCommand)cmd).Invoke(cmdName, split);
+                }
+                else if (cmd.GetType() == typeof(DebugArgsCommand))
+                {
+                    ((DebugArgsCommand)cmd).Invoke(cmdName, args) ;
                 }
             }
         }
