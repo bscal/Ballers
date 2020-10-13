@@ -207,7 +207,7 @@ Transform:
   m_GameObject: {fileID: 6110922978709442016}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.72, z: 0}
-  m_LocalScale: {x: 0.75, y: 0.75, z: 0.75}
+  m_LocalScale: {x: 0.53, y: 0.53, z: 0.53}
   m_Children:
   - {fileID: 272434331958918574}
   m_Father: {fileID: 0}
@@ -366,7 +366,7 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.33
+  m_Radius: 0.3
   m_Center: {x: 0.3, y: 0.3, z: 0.3}
 --- !u!135 &1601076309029985891
 SphereCollider:
@@ -379,7 +379,7 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.4
+  m_Radius: 0.45
   m_Center: {x: 0.3, y: 0.3, z: 0.3}
 --- !u!1 &7959070845005647736
 GameObject:
@@ -487,5 +487,5 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/ball.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 91072
+  thisInstanceId: 84684
   Undone: 1
