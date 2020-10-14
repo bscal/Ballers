@@ -272,33 +272,53 @@ public class BallHandling : NetworkedBehaviour
 
         Vector3 offset = Vector3.zero;
 
+        // Basket is AROUND ~0.8m (circumference) or .8x.8m box
+        // Voxel of rim is .2m
+        // The ball currently is .6m (circumference) at 1 scale.
+        // NBA rim is 18inchs, ball is 9.4inchs (circumference) = ~52% of size
+        // The scale of the ball is set to .55
+        // This makes the ball size 3.3m
+        // .8 - .33 = .47 / 2 = .235m around 0,0,0 of rim
+
+        const float BASE_VAL_INCREMENT = .01f;
+        const float HEIGHT_DIFF_MULTIPLIER = 1f;
+        const float MAX_HEIGHT_DIFF = 100f;
+
+        float releaseDiffXOffset = Mathf.Clamp(releaseDiff, -MAX_HEIGHT_DIFF, MAX_HEIGHT_DIFF) * HEIGHT_DIFF_MULTIPLIER * BASE_VAL_INCREMENT;
+        print($"diff = {releaseDiff} | {releaseDiffXOffset}");
+
+        Vector2 X_GRADE_GOOD = new Vector2(.0f, .05f);
+        Vector2 Y_GRADE_GOOD = new Vector2(.0f, .0f);
+        Vector2 Z_GRADE_GOOD = new Vector2(.0f, .235f);
+
+        Vector2 X_GRADE_OK =  new Vector2(.0f, .1f);
+        Vector2 Y_GRADE_OK =  new Vector2(.0f, .0f);
+        Vector2 Z_GRADE_OK =  new Vector2(.1f, .235f * 2f);
+
+        Vector2 X_GRADE_POOR = new Vector2(.1f, .2f);
+        Vector2 Y_GRADE_POOR = new Vector2(.1f, .2f);
+        Vector2 Z_GRADE_POOR = new Vector2(.1f, .235f * 3f);
+
         m_grade = m_shotBarData.GetShotGrade(releaseDist);
         m_releaseDiff = releaseDiff;
         m_shotDifficulty = 0;
 
         if (m_grade == ShotBarData.GRADE_GOOD)
         {
-            offset.x = UnityEngine.Random.Range(.1f, .2f);
-            offset.y = 0f;
-            offset.z = UnityEngine.Random.Range(.1f, .2f);
+            offset = GetRandOffsetFromRanges(X_GRADE_GOOD, Y_GRADE_GOOD, Z_GRADE_GOOD);
         }
         else if (m_grade == ShotBarData.GRADE_OK)
         {
-            offset.x = UnityEngine.Random.Range(.1f, .4f);
-            offset.y = UnityEngine.Random.Range(.0f, .1f);
-            offset.z = UnityEngine.Random.Range(.1f, .4f);
+            offset = GetRandOffsetFromRanges(X_GRADE_OK, Y_GRADE_OK, Z_GRADE_OK);
         }
         else if (m_grade == ShotBarData.GRADE_POOR)
         {
-            offset.x = UnityEngine.Random.Range(.2f, .8f);
-            offset.y = UnityEngine.Random.Range(.1f, .4f);
-            offset.z = UnityEngine.Random.Range(.2f, .8f);
+            offset = GetRandOffsetFromRanges(X_GRADE_POOR, Y_GRADE_POOR, Z_GRADE_POOR);
         }
+        print(m_currentPlayer.transform.forward * releaseDiffXOffset);
+        if (m_grade != ShotBarData.GRADE_PERFECT)
+            offset += m_currentPlayer.transform.forward * releaseDiffXOffset;
 
-        offset.x *= RandNegOrPos();
-        //offset.y *= RandNegOrPos();
-        offset.z *= RandNegOrPos();
-        offset *= (Mathf.Clamp(releaseDist, 0, 100) / 100) + 1;
 
         if (m_shotData.type == ShotType.LAYUP)
         {
@@ -327,6 +347,14 @@ public class BallHandling : NetworkedBehaviour
 
     }
 
+    private Vector3 GetRandOffsetFromRanges(Vector2 x, Vector2 y, Vector2 z)
+    {
+        return new Vector3() {
+            x = UnityEngine.Random.Range(x.x, x.y),
+            y = UnityEngine.Random.Range(y.x, y.y),
+            z = UnityEngine.Random.Range(z.x, z.y)
+        };
+    }
     private IEnumerator FollowArc(Vector3 start, Vector3 end, float height, float duration)
     {
         float startTime = Time.time;
