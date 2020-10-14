@@ -207,7 +207,7 @@ Transform:
   m_GameObject: {fileID: 6110922978709442016}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.72, z: 0}
-  m_LocalScale: {x: 0.53, y: 0.53, z: 0.53}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_Children:
   - {fileID: 272434331958918574}
   m_Father: {fileID: 0}
@@ -487,5 +487,5 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/ball.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 84684
+  thisInstanceId: 110948
   Undone: 1
