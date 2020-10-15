@@ -44,13 +44,26 @@ public class ShotBarData : IBitWritable
     public float BonusHeight => good + perfect;
     public float FinalTargetHeight => targetHeight + targetOffset;
 
+    public void SetBarValues(float perfect, float good, float ok)
+    {
+        this.perfect = Mathf.Clamp01(perfect);
+        this.good = Mathf.Clamp01(good);
+        this.ok = Mathf.Clamp01(ok);
+        this.bad = Mathf.Clamp01(1f - ok);
+    }
+
+    public void SetBarValuesMultipleOf(float perfect)
+    {
+        SetBarValues(perfect, perfect * 2f, perfect * 4f);
+    }
+
     public int GetShotGrade(float distance)
     {
-        if (distance < PerfectLength)
+        if (distance < PerfectLength / 2)
             return 0;
-        if (distance < GoodLength)
+        else if (distance < GoodLength / 2)
             return 1;
-        if (distance < OkLength)
+        else if (distance < OkLength / 2)
             return 2;
         return 3;
     }
@@ -69,9 +82,9 @@ public class ShotBarData : IBitWritable
             targetHeight    = reader.ReadSinglePacked();
             barShake        = reader.ReadSinglePacked();
             spdVariationID  = reader.ReadByte();
-
-            bad = Mathf.Clamp(ok + good + perfect - 1f, 0f, 1f);
         }
+        bad = Mathf.Clamp(1f - ok, 0f, 1f);
+        Debug.LogWarning(bad + "   " + OkLength);
     }
     public void Write(Stream stream)
     {

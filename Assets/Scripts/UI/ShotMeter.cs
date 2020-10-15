@@ -18,7 +18,14 @@ public class ShotMeter : MonoBehaviour
     public RawImage background;
     public RawImage fill;
     public Image target;
+    public Image targetGood;
+    public Image targetOk;
     public RawImage glow;
+
+    private static readonly Color BAD_COLOR = new Color(1, 0, 0, 1);
+    private static readonly Color OK_COLOR = new Color(1, 171f / 255f, 35f / 255f, 1);
+    private static readonly Color GOOD_COLOR = new Color(1, 1, 0, 1);
+    private static readonly Color PERFECT_COLOR = new Color(51f / 255f, 204f / 255f, 51f / 255f, 1);
 
     private RectTransform m_meterTransform;
     private ShotBarData m_shotBarData;
@@ -40,6 +47,8 @@ public class ShotMeter : MonoBehaviour
             background  = GameObject.Find("ShotMeterBG").GetComponent<RawImage>();
             fill        = GameObject.Find("ShotMeterBar").GetComponent<RawImage>();
             target      = GameObject.Find("TargetLine").GetComponent<Image>();
+            targetGood  = GameObject.Find("TargetLine_GOOD").GetComponent<Image>();
+            targetOk    = GameObject.Find("TargetLine_OK").GetComponent<Image>();
             glow        = GameObject.Find("Glow").GetComponent<RawImage>();
         }
 
@@ -48,7 +57,7 @@ public class ShotMeter : MonoBehaviour
         SpawnManager.GetLocalPlayerObject().GetComponent<Player>().Release += OnRelease;
 
         MAX_TARGET_HEIGHT = background.rectTransform.GetHeight();
-        BASE_TARGET_HEIGHT = MAX_TARGET_HEIGHT * 0.8f;
+        BASE_TARGET_HEIGHT = MAX_TARGET_HEIGHT * 0.65f;
         TARGET_OFFSET = m_meterTransform.GetHeight() / 2.0f;
         meter.SetActive(false);
     }
@@ -80,58 +89,67 @@ public class ShotMeter : MonoBehaviour
         m_shotBarData = shotBarData;
 
         fill.rectTransform.SetHeight(0.0f);
-        target.rectTransform.SetHeight(m_shotBarData.targetSize);
-        target.rectTransform.anchoredPosition = GetBarPosition(m_shotBarData.targetHeight - m_shotBarData.targetSize / 2);
+        target.rectTransform.SetHeight(m_shotBarData.PerfectLength);
+        target.rectTransform.anchoredPosition = GetBarPosition(m_shotBarData.targetHeight - m_shotBarData.PerfectLength / 2);
+
+        targetGood.rectTransform.SetHeight(m_shotBarData.GoodLength);
+        targetGood.rectTransform.anchoredPosition = GetBarPosition(m_shotBarData.targetHeight - m_shotBarData.GoodLength / 2);
+
+        targetOk.rectTransform.SetHeight(m_shotBarData.OkLength);
+        targetOk.rectTransform.anchoredPosition = GetBarPosition(m_shotBarData.targetHeight - m_shotBarData.OkLength / 2);
 
         meter.SetActive(true);
         m_isShooting = true;
+
         if (shotBarData.targetFadeSpd != 0f)
             LeanTween.alpha(target.rectTransform, 0f, shotBarData.targetFadeSpd);
-        //StartCoroutine(ShootingTimeout());
     }
 
-    public void OnRelease(float dist, float diff)
+    private void OnRelease(float dist, float diff)
     {
-        //float dist = Mathf.Abs(m_shotBarData.FinalTargetHeight - m_timer);
-        if (dist < m_shotBarData.PerfectLength)
-        {
-            glow.gameObject.SetActive(true);
-            print("perfect");
-        }
-        else if (dist < m_shotBarData.GoodLength)
-        {
-            print("good");
-        }
+        int grade = m_shotBarData.GetShotGrade(dist);
+        if (grade == ShotBarData.GRADE_PERFECT)
+            SetColors(PERFECT_COLOR);
+        else if (grade == ShotBarData.GRADE_GOOD)
+            SetColors(GOOD_COLOR);
+        else if (grade == ShotBarData.GRADE_OK)
+            SetColors(OK_COLOR);
+        else
+            SetColors(BAD_COLOR);
+
+        glow.gameObject.SetActive(true);
         StopShooting();
         StartCoroutine(Hide(3.0f));
     }
 
-    public Vector3 GetBarPosition(float height)
+    private void SetColors(Color color)
+    {
+        fill.color = color;
+        glow.color = color;
+    }
+
+    private Vector3 GetBarPosition(float height)
     {
         Vector3 pos = Vector3.zero;
         pos.y = height;
         return pos;
     }
 
-    IEnumerator Hide(float t_wait)
+    private IEnumerator Hide(float t_wait)
     {
         yield return new WaitForSeconds(t_wait);
-        Reset();
+        if (!m_isShooting)
+            Reset();
     }
 
-    IEnumerator ShootingTimeout()
-    {
-        yield return new WaitForSeconds(3.0f);
-        StopShooting();
-    }
-
-    public void StopShooting()
+    private void StopShooting()
     {
         m_isShooting = false;
     }
 
     private void Reset()
     {
+        fill.color = Color.white;
         fill.rectTransform.SetHeight(0);
         meter.SetActive(false);
         glow.gameObject.SetActive(false);
