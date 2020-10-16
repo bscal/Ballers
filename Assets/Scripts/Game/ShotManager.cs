@@ -68,10 +68,7 @@ public class ShotManager : MonoBehaviour
         m_shotBarData.barShake = 0f;
         m_shotBarData.spdVariationID = (int)SpeedVariations.NONE;
 
-        m_shotBarData.bad = .5f;
-        m_shotBarData.ok = .35f;
-        m_shotBarData.good = .15f;
-        m_shotBarData.perfect = .05f;
+        m_shotBarData.SetBarValues(.05f, .15f, .3f);
 
         // ShotMeter constants are set in ShotMeter script. These have to do with size of ui elements.
         m_shotBarData.targetSize = (ShotMeter.MAX_TARGET_HEIGHT * m_shotBarData.BonusHeight) + ShotMeter.BASE_TARGET;

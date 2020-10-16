@@ -43,7 +43,7 @@ public class BallHandling : NetworkedBehaviour
     [SerializeField]
     private const float SHOT_SPEED = 0.5f;
 
-    // =================================== Events ===================================
+    // =================================== Public Events ===================================
 
     public event Action<int, ShotData, ShotResultData> ShotMade;
     public event Action<ShotData, ShotResultData> ShotMissed;
@@ -54,7 +54,7 @@ public class BallHandling : NetworkedBehaviour
     public event Action<Player, PassType> CatchBall;
     public event Action<Player, float> TouchedBall;
 
-    // =================================== Networking Variables ===================================
+    // =================================== Public Networking Variables ===================================
 
     // PlayerID with ball
     private readonly NetworkedVarULong m_playerWithBall = new NetworkedVarULong(NetworkConstants.BALL_CHANNEL, NO_PLAYER);
@@ -77,13 +77,13 @@ public class BallHandling : NetworkedBehaviour
     public int Possession { get { return m_possession.Value; } set { if (value < -1 || value > 1) value = -1; m_possession.Value = (sbyte)value; } }
     public int PossessionOrHome { get { return (Possession != 1) ? 0 : 1; } }
 
-    // =================================== Public Varibles ===================================
+    // =================================== Public ===================================
 
     public float pass_speed = 6.0f;
     public float walk_offset = 2.5f;
     public float sprint_offset = 6.0f;
 
-    // =================================== Private Varibles ===================================
+    // =================================== Private ===================================
 
     private ShotManager m_shotManager;
     private Player m_currentPlayer;
@@ -100,9 +100,7 @@ public class BallHandling : NetworkedBehaviour
     private float m_passScore;
     private float m_releaseDiff;
     private float m_shotDifficulty;
-    private bool m_hitBackboard;
     private bool m_hitRim;
-    private bool m_hitFloor;
     private bool m_isAboveRim;
     private bool m_shotPastArc;
     private bool m_hitTopTrigger;
@@ -206,7 +204,7 @@ public class BallHandling : NetworkedBehaviour
         // ============ Ball Shoot ============
         else if (State == BallState.SHOT)
         {
-            m_body.isKinematic = false;
+            //m_body.isKinematic = false;
             ChangeBallHandler(NO_PLAYER);
         }
     }
@@ -228,7 +226,7 @@ public class BallHandling : NetworkedBehaviour
     {
         if (m_shotInAction)
         {
-            OnShotMissed(m_shotData);
+            OnShotMissed();
         }
     }
 
@@ -265,7 +263,6 @@ public class BallHandling : NetworkedBehaviour
 
         State = BallState.SHOT;
         m_shotInAction = true;
-        m_body.isKinematic = false;
 
         float h = ShotController.GetShotRange(m_shotData.type) == ShotRange.LONG ? UnityEngine.Random.Range(5f, 8f) : UnityEngine.Random.Range(1.5f, 2f);
         float d = SHOT_SPEED + UnityEngine.Random.value / m_shotData.distance;
@@ -285,7 +282,6 @@ public class BallHandling : NetworkedBehaviour
         const float MAX_HEIGHT_DIFF = 100f;
 
         float releaseDiffXOffset = Mathf.Clamp(releaseDiff, -MAX_HEIGHT_DIFF, MAX_HEIGHT_DIFF) * HEIGHT_DIFF_MULTIPLIER * BASE_VAL_INCREMENT;
-        print($"diff = {releaseDiff} | {releaseDiffXOffset}");
 
         Vector2 X_GRADE_GOOD = new Vector2(.0f, .05f);
         Vector2 Y_GRADE_GOOD = new Vector2(.0f, .0f);
@@ -315,10 +311,9 @@ public class BallHandling : NetworkedBehaviour
         {
             offset = GetRandOffsetFromRanges(X_GRADE_POOR, Y_GRADE_POOR, Z_GRADE_POOR);
         }
-        print(m_currentPlayer.transform.forward * releaseDiffXOffset);
+
         if (m_grade != ShotBarData.GRADE_PERFECT)
             offset += m_currentPlayer.transform.forward * releaseDiffXOffset;
-
 
         if (m_shotData.type == ShotType.LAYUP)
         {
@@ -339,7 +334,7 @@ public class BallHandling : NetworkedBehaviour
 
         print(offset);
 
-        Vector3 basketPos = GameManager.Singleton.baskets[player.teamID].netPos.position;
+        Vector3 basketPos = GameManager.Singleton.CurrentBasket.netPos.position;
         if (m_shotData.bankshot == BankType.NONE)
             StartCoroutine(FollowArc(m_ball.transform.position, basketPos + offset, h, d));
         else
@@ -361,14 +356,17 @@ public class BallHandling : NetworkedBehaviour
         float fracComplete = 0;
         while (fracComplete < 1)
         {
+            if (!m_shotInAction) break;
             if (fracComplete < .5f) m_shotPastArc = true;
-
             // Fraction of journey completed equals current distance divided by total distance.
             fracComplete = (Time.time - startTime) / duration;
             // Calculate arc
             Vector3 pos = Vector3.Lerp(start, end, fracComplete);
             pos.y += Mathf.Sin(Mathf.PI * fracComplete) * height;
-            m_ball.transform.position = pos;
+
+            if (!GameManager.Singleton.CurrentBasket.backBoardCollider.bounds.Contains(pos))
+                m_body.MovePosition(pos);
+            //m_ball.transform.position = pos;
 
             yield return null;
         }
@@ -387,6 +385,7 @@ public class BallHandling : NetworkedBehaviour
         // This statement will break itself at 99% completion of journey
         while (fracComplete < 1)
         {
+            if (!m_shotInAction) break;
             // Fraction of journey completed equals current distance divided by total distance.
             fracComplete = (Time.time - startTime) / duration;
             // Calculate arc
@@ -403,6 +402,7 @@ public class BallHandling : NetworkedBehaviour
         // This is the loop for lerp ball position from bank spot on backboard to basket.
         while (fracComplete < 1)
         {
+            if (!m_shotInAction) break;
             // Using duration here does not makes sense since its a constant distance between the bank and the
             // basket. Think about moveing this to a static const or some better way?
             fracComplete = (Time.time - startTime) / (duration * .75f);
@@ -704,10 +704,6 @@ public class BallHandling : NetworkedBehaviour
                     LeanTween.delayedCall(.5f, () => basket.netCloth.externalAcceleration = Vector3.zero);
                 }
             }
-            if (other.gameObject.name.Equals("Hitbox Shot"))
-            {
-                m_insideHitboxShot = true;
-            }
         }
     }
 
@@ -719,7 +715,8 @@ public class BallHandling : NetworkedBehaviour
         }
         if (other.gameObject.name.Equals("Hitbox Shot"))
         {
-            m_insideHitboxShot = false;
+            if (m_shotInAction)
+                OnShotMissed();
         }
     }
 
@@ -734,13 +731,13 @@ public class BallHandling : NetworkedBehaviour
         print("made");
     }
 
-    private void OnShotMissed(ShotData shotData)
+    private void OnShotMissed()
     {
         m_shotInAction = false;
         m_hitTopTrigger = false;
 
         ShotResultData result = GetShotResultData(ShotResultType.MISSED);
-        ShotMissed?.Invoke(shotData, result);
+        ShotMissed?.Invoke(m_shotData, result);
         print("missed");
     }
 
@@ -788,7 +785,8 @@ public class BallHandling : NetworkedBehaviour
         // There is no need to update that client or change possession until ball is picked up.
         if (newNetworkID == NO_PLAYER)
         {
-            State = BallState.LOOSE;
+            if (State != BallState.SHOT)
+                State = BallState.LOOSE;
             return;
         }
         else
@@ -809,6 +807,11 @@ public class BallHandling : NetworkedBehaviour
         ChangePossession(teamToSwitch, false, false);
     }
 
+    public void StopShot(bool inbound)
+    {
+        m_shotInAction = false;
+    }
+
     private void SetupInbound(int team, GameObject inbound)
     {
         // Fade Screen
@@ -827,7 +830,8 @@ public class BallHandling : NetworkedBehaviour
         // parents "Chunks" is tagged.
         if (collision.gameObject.CompareTag(BACKBOARD_TAG))
         {
-            m_hitBackboard = true;
+            StopShot(false);
+            print("hit");
         }
         if (collision.gameObject.CompareTag(RIM_TAG))
         {
@@ -835,8 +839,8 @@ public class BallHandling : NetworkedBehaviour
         }
         if (collision.gameObject.CompareTag(FLOOR_TAG))
         {
-            m_hitFloor = true;
-            if (m_shotInAction) OnShotMissed(m_shotData);
+            if (m_shotInAction)
+                OnShotMissed();
         }
     }
 

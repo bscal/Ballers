@@ -9,6 +9,7 @@ public class Basket : MonoBehaviour
     public Transform netPos;
     public Transform bottomOfNet;
     public Transform floorUnderNet;
+    public BoxCollider backBoardCollider;
     public Cloth netCloth;
     public GameObject[] banks;
     private void Start()
