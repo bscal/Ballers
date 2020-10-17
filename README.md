@@ -1,17 +1,19 @@
 ## Ballers
-Unity version 2019.3.12f 3D Game.
+Ballers is a competitive multiplayer basketball simulation game built with Unity v2020.
 
-Ballers is a 3D multiplayer basketball simulation with the goal of being competitive and skill based.
+Ballers aims to be a fun, skill based, and strategic game. Trying to include a more realistic game then other basketball games, while also
+keeping an enjoyable and customizable experience.
 
-The game is in VERY early development and I am making it mostly to learn and get better with unity/gamedev. So you will currently receive no support or downloads until further into the project.
+Ballers uses MLAPI and Steam to handle most of the networking. And SteamP2P for hosting matches.
 
-Uses voxel models
+The game is in VERY early development and I am making it mostly to learn and get better with unity/gamedev/game design. So you will currently receive no support or downloads until further into the project. I will also not a lot of detail or documentation for setting this up yet.
+
+Ballers is 3D but uses voxel models or voxel style for the player model. 
 
 ### Dependencies
 
 * PixaVoxel* (Paid Voxel Library in the Unity store)                Link --> http://picavoxel.com/index.html
 * MLAPI (Networking Library. Included as dll from their installer)  Link --> https://github.com/MidLevel/MLAPI
-* InputManager (Custom input manager for Unity)                     Link --> https://github.com/daemon3000/InputManager
 * Steamworks.NET                                                    Link --> https://steamworks.github.io/
 * LeanTween                                Link --> https://assetstore.unity.com/packages/tools/animation/leantween-3595
 
