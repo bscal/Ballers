@@ -10,12 +10,6 @@ public class ShotManager : MonoBehaviour
 
     private const float BASE_SPEED = 50.0f;
 
-    public static ShotManager Singleton { get; private set; }
-
-    private ShotManager() { }
-
-    //public NetworkedShotData ShotData { get; } = new NetworkedShotData(NetworkConstants.SHOT_CHANNEL, new ShotData());
-
     // =================================== Private Varibles ===================================
 
     private bool m_isShot = false;
@@ -29,7 +23,6 @@ public class ShotManager : MonoBehaviour
 
     private void Awake()
     {
-        Singleton = this;
         m_shotData = new ShotData();
         m_shotBarData = new ShotBarData();
     }

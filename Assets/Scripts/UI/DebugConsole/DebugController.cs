@@ -9,6 +9,8 @@ using UnityEngine.InputSystem;
 
 public class DebugController : MonoBehaviour
 {
+    public static DebugController Singleton { get; private set; }
+
     private const int BUFFER_SIZE = 128;
     private const int VIEW_LENGTH = 16;
 
@@ -19,7 +21,7 @@ public class DebugController : MonoBehaviour
     private const int LAST_LIST_SIZE = 8;
     private const int TABLE_WIDTH_SIZE = 48;
 
-    public static DebugController Singleton { get; private set; }
+
 
     private Controls m_controls;
     private bool m_showConsole;
@@ -40,9 +42,10 @@ public class DebugController : MonoBehaviour
     private GUIStyle m_hintStyle = new GUIStyle();
     private GUIStyle m_hintSelectStyle = new GUIStyle();
 
-    public List<DebugCommandBase> commandList = new List<DebugCommandBase>();
+    private List<DebugCommandBase> m_commandList = new List<DebugCommandBase>();
 
-    public Font font;
+    [SerializeField]
+    private Font m_font;
 
     // Start is called before the first frame update
     void Awake()
@@ -99,27 +102,27 @@ public class DebugController : MonoBehaviour
 
 
         m_textStyle.fontSize = 14;
-        m_textStyle.font = font;
+        m_textStyle.font = m_font;
         m_textStyle.normal.textColor = Color.white;
 
         m_textIStyle.fontSize = 14;
-        m_textIStyle.font = font;
+        m_textIStyle.font = m_font;
         m_textIStyle.normal.textColor = new Color(.55f, .8f, 1);
 
         m_textWStyle.fontSize = 14;
-        m_textWStyle.font = font;
+        m_textWStyle.font = m_font;
         m_textWStyle.normal.textColor = new Color(1, .55f, .2f);
 
         m_textEStyle.fontSize = 14;
-        m_textEStyle.font = font;
+        m_textEStyle.font = m_font;
         m_textEStyle.normal.textColor = new Color(1, .3f, .3f);
 
         m_hintStyle.fontSize = 14;
-        m_hintStyle.font = font;
+        m_hintStyle.font = m_font;
         m_hintStyle.normal.textColor = new Color(.6f, .6f, .6f);
 
         m_hintSelectStyle.fontSize = 14;
-        m_hintSelectStyle.font = font;
+        m_hintSelectStyle.font = m_font;
         m_hintSelectStyle.normal.textColor = new Color(200 / 255, 200 / 255, 200 / 255);
 
         PrintConsole("Testing This 1!", LogType.INFO);
@@ -129,10 +132,10 @@ public class DebugController : MonoBehaviour
             new object[] { 1, true, 50.50, "this"}, LogType.WARNING);
 
         var TEST_CMD = new DebugCommand("test", "testing", "test - testing", args => Debug.Log("testing command"));
-        commandList.Add(TEST_CMD);
+        m_commandList.Add(TEST_CMD);
 
         var TESTDEBUG_CMD = new DebugArgsCommand("test_this", "testing", "test_this <value>", args => Debug.Log("test " + args[0]), 1);
-        commandList.Add(TESTDEBUG_CMD);
+        m_commandList.Add(TESTDEBUG_CMD);
     }
 
     private void OnGUI()
@@ -195,9 +198,9 @@ public class DebugController : MonoBehaviour
     private void HandleInput()
     {
         PrintConsole(m_input, LogType.NONE);
-        for (int i = 0; i < commandList.Count; i++)
+        for (int i = 0; i < m_commandList.Count; i++)
         {
-            DebugCommandBase cmd = commandList[i];
+            DebugCommandBase cmd = m_commandList[i];
             string[] split = m_input.Split(new char[] { ' ' });
             string cmdName = split[0];
 
@@ -230,12 +233,12 @@ public class DebugController : MonoBehaviour
         List<string> res = new List<string>();
         string pattern = string.Format("^(?i:{0})", Regex.Escape(str));
         
-        for (int i = 0; i < commandList.Count; i++)
+        for (int i = 0; i < m_commandList.Count; i++)
         {
-            var m = Regex.Match(commandList[i].Name, pattern);
+            var m = Regex.Match(m_commandList[i].Name, pattern);
             if (m.Success)
             {
-                res.Add(commandList[i].Formatted);
+                res.Add(m_commandList[i].Formatted);
             }
         }
         return res;

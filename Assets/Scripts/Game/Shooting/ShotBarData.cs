@@ -84,7 +84,6 @@ public class ShotBarData : IBitWritable
             spdVariationID  = reader.ReadByte();
         }
         bad = Mathf.Clamp(1f - ok, 0f, 1f);
-        Debug.LogWarning(bad + "   " + OkLength);
     }
     public void Write(Stream stream)
     {
