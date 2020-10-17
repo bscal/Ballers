@@ -1,3 +1,6 @@
+# =========================
+# Project Specific Ignores
+# =========================
 # PicaVoxel is a bought asset from unity store
 Assets/PicaVoxel/*
 Assets/PicaVoxel/PicaVoxel/*
@@ -17,10 +20,14 @@ Assets/Plugins
 Assets/Plugins/Steamworks.NET
 Assets/Editor/Steamworks.NET
 
-# Unity Generated
-[Tt]emp/
+# =========================
+# General Unity Files
+# =========================
 [Ll]ibrary/
+[Tt]emp/
 [Oo]bj/
+[Bb]uild/
+[Bb]uilds/
 
 # Unity3D Generated File On Crash Reports
 sysinfo.txt
@@ -40,6 +47,12 @@ obj/
 *.svd
 .vs/
 
+
+
+# =========================
+# Operating System Files
+# =========================
+
 # OS Generated
 desktop.ini
 .DS_Store
@@ -48,3 +61,46 @@ desktop.ini
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# OSX
+# =========================
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+# =========================
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
