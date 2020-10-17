@@ -268,14 +268,12 @@ public class PlayerControls : NetworkedBehaviour
     void StartShot(InputAction.CallbackContext context)
     {
         m_player.ShootBall();
-        //m_animator.SetTrigger("Shoot");
         StartCoroutine(WaitShoot(0.20f));
     }
 
     void StopShot(InputAction.CallbackContext context)
     {
         m_player.ReleaseBall();
-        //m_animator.ResetTrigger("Shoot");
         StartCoroutine(WaitShoot(0.20f));
     }
 

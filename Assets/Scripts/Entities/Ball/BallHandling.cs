@@ -204,7 +204,6 @@ public class BallHandling : NetworkedBehaviour
         // ============ Ball Shoot ============
         else if (State == BallState.SHOT)
         {
-            //m_body.isKinematic = false;
             ChangeBallHandler(NO_PLAYER);
         }
     }
