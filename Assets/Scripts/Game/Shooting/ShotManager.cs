@@ -148,8 +148,8 @@ public class ShotManager : MonoBehaviour
     {
         if (type == ShotType.LAYUP && ShotController.GetShotRange(type) == ShotRange.CLOSE)
         {
-            if (p.isDribLeft) return BankType.LEFT;
-            else if (p.isDribRight) return BankType.RIGHT;
+            if (p.movingLeft) return BankType.LEFT;
+            else if (p.movingRight) return BankType.RIGHT;
             else return GetClosestBank(p.transform.position);
         }
         else if (type == ShotType.SHOT && p.isCtrlDown)

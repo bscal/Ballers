@@ -17,7 +17,6 @@ public class LineTracker : MonoBehaviour
         Player assignment = p.Assignment;
         if (p == null || assignment == null)
         {
-            //gameObject.SetActive(false);
             return;
         }
 

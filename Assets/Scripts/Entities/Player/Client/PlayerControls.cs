@@ -71,10 +71,10 @@ public class PlayerControls : NetworkedBehaviour
         m_player.isAltDown = Keyboard.current.altKey.ReadValue() > 0.0f;
 
         Vector2 dribVec = actions.Keyboard.Dribble.ReadValue<Vector2>();
-        m_player.isDribUp = dribVec.y > 0; //1
-        m_player.isDribDown = dribVec.y < 0; //-1
-        m_player.isDribLeft = dribVec.x < 0; //-1
-        m_player.isDribRight = dribVec.x > 0; //1
+        m_player.movingFoward = dribVec.y > 0; //1
+        m_player.movingBack = dribVec.y < 0; //-1
+        m_player.movingLeft = dribVec.x < 0; //-1
+        m_player.movingRight = dribVec.x > 0; //1
 
         if (actions.Keyboard.Jump.triggered && !m_jumpCooldown)
         {

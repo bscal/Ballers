@@ -3,6 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum CharacterClass
+{
+    GUARD = 0,
+    WING = 1,
+    HYBRID = 2,
+    BIG = 3
+}
+
 public enum PlayerClass
 {
 
@@ -26,3 +34,4 @@ static class PlayerClassExtensions
     }
 
 }
+

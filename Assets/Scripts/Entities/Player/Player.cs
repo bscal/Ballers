@@ -55,10 +55,10 @@ public class Player : NetworkedBehaviour, IBitWritable
     public bool isBallInLeftHand;
     public bool isCtrlDown;
     public bool isAltDown;
-    public bool isDribUp;
-    public bool isDribDown;
-    public bool isDribLeft;
-    public bool isDribRight;
+    public bool movingFoward;
+    public bool movingBack;
+    public bool movingLeft;
+    public bool movingRight;
     public bool isContesting;
     public bool isBlocking;
     public bool isStealing;
@@ -70,6 +70,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     public bool isInbounds;
     public bool isPostShot;
     public bool isPostMove;
+
 
     public int OtherTeam { get { return FlipTeamID(teamID); } }
     /// <summary>
@@ -488,10 +489,10 @@ public class Player : NetworkedBehaviour, IBitWritable
             isBallInLeftHand = reader.ReadBool();
             isCtrlDown = reader.ReadBool();
             isAltDown = reader.ReadBool();
-            isDribUp = reader.ReadBool();
-            isDribDown = reader.ReadBool();
-            isDribLeft = reader.ReadBool();
-            isDribRight = reader.ReadBool();
+            movingFoward = reader.ReadBool();
+            movingBack = reader.ReadBool();
+            movingLeft = reader.ReadBool();
+            movingRight = reader.ReadBool();
 
             isContesting = reader.ReadBool();
             isBlocking = reader.ReadBool();
@@ -520,10 +521,10 @@ public class Player : NetworkedBehaviour, IBitWritable
             writer.WriteBool(isBallInLeftHand);
             writer.WriteBool(isCtrlDown);
             writer.WriteBool(isAltDown);
-            writer.WriteBool(isDribUp);
-            writer.WriteBool(isDribDown);
-            writer.WriteBool(isDribLeft);
-            writer.WriteBool(isDribRight);
+            writer.WriteBool(movingFoward);
+            writer.WriteBool(movingBack);
+            writer.WriteBool(movingLeft);
+            writer.WriteBool(movingRight);
 
             writer.WriteBool(isContesting);
             writer.WriteBool(isBlocking);

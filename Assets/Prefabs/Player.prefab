@@ -318,7 +318,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_spriteRender: {fileID: 602050737075228655}
-  thickness: 4
+  thickness: 1
 --- !u!1 &202022365623130695
 GameObject:
   m_ObjectHideFlags: 0

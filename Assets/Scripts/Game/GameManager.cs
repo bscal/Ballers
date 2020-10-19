@@ -420,6 +420,28 @@ public class GameManager : NetworkedBehaviour
         return LocalPlayer;
     }
 
+    public static List<Player> GetPlayersInRadius(float radius)
+    {
+        List<Player> res = new List<Player>();
+        foreach (Player p in Players)
+        {
+            if (LocalPlayer.Dist(p.transform.position) < radius)
+                res.Add(p);
+        }
+        return res;
+    }
+
+    public static List<Player> GetEnemeiesInRadius(float radius)
+    {
+        List<Player> res = new List<Player>();
+        foreach (Player p in Singleton.teams[LocalPlayer.OtherTeam].teamSlots.Values)
+        {
+            if (LocalPlayer.Dist(p.transform.position) < radius)
+                res.Add(p);
+        }
+        return res;
+    }
+
     /// <summary>
     /// Takes a NetworkID and returns Player matching that id. This can return AIs from the player list.
     /// </summary>

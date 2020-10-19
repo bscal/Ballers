@@ -1,6 +1,7 @@
 ﻿using MLAPI;
 using MLAPI.Spawning;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class Movement : MonoBehaviour
@@ -14,19 +15,11 @@ public class Movement : MonoBehaviour
 
     public bool isMovementEnabled = true;
 
-    private float m_horizontal;
-    private float m_vertical;
-    private float m_strafe;
-
-
-
+    private Controls actions;
     private Vector3 m_targetDirection;
-    private bool m_skipRotate = false;
     private readonly float m_movementSpeed  = 8.0f;
     private readonly float m_sprintSpeed    = 16.0f;
     private readonly float m_turningSpeed   = 200.0f;
-
-    private Controls actions;
 
     private void OnEnable()
     {
@@ -86,26 +79,47 @@ public class Movement : MonoBehaviour
         Vector2 move = actions.Keyboard.Move.ReadValue<Vector2>();
         m_player.isMoving = move != Vector2.zero;
 
-        m_player.isDribUp = move.y > 0;    //1
-        m_player.isDribDown = move.y < 0;  //-1
-        m_player.isDribLeft = move.x < 0;  //-1
-        m_player.isDribRight = move.x > 0; //1
+        bool foward = move.y > 0;    //1
+        bool back = move.y < 0;  //-1
+        bool left = move.x < 0;  //-1
+        bool right = move.x > 0; //1
 
-        if (m_player.isDribUp)
+        // Move backwards while facing foward
+        if (back && !m_player.isSprinting)
+        {
+            print("back pettle");
+        }
+        // Crossover the ball
+        else if (left && m_player.movingRight && m_player.isSprinting)
+        {
+            print("ball right to left");
+        }
+        // Crossover the ball
+        else if (right && m_player.movingLeft && m_player.isSprinting)
+        {
+            print("ball left to right");
+        }
+
+        m_player.movingFoward = foward; //1
+        m_player.movingBack = back;     //-1
+        m_player.movingLeft = left;     //-1
+        m_player.movingRight = right;   //1
+
+        if (m_player.movingFoward)
         {
             m_parent.transform.position += mov;
         }
-        else if (m_player.isDribDown)
+        else if (m_player.movingBack)
         {
             m_parent.transform.position -= mov;
         }
 
         mov = (GameManager.Singleton.Possession == 0 ? Vector3.left : -Vector3.left) * ms;
-        if (m_player.isDribLeft)
+        if (m_player.movingLeft)
         {
             m_parent.transform.position += mov;
         }
-        else if (m_player.isDribRight)
+        else if (m_player.movingRight)
         {
             m_parent.transform.position -= mov;
         }
@@ -128,4 +142,13 @@ public class Movement : MonoBehaviour
     {
 
     }
+}
+
+public enum MoveDir
+{
+    NONE,
+    FOWARD,
+    BACK,
+    LEFT,
+    RIGHT,
 }
