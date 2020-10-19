@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
-[CreateAssetMenu(fileName = "Tips", menuName = "ScriptableObjects/TipData", order = 1)]
+[CreateAssetMenu(fileName = "NewTip", menuName = "Ballers/TipData")]
 public class TipData : ScriptableObject
 {
 
