@@ -21,6 +21,22 @@ public static class AnimNames
 
     public const string REG_PUMPFAKE = "player@reg_pumpfake";
     public const string REG_JUMPSHOT = "player@reg_jumpshot";
+
+    public const string JUMP1 = "player@jump1";
+    public const string CROSS_L_TO_R = "player@left_to_right";
+    public const string CROSS_R_TO_L = "player@right_to_left";
+    public const string BACKPEDDLE = "player@backpeddle";
+    public const string BACKPEDDLE_BALL = "player@backpeddle_ball";
+    public const string BLOCK = "player@block";
+    public const string CONTEST_UP = "player@contest_up";
+    public const string CONTEST_AT = "player@contest_at";
+    public const string STEAL = "player@steal";
+    public const string SWIPE = "player@swipe";
+    public const string TRIPLE_THREAT = "player@triple_threat";
+    public const string PASS_NORMAL1 = "player@pass_normal1";
+    public const string DEF_STANCE = "player@def_stance";
+    public const string DEF_STANCE_STRAFE_LEFT = "player@def_stance_left";
+    public const string DEF_STANCE_STRAFE_RIGHT = "player@def_stance_right";
 }
 
 public class PlayerAnimHandler : MonoBehaviour
