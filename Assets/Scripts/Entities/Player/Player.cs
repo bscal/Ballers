@@ -319,6 +319,23 @@ public class Player : NetworkedBehaviour, IBitWritable
         InvokeServerRpc(ReleaseRoundShotMeter, OwnerClientId, m_roundShotMeter.GetTime());
     }
 
+    public void Jump()
+    {
+        m_animHandler.PlayAnim(AnimNames.JUMP1);
+    }
+
+    public void Block() { }
+    public void Contest() { }
+    public void Steal() { }
+    public void Swipe() { }
+    public void DriveLeft() { }
+    public void DriveRight() { }
+    public void DriveStraight() { }
+    public void ProtectedBall() { }
+    public void TripleThreat() { }
+    public void PostUp() { }
+
+
     public float Dist(Vector3 other)
     {
         return Vector3.Distance(transform.position, other);
