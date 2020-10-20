@@ -16,8 +16,8 @@ public class PlayerControls : NetworkedBehaviour
     private PlayerAnimHandler m_animHandler;
     private GameObject m_menu;
 
-    private bool m_shootCooldown = false;
-    private bool m_jumpCooldown = false;
+    private float m_shootCooldown = 0;
+    private float m_jumpCooldown = 0;
 
     private Controls actions;
 
@@ -76,10 +76,10 @@ public class PlayerControls : NetworkedBehaviour
         m_player.movingLeft = dribVec.x < 0; //-1
         m_player.movingRight = dribVec.x > 0; //1
 
-        if (actions.Keyboard.Jump.triggered && !m_jumpCooldown)
+        if (actions.Keyboard.Jump.triggered && m_jumpCooldown < Time.time)
         {
-            m_animator.SetTrigger("Jump");
-            StartCoroutine(WaitJump(1.5f));
+            m_player.Jump();
+            m_jumpCooldown = Time.time + 1.5f;
         }
 
         if (Keyboard.current.escapeKey.isPressed)
@@ -111,20 +111,6 @@ public class PlayerControls : NetworkedBehaviour
         }
 
         if (Keyboard.current.uKey.isPressed) m_animator.SetTrigger("Crossover");
-    }
-
-    private IEnumerator WaitShoot(float delay)
-    {
-        m_shootCooldown = true;
-        yield return new WaitForSeconds(delay);
-        m_shootCooldown = false;
-    }
-
-    private IEnumerator WaitJump(float delay)
-    {
-        m_jumpCooldown = true;
-        yield return new WaitForSeconds(delay);
-        m_jumpCooldown = false;
     }
 
     private void CallForBall(InputAction.CallbackContext context)
@@ -174,7 +160,7 @@ public class PlayerControls : NetworkedBehaviour
         bool held = false;
         while (true)
         {
-            if (m_shootCooldown || m_player.isShooting) yield return new WaitForSeconds(0.1f);
+            if (m_shootCooldown < Time.time || m_player.isShooting) yield return new WaitForSeconds(0.1f);
 
             //Check when the key is pressed
             if (actions.Keyboard.Shoot.ReadValue<float>() > 0)
@@ -261,27 +247,28 @@ public class PlayerControls : NetworkedBehaviour
 
     void Pumpfake(InputAction.CallbackContext context)
     {
-        m_animHandler.PlayAnim(AnimNames.REG_PUMPFAKE);
-        StartCoroutine(WaitShoot(0.20f));
+        if (m_shootCooldown < Time.time)
+        {
+            m_animHandler.PlayAnim(AnimNames.REG_PUMPFAKE);
+            m_shootCooldown = Time.time + .2f;
+        }
     }
 
     void StartShot(InputAction.CallbackContext context)
     {
-        m_player.ShootBall();
-        StartCoroutine(WaitShoot(0.20f));
+        if (m_shootCooldown < Time.time)
+        {
+            m_player.ShootBall();
+            m_shootCooldown = Time.time + .2f;
+        }
     }
 
     void StopShot(InputAction.CallbackContext context)
     {
-        m_player.ReleaseBall();
-        StartCoroutine(WaitShoot(0.20f));
+        if (m_shootCooldown < Time.time)
+        {
+            m_player.ReleaseBall();
+            m_shootCooldown = Time.time + .2f;
+        }
     }
-
-    private static bool IsKeyPressed(InputAction action)
-    {
-        return action.ReadValue<float>() > 0;
-    }
-
-
-
 }
