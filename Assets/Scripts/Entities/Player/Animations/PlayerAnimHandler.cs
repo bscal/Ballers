@@ -22,7 +22,11 @@ public static class AnimNames
     public const string REG_PUMPFAKE = "player@reg_pumpfake";
     public const string REG_JUMPSHOT = "player@reg_jumpshot";
 
-    public const string JUMP1 = "player@jump1";
+    public const string REBOUND = "player@rebound";
+    public const string STRAFE_RIGHT = "player@strafe_right";
+    public const string STRAFE_LEFT = "player@strafe_left";
+
+    // TODO
     public const string CROSS_L_TO_R = "player@left_to_right";
     public const string CROSS_R_TO_L = "player@right_to_left";
     public const string BACKPEDDLE = "player@backpeddle";
@@ -83,16 +87,8 @@ public class PlayerAnimHandler : MonoBehaviour
 
 public class AnimContainer
 {
-    public string name;
-    public int weight;
-    public bool interruptible;
-
-    public bool keepLooped;
-
-    public AnimContainer(string name, int weight, bool interruptible)
-    {
-        this.name = name;
-        this.weight = weight;
-        this.interruptible = interruptible;
-    }
+    public readonly AnimationClip clip;
+    public readonly int weight;
+    public readonly bool interruptible;
+    public readonly bool keepLooped;
 }

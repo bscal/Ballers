@@ -321,7 +321,7 @@ public class Player : NetworkedBehaviour, IBitWritable
 
     public void Jump()
     {
-        m_animHandler.PlayAnim(AnimNames.JUMP1);
+        m_animHandler.PlayAnim(AnimNames.REBOUND);
     }
 
     public void Block() { }
