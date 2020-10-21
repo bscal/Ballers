@@ -1,14 +1,14 @@
 fileFormatVersion: 2
-guid: 237680b4afaa11e4cbe2121d9f0fb34a
+guid: 9e2bd16ad4de7dd4ab4837af98266559
 ModelImporter:
   serializedVersion: 20101
   internalIDToNameTable:
   - first:
-      74: 4781951162920444690
-    second: backpeddle_dribble
+      74: 8450808836658823645
+    second: lob_pass1
   - first:
-      74: -6201834280730877740
-    second: Armature|Armature|Armature|Armature|mixamo.com|Layer0|Armature|Armature|
+      74: -4352182360597662222
+    second: Armature|Armature|Armature|Armature|Armature|Armature|mixamo.com|Layer0|
   externalObjects: {}
   materials:
     materialImportMode: 1
@@ -24,7 +24,10 @@ ModelImporter:
     rigImportErrors: 
     rigImportWarnings: 
     animationImportErrors: 
-    animationImportWarnings: 
+    animationImportWarnings: "\nClip 'Armature|Armature|Armature|ArmatureAction|Armature|ArmatureAction'
+      has import animation warnings that might lower retargeting quality:\nNote:
+      Activate translation DOF on avatar to improve retargeting quality.\n\t'mixamorig:Spine'
+      is inbetween humanoid transforms and has rotation animation that will be discarded.\n"
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
@@ -38,19 +41,19 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: backpeddle_dribble
-      takeName: Armature|ArmatureAction
+      name: lob_pass1
+      takeName: Armature|Armature|Armature|ArmatureAction|Armature|ArmatureAction
       internalID: 0
       firstFrame: 0
-      lastFrame: 23
+      lastFrame: 34
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 1
-      loopBlend: 1
+      loopTime: 0
+      loopBlend: 0
       loopBlendOrientation: 1
       loopBlendPositionY: 1
       loopBlendPositionXZ: 1

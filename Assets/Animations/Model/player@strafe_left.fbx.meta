@@ -1,11 +1,11 @@
 fileFormatVersion: 2
-guid: 237680b4afaa11e4cbe2121d9f0fb34a
+guid: c8e53fcb67a86e7488b7af7490c00670
 ModelImporter:
   serializedVersion: 20101
   internalIDToNameTable:
   - first:
       74: 4781951162920444690
-    second: backpeddle_dribble
+    second: strafe_left
   - first:
       74: -6201834280730877740
     second: Armature|Armature|Armature|Armature|mixamo.com|Layer0|Armature|Armature|
@@ -38,7 +38,7 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: backpeddle_dribble
+      name: strafe_left
       takeName: Armature|ArmatureAction
       internalID: 0
       firstFrame: 0
@@ -58,7 +58,7 @@ ModelImporter:
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
       heightFromFeet: 0
-      mirror: 0
+      mirror: 1
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events: []
