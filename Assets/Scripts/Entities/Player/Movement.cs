@@ -10,6 +10,7 @@ public class Movement : MonoBehaviour
     public const float AUTO_TURN_SPEED = 3.0f;
 
     public Animator animator;
+    public PlayerAnimHandler playerAnim;
     public Player m_player;
     public GameObject m_parent;
 
@@ -17,8 +18,11 @@ public class Movement : MonoBehaviour
 
     private Controls actions;
     private Vector3 m_targetDirection;
-    private readonly float m_movementSpeed  = 8.0f;
-    private readonly float m_sprintSpeed    = 16.0f;
+
+    private readonly float m_movementSpeed  = 6.0f;
+    private readonly float m_backpeddleSpeed = 2.5f;
+    private readonly float m_strafeSpeed = 5.0f;
+    private readonly float m_sprintSpeed    = 12.0f;
     private readonly float m_turningSpeed   = 200.0f;
 
     private void OnEnable()
@@ -84,13 +88,8 @@ public class Movement : MonoBehaviour
         bool left = move.x < 0;  //-1
         bool right = move.x > 0; //1
 
-        // Move backwards while facing foward
-        if (back && !m_player.isSprinting)
-        {
-            print("back pettle");
-        }
         // Crossover the ball
-        else if (left && m_player.movingRight && m_player.isSprinting)
+        if (left && m_player.movingRight && m_player.isSprinting)
         {
             print("ball right to left");
         }

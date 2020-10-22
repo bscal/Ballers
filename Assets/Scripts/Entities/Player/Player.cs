@@ -179,6 +179,7 @@ public class Player : NetworkedBehaviour, IBitWritable
         if (!IsNpc && movement != null)
         {
             movement.animator = m_animator;
+            movement.playerAnim = m_animHandler;
         }
     }
 
@@ -257,7 +258,7 @@ public class Player : NetworkedBehaviour, IBitWritable
         switch (type)
         {
             case ShotType.SHOT:
-                m_animHandler.PlayAnim(AnimNames.REG_JUMPSHOT);
+                m_animHandler.Play(AnimNames.REG_JUMPSHOT);
                 break;
             case ShotType.LAYUP:
                 if (leftHanded) m_animator.Play("LayupL");
@@ -321,7 +322,7 @@ public class Player : NetworkedBehaviour, IBitWritable
 
     public void Jump()
     {
-        m_animHandler.PlayAnim(AnimNames.REBOUND);
+        m_animHandler.Play(AnimNames.REBOUND);
     }
 
     public void Block() { }

@@ -85,31 +85,6 @@ public class PlayerControls : NetworkedBehaviour
         if (Keyboard.current.escapeKey.isPressed)
             m_menu.SetActive(!m_menu.activeSelf);
 
-        if (m_player.isMoving)
-        {
-            if (m_player.isSprinting)
-            {
-                if (m_player.isDribbling)
-                    m_animHandler.PlayAnim(AnimNames.RUN_DRIB);
-                else
-                    m_animHandler.PlayAnim(AnimNames.RUN);
-            }
-            else
-            {
-                if (m_player.isDribbling)
-                    m_animHandler.PlayAnim(AnimNames.JOG_DRIB);
-                else
-                    m_animHandler.PlayAnim(AnimNames.JOG);
-            }
-        }
-        else
-        {
-            if (m_player.isDribbling)
-                m_animHandler.PlayAnim(AnimNames.IDLE_DRIB);
-            else
-                m_animHandler.PlayAnim(AnimNames.IDLE);
-        }
-
         if (Keyboard.current.uKey.isPressed) m_animator.SetTrigger("Crossover");
     }
 
@@ -249,7 +224,7 @@ public class PlayerControls : NetworkedBehaviour
     {
         if (m_shootCooldown < Time.time)
         {
-            m_animHandler.PlayAnim(AnimNames.REG_PUMPFAKE);
+            m_animHandler.Play(AnimNames.REG_PUMPFAKE);
             m_shootCooldown = Time.time + .2f;
         }
     }
