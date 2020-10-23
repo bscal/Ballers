@@ -224,6 +224,7 @@ public class PlayerControls : NetworkedBehaviour
     {
         if (m_shootCooldown < Time.time)
         {
+            m_player.InvokeServerRpc(m_player.Pumpfake);
             m_animHandler.Play(AnimNames.REG_PUMPFAKE);
             m_shootCooldown = Time.time + .2f;
         }

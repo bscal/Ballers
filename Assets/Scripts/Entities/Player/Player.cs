@@ -62,10 +62,10 @@ public class Player : NetworkedBehaviour, IBitWritable
     public bool isContesting;
     public bool isBlocking;
     public bool isStealing;
+    public bool isDribbling;
 
 
     // Server values
-    public bool isDribbling;
     public bool isInsideThree;
     public bool isInbounds;
     public bool isPostShot;
@@ -318,6 +318,12 @@ public class Player : NetworkedBehaviour, IBitWritable
     public void ReleasePass()
     {
         InvokeServerRpc(ReleaseRoundShotMeter, OwnerClientId, m_roundShotMeter.GetTime());
+    }
+
+    [ServerRPC]
+    public void Pumpfake()
+    {
+        isDribbling = false;
     }
 
     public void Jump()
