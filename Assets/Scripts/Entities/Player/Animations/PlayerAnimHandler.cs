@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Animations;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Experimental.AI;
@@ -30,6 +31,10 @@ public static class AnimNames
     public const string STRAFE_DRIBBLE_LEFT = "player@strafe_dribble_left";
     public const string BACKPEDDLE = "player@backpeddle";
     public const string BACKPEDDLE_BALL = "player@backpeddle_dribble";
+    public const string TRIPLE_THREAT = "player@triple_threat";
+    public const string TRIPLE_THREAT_UP = "player@triple_threat_up";
+    public const string TRIPLE_THREAT_DOWN = "player@triple_threat_down";
+
 
     // TODO
     public const string CROSS_L_TO_R = "player@left_to_right";
@@ -39,7 +44,6 @@ public static class AnimNames
     public const string CONTEST_AT = "player@contest_at";
     public const string STEAL = "player@steal";
     public const string SWIPE = "player@swipe";
-    public const string TRIPLE_THREAT = "player@triple_threat";
     public const string PASS_NORMAL1 = "player@pass_normal1";
     public const string DEF_STANCE = "player@def_stance";
     public const string DEF_STANCE_STRAFE_LEFT = "player@def_stance_left";
@@ -63,7 +67,7 @@ public class PlayerAnimHandler : MonoBehaviour
 
     private void Update()
     {
-        if (m_override && m_animator.GetCurrentAnimatorStateInfo(0).normalizedTime > 1)
+        if (m_override && m_animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f)
         {
             return;
         }
@@ -114,6 +118,8 @@ public class PlayerAnimHandler : MonoBehaviour
 
         if (m_player.isDribbling)
             TryNewState(AnimNames.IDLE_DRIB);
+        else if (m_player.HasBall)
+            TryNewState(AnimNames.TRIPLE_THREAT);
         else
             TryNewState(AnimNames.IDLE);
 
@@ -132,7 +138,7 @@ public class PlayerAnimHandler : MonoBehaviour
             return;
 
         m_override = true;
-
+        m_newState = state;
         ApplyState(state);
     }
 
