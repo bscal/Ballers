@@ -128,7 +128,7 @@ public class DebugController : MonoBehaviour
         PrintConsole("Testing This 1!", LogType.INFO);
         PrintConsole("Test That 2.", LogType.WARNING);
         PrintConsole("Test These 3?", LogType.ERROR);
-        PrintConsoleTable("", new string[] { "test", "this", "table", "LONG_WORD_STRING" },
+        PrintConsoleTable("", 64, new string[] { "test", "this", "table", "LONG_WORD_STRING" },
             new object[] { 1, true, 50.50, "this"}, LogType.WARNING);
 
         var TEST_CMD = new DebugCommand("test", "testing", "test - testing", args => Debug.Log("testing command"));
@@ -273,11 +273,13 @@ public class DebugController : MonoBehaviour
         AddText(cText);
     }
 
-    public void PrintConsoleTable(string text, string[] keys, object[] values, LogType type = LogType.INFO)
+    public void PrintConsoleTable(string text, int size, string[] keys, object[] values, LogType type = LogType.INFO)
     {
-        const int MAX_LENGTH = 32;
+        const int MIN_SIZE = 16;
+        const int MAX_SIZE = 128;
+        size = Mathf.Clamp(size, MIN_SIZE, MAX_SIZE);
 
-        ConsoleText cText = new ConsoleText(GetRepeatedStr('-', MAX_LENGTH), type);
+        ConsoleText cText = new ConsoleText(GetRepeatedStr('-', size), type);
         AddText(cText);
 
         for (int i = 0; i < values.Length; i++)
@@ -295,7 +297,7 @@ public class DebugController : MonoBehaviour
             else
                 val = values[i];
 
-            ConsoleText ct = new ConsoleText(FormatLogTable(key, val.ToString(), "*", MAX_LENGTH), type);
+            ConsoleText ct = new ConsoleText(FormatLogTable(key, val.ToString(), "*", size), type);
             AddText(ct);
         }
         AddText(cText);
@@ -303,12 +305,13 @@ public class DebugController : MonoBehaviour
 
     public void PrintObjAsTable(object obj, LogType type = LogType.INFO)
     {
-        const int MAX_LENGTH = 48;
+        const int BORDER_SIZE = 64;
 
-        ConsoleText cText = new ConsoleText(GetRepeatedStr('-', MAX_LENGTH), type);
+
+        ConsoleText cText = new ConsoleText(GetRepeatedStr('-', BORDER_SIZE), type);
         AddText(cText);
 
-        ConsoleText headText = new ConsoleText(FormatHeaderTable(obj.GetType().Name, "", MAX_LENGTH), type);
+        ConsoleText headText = new ConsoleText(FormatHeaderTable(obj.GetType().Name, "", BORDER_SIZE), type);
         AddText(headText);
 
         AddText(cText);
@@ -320,7 +323,7 @@ public class DebugController : MonoBehaviour
             string val = "";
             if (fields[i].GetValue(obj) != null) val = fields[i].GetValue(obj).ToString();
 
-            ConsoleText ct = new ConsoleText(FormatLogTable(fields[i].Name, val, "*", MAX_LENGTH), type);
+            ConsoleText ct = new ConsoleText(FormatLogTable(fields[i].Name, val, "*", BORDER_SIZE), type);
             AddText(ct);
         }
         AddText(cText);
