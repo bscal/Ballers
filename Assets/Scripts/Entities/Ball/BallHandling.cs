@@ -263,11 +263,14 @@ public class BallHandling : NetworkedBehaviour
         State = BallState.SHOT;
         m_shotInAction = true;
 
-        float h = ShotController.GetShotRange(m_shotData.type) == ShotRange.LONG ? UnityEngine.Random.Range(5f, 8f) : UnityEngine.Random.Range(1.5f, 2f);
+        float h = ShotController.GetShotRange(m_shotData.type)
+            == ShotRange.LONG ? UnityEngine.Random.Range(10f, 12f)
+            : UnityEngine.Random.Range(2.5f, 3.5f);
         float d = SHOT_SPEED + UnityEngine.Random.value / m_shotData.distance;
 
         Vector3 offset = Vector3.zero;
 
+        // Outdated but kept if changes ever revert
         // Basket is AROUND ~0.8m (circumference) or .8x.8m box
         // Voxel of rim is .2m
         // The ball currently is .6m (circumference) at 1 scale.
@@ -275,6 +278,11 @@ public class BallHandling : NetworkedBehaviour
         // The scale of the ball is set to .55
         // This makes the ball size 3.3m
         // .8 - .33 = .47 / 2 = .235m around 0,0,0 of rim
+        //
+        // Updated ball size to be .9 scale. And rim to be slightly smaller to accomidate the size.
+        // This results in around ~.16 meter around the ball if ball is centered at the rim.
+        // This is slightly inaccuracte because I have not done the math on the slightly smaller rim
+        // Overrall the ball is slighly larger then supposed to at around exactly 50% the size of the rim rather then 52%.
 
         const float BASE_VAL_INCREMENT = .01f;
         const float HEIGHT_DIFF_MULTIPLIER = 1f;
@@ -286,9 +294,9 @@ public class BallHandling : NetworkedBehaviour
         Vector2 Y_GRADE_GOOD = new Vector2(.0f, .0f);
         Vector2 Z_GRADE_GOOD = new Vector2(.0f, .235f);
 
-        Vector2 X_GRADE_OK =  new Vector2(.0f, .1f);
-        Vector2 Y_GRADE_OK =  new Vector2(.0f, .0f);
-        Vector2 Z_GRADE_OK =  new Vector2(.1f, .235f * 2f);
+        Vector2 X_GRADE_OK = new Vector2(.0f, .1f);
+        Vector2 Y_GRADE_OK = new Vector2(.0f, .0f);
+        Vector2 Z_GRADE_OK = new Vector2(.1f, .235f * 2f);
 
         Vector2 X_GRADE_POOR = new Vector2(.1f, .2f);
         Vector2 Y_GRADE_POOR = new Vector2(.1f, .2f);
@@ -332,8 +340,15 @@ public class BallHandling : NetworkedBehaviour
         }
 
         print(offset);
-
         Vector3 basketPos = GameManager.Singleton.CurrentBasket.netPos.position;
+
+        DebugController.Singleton.PrintConsoleTable("Shot", 128,
+            new string[] {"pos", "offset", "grade", "dist", "diff", "target_h",
+                "max_h", "perfect", "good", "ok" },
+            new object[] { basketPos, offset, m_grade, releaseDist, releaseDiff, ShotMeter.BASE_TARGET_HEIGHT,
+                ShotMeter.MAX_TARGET_HEIGHT, m_shotBarData.PerfectLength, m_shotBarData.GoodLength, m_shotBarData.OkLength });
+
+
         if (m_shotData.bankshot == BankType.NONE)
             StartCoroutine(FollowArc(m_ball.transform.position, basketPos + offset, h, d));
         else
@@ -684,7 +699,10 @@ public class BallHandling : NetworkedBehaviour
 
                 // Detect if coming from above the collider.
                 if (dir.y > 0)
-                    m_body.AddForce(new Vector3(0, -5));
+                {
+                    m_body.velocity.Set(0, -1, 0);
+                    m_body.AddForce(new Vector3(0, -1));
+                }
             }
             if (other.gameObject.name == "Hitbox Bot" && m_hitTopTrigger)
             {

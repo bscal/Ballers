@@ -9,10 +9,10 @@ using UnityEngine.UI;
 public class ShotMeter : MonoBehaviour
 {
     public const float BASE_TARGET = 3.0f;
+    public const float BAR_OFFSET = 3.0f;
 
     public static float MAX_TARGET_HEIGHT { get; private set; }
     public static float BASE_TARGET_HEIGHT { get; private set; }
-    public static float TARGET_OFFSET { get; private set; }
 
     public GameObject meter;
     public RawImage background;
@@ -58,7 +58,6 @@ public class ShotMeter : MonoBehaviour
 
         MAX_TARGET_HEIGHT = background.rectTransform.GetHeight();
         BASE_TARGET_HEIGHT = MAX_TARGET_HEIGHT * 0.65f;
-        TARGET_OFFSET = m_meterTransform.GetHeight() / 2.0f;
         meter.SetActive(false);
     }
 
@@ -89,14 +88,15 @@ public class ShotMeter : MonoBehaviour
         m_shotBarData = shotBarData;
 
         fill.rectTransform.SetHeight(0.0f);
+
         target.rectTransform.SetHeight(m_shotBarData.PerfectLength);
-        target.rectTransform.anchoredPosition = GetBarPosition(m_shotBarData.targetHeight - m_shotBarData.PerfectLength / 2);
+        target.rectTransform.anchoredPosition = GetBarPosition(m_shotBarData.FinalTargetHeight - m_shotBarData.PerfectLength / 2);
 
         targetGood.rectTransform.SetHeight(m_shotBarData.GoodLength);
-        targetGood.rectTransform.anchoredPosition = GetBarPosition(m_shotBarData.targetHeight - m_shotBarData.GoodLength / 2);
+        targetGood.rectTransform.anchoredPosition = GetBarPosition(m_shotBarData.FinalTargetHeight - m_shotBarData.GoodLength / 2);
 
         targetOk.rectTransform.SetHeight(m_shotBarData.OkLength);
-        targetOk.rectTransform.anchoredPosition = GetBarPosition(m_shotBarData.targetHeight - m_shotBarData.OkLength / 2);
+        targetOk.rectTransform.anchoredPosition = GetBarPosition(m_shotBarData.FinalTargetHeight - m_shotBarData.OkLength / 2);
 
         meter.SetActive(true);
         m_isShooting = true;

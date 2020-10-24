@@ -42,7 +42,7 @@ public class ShotBarData : IBitWritable
     public float GoodLength => ShotMeter.MAX_TARGET_HEIGHT * good;
     public float PerfectLength => ShotMeter.MAX_TARGET_HEIGHT * perfect;
     public float BonusHeight => good + perfect;
-    public float FinalTargetHeight => targetHeight + targetOffset;
+    public float FinalTargetHeight => targetHeight;
 
     public void SetBarValues(float perfect, float good, float ok)
     {
@@ -54,7 +54,7 @@ public class ShotBarData : IBitWritable
 
     public void SetBarValuesMultipleOf(float perfect)
     {
-        SetBarValues(perfect, perfect * 2f, perfect * 4f);
+        SetBarValues(perfect, perfect * 3f, perfect * 6f);
     }
 
     public int GetShotGrade(float distance)
