@@ -21,8 +21,6 @@ public class DebugController : MonoBehaviour
     private const int LAST_LIST_SIZE = 8;
     private const int TABLE_WIDTH_SIZE = 48;
 
-
-
     private Controls m_controls;
     private bool m_showConsole;
 
@@ -36,9 +34,10 @@ public class DebugController : MonoBehaviour
     private List<string> m_last = new List<string>();
 
     private GUIStyle m_textStyle = new GUIStyle();
-    private GUIStyle m_textIStyle = new GUIStyle();
-    private GUIStyle m_textWStyle = new GUIStyle();
-    private GUIStyle m_textEStyle = new GUIStyle();
+    private GUIStyle m_textInfoStyle = new GUIStyle();
+    private GUIStyle m_textWarnStyle = new GUIStyle();
+    private GUIStyle m_textErrStyle = new GUIStyle();
+    private GUIStyle m_textActStyle = new GUIStyle();
     private GUIStyle m_hintStyle = new GUIStyle();
     private GUIStyle m_hintSelectStyle = new GUIStyle();
 
@@ -105,17 +104,21 @@ public class DebugController : MonoBehaviour
         m_textStyle.font = m_font;
         m_textStyle.normal.textColor = Color.white;
 
-        m_textIStyle.fontSize = 14;
-        m_textIStyle.font = m_font;
-        m_textIStyle.normal.textColor = new Color(.55f, .8f, 1);
+        m_textInfoStyle.fontSize = 14;
+        m_textInfoStyle.font = m_font;
+        m_textInfoStyle.normal.textColor = new Color(99 / 255, 171 / 255, 201 / 255);
 
-        m_textWStyle.fontSize = 14;
-        m_textWStyle.font = m_font;
-        m_textWStyle.normal.textColor = new Color(1, .55f, .2f);
+        m_textWarnStyle.fontSize = 14;
+        m_textWarnStyle.font = m_font;
+        m_textWarnStyle.normal.textColor = new Color(1, .55f, .2f);
 
-        m_textEStyle.fontSize = 14;
-        m_textEStyle.font = m_font;
-        m_textEStyle.normal.textColor = new Color(1, .3f, .3f);
+        m_textErrStyle.fontSize = 14;
+        m_textErrStyle.font = m_font;
+        m_textErrStyle.normal.textColor = new Color(1, .3f, .3f);
+
+        m_textActStyle.fontSize = 14;
+        m_textActStyle.font = m_font;
+        m_textActStyle.normal.textColor = new Color(182/255, 201/255, 99/255);  
 
         m_hintStyle.fontSize = 14;
         m_hintStyle.font = m_font;
@@ -125,7 +128,7 @@ public class DebugController : MonoBehaviour
         m_hintSelectStyle.font = m_font;
         m_hintSelectStyle.normal.textColor = new Color(200 / 255, 200 / 255, 200 / 255);
 
-        PrintConsole("Testing This 1!", LogType.INFO);
+        PrintConsole("Testing This 1!", LogType.ACTION);
         PrintConsole("Test That 2.", LogType.WARNING);
         PrintConsole("Test These 3?", LogType.ERROR);
         PrintConsoleTable("", 64, new string[] { "test", "this", "table", "LONG_WORD_STRING" },
@@ -154,12 +157,7 @@ public class DebugController : MonoBehaviour
         {
             if (string.IsNullOrEmpty(line.text)) continue;
             Rect labelRect = new Rect(VIEW_BORDER_SIZE, LINE_SIZE * i, viewport.width - 100, LINE_SIZE);
-            GUIStyle style;
-            if (line.type == LogType.INFO) style = m_textIStyle;
-            else if (line.type == LogType.WARNING) style = m_textWStyle;
-            else if (line.type == LogType.ERROR) style = m_textEStyle;
-            else style = m_textStyle;
-            GUI.Label(labelRect, line.text, style);
+            GUI.Label(labelRect, line.text, LogTypeToStyle(line.type));
             i++;
         }
 
@@ -398,6 +396,26 @@ public class DebugController : MonoBehaviour
             (type == LogType.NONE) ? "" : "[" + type.ToString() + "]",
             text);
     }
+
+    private GUIStyle LogTypeToStyle(LogType type)
+    {
+        switch (type)
+        {
+            case LogType.INFO:
+                return m_textInfoStyle;
+            case LogType.WARNING:
+                return m_textWarnStyle;
+            case LogType.ERROR:
+                return m_textErrStyle;
+            case LogType.ACTION:
+                return m_textActStyle;
+            case LogType.NONE:
+                return m_textStyle;
+            default:
+                return m_textInfoStyle;
+        }
+    }
+
 }
 
 public enum LogType
@@ -405,7 +423,8 @@ public enum LogType
     NONE,
     INFO,
     WARNING,
-    ERROR
+    ERROR,
+    ACTION
 }
 
 struct ConsoleText
