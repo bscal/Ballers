@@ -230,6 +230,7 @@ MonoBehaviour:
   pass_speed: 6
   walk_offset: 2.5
   sprint_offset: 6
+  shotInAction: 0
 --- !u!54 &1914631757
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -245,7 +246,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 3
+  m_CollisionDetection: 2
 --- !u!114 &1483954994
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -477,7 +478,7 @@ SphereCollider:
   m_GameObject: {fileID: 6110922978746903064}
   m_Material: {fileID: 13400000, guid: a61db1e987a15aa49b74e59b18fcffa5, type: 2}
   m_IsTrigger: 1
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.3
   m_Center: {x: 0.3, y: 0.3, z: 0.3}
@@ -600,5 +601,5 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: E:/MagicaVoxel-0.99.4-alpha-win64/vox/ball.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 36726
+  thisInstanceId: 44590
   Undone: 1
