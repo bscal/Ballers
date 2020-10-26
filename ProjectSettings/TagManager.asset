@@ -15,6 +15,7 @@ TagManager:
   - Rim
   - AboveRim
   - Floor
+  - RimColliders
   layers:
   - Default
   - TransparentFX

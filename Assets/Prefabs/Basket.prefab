@@ -85,9 +85,10 @@ GameObject:
   m_Component:
   - component: {fileID: 5242441059446357011}
   - component: {fileID: 9110676263548712050}
+  - component: {fileID: 4063187498666274624}
   m_Layer: 0
   m_Name: Hitbox Shot
-  m_TagString: Untagged
+  m_TagString: Rim
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -100,11 +101,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 718583775150320359}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: -0.0020017624}
+  m_LocalPosition: {x: 0, y: -0.01, z: -0.0020017624}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1623104314108865597}
-  m_RootOrder: 4
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &9110676263548712050
 BoxCollider:
@@ -119,6 +120,18 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 3, y: 3, z: 3}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &4063187498666274624
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 718583775150320359}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e4e46e037795f942abcfe7f28838089, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &914404129957528232
 GameObject:
   m_ObjectHideFlags: 0
@@ -131,7 +144,7 @@ GameObject:
   - component: {fileID: 6693690290901879660}
   m_Layer: 0
   m_Name: RimHitbox (5)
-  m_TagString: Rim
+  m_TagString: RimColliders
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -160,7 +173,7 @@ CapsuleCollider:
   m_Material: {fileID: 13400000, guid: 1eda253c9c37aa54b9b9d5ec2e44e074, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.04
+  m_Radius: 0.02
   m_Height: 0.46
   m_Direction: 2
   m_Center: {x: 0, y: 0, z: 0}
@@ -331,7 +344,7 @@ GameObject:
   - component: {fileID: 1623104313380056204}
   m_Layer: 0
   m_Name: Hitbox Top
-  m_TagString: Untagged
+  m_TagString: Rim
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -344,11 +357,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1623104313380056206}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.2, z: 0}
+  m_LocalPosition: {x: 0, y: -0.2550001, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 1623104314108865597}
-  m_RootOrder: 1
+  m_Father: {fileID: 6999078058558136600}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &1623104313380056204
 BoxCollider:
@@ -361,7 +374,7 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.75, y: 0.2, z: 0.75}
+  m_Size: {x: 0.75, y: 0.3, z: 0.75}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1623104313845808585
 GameObject:
@@ -443,12 +456,11 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4592921898771042205}
-  - {fileID: 1623104313380056207}
-  - {fileID: 966043702752283711}
   - {fileID: 8202237635289157369}
   - {fileID: 5242441059446357011}
   - {fileID: 7156085804003465466}
   - {fileID: 1623104315421406284}
+  - {fileID: 6999078058558136600}
   m_Father: {fileID: 1623104314443677525}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -560,7 +572,7 @@ MonoBehaviour:
   ImportedFrom: 0
   ImportedFile: 
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 37620
+  thisInstanceId: 68570
   Undone: 1
 --- !u!1 &1623104314443677527
 GameObject:
@@ -7119,7 +7131,7 @@ Transform:
   - {fileID: 5650035402488576457}
   - {fileID: 1728496798804826454}
   m_Father: {fileID: 1623104314108865597}
-  m_RootOrder: 6
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1739782010352189221
 GameObject:
@@ -7188,9 +7200,10 @@ GameObject:
   m_Component:
   - component: {fileID: 966043702752283711}
   - component: {fileID: 2766991507488684889}
+  - component: {fileID: 2768861616561476100}
   m_Layer: 0
   m_Name: Hitbox Bot
-  m_TagString: Untagged
+  m_TagString: Rim
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7203,11 +7216,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1784624646547905917}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.475, z: -0.0020017624}
+  m_LocalPosition: {x: 0, y: -0.55, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 1623104314108865597}
-  m_RootOrder: 2
+  m_Father: {fileID: 6999078058558136600}
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &2766991507488684889
 BoxCollider:
@@ -7220,8 +7233,20 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.75, y: 0.2, z: 0.75}
+  m_Size: {x: 0.75, y: 0.5, z: 0.75}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2768861616561476100
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1784624646547905917}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e4e46e037795f942abcfe7f28838089, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3205846305604426521
 GameObject:
   m_ObjectHideFlags: 0
@@ -7234,7 +7259,7 @@ GameObject:
   - component: {fileID: 3690482770904771216}
   m_Layer: 0
   m_Name: Hitbox Net
-  m_TagString: Untagged
+  m_TagString: Rim
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7247,11 +7272,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3205846305604426521}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.35, z: 0}
+  m_LocalPosition: {x: 0, y: -0.3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1623104314108865597}
-  m_RootOrder: 3
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &3690482770904771216
 BoxCollider:
@@ -7625,6 +7650,38 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.1, y: 1.5, z: 2.75}
   m_Center: {x: 0, y: 0.35, z: 0}
+--- !u!1 &4143507454252278287
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6999078058558136600}
+  m_Layer: 0
+  m_Name: NetTriggers
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6999078058558136600
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4143507454252278287}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 1623104313380056207}
+  - {fileID: 966043702752283711}
+  m_Father: {fileID: 1623104314108865597}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4184420427947635304
 GameObject:
   m_ObjectHideFlags: 0
@@ -7711,7 +7768,7 @@ GameObject:
   - component: {fileID: 644657313435068846}
   m_Layer: 0
   m_Name: RimHitbox (3)
-  m_TagString: Rim
+  m_TagString: RimColliders
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -7740,7 +7797,7 @@ CapsuleCollider:
   m_Material: {fileID: 13400000, guid: 1eda253c9c37aa54b9b9d5ec2e44e074, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.04
+  m_Radius: 0.02
   m_Height: 0.46
   m_Direction: 2
   m_Center: {x: 0, y: 0, z: 0}
@@ -7756,7 +7813,7 @@ GameObject:
   - component: {fileID: 1097068799250720173}
   m_Layer: 0
   m_Name: RimHitbox (9)
-  m_TagString: Rim
+  m_TagString: RimColliders
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -7800,7 +7857,7 @@ GameObject:
   - component: {fileID: 5438532696772201817}
   m_Layer: 0
   m_Name: RimHitbox (4)
-  m_TagString: Rim
+  m_TagString: RimColliders
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -7829,7 +7886,7 @@ CapsuleCollider:
   m_Material: {fileID: 13400000, guid: 1eda253c9c37aa54b9b9d5ec2e44e074, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.04
+  m_Radius: 0.02
   m_Height: 0.42
   m_Direction: 2
   m_Center: {x: 0, y: 0, z: 0}
@@ -7940,7 +7997,7 @@ GameObject:
   - component: {fileID: 5024755071599142894}
   m_Layer: 0
   m_Name: RimHitbox (7)
-  m_TagString: Rim
+  m_TagString: RimColliders
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -7969,7 +8026,7 @@ CapsuleCollider:
   m_Material: {fileID: 13400000, guid: 1eda253c9c37aa54b9b9d5ec2e44e074, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.04
+  m_Radius: 0.02
   m_Height: 0.46
   m_Direction: 2
   m_Center: {x: 0, y: 0, z: 0}
@@ -8002,7 +8059,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1623104314108865597}
-  m_RootOrder: 5
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!136 &2225068742900041606
 CapsuleCollider:
@@ -8074,7 +8131,7 @@ GameObject:
   - component: {fileID: 3494367888925426118}
   m_Layer: 0
   m_Name: RimHitbox
-  m_TagString: Rim
+  m_TagString: RimColliders
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -8103,7 +8160,7 @@ CapsuleCollider:
   m_Material: {fileID: 13400000, guid: 1eda253c9c37aa54b9b9d5ec2e44e074, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.04
+  m_Radius: 0.02
   m_Height: 0.46
   m_Direction: 2
   m_Center: {x: 0, y: 0, z: 0}
@@ -8119,7 +8176,7 @@ GameObject:
   - component: {fileID: 5381498616164507556}
   m_Layer: 0
   m_Name: RimHitbox (1)
-  m_TagString: Rim
+  m_TagString: RimColliders
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -8148,7 +8205,7 @@ CapsuleCollider:
   m_Material: {fileID: 13400000, guid: 1eda253c9c37aa54b9b9d5ec2e44e074, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.04
+  m_Radius: 0.02
   m_Height: 0.42
   m_Direction: 2
   m_Center: {x: 0, y: 0, z: 0}
@@ -8165,7 +8222,7 @@ GameObject:
   - component: {fileID: 4249524600515670161}
   m_Layer: 0
   m_Name: RimHitbox (8)
-  m_TagString: Rim
+  m_TagString: RimColliders
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -8178,7 +8235,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8135711691886538119}
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 2, y: 5.15, z: 0.95}
+  m_LocalPosition: {x: 2, y: 5.202, z: 0.95}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 7766097289062706951}
@@ -8194,7 +8251,7 @@ CapsuleCollider:
   m_Material: {fileID: 13400000, guid: 1eda253c9c37aa54b9b9d5ec2e44e074, type: 2}
   m_IsTrigger: 0
   m_Enabled: 0
-  m_Radius: 0.07
+  m_Radius: 0.02
   m_Height: 0.5
   m_Direction: 2
   m_Center: {x: 0, y: 0, z: 0}
@@ -8209,7 +8266,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.08, y: 0.2, z: 0.5}
+  m_Size: {x: 0.08, y: 0.1, z: 0.5}
   m_Center: {x: 0, y: -0.05, z: 0}
 --- !u!1 &8556542086928496973
 GameObject:
@@ -8267,7 +8324,7 @@ GameObject:
   - component: {fileID: 4559454969598698696}
   m_Layer: 0
   m_Name: RimHitbox (2)
-  m_TagString: Rim
+  m_TagString: RimColliders
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -8296,7 +8353,7 @@ CapsuleCollider:
   m_Material: {fileID: 13400000, guid: 1eda253c9c37aa54b9b9d5ec2e44e074, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.04
+  m_Radius: 0.02
   m_Height: 0.46
   m_Direction: 2
   m_Center: {x: 0, y: 0, z: 0}
@@ -8405,12 +8462,17 @@ PrefabInstance:
     - target: {fileID: 192321392423187384, guid: c1f3bff54982fb8419fd13237ff312a9,
         type: 3}
       propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 192321392423187384, guid: c1f3bff54982fb8419fd13237ff312a9,
+        type: 3}
+      propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 215814404289537478, guid: c1f3bff54982fb8419fd13237ff312a9,
         type: 3}
       propertyPath: thisInstanceId
-      value: -52152
+      value: -228608
       objectReference: {fileID: 0}
     - target: {fileID: 215814404289537478, guid: c1f3bff54982fb8419fd13237ff312a9,
         type: 3}
@@ -8915,7 +8977,7 @@ PrefabInstance:
     - target: {fileID: 4688628186029689010, guid: 3a4edfd4b8525ee48a03a980fa8ad317,
         type: 3}
       propertyPath: thisInstanceId
-      value: -52618
+      value: -229074
       objectReference: {fileID: 0}
     - target: {fileID: 4688628186029689010, guid: 3a4edfd4b8525ee48a03a980fa8ad317,
         type: 3}
@@ -9099,15 +9161,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3a4edfd4b8525ee48a03a980fa8ad317, type: 3}
---- !u!4 &269069500020288694 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 8932516306626550453, guid: 3a4edfd4b8525ee48a03a980fa8ad317,
-    type: 3}
-  m_PrefabInstance: {fileID: 8668656368934581763}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &7766097289062706951 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1408493497114237188, guid: 3a4edfd4b8525ee48a03a980fa8ad317,
+    type: 3}
+  m_PrefabInstance: {fileID: 8668656368934581763}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &269069500020288694 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8932516306626550453, guid: 3a4edfd4b8525ee48a03a980fa8ad317,
     type: 3}
   m_PrefabInstance: {fileID: 8668656368934581763}
   m_PrefabAsset: {fileID: 0}

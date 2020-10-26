@@ -9,6 +9,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using UnityEditor;
 
 [Serializable]
 public enum BallState
@@ -104,7 +105,7 @@ public class BallHandling : NetworkedBehaviour
     private bool m_isAboveRim;
     private bool m_shotPastArc;
     private bool m_hitTopTrigger;
-    private bool m_shotInAction;
+    public bool shotInAction;
     private bool m_insideHitboxShot;
 
     private Dictionary<ulong, float> m_playerDistances;
@@ -196,9 +197,9 @@ public class BallHandling : NetworkedBehaviour
 
             // Tells the ball which hand to be in.
             if (m_currentPlayer.isBallInLeftHand)
-                m_ball.transform.position = m_currentPlayer.GetLeftHand().transform.position;
+                m_body.MovePosition(m_currentPlayer.GetLeftHand().transform.position);
             else
-                m_ball.transform.position = m_currentPlayer.GetRightHand().transform.position;
+                m_body.MovePosition(m_currentPlayer.GetRightHand().transform.position);
         }
 
         // ============ Ball Shoot ============
@@ -216,14 +217,14 @@ public class BallHandling : NetworkedBehaviour
         if (IsServer)
         {
             StopBall();
-            gameObject.transform.position = new Vector3(5, 3, 5);
+            m_body.MovePosition(new Vector3(5, 3, 5));
             ChangeBallHandler(NO_PLAYER);
         }
     }
 
     public void OnChangeBallHandler(ulong lastPlayer, ulong newPlayer)
     {
-        if (m_shotInAction)
+        if (shotInAction)
         {
             OnShotMissed();
         }
@@ -261,7 +262,7 @@ public class BallHandling : NetworkedBehaviour
         Player player = GameManager.GetPlayerByNetworkID(netID);
 
         State = BallState.SHOT;
-        m_shotInAction = true;
+        shotInAction = true;
 
         float h = ShotController.GetShotRange(m_shotData.type)
             == ShotRange.LONG ? UnityEngine.Random.Range(10f, 12f)
@@ -366,23 +367,19 @@ public class BallHandling : NetworkedBehaviour
     }
     private IEnumerator FollowArc(Vector3 start, Vector3 end, float height, float duration)
     {
-        float startTime = Time.time;
+        float startTime = Time.fixedTime;
         float fracComplete = 0;
         while (fracComplete < 1)
         {
-            if (!m_shotInAction) break;
+            if (!shotInAction) break;
             if (fracComplete < .5f) m_shotPastArc = true;
             // Fraction of journey completed equals current distance divided by total distance.
-            fracComplete = (Time.time - startTime) / duration;
+            fracComplete = (Time.fixedTime - startTime) / duration;
             // Calculate arc
             Vector3 pos = Vector3.Lerp(start, end, fracComplete);
             pos.y += Mathf.Sin(Mathf.PI * fracComplete) * height;
-
-            if (!GameManager.Singleton.CurrentBasket.backBoardCollider.bounds.Contains(pos))
-                m_body.MovePosition(pos);
-            //m_ball.transform.position = pos;
-
-            yield return null;
+            m_body.MovePosition(pos);
+            yield return new WaitForFixedUpdate();
         }
         m_shotPastArc = false;
         State = BallState.LOOSE;
@@ -399,13 +396,13 @@ public class BallHandling : NetworkedBehaviour
         // This statement will break itself at 99% completion of journey
         while (fracComplete < 1)
         {
-            if (!m_shotInAction) break;
+            if (!shotInAction) break;
             // Fraction of journey completed equals current distance divided by total distance.
             fracComplete = (Time.time - startTime) / duration;
             // Calculate arc
             Vector3 pos = Vector3.Lerp(start, bankPos, fracComplete);
             pos.y += Mathf.Sin(Mathf.PI * fracComplete) * height;
-            m_ball.transform.position = pos;
+            m_body.MovePosition(pos);
 
             yield return null;
         }
@@ -416,12 +413,14 @@ public class BallHandling : NetworkedBehaviour
         // This is the loop for lerp ball position from bank spot on backboard to basket.
         while (fracComplete < 1)
         {
-            if (!m_shotInAction) break;
+            if (!shotInAction) break;
             // Using duration here does not makes sense since its a constant distance between the bank and the
             // basket. Think about moveing this to a static const or some better way?
             fracComplete = (Time.time - startTime) / (duration * .75f);
 
-            transform.position = Vector3.Lerp(bankPos, end, fracComplete);
+            Vector3 pos = Vector3.Lerp(bankPos, end, fracComplete);
+            pos.y += Mathf.Sin(Mathf.PI * fracComplete) * height;
+            m_body.MovePosition(pos);
             yield return null;
         }
 
@@ -539,7 +538,7 @@ public class BallHandling : NetworkedBehaviour
             fractionOfJourney = distCovered / journeyLength;
 
             // Set our position as a fraction of the distance between the markers.
-            m_ball.transform.position = Vector3.Lerp(start, end, fractionOfJourney);
+            m_body.MovePosition(Vector3.Lerp(start, end, fractionOfJourney));
 
             yield return null;
         }
@@ -564,7 +563,7 @@ public class BallHandling : NetworkedBehaviour
             // Fraction of journey completed equals current distance divided by total distance.
             fractionOfJourney = distCovered / journeyLength;
             // Set our position as a fraction of the distance between the markers.
-            m_ball.transform.position = Vector3.Lerp(start, center, fractionOfJourney);
+            m_body.MovePosition(Vector3.Lerp(start, center, fractionOfJourney));
             yield return null;
         }
         // Reset values;
@@ -579,7 +578,7 @@ public class BallHandling : NetworkedBehaviour
             // Fraction of journey completed equals current distance divided by total distance.
             fractionOfJourney = distCovered / journeyLength;
             // Set our position as a fraction of the distance between the markers.
-            m_ball.transform.position = Vector3.Lerp(center, end, fractionOfJourney);
+            m_body.MovePosition(Vector3.Lerp(center, end, fractionOfJourney));
             yield return null;
         }
         FinishPass(target.NetworkId);
@@ -599,7 +598,7 @@ public class BallHandling : NetworkedBehaviour
             // Calculate arc
             Vector3 pos = Vector3.Lerp(start, end, fractionOfJourney);
             pos.y += Mathf.Sin(Mathf.PI * fractionOfJourney) * LOB_HEIGHT;
-            m_ball.transform.position = pos;
+            m_body.MovePosition(pos);
             yield return null;
         }
         FinishPass(target.NetworkId);
@@ -680,77 +679,69 @@ public class BallHandling : NetworkedBehaviour
         PlayerWithBall = netId;
     }
 
-    private void OnTriggerEnter(Collider other)
+    const string BACKBOARD_TAG = "Backboard";
+    const string RIM_TAG = "RimColliders";
+    const string FLOOR_TAG = "Floor";
+    private void OnCollisionEnter(Collision collision)
     {
-        if (IsServer)
+        // backboard is stored in several chunk objects. its
+        // parents "Chunks" is tagged.
+        if (collision.gameObject.CompareTag(BACKBOARD_TAG))
         {
-            if (other.gameObject.name == "Hitbox Net")
-            {
-                Vector3 dir = (transform.position - other.transform.position).normalized;
-
-                // Detect if coming from above the collider.
-                if (dir.y > 0)
-                    m_hitTopTrigger = true;
-
-            }
-            if (other.gameObject.name == "Hitbox Top")
-            {
-                Vector3 dir = (transform.position - other.transform.position).normalized;
-
-                // Detect if coming from above the collider.
-                if (dir.y > 0)
-                {
-                    m_body.velocity.Set(0, -1, 0);
-                    m_body.AddForce(new Vector3(0, -1));
-                }
-            }
-            if (other.gameObject.name == "Hitbox Bot" && m_hitTopTrigger)
-            {
-                Vector3 dir = (transform.position - other.transform.position).normalized;
-
-                // Detect if coming from above the collider.
-                if (dir.y > 0)
-                {
-                    Basket basket = other.GetComponentInParent<Basket>();
-                    OnShotMade((int)basket.id, m_shotData);
-                    basket.netCloth.externalAcceleration = new Vector3() {
-                        x = UnityEngine.Random.Range(5, 12),
-                        y = UnityEngine.Random.Range(32, 48),
-                        z = UnityEngine.Random.Range(5, 12),
-                    };
-                    LeanTween.delayedCall(.5f, () => basket.netCloth.externalAcceleration = Vector3.zero);
-                }
-            }
+            StopShot(false);
+            Debug.Break();
         }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.gameObject.name == "Hitbox Net")
+        if (collision.gameObject.CompareTag(RIM_TAG))
         {
-            m_hitTopTrigger = false;
+            m_hitRim = true;
         }
-        if (other.gameObject.name.Equals("Hitbox Shot"))
+        if (collision.gameObject.CompareTag(FLOOR_TAG))
         {
-            if (m_shotInAction)
+            if (shotInAction)
                 OnShotMissed();
         }
     }
 
-    private void OnShotMade(int teamID, ShotData shotData)
+    private void OnCollisionStay(Collision collision)
     {
-        m_shotInAction = false;
-        m_hitTopTrigger = false;
-        GameManager.Singleton.AddScore(teamID, shotData.shotValue);
-        ShotResultData result = GetShotResultData(ShotResultType.MADE);
-        DebugController.Singleton.PrintObjAsTable(result);
-        ShotMade?.Invoke(teamID, shotData, result);
-        print("made");
+        // Ball Rigidbody -> AboveRim Collider
+        if (collision.gameObject.CompareTag("AboveRim"))
+        {
+            m_isAboveRim = true;
+            // Ball Collider -> Player Rigidboy
+            if (collision.gameObject.CompareTag("Player"))
+            {
+                // If both then goaltend
+                print("goaltend");
+            }
+        }
     }
 
-    private void OnShotMissed()
+    private void OnCollisionExit(Collision collision)
     {
-        m_shotInAction = false;
+        if (collision.gameObject.CompareTag("AboveRim"))
+        {
+            m_isAboveRim = false;
+        }
+    }
+
+    public void OnShotMade(int teamID)
+    {
+        if (IsServer && shotInAction)
+        {
+            shotInAction = false;
+            m_hitTopTrigger = false;
+            GameManager.Singleton.AddScore(teamID, m_shotData.shotValue);
+            ShotResultData result = GetShotResultData(ShotResultType.MADE);
+            DebugController.Singleton.PrintObjAsTable(result);
+            ShotMade?.Invoke(teamID, m_shotData, result);
+            print("made");
+        }
+    }
+
+    public void OnShotMissed()
+    {
+        shotInAction = false;
         m_hitTopTrigger = false;
 
         ShotResultData result = GetShotResultData(ShotResultType.MISSED);
@@ -826,7 +817,7 @@ public class BallHandling : NetworkedBehaviour
 
     public void StopShot(bool inbound)
     {
-        m_shotInAction = false;
+        shotInAction = false;
     }
 
     private void SetupInbound(int team, GameObject inbound)
@@ -837,53 +828,6 @@ public class BallHandling : NetworkedBehaviour
 
         // Setup Inbound Coroutine
     }
-
-    const string BACKBOARD_TAG = "Backboard";
-    const string RIM_TAG = "Rim";
-    const string FLOOR_TAG = "Floor";
-    private void OnCollisionEnter(Collision collision)
-    {
-        // backboard is stored in several chunk objects. its
-        // parents "Chunks" is tagged.
-        if (collision.gameObject.CompareTag(BACKBOARD_TAG))
-        {
-            StopShot(false);
-            print("hit");
-        }
-        if (collision.gameObject.CompareTag(RIM_TAG))
-        {
-            m_hitRim = true;
-        }
-        if (collision.gameObject.CompareTag(FLOOR_TAG))
-        {
-            if (m_shotInAction)
-                OnShotMissed();
-        }
-    }
-
-    private void OnCollisionStay(Collision collision)
-    {
-        // Ball Rigidbody -> AboveRim Collider
-        if (collision.gameObject.CompareTag("AboveRim"))
-        {
-            m_isAboveRim = true;
-            // Ball Collider -> Player Rigidboy
-            if (collision.gameObject.CompareTag("Player"))
-            {
-                // If both then goaltend
-                print("goaltend");
-            }
-        }
-    }
-
-    private void OnCollisionExit(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("AboveRim"))
-        {
-            m_isAboveRim = false;
-        }  
-    }
-
 
     public void ChangePossession(int team, bool inbound, bool loose)
     {

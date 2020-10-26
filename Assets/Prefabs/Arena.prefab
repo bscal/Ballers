@@ -265,7 +265,7 @@ GameObject:
   - component: {fileID: 2262351708739514797}
   m_Layer: 0
   m_Name: Hitbox
-  m_TagString: Untagged
+  m_TagString: Floor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -1648,7 +1648,7 @@ MonoBehaviour:
   ImportedFrom: 1
   ImportedFile: F:/old/MagicaVoxel-0.99.4-alpha-win64/vox/game/courtfloor.vox
   ImportedCutoutColor: {r: 0, g: 0, b: 0, a: 0}
-  thisInstanceId: 143538
+  thisInstanceId: 121028
   Undone: 1
 --- !u!1 &3853342065544537922
 GameObject:
