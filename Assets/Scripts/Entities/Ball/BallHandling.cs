@@ -42,7 +42,7 @@ public class BallHandling : NetworkedBehaviour
     public const ulong DUMMY_PLAYER = ulong.MaxValue - 1;
 
     [SerializeField]
-    private const float SHOT_SPEED = 0.5f;
+    private const float SHOT_SPEED = 0.75f;
 
     // =================================== Public Events ===================================
 
@@ -104,8 +104,9 @@ public class BallHandling : NetworkedBehaviour
     private bool m_hitRim;
     private bool m_isAboveRim;
     private bool m_shotPastArc;
-    private bool m_hitTopTrigger;
+    public bool hitTopTrigger;
     public bool shotInAction;
+    private bool m_collisionCheck;
     private bool m_insideHitboxShot;
 
     private Dictionary<ulong, float> m_playerDistances;
@@ -133,7 +134,7 @@ public class BallHandling : NetworkedBehaviour
         m_body = gameObject.GetComponent<Rigidbody>();
         m_body.AddForce(new Vector3(1, 1, 1), ForceMode.Impulse);
 
-        m_collider = GetComponentInChildren<SphereCollider>();
+        m_collider = GetComponent<SphereCollider>();
     }
 
     void Update()
@@ -236,6 +237,7 @@ public class BallHandling : NetworkedBehaviour
         m_shooter = netID;
         m_shotData = shotData;
         m_shotBarData = shotBarData;
+        m_body.isKinematic = false;
     }
 
     [ServerRPC]
@@ -371,14 +373,36 @@ public class BallHandling : NetworkedBehaviour
         float fracComplete = 0;
         while (fracComplete < 1)
         {
-            if (!shotInAction) break;
+            if (!shotInAction || m_collisionCheck) break;
             if (fracComplete < .5f) m_shotPastArc = true;
             // Fraction of journey completed equals current distance divided by total distance.
             fracComplete = (Time.fixedTime - startTime) / duration;
             // Calculate arc
             Vector3 pos = Vector3.Lerp(start, end, fracComplete);
             pos.y += Mathf.Sin(Mathf.PI * fracComplete) * height;
-            m_body.MovePosition(pos);
+
+            // Checks if we collide ahead of time. Since we are force moving the ball with pos
+            // the ball will go through colliders. This will hopefully fix any issues.
+            Physics.SphereCast(m_body.position, .3f, pos, out RaycastHit hitInfo, fracComplete);
+            if (!hitInfo.collider)
+                m_body.MovePosition(pos);
+            else if (hitInfo.collider.isTrigger)
+            {
+                m_body.MovePosition(pos);
+                if (hitInfo.collider.name == "Hitbox Bot")
+                {
+                    Debug.Break();
+                    m_body.MovePosition(hitInfo.point);
+                    hitInfo.collider.SendMessage("OnTriggerEnter", m_collider);
+                    break;
+                }
+            }
+            else if (!hitInfo.collider.isTrigger)
+            {
+                m_body.MovePosition(hitInfo.point);
+                break;
+            }
+
             yield return new WaitForFixedUpdate();
         }
         m_shotPastArc = false;
@@ -402,6 +426,7 @@ public class BallHandling : NetworkedBehaviour
             // Calculate arc
             Vector3 pos = Vector3.Lerp(start, bankPos, fracComplete);
             pos.y += Mathf.Sin(Mathf.PI * fracComplete) * height;
+
             m_body.MovePosition(pos);
 
             yield return null;
@@ -688,11 +713,12 @@ public class BallHandling : NetworkedBehaviour
         // parents "Chunks" is tagged.
         if (collision.gameObject.CompareTag(BACKBOARD_TAG))
         {
-            StopShot(false);
+            m_collisionCheck = true;
             Debug.Break();
         }
         if (collision.gameObject.CompareTag(RIM_TAG))
         {
+            m_collisionCheck = true;
             m_hitRim = true;
         }
         if (collision.gameObject.CompareTag(FLOOR_TAG))
@@ -730,7 +756,8 @@ public class BallHandling : NetworkedBehaviour
         if (IsServer && shotInAction)
         {
             shotInAction = false;
-            m_hitTopTrigger = false;
+            hitTopTrigger = false;
+            m_collisionCheck = false;
             GameManager.Singleton.AddScore(teamID, m_shotData.shotValue);
             ShotResultData result = GetShotResultData(ShotResultType.MADE);
             DebugController.Singleton.PrintObjAsTable(result);
@@ -742,8 +769,8 @@ public class BallHandling : NetworkedBehaviour
     public void OnShotMissed()
     {
         shotInAction = false;
-        m_hitTopTrigger = false;
-
+        hitTopTrigger = false;
+        m_collisionCheck = false;
         ShotResultData result = GetShotResultData(ShotResultType.MISSED);
         ShotMissed?.Invoke(m_shotData, result);
         print("missed");
@@ -813,11 +840,6 @@ public class BallHandling : NetworkedBehaviour
                 teamToSwitch = m_currentPlayer.teamID;
         }
         ChangePossession(teamToSwitch, false, false);
-    }
-
-    public void StopShot(bool inbound)
-    {
-        shotInAction = false;
     }
 
     private void SetupInbound(int team, GameObject inbound)

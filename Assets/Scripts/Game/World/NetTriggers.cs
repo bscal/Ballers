@@ -20,33 +20,25 @@ public class NetTriggers : MonoBehaviour
 
         if (gameObject.name.Equals("Hitbox Top"))
         {
-
+            //GameManager.GetBallHandling().hitTopTrigger = true;
         }
 
-        if (gameObject.name.Equals("Hitbox Bot"))
+        if (gameObject.name.Equals("Hitbox Bot") && other.gameObject.CompareTag("Ball"))
         {
-            print(1);
-            if (other.gameObject.CompareTag("Ball"))
+            Debug.Break();
+            Vector3 dir = (transform.position - other.transform.position).normalized;
+            // Detect if coming from above the collider.
+            GameManager.GetBallHandling().OnShotMade((int)m_basket.id);
+            m_basket.netCloth.externalAcceleration = new Vector3() {
+                x = UnityEngine.Random.Range(5, 12),
+                y = UnityEngine.Random.Range(32, 48),
+                z = UnityEngine.Random.Range(5, 12),
+            };
+            LeanTween.delayedCall(.5f, () => m_basket.netCloth.externalAcceleration = Vector3.zero);
+            if (dir.y > 0)
             {
-                Vector3 dir = (transform.position - other.transform.position).normalized;
 
-                // Detect if coming from above the collider.
-                if (dir.y > 0)
-                {
-                    GameManager.GetBallHandling().OnShotMade((int)m_basket.id);
-                    m_basket.netCloth.externalAcceleration = new Vector3() {
-                        x = UnityEngine.Random.Range(5, 12),
-                        y = UnityEngine.Random.Range(32, 48),
-                        z = UnityEngine.Random.Range(5, 12),
-                    };
-                    LeanTween.delayedCall(.5f, () => m_basket.netCloth.externalAcceleration = Vector3.zero);
-                }
             }
-        }
-
-        if (gameObject.name.Equals("Hitbox Shot"))
-        {
-            GameManager.GetBallHandling().shotInAction = true;
         }
     }
 
@@ -57,10 +49,9 @@ public class NetTriggers : MonoBehaviour
 
         if (gameObject.name.Equals("Hitbox Shot") && GameManager.GetBallHandling().shotInAction)
         {
-            if (!other.bounds.Contains(GameManager.GetBallHandling().transform.position))
+            if (!other.bounds.Contains(GameManager.GetBallHandling().gameObject.transform.position))
             {
-                print(2);
-                GameManager.GetBallHandling().shotInAction = true;
+                GameManager.GetBallHandling().OnShotMissed();
             }
         }
     }
