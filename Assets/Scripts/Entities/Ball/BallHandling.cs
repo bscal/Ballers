@@ -238,6 +238,7 @@ public class BallHandling : NetworkedBehaviour
         m_shotData = shotData;
         m_shotBarData = shotBarData;
         m_body.isKinematic = false;
+        Reset();
     }
 
     [ServerRPC]
@@ -381,27 +382,10 @@ public class BallHandling : NetworkedBehaviour
             Vector3 pos = Vector3.Lerp(start, end, fracComplete);
             pos.y += Mathf.Sin(Mathf.PI * fracComplete) * height;
 
-            // Checks if we collide ahead of time. Since we are force moving the ball with pos
-            // the ball will go through colliders. This will hopefully fix any issues.
-            Physics.SphereCast(m_body.position, .3f, pos, out RaycastHit hitInfo, fracComplete);
-            if (!hitInfo.collider)
-                m_body.MovePosition(pos);
-            else if (hitInfo.collider.isTrigger)
-            {
-                m_body.MovePosition(pos);
-                if (hitInfo.collider.name == "Hitbox Bot")
-                {
-                    Debug.Break();
-                    m_body.MovePosition(hitInfo.point);
-                    hitInfo.collider.SendMessage("OnTriggerEnter", m_collider);
-                    break;
-                }
-            }
-            else if (!hitInfo.collider.isTrigger)
-            {
-                m_body.MovePosition(hitInfo.point);
+            // Sends out a spherecast to make sure we can move the ball.
+            // the rigidbody is move here and returns if we should break the loop.
+            if (HandleSphereCast(pos, fracComplete))
                 break;
-            }
 
             yield return new WaitForFixedUpdate();
         }
@@ -414,7 +398,7 @@ public class BallHandling : NetworkedBehaviour
     {
         Vector3 bankPos = GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[(int)shot.bankshot].transform.position;
 
-        float startTime = Time.time;
+        float startTime = Time.fixedTime;
         float fracComplete = 0;
         // This is the loop for slerp the ball position from the player to the bank position
         // This statement will break itself at 99% completion of journey
@@ -422,18 +406,21 @@ public class BallHandling : NetworkedBehaviour
         {
             if (!shotInAction) break;
             // Fraction of journey completed equals current distance divided by total distance.
-            fracComplete = (Time.time - startTime) / duration;
+            fracComplete = (Time.fixedTime - startTime) / duration;
             // Calculate arc
             Vector3 pos = Vector3.Lerp(start, bankPos, fracComplete);
             pos.y += Mathf.Sin(Mathf.PI * fracComplete) * height;
 
-            m_body.MovePosition(pos);
+            // Sends out a spherecast to make sure we can move the ball.
+            // the rigidbody is move here and returns if we should break the loop.
+            if (HandleSphereCast(pos, fracComplete))
+                break;
 
-            yield return null;
+            yield return new WaitForFixedUpdate();
         }
 
         //Resets values
-        startTime = Time.time;
+        startTime = Time.fixedTime;
         fracComplete = 0;
         // This is the loop for lerp ball position from bank spot on backboard to basket.
         while (fracComplete < 1)
@@ -441,12 +428,17 @@ public class BallHandling : NetworkedBehaviour
             if (!shotInAction) break;
             // Using duration here does not makes sense since its a constant distance between the bank and the
             // basket. Think about moveing this to a static const or some better way?
-            fracComplete = (Time.time - startTime) / (duration * .75f);
+            fracComplete = (Time.fixedTime - startTime) / (duration * .75f);
 
             Vector3 pos = Vector3.Lerp(bankPos, end, fracComplete);
             pos.y += Mathf.Sin(Mathf.PI * fracComplete) * height;
-            m_body.MovePosition(pos);
-            yield return null;
+
+            // Sends out a spherecast to make sure we can move the ball.
+            // the rigidbody is move here and returns if we should break the loop.
+            if (HandleSphereCast(pos, fracComplete))
+                break;
+
+            yield return new WaitForFixedUpdate();
         }
 
         State = BallState.LOOSE;
@@ -550,22 +542,24 @@ public class BallHandling : NetworkedBehaviour
     {
         Vector3 start = m_ball.transform.position;
         // Keep a note of the time the movement started.
-        float startTime = Time.time;
+        float startTime = Time.fixedTime;
         // Calculate the journey length.
         float journeyLength = Vector3.Distance(start, end);
         float fractionOfJourney = 0f;
         while (fractionOfJourney < 1.0f)
         {
             // Distance moved equals elapsed time times speed..
-            float distCovered = (Time.time - startTime) * speed;
+            float distCovered = (Time.fixedTime - startTime) * speed;
 
             // Fraction of journey completed equals current distance divided by total distance.
             fractionOfJourney = distCovered / journeyLength;
 
-            // Set our position as a fraction of the distance between the markers.
-            m_body.MovePosition(Vector3.Lerp(start, end, fractionOfJourney));
+            // Sends out a spherecast to make sure we can move the ball.
+            // the rigidbody is move here and returns if we should break the loop.
+            if (HandleSphereCast(Vector3.Lerp(start, end, fractionOfJourney), distCovered))
+                break;
 
-            yield return null;
+            yield return new WaitForFixedUpdate();
         }
         FinishPass(target.NetworkId);
     }
@@ -577,34 +571,36 @@ public class BallHandling : NetworkedBehaviour
         Vector3 center = (start + end) * 0.5f;
         center.y = FLOOR_OFFSET;
 
-        float startTime = Time.time;
+        float startTime = Time.fixedTime;
         float journeyLength = Vector3.Distance(start, center);
         float fractionOfJourney = 0f;
         // Part 1 Ball -> center floor pos
         while (fractionOfJourney < 1.0f)
         {
             // Distance moved equals elapsed time times speed..
-            float distCovered = (Time.time - startTime) * speed;
+            float distCovered = (Time.fixedTime - startTime) * speed;
             // Fraction of journey completed equals current distance divided by total distance.
             fractionOfJourney = distCovered / journeyLength;
             // Set our position as a fraction of the distance between the markers.
-            m_body.MovePosition(Vector3.Lerp(start, center, fractionOfJourney));
-            yield return null;
+            if (HandleSphereCast(Vector3.Lerp(start, end, fractionOfJourney), distCovered))
+                break;
+            yield return new WaitForFixedUpdate();
         }
         // Reset values;
-        startTime = Time.time;
+        startTime = Time.fixedTime;
         journeyLength = Vector3.Distance(center, end);
         fractionOfJourney = 0f;
         // Part 2 center floor pos -> target
         while (fractionOfJourney < 1.0f)
         {
             // Distance moved equals elapsed time times speed..
-            float distCovered = (Time.time - startTime) * speed;
+            float distCovered = (Time.fixedTime - startTime) * speed;
             // Fraction of journey completed equals current distance divided by total distance.
             fractionOfJourney = distCovered / journeyLength;
             // Set our position as a fraction of the distance between the markers.
-            m_body.MovePosition(Vector3.Lerp(center, end, fractionOfJourney));
-            yield return null;
+            if (HandleSphereCast(Vector3.Lerp(start, end, fractionOfJourney), distCovered))
+                break;
+            yield return new WaitForFixedUpdate();
         }
         FinishPass(target.NetworkId);
     }
@@ -614,17 +610,18 @@ public class BallHandling : NetworkedBehaviour
         const float LOB_HEIGHT = 5f;
 
         Vector3 start = m_ball.transform.position;
-        float startTime = Time.time;
+        float startTime = Time.fixedTime;
         float fractionOfJourney = 0f;
         while (fractionOfJourney < 1.0f)
         {
             // Fraction of journey completed equals current distance divided by total distance.
-            fractionOfJourney = (Time.time - startTime) / speed;
+            fractionOfJourney = (Time.fixedTime - startTime) / speed;
             // Calculate arc
             Vector3 pos = Vector3.Lerp(start, end, fractionOfJourney);
             pos.y += Mathf.Sin(Mathf.PI * fractionOfJourney) * LOB_HEIGHT;
-            m_body.MovePosition(pos);
-            yield return null;
+            if (HandleSphereCast(pos, fractionOfJourney))
+                break;
+            yield return new WaitForFixedUpdate();
         }
         FinishPass(target.NetworkId);
     }
@@ -638,6 +635,40 @@ public class BallHandling : NetworkedBehaviour
     {
         yield return null;
     }
+
+    /// <summary>
+    /// Sends a SphereCast from ball rigidbody to given position.
+    /// Will move the rigidbody correctly. If the ray hits a collider
+    /// the ball will move towards the contact point. Returns true if a collision
+    /// has happen.
+    /// </summary>
+    /// <param name="pos">Position to move too</param>
+    /// <param name="fracComplete">Max move distance</param>
+    /// <returns>true if collision too place. false if not</returns>
+    private bool HandleSphereCast(Vector3 pos, float fracComplete)
+    {
+        Physics.SphereCast(m_body.position, .3f, pos, out RaycastHit hitInfo, fracComplete);
+        if (!hitInfo.collider)
+            m_body.MovePosition(pos);
+        else if (hitInfo.collider.isTrigger)
+        {
+            m_body.MovePosition(pos);
+            if (hitInfo.collider.name == "Hitbox Bot")
+            {
+                Debug.Break();
+                m_body.MovePosition(hitInfo.point);
+                hitInfo.collider.SendMessage("OnTriggerEnter", m_collider);
+                return true;
+            }
+        }
+        else if (!hitInfo.collider.isTrigger)
+        {
+            m_body.MovePosition(hitInfo.point);
+            return true;
+        }
+        return false;
+    }
+
 
     private void FinishPass(ulong targetNetID)
     {
@@ -755,25 +786,24 @@ public class BallHandling : NetworkedBehaviour
     {
         if (IsServer && shotInAction)
         {
-            shotInAction = false;
-            hitTopTrigger = false;
-            m_collisionCheck = false;
             GameManager.Singleton.AddScore(teamID, m_shotData.shotValue);
             ShotResultData result = GetShotResultData(ShotResultType.MADE);
             DebugController.Singleton.PrintObjAsTable(result);
             ShotMade?.Invoke(teamID, m_shotData, result);
+            Reset();
             print("made");
         }
     }
 
     public void OnShotMissed()
     {
-        shotInAction = false;
-        hitTopTrigger = false;
-        m_collisionCheck = false;
-        ShotResultData result = GetShotResultData(ShotResultType.MISSED);
-        ShotMissed?.Invoke(m_shotData, result);
-        print("missed");
+        if (IsServer)
+        {
+            ShotResultData result = GetShotResultData(ShotResultType.MISSED);
+            ShotMissed?.Invoke(m_shotData, result);
+            Reset();
+            print("missed");
+        }
     }
 
     private ShotResultData GetShotResultData(ShotResultType type)
@@ -885,6 +915,13 @@ public class BallHandling : NetworkedBehaviour
     private int RandNegOrPos()
     {
         return (UnityEngine.Random.value > .5f) ? 1 : -1;
+    }
+
+    private void Reset()
+    {
+        shotInAction = false;
+        hitTopTrigger = false;
+        m_collisionCheck = false;
     }
 
 }
