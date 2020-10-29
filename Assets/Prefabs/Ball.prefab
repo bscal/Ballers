@@ -230,6 +230,7 @@ MonoBehaviour:
   pass_speed: 6
   walk_offset: 2.5
   sprint_offset: 6
+  hitTopTrigger: 0
   shotInAction: 0
 --- !u!54 &1914631757
 Rigidbody:
@@ -246,7 +247,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 2
+  m_CollisionDetection: 3
 --- !u!114 &1483954994
 MonoBehaviour:
   m_ObjectHideFlags: 0

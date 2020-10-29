@@ -13981,6 +13981,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 241702298840052630}
+  playerAnim: {fileID: 0}
   m_player: {fileID: 0}
   m_parent: {fileID: 0}
   isMovementEnabled: 1
@@ -15354,10 +15355,10 @@ MonoBehaviour:
   isBallInLeftHand: 0
   isCtrlDown: 0
   isAltDown: 0
-  isDribUp: 0
-  isDribDown: 0
-  isDribLeft: 0
-  isDribRight: 0
+  movingFoward: 0
+  movingBack: 0
+  movingLeft: 0
+  movingRight: 0
   isContesting: 0
   isBlocking: 0
   isStealing: 0
@@ -15368,6 +15369,7 @@ MonoBehaviour:
   isPostMove: 0
   m_rightHand: {fileID: 1367100140280164334}
   m_leftHand: {fileID: 5912948185960104492}
+  m_targetTracker: {fileID: 7405135027028517589}
 --- !u!114 &5179076237109872503
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15478,6 +15480,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 3079357640688713583, guid: 0ef8b220239795f4c953f855be37545f,
     type: 3}
+  playerAnim: {fileID: 0}
   m_player: {fileID: 0}
   m_parent: {fileID: 0}
   isMovementEnabled: 1
