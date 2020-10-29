@@ -106,6 +106,8 @@ public class Player : NetworkedBehaviour, IBitWritable
     private GameObject m_rightHand;
     [SerializeField]
     private GameObject m_leftHand;
+    [SerializeField]
+    private LineTracker m_targetTracker;
     private GameObject m_center;
     private ShotMeter m_shotmeter;
     private RoundShotMeter m_roundShotMeter;
@@ -152,13 +154,12 @@ public class Player : NetworkedBehaviour, IBitWritable
         if (isDummy) return;
         if (!GameManager.Singleton.HasStarted) return;
 
-        if (IsOwner)
+        if (IsOwner && !isAI)
         {
-            //m_animator.SetBool("hasBall", HasBall);
-            //m_animator.SetBool("hasBallInLeft", isBallInLeftHand);
-
-            Debugger.Instance.Print(string.Format("{0} : {1}", transform.position.ToString(), Vector3.Distance(transform.position, TargetPos)), 0);
-            Debugger.Instance.Print(string.Format("2pt:{0}", isInsideThree), 3);
+            if (IsOnDefense())
+                m_targetTracker.gameObject.SetActive(true);
+            else 
+                m_targetTracker.gameObject.SetActive(false);
 
             m_target = GameManager.Singleton.baskets[GameManager.Singleton.Possession].gameObject.transform.position;
         }

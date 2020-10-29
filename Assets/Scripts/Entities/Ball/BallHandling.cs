@@ -109,6 +109,11 @@ public class BallHandling : NetworkedBehaviour
     private bool m_collisionCheck;
     private bool m_insideHitboxShot;
 
+    private Vector3 pos;
+    private float maxDistance;
+    private bool moved;
+    private bool breakShot;
+
     private Dictionary<ulong, float> m_playerDistances;
     private IOrderedEnumerable<KeyValuePair<ulong, float>> m_pairs;
 
@@ -141,7 +146,8 @@ public class BallHandling : NetworkedBehaviour
     {
         m_timer += Time.deltaTime;
 
-        if (Match.HasGameStarted && IsServer && m_timer > .1)
+        // Time to run these are around 20x a second
+        if (IsServer && Match.HasGameStarted && m_timer > .05)
         {
             m_timer = 0;
             // ============ Lists Closest Players ============
@@ -167,8 +173,13 @@ public class BallHandling : NetworkedBehaviour
     // FixedUpdate is called 50x per frame
     void FixedUpdate()
     {
-        if (!IsServer || !Match.HasGameStarted) return;
+        if (moved)
+        {
+            breakShot = HandleSphereCast(pos, maxDistance);
+            moved = false;
+        }
 
+        // ============ Updates BallStates ============
         // ============ Loose Ball ============
         if (State == BallState.LOOSE)
         {
@@ -177,17 +188,13 @@ public class BallHandling : NetworkedBehaviour
 
             foreach (KeyValuePair<ulong, float> pair in m_pairs)
             {
-                if (pair.Value < 1.5f)
+                if (pair.Value < 1.5f && !m_insideHitboxShot)
                 {
-                    if (!m_insideHitboxShot)
-                    {
-                        Debug.Log(pair.Key + " picked up ball");
-                        // Player closest to ball picks up the ball.
-                        State = BallState.HELD;
-                        ChangeBallHandler(pair.Key);
-                        break;
-                    }
-
+                    Debug.Log(pair.Key + " picked up ball");
+                    // Player closest to ball picks up the ball.
+                    State = BallState.HELD;
+                    ChangeBallHandler(pair.Key);
+                    break;
                 }
             }
         }
@@ -197,17 +204,18 @@ public class BallHandling : NetworkedBehaviour
             m_body.isKinematic = true;
 
             // Tells the ball which hand to be in.
+            // These should be ok to not be in FixedUpdate
             if (m_currentPlayer.isBallInLeftHand)
                 m_body.MovePosition(m_currentPlayer.GetLeftHand().transform.position);
             else
                 m_body.MovePosition(m_currentPlayer.GetRightHand().transform.position);
         }
-
         // ============ Ball Shoot ============
         else if (State == BallState.SHOT)
         {
             ChangeBallHandler(NO_PLAYER);
         }
+
     }
 
     public void OnGameStarted()
@@ -374,7 +382,7 @@ public class BallHandling : NetworkedBehaviour
         float fracComplete = 0;
         while (fracComplete < 1)
         {
-            if (!shotInAction || m_collisionCheck) break;
+            if (!shotInAction || m_collisionCheck || breakShot) break;
             if (fracComplete < .5f) m_shotPastArc = true;
             // Fraction of journey completed equals current distance divided by total distance.
             fracComplete = (Time.fixedTime - startTime) / duration;
@@ -384,11 +392,16 @@ public class BallHandling : NetworkedBehaviour
 
             // Sends out a spherecast to make sure we can move the ball.
             // the rigidbody is move here and returns if we should break the loop.
-            if (HandleSphereCast(pos, fracComplete))
-                break;
+
+            this.pos = pos;
+            this.maxDistance = fracComplete;
+            this.moved = true;
+            //if (HandleSphereCast(pos, fracComplete))
+                //break;
 
             yield return new WaitForFixedUpdate();
         }
+        breakShot = false;
         m_shotPastArc = false;
         State = BallState.LOOSE;
     }
@@ -647,7 +660,7 @@ public class BallHandling : NetworkedBehaviour
     /// <returns>true if collision too place. false if not</returns>
     private bool HandleSphereCast(Vector3 pos, float fracComplete)
     {
-        Physics.SphereCast(m_body.position, .3f, pos, out RaycastHit hitInfo, fracComplete);
+        Physics.SphereCast(m_body.position, .2f, pos, out RaycastHit hitInfo, fracComplete);
         if (!hitInfo.collider)
             m_body.MovePosition(pos);
         else if (hitInfo.collider.isTrigger)
@@ -655,10 +668,7 @@ public class BallHandling : NetworkedBehaviour
             m_body.MovePosition(pos);
             if (hitInfo.collider.name == "Hitbox Bot")
             {
-                Debug.Break();
-                m_body.MovePosition(hitInfo.point);
                 hitInfo.collider.SendMessage("OnTriggerEnter", m_collider);
-                return true;
             }
         }
         else if (!hitInfo.collider.isTrigger)
@@ -745,7 +755,6 @@ public class BallHandling : NetworkedBehaviour
         if (collision.gameObject.CompareTag(BACKBOARD_TAG))
         {
             m_collisionCheck = true;
-            Debug.Break();
         }
         if (collision.gameObject.CompareTag(RIM_TAG))
         {
