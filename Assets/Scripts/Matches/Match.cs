@@ -50,6 +50,8 @@ public static class Match
 
     public static void AddPlayer(ulong steamid, int cid)
     {
+        if (ServerManager.Singleton.ContainsPlayer(steamid))
+            return;
         ServerManager.Singleton.AddPlayer(steamid, cid);
 
         int teamID;

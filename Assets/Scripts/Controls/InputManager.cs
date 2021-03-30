@@ -1,4 +1,4 @@
-﻿using MLAPI;
+using MLAPI;
 using MLAPI.Spawning;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,18 +18,18 @@ public class InputManager : MonoBehaviour
         foreach (var action in m_controls.Keyboard.Get().actions)
         {
             action.performed += ctx => {
-                if (NetworkingManager.Singleton.IsServer || NetworkingManager.Singleton.IsClient)
+                if (NetworkManager.Singleton.IsServer || NetworkManager.Singleton.IsClient)
                 {
                     if (!m_map.ContainsKey(ctx.action)) return;
-                    NetInput.SendInput(m_map[ctx.action], InputType.PRESSED);
+                    //NetInput.SendInput(m_map[ctx.action], InputType.PRESSED);
                 }
             };
 
             action.canceled += ctx => {
-                if (NetworkingManager.Singleton.IsServer || NetworkingManager.Singleton.IsClient)
+                if (NetworkManager.Singleton.IsServer || NetworkManager.Singleton.IsClient)
                 {
                     if (!m_map.ContainsKey(ctx.action)) return;
-                    NetInput.SendInput(m_map[ctx.action], InputType.RELEASED);
+                    //NetInput.SendInput(m_map[ctx.action], InputType.RELEASED);
                 }
             };
         }
@@ -75,10 +75,3 @@ static class InputID
     }
 }
 
-public static class NetInput
-{
-    public static void SendInput(uint id, InputType type)
-    {
-        NetworkEvents.Singleton.ServerKeyInput(SpawnManager.GetLocalPlayerObject().NetworkId, id, (int)type);
-    }
-}

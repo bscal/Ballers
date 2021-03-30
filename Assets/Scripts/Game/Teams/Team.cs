@@ -1,4 +1,4 @@
-﻿using MLAPI;
+using MLAPI;
 using MLAPI.Messaging;
 using MLAPI.Serialization;
 using MLAPI.Serialization.Pooled;
@@ -9,7 +9,7 @@ using System.IO;
 using UnityEngine.Assertions;
 
 [Serializable]
-public class TeamData : IBitWritable
+public class TeamData : INetworkSerializable
 {
     /// <summary>
     /// Team points;
@@ -20,9 +20,15 @@ public class TeamData : IBitWritable
     /// </summary>
     public int fouls = 0;
 
+    public void NetworkSerialize(NetworkSerializer serializer)
+    {
+        serializer.Serialize(ref points);
+        serializer.Serialize(ref fouls);
+    }
+
     public void Read(Stream stream)
     {
-        using (PooledBitReader reader = PooledBitReader.Get(stream))
+        using (PooledNetworkReader reader = PooledNetworkReader.Get(stream))
         {
             points = reader.ReadInt32Packed();
             fouls = reader.ReadInt32Packed();
@@ -30,7 +36,7 @@ public class TeamData : IBitWritable
     }
     public void Write(Stream stream)
     {
-        using (PooledBitWriter writer = PooledBitWriter.Get(stream))
+        using (PooledNetworkWriter writer = PooledNetworkWriter.Get(stream))
         {
             writer.WriteInt32Packed(points);
             writer.WriteInt32Packed(fouls);
@@ -77,23 +83,23 @@ public class Team
 
     public void WriteSyncTeamSlots()
     {
-        using (PooledBitStream stream = PooledBitStream.Get())
+        using (PooledNetworkBuffer stream = PooledNetworkBuffer.Get())
         {
-            using (PooledBitWriter writer = PooledBitWriter.Get(stream))
+            using (PooledNetworkWriter writer = PooledNetworkWriter.Get(stream))
             {
                 writer.WriteInt32Packed(id);
                 writer.WriteInt32Packed(teamSlots.Count);
                 foreach (var pair in teamSlots)
                 {
                     writer.WriteInt32Packed(pair.Key);
-                    writer.WriteUInt64Packed(pair.Value.NetworkId);
+                    writer.WriteUInt64Packed(pair.Value.NetworkObjectId);
                 }
-                GameManager.Singleton.InvokeClientRpcOnEveryone(GameManager.Singleton.ClientSyncTeamSlots, stream);
+                //GameManager.Singleton.ClientSyncTeamSlotsClientRpc(stream);
             }
         }
     }
 
-    public void ReadSyncTeamSlots(PooledBitReader reader, int count)
+    public void ReadSyncTeamSlots(PooledNetworkReader reader, int count)
     {
         for (int i = 0; i < count; i++)
         {

@@ -1,4 +1,4 @@
-﻿using MLAPI.Serialization;
+using MLAPI.Serialization;
 using MLAPI.Serialization.Pooled;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,16 +12,16 @@ public enum BallersGamemode
     MP_PVP
 }
 
-public class MatchSettings : IBitWritable
+public class MatchSettings : INetworkSerializable
 {
 
-    public BallersGamemode GameMode { get; set; }
-    public int TeamSize { get; set; }
-    public int QuartersCount { get; set; }
-    public double QuarterLength { get; set; }
-    public double ShotClockLength { get; set; } 
-    public int NumOfAIs { get; set; }
-    public AIDifficulty Difficulty { get; set; }
+    public BallersGamemode GameMode;
+    public int TeamSize;
+    public int QuartersCount;
+    public double QuarterLength;
+    public double ShotClockLength;
+    public int NumOfAIs;
+    public AIDifficulty Difficulty;
 
 
     public MatchSettings() { }
@@ -36,7 +36,7 @@ public class MatchSettings : IBitWritable
 
     public void Read(Stream stream)
     {
-        using (PooledBitReader reader = PooledBitReader.Get(stream))
+        using (PooledNetworkReader reader = PooledNetworkReader.Get(stream))
         {
             GameMode = (BallersGamemode)reader.ReadByte();
             TeamSize = reader.ReadByte();
@@ -48,7 +48,7 @@ public class MatchSettings : IBitWritable
 
     public void Write(Stream stream)
     {
-        using (PooledBitWriter writer = PooledBitWriter.Get(stream))
+        using (PooledNetworkWriter writer = PooledNetworkWriter.Get(stream))
         {
             writer.WriteByte((byte)GameMode);
             writer.WriteByte((byte)TeamSize);
@@ -56,5 +56,14 @@ public class MatchSettings : IBitWritable
             writer.WriteDoublePacked(QuarterLength);
             writer.WriteDoublePacked(ShotClockLength);
         }
+    }
+
+    public void NetworkSerialize(NetworkSerializer serializer)
+    {
+        serializer.Serialize(ref GameMode);
+        serializer.Serialize(ref TeamSize);
+        serializer.Serialize(ref QuartersCount);
+        serializer.Serialize(ref QuarterLength);
+        serializer.Serialize(ref ShotClockLength);
     }
 }

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using MLAPI;
 
@@ -10,7 +10,7 @@ public enum DriveDir
     RIGHT
 }
 
-public class DriveController : NetworkedBehaviour
+public class DriveController : NetworkBehaviour
 {
     /*
      * TODO

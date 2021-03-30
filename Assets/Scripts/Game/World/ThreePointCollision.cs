@@ -1,4 +1,4 @@
-﻿using MLAPI;
+using MLAPI;
 using MLAPI.Spawning;
 using UnityEngine;
 
@@ -9,7 +9,7 @@ public class ThreePointCollision : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (NetworkingManager.Singleton.IsServer)
+        if (NetworkManager.Singleton.IsServer)
         {
             if (other.gameObject.CompareTag(PLAYER_TAG))
             {
@@ -21,7 +21,7 @@ public class ThreePointCollision : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (NetworkingManager.Singleton.IsServer)
+        if (NetworkManager.Singleton.IsServer)
         {
             if (other.gameObject.CompareTag(PLAYER_TAG))
             {

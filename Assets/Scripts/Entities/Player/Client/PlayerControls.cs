@@ -1,10 +1,10 @@
-﻿using MLAPI;
+using MLAPI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerControls : NetworkedBehaviour
+public class PlayerControls : NetworkBehaviour
 {
 
     private const float MAX_TIME = 3.0f;
@@ -224,7 +224,7 @@ public class PlayerControls : NetworkedBehaviour
     {
         if (m_shootCooldown < Time.time)
         {
-            m_player.InvokeServerRpc(m_player.Pumpfake);
+            m_player.PumpfakeServerRpc();
             m_animHandler.Play(AnimNames.REG_PUMPFAKE);
             m_shootCooldown = Time.time + .2f;
         }

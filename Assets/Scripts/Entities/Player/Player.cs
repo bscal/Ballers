@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using UnityEngine;
 using MLAPI;
@@ -7,7 +7,7 @@ using MLAPI.Serialization;
 using MLAPI.Serialization.Pooled;
 using Ballers;
 
-public class Player : NetworkedBehaviour, IBitWritable
+public class Player : NetworkBehaviour, INetworkSerializable
 {
     // Local Player Events
     //  These are not synced over the network and only used by local client.
@@ -77,7 +77,7 @@ public class Player : NetworkedBehaviour, IBitWritable
     /// Returns true if Player is an AI or is a Dummy
     /// </summary>
     public bool IsNpc { get { return isAI || isDummy; } }
-    public bool HasBall { get { return NetworkId == GameManager.GetBallHandling().PlayerWithBall; } }
+    public bool HasBall { get { return NetworkBehaviourId == GameManager.GetBallHandling().PlayerWithBall; } }
     public Vector3 RightHandPos { get { return m_rightHand.transform.position; } }
     public Vector3 LeftHandPos { get { return m_leftHand.transform.position; } }
     public Vector3 CurHandPos { get { return (isBallInLeftHand) ? LeftHandPos : RightHandPos; } }
@@ -97,7 +97,7 @@ public class Player : NetworkedBehaviour, IBitWritable
             if (IsOnOffense() || GameManager.GetBallHandling().IsBallLoose()) return null;
             if (isHelping) return GameManager.Singleton.BallHandler;
             else if (m_assignment == null) m_assignment = GameManager.GetPlayerBySlot(FlipTeamID(teamID), slot);
-            return m_assignment;
+            return (m_assignment == null) ? null : m_assignment;
         }
         set { m_assignment = value; }
     }
@@ -140,7 +140,7 @@ public class Player : NetworkedBehaviour, IBitWritable
             m_shotmeter = GetComponent<ShotMeter>();
             m_roundShotMeter = GameObject.Find("HUD/Canvas/RoundShotMeter").GetComponent<RoundShotMeter>();
 
-            GameManager.Singleton.RegisterLocalPlayerToServer(OwnerClientId);
+            //GameManager.Singleton.RegisterLocalPlayerToServer(OwnerClientId);
         }
     }
 
@@ -203,16 +203,16 @@ public class Player : NetworkedBehaviour, IBitWritable
 
     public void ShootBall()
     {
-        InvokeServerRpc(ServerShootBall, NetworkId);
+        ShootBallServerRpc(NetworkBehaviourId);
     }
 
-    [ServerRPC]
-    public void ServerShootBall(ulong netID)
+    [ServerRpc]
+    public void ShootBallServerRpc(ulong netID)
     {
         if (isShooting && !HasBall) return;
         isShooting = true;
         ulong clientID = GameManager.GetPlayerByNetworkID(netID).OwnerClientId;
-        ulong rtt = NetworkingManager.Singleton.NetworkConfig.NetworkTransport.GetCurrentRtt(clientID);
+        ulong rtt = NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetCurrentRtt(clientID);
         m_shotManager.OnShoot(netID, this, (rtt / 1000 / 2));
     }
 
@@ -220,20 +220,20 @@ public class Player : NetworkedBehaviour, IBitWritable
     {
         if (!isShooting && !HasBall) return;
         isShooting = false;
-        InvokeServerRpc(OnRelease, NetworkId);
+        ReleaseServerRpc(NetworkBehaviourId);
     }
 
-    [ServerRPC]
-    public void OnRelease(ulong netID)
+    [ServerRpc]
+    public void ReleaseServerRpc(ulong netID)
     {
         ulong clientID = GameManager.GetPlayerByNetworkID(netID).OwnerClientId;
-        ulong rtt = NetworkingManager.Singleton.NetworkConfig.NetworkTransport.GetCurrentRtt(clientID);
+        ulong rtt = NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetCurrentRtt(clientID);
         m_shotManager.OnRelease(netID, (rtt / 1000 / 2));
     }
 
 
-    [ClientRPC]
-    public void ClientShootBall(ulong netID, ShotData shotData, ShotBarData shotBarData)
+    [ClientRpc]
+    public void ClientShootBallClientRpc(ulong netID, ShotData shotData, ShotBarData shotBarData, ClientRpcParams cParams = default)
     {
         Player p = GameManager.GetPlayerByNetworkID(netID);
         if (p.isCtrlDown)
@@ -245,8 +245,8 @@ public class Player : NetworkedBehaviour, IBitWritable
         Shoot?.Invoke(shotData, shotBarData);
     }
 
-    [ClientRPC]
-    public void ClientReleaseBall(float distance, float difference)
+    [ClientRpc]
+    public void ClientReleaseBallClientRpc(float distance, float difference, ClientRpcParams cParams = default)
     {
         Release?.Invoke(distance, difference);
     }
@@ -280,30 +280,29 @@ public class Player : NetworkedBehaviour, IBitWritable
     {
         if (IsOwner)
         {
-            GameManager.GetBallHandling().InvokeServerRpc(
-                GameManager.GetBallHandling().PlayerCallForBall, NetworkId);
+            GameManager.GetBallHandling().PlayerCallForBallServerRpc(NetworkBehaviourId);
         }
     }
 
-    [ClientRPC]
-    public void TriggerRoundShotMeter(float speed, float difficulty)
+    [ClientRpc]
+    public void TriggerRoundShotMeterClientRpc(float speed, float difficulty, ClientRpcParams clientRpcParams = default)
     {
         m_roundShotMeter.StartMeter(speed, difficulty);
         StartRoundMeter?.Invoke(speed, difficulty);
     }
 
 
-    [ClientRPC]
-    public void ResponseRoundShotMeter(float score)
+    [ClientRpc]
+    public void ResponseRoundShotMeterClientRpc(float score)
     {
         m_roundShotMeter.Response(score);
         StopRoundMeter?.Invoke(score);
     }
 
-    [ServerRPC]
-    public void ReleaseRoundShotMeter(ulong clientID, float result)
+    [ServerRpc]
+    public void ReleaseRoundShotMeterServerRpc(ulong clientID, float result)
     {
-        ulong rtt = NetworkingManager.Singleton.NetworkConfig.NetworkTransport.GetCurrentRtt(clientID);
+        ulong rtt = NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetCurrentRtt(clientID);
         m_roundShotMeter.StopMeter(result - (rtt / 1000 /2));
     }
 
@@ -311,18 +310,18 @@ public class Player : NetworkedBehaviour, IBitWritable
     {
         if (IsServer)
         {
-            InvokeClientRpcOnClient(TriggerRoundShotMeter, clientID, speed, difficulty);
+            TriggerRoundShotMeterClientRpc(speed, difficulty, RPCParams.ClientParamsOnlyClient(clientID));
             StartCoroutine(m_roundShotMeter.ServerTimer(netID, speed, difficulty, cb));
         }
     }
 
     public void ReleasePass()
     {
-        InvokeServerRpc(ReleaseRoundShotMeter, OwnerClientId, m_roundShotMeter.GetTime());
+        ReleaseRoundShotMeterServerRpc(OwnerClientId, m_roundShotMeter.GetTime());
     }
 
-    [ServerRPC]
-    public void Pumpfake()
+    [ServerRpc]
+    public void PumpfakeServerRpc()
     {
         isDribbling = false;
     }
@@ -474,7 +473,7 @@ public class Player : NetworkedBehaviour, IBitWritable
 
     public void ReadPlayerFromServer(Stream stream)
     {
-        using (PooledBitReader reader = PooledBitReader.Get(stream))
+        using (PooledNetworkReader reader = PooledNetworkReader.Get(stream))
         {
             // THIS CURRENT ISNT UPDATED BECAUSE LOOP NEVER SENDS
             isInsideThree = reader.ReadBool();
@@ -486,18 +485,18 @@ public class Player : NetworkedBehaviour, IBitWritable
     public void SetReadyStatus(bool state)
     {
         hasReadyUp = state;
-        InvokeServerRpc(ServerReadyUp, hasReadyUp);
+        ServerReadyUpServerRpc(hasReadyUp);
     }
 
-    [ServerRPC]
-    public void ServerReadyUp(bool isReady)
+    [ServerRpc]
+    public void ServerReadyUpServerRpc(bool isReady)
     {
         this.hasReadyUp = isReady;
     }
 
     public void Read(Stream stream)
     {
-        using (PooledBitReader reader = PooledBitReader.Get(stream))
+        using (PooledNetworkReader reader = PooledNetworkReader.Get(stream))
         {
             teamID = reader.ReadInt32Packed();
 
@@ -529,7 +528,7 @@ public class Player : NetworkedBehaviour, IBitWritable
 
     public void Write(Stream stream)
     {
-        using (PooledBitWriter writer = PooledBitWriter.Get(stream))
+        using (PooledNetworkWriter writer = PooledNetworkWriter.Get(stream))
         {
             writer.WriteInt32Packed(teamID);
 
@@ -557,5 +556,28 @@ public class Player : NetworkedBehaviour, IBitWritable
 
             writer.WriteVector3Packed(m_target);
         }
+    }
+
+    public void NetworkSerialize(NetworkSerializer serializer)
+    {
+        serializer.Serialize(ref teamID);
+        serializer.Serialize(ref isAI);
+        serializer.Serialize(ref isRightHanded);
+        serializer.Serialize(ref isMoving);
+        serializer.Serialize(ref isSprinting);
+        serializer.Serialize(ref isDribbling);
+        serializer.Serialize(ref isScreening);
+        serializer.Serialize(ref isHelping);
+        serializer.Serialize(ref isBallInLeftHand);
+        serializer.Serialize(ref isCtrlDown);
+        serializer.Serialize(ref isAltDown);
+        serializer.Serialize(ref movingFoward);
+        serializer.Serialize(ref movingBack);
+        serializer.Serialize(ref movingLeft);
+        serializer.Serialize(ref movingRight);
+        serializer.Serialize(ref isContesting);
+        serializer.Serialize(ref isBlocking);
+        serializer.Serialize(ref isStealing);
+        serializer.Serialize(ref m_target);
     }
 }

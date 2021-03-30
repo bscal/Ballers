@@ -1,4 +1,4 @@
-﻿using MLAPI;
+using MLAPI;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -42,7 +42,7 @@ public class PlayerHandler : MonoBehaviour
     /// </summary>
     public void GetPlayerStats(Player player)
     {
-        if (!NetworkingManager.Singleton.IsServer) return;
+        if (!NetworkManager.Singleton.IsServer) return;
 
         if (!ServerManager.Singleton.players.TryGetValue(player.steamID, out ServerPlayer sPlayer)) return;
 

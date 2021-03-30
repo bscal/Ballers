@@ -1,5 +1,5 @@
-﻿using MLAPI;
-using MLAPI.NetworkedVar;
+using MLAPI;
+using MLAPI.NetworkVariable;
 using MLAPI.Serialization;
 using MLAPI.Serialization.Pooled;
 using System;
@@ -11,7 +11,7 @@ using UnityEngine;
 /// Data Container for ShotData. Used in NetworkedShotData
 /// </summary>
 [Serializable]
-public class ShotData : IBitWritable
+public class ShotData : INetworkSerializable
 {
     public Vector3 position;
     public ShotType type;
@@ -27,9 +27,26 @@ public class ShotData : IBitWritable
     public float defSkill;
     public float passRating;
 
+    public void NetworkSerialize(NetworkSerializer serializer)
+    {
+        serializer.Serialize(ref position);
+        serializer.Serialize(ref type);
+        serializer.Serialize(ref style);
+        serializer.Serialize(ref direction);
+        serializer.Serialize(ref bankshot);
+        serializer.Serialize(ref shooter);
+        serializer.Serialize(ref shotValue);
+        serializer.Serialize(ref leftHanded);
+        serializer.Serialize(ref distance);
+        serializer.Serialize(ref contest);
+        serializer.Serialize(ref offSkill);
+        serializer.Serialize(ref defSkill);
+        serializer.Serialize(ref passRating);
+    }
+
     public void Read(Stream stream)
     {
-        using (PooledBitReader reader = PooledBitReader.Get(stream))
+        using (PooledNetworkReader reader = PooledNetworkReader.Get(stream))
         {
             position = reader.ReadVector3Packed();
             type = (ShotType)reader.ReadByte();
@@ -49,7 +66,7 @@ public class ShotData : IBitWritable
 
     public void Write(Stream stream)
     {
-        using (PooledBitWriter writer = PooledBitWriter.Get(stream))
+        using (PooledNetworkWriter writer = PooledNetworkWriter.Get(stream))
         {
             writer.WriteVector3Packed(position);
             writer.WriteByte((byte)type);
@@ -69,6 +86,8 @@ public class ShotData : IBitWritable
     }
 }
 
+/**
+
 /// <summary>
 /// ShotData contains data of the most recent shot. Shared by the server to clients.
 /// </summary>
@@ -82,7 +101,7 @@ public class NetworkedShotData : INetworkedVar
     /// <summary>
     /// The settings for this var
     /// </summary>
-    public readonly NetworkedVarSettings Settings = new NetworkedVarSettings();
+    public readonly NetworkVariableSettings Settings = new NetworkVariableSettings();
     /// <summary>
     /// Gets the last time the variable was synced
     /// </summary>
@@ -97,24 +116,24 @@ public class NetworkedShotData : INetworkedVar
     /// The callback to be invoked when the value gets changed
     /// </summary>
     public OnValueChangedDelegate OnValueChanged;
-    private NetworkedBehaviour networkedBehaviour;
+    private NetworkBehaviour networkedBehaviour;
 
     public NetworkedShotData() { }
     /// <summary>
-    /// Creates a NetworkedVar with the default value and custom settings
+    /// Creates a NetworkVariable with the default value and custom settings
     /// </summary>
-    /// <param name="settings">The settings to use for the NetworkedVar</param>
-    public NetworkedShotData(NetworkedVarSettings settings)
+    /// <param name="settings">The settings to use for the NetworkVariable</param>
+    public NetworkedShotData(NetworkVariableSettings settings)
     {
         this.Settings = settings;
     }
 
     /// <summary>
-    /// Creates a NetworkedVar with a custom value and custom settings
+    /// Creates a NetworkVariable with a custom value and custom settings
     /// </summary>
-    /// <param name="settings">The settings to use for the NetworkedVar</param>
-    /// <param name="value">The initial value to use for the NetworkedVar</param>
-    public NetworkedShotData(NetworkedVarSettings settings, ShotData value)
+    /// <param name="settings">The settings to use for the NetworkVariable</param>
+    /// <param name="value">The initial value to use for the NetworkVariable</param>
+    public NetworkedShotData(NetworkVariableSettings settings, ShotData value)
     {
         this.Settings = settings;
         this.InternalValue = value;
@@ -123,7 +142,7 @@ public class NetworkedShotData : INetworkedVar
     [SerializeField]
     private ShotData InternalValue = default(ShotData);
     /// <summary>
-    /// The value of the NetworkedVar container
+    /// The value of the NetworkVariable container
     /// </summary>
     public ShotData Value
     {
@@ -148,13 +167,13 @@ public class NetworkedShotData : INetworkedVar
     {
         switch (Settings.ReadPermission)
         {
-            case NetworkedVarPermission.Everyone:
+            case NetworkVariablePermission.Everyone:
                 return true;
-            case NetworkedVarPermission.ServerOnly:
+            case NetworkVariablePermission.ServerOnly:
                 return false;
-            case NetworkedVarPermission.OwnerOnly:
+            case NetworkVariablePermission.OwnerOnly:
                 return networkedBehaviour.OwnerClientId == clientId;
-            case NetworkedVarPermission.Custom:
+            case NetworkVariablePermission.Custom:
                 {
                     if (Settings.ReadPermissionCallback == null) return false;
                     return Settings.ReadPermissionCallback(clientId);
@@ -174,7 +193,7 @@ public class NetworkedShotData : INetworkedVar
     /// <inheritdoc />
     public string GetChannel()
     {
-        return Settings.SendChannel;
+        return Settings.SendNetworkChannel;
     }
 
     /// <inheritdoc />
@@ -183,7 +202,7 @@ public class NetworkedShotData : INetworkedVar
         if (!isDirty) return false;
         if (Settings.SendTickrate == 0) return true;
         if (Settings.SendTickrate < 0) return false;
-        if (NetworkingManager.Singleton.NetworkTime - LastSyncedTime >= (1f / Settings.SendTickrate)) return true;
+        if (NetworkManager.Singleton.NetworkTime - LastSyncedTime >= (1f / Settings.SendTickrate)) return true;
         return false;
     }
 
@@ -212,10 +231,10 @@ public class NetworkedShotData : INetworkedVar
     public void ResetDirty()
     {
         isDirty = false;
-        LastSyncedTime = NetworkingManager.Singleton.NetworkTime;
+        LastSyncedTime = NetworkManager.Singleton.NetworkTime;
     }
 
-    public void SetNetworkedBehaviour(NetworkedBehaviour behaviour)
+    public void SetNetworkedBehaviour(NetworkBehaviour behaviour)
     {
         networkedBehaviour = behaviour;
     }
@@ -224,10 +243,12 @@ public class NetworkedShotData : INetworkedVar
     /// Writes the variable to the writer
     /// </summary>
     /// <param name="stream">The stream to write the value to</param>
-    public void WriteDelta(Stream stream) => WriteField(stream); // Based on default NetworkedVar implementation. This class doesnt need this
+    public void WriteDelta(Stream stream) => WriteField(stream); // Based on default NetworkVariable implementation. This class doesnt need this
 
     public void WriteField(Stream stream)
     {
         InternalValue.Write(stream);
     }
 }
+**/
+

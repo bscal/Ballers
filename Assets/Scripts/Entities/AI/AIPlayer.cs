@@ -1,10 +1,10 @@
-﻿using MLAPI;
+using MLAPI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AIPlayer : NetworkedBehaviour
+public class AIPlayer : NetworkBehaviour
 {
 
     protected Player m_player;

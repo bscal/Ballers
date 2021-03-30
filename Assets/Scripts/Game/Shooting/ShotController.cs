@@ -1,4 +1,4 @@
-﻿using MLAPI.NetworkedVar;
+using MLAPI.NetworkVariable;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

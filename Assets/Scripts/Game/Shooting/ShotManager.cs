@@ -1,8 +1,8 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using MLAPI;
-using MLAPI.NetworkedVar;
+using MLAPI.NetworkVariable;
 using UnityEditor.Experimental.GraphView;
 
 public class ShotManager : MonoBehaviour
@@ -34,7 +34,7 @@ public class ShotManager : MonoBehaviour
      */
     public void OnShoot(ulong netID, Player p, float rttDelay)
     {
-        if (!NetworkingManager.Singleton.IsServer) return;
+        if (!NetworkManager.Singleton.IsServer) return;
 
         float dist = Vector3.Distance(p.transform.position, p.TargetPos);
         float angle = Quaternion.Angle(transform.rotation, p.TargetRotation);
@@ -68,7 +68,7 @@ public class ShotManager : MonoBehaviour
         m_shotBarData.targetHeight = (ShotMeter.BASE_TARGET_HEIGHT + m_shotBarData.targetOffset);
 
         GameManager.GetBallHandling().OnShoot(netID, m_shotData, m_shotBarData);
-        p.InvokeClientRpcOnClient(p.ClientShootBall, p.OwnerClientId, netID, m_shotData, m_shotBarData);
+       p.ClientShootBallClientRpc(netID, m_shotData, m_shotBarData, RPCParams.ClientParamsOnlyClient(p.OwnerClientId));
         //p.InvokeClientRpcOnEveryone(p.ClientShootBall, m_shotData, m_shotBarData);
         StartCoroutine(ShotQuality(p, rttDelay));
     }
@@ -126,8 +126,8 @@ public class ShotManager : MonoBehaviour
 
         print("Server: " + m_shotBarData.FinalTargetHeight + ", " + timer + ", dist = " + m_releaseDist + ", grade = " + grade + ", diff = " + m_releaseDiff);
 
-        p.InvokeClientRpcOnClient(p.ClientReleaseBall, p.OwnerClientId, m_releaseDist, m_releaseDiff);
-        HandleShot(p.NetworkId);
+        p.ClientReleaseBallClientRpc(m_releaseDist, m_releaseDiff, RPCParams.ClientParamsOnlyClient(p.OwnerClientId));
+        HandleShot(p.NetworkObjectId);
     }
 
     private ShotDirection GetShotDirection(float angle)

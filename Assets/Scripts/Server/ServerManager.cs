@@ -1,4 +1,4 @@
-﻿using MLAPI;
+using MLAPI;
 using MLAPI.Messaging;
 using MLAPI.Spawning;
 using System;
@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-public class ServerManager : NetworkedBehaviour
+public class ServerManager : NetworkBehaviour
 {
     public static ServerManager Singleton { get; private set; }
 
@@ -26,7 +26,7 @@ public class ServerManager : NetworkedBehaviour
 
     private void Start()
     {
-        NetworkingManager.Singleton.OnServerStarted += OnServerStarted;
+        NetworkManager.Singleton.OnServerStarted += OnServerStarted;
 
         m_playerHandler = GameObject.Find("NetworkClient").GetComponent<PlayerHandler>();
     }
@@ -35,6 +35,11 @@ public class ServerManager : NetworkedBehaviour
     {
         if (Match.HostServer)
             HandlePlayerConnection(steamid, cid);
+    }
+
+    public bool ContainsPlayer(ulong steamid)
+    {
+        return players.ContainsKey(steamid);
     }
 
     public void RemovePlayer(ulong steamid)
@@ -68,8 +73,8 @@ public class ServerManager : NetworkedBehaviour
 
     private void OnServerStarted()
     {
-        NetworkingManager.Singleton.OnClientConnectedCallback += OnClientConnected;
-        NetworkingManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
 
         // These statements are a temp solution because starting a server (or host)
         // will not fire OnClientConnectedCallback

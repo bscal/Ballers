@@ -13,6 +13,8 @@ public class LineTracker : MonoBehaviour
 
     void Update()
     {
+        if (!GameManager.Singleton.HasStarted)
+            return;
         Player p = GameManager.GetPlayer();
         Player assignment = p.Assignment;
         if (p == null || assignment == null)

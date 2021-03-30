@@ -1,4 +1,4 @@
-﻿using MLAPI.Spawning;
+using MLAPI.Spawning;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,7 +13,7 @@ public class PlayerUI : MonoBehaviour
 
     void Start()
     {
-        m_player = SpawnManager.GetLocalPlayerObject().GetComponentInChildren<Player>();
+        m_player = NetworkSpawnManager.GetLocalPlayerObject().GetComponentInChildren<Player>();
         obj.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
     }
 

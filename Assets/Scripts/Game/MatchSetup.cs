@@ -1,4 +1,4 @@
-﻿using MLAPI;
+using MLAPI;
 using MLAPI.Messaging;
 using MLAPI.SceneManagement;
 using MLAPI.Spawning;
@@ -20,7 +20,7 @@ public enum GameType
 /// <summary>
 /// Handles going from Main Menu scene -> Match scene
 /// </summary>
-public class MatchSetup : NetworkedBehaviour
+public class MatchSetup : NetworkBehaviour
 {
     private const string CONST_GAME_SCENE_NAME = "Match";
 
@@ -30,30 +30,35 @@ public class MatchSetup : NetworkedBehaviour
 
     void Start()
     {
-        NetworkSceneManager.OnSceneSwitchStarted += OnSceneSwitchStarted;
+        //NetworkSceneManager.OnSceneSwitchStarted += OnSceneSwitchStarted;
     }
 
     public void Setup(CSteamID hostSteamID)
     {
         //NetworkSceneManager.SwitchScene(CONST_GAME_SCENE_NAME);
-        var operation = SceneManager.LoadSceneAsync(CONST_GAME_SCENE_NAME);
-        StartCoroutine("LoadGame", operation);
+        if (!Match.HostServer)
+            NetworkManager.Singleton.StartClient();
+            
+
+        var prog = NetworkSceneManager.SwitchScene(CONST_GAME_SCENE_NAME);
+        //var operation = SceneManager.LoadSceneAsync(CONST_GAME_SCENE_NAME);
+        OnSceneSwitchStarted(prog);
 
         print("match setup successful");
     }
 
-    private void OnSceneSwitchStarted(AsyncOperation operation)
+    private void OnSceneSwitchStarted(SceneSwitchProgress operation)
     {
         StartCoroutine(LoadGame(operation));
     }
 
-    private IEnumerator LoadGame(AsyncOperation operation)
+    private IEnumerator LoadGame(SceneSwitchProgress operation)
     {
         GameObject canvas = Instantiate(loadingCanvas);
         loadingScreen = canvas.GetComponent<LoadingScreen>();
         loadingScreen.enabled = true;
 
-        while (!operation.isDone)
+        while (!operation.IsCompleted)
         {
             yield return null;
         }

@@ -1,4 +1,4 @@
-﻿using MLAPI.Serialization;
+using MLAPI.Serialization;
 using MLAPI.Serialization.Pooled;
 using System;
 using System.IO;
@@ -13,7 +13,7 @@ public enum SpeedVariations
 }
 
 [Serializable]
-public class ShotBarData : IBitWritable
+public class ShotBarData : INetworkSerializable
 {
     public const int GRADE_PERFECT  = 0;
     public const int GRADE_GOOD     = 1;
@@ -70,7 +70,7 @@ public class ShotBarData : IBitWritable
 
     public void Read(Stream stream)
     {
-        using (PooledBitReader reader = PooledBitReader.Get(stream))
+        using (PooledNetworkReader reader = PooledNetworkReader.Get(stream))
         {
             speed           = reader.ReadSinglePacked();
             targetOffset    = reader.ReadSinglePacked();
@@ -87,7 +87,7 @@ public class ShotBarData : IBitWritable
     }
     public void Write(Stream stream)
     {
-        using (PooledBitWriter writer = PooledBitWriter.Get(stream))
+        using (PooledNetworkWriter writer = PooledNetworkWriter.Get(stream))
         {
             writer.WriteSinglePacked(speed);
             writer.WriteSinglePacked(targetOffset);
@@ -100,5 +100,19 @@ public class ShotBarData : IBitWritable
             writer.WriteSinglePacked(barShake);
             writer.WriteByte((byte)spdVariationID);
         }
+    }
+
+    public void NetworkSerialize(NetworkSerializer serializer)
+    {
+        serializer.Serialize(ref speed);
+        serializer.Serialize(ref targetOffset);
+        serializer.Serialize(ref targetFadeSpd);
+        serializer.Serialize(ref ok);
+        serializer.Serialize(ref good);
+        serializer.Serialize(ref perfect);
+        serializer.Serialize(ref targetSize);
+        serializer.Serialize(ref targetHeight);
+        serializer.Serialize(ref barShake);
+        serializer.Serialize(ref spdVariationID);
     }
 }

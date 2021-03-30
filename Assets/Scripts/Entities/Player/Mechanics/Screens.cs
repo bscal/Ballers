@@ -1,4 +1,4 @@
-﻿using MLAPI;
+using MLAPI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -43,7 +43,7 @@ public class Screens : MonoBehaviour
 
     public void OnTriggerEnter(Collider other)
     {
-        if (NetworkingManager.Singleton.IsServer)
+        if (NetworkManager.Singleton.IsServer)
         {
             if (other.gameObject != gameObject && other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("Dummy"))
             {
@@ -60,7 +60,7 @@ public class Screens : MonoBehaviour
 
     public void OnTriggerExit(Collider other)
     {
-        if (NetworkingManager.Singleton.IsServer)
+        if (NetworkManager.Singleton.IsServer)
         {
             if (other.gameObject != gameObject && other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("Dummy"))
             {

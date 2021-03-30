@@ -1,4 +1,5 @@
-﻿using Steamworks;
+﻿using MLAPI;
+using Steamworks;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -89,6 +90,13 @@ public class Matchmaking : MonoBehaviour
         // Sets lobby host steamid
         SteamMatchmaking.SetLobbyData(lobbyID, "Host", ClientPlayer.Singleton.SteamID.ToString());
         SteamMatchmaking.SetLobbyData(lobbyID, "NeededPlayers", $"{1}");
+
+        Match.InitMatch();
+        Match.NetworkLobby.SetSteamIDToConnect(ClientPlayer.Singleton.SteamID);
+        Match.HostID = new CSteamID(ClientPlayer.Singleton.SteamID);
+        Match.HostServer = true;
+
+        NetworkManager.Singleton.StartHost();
     }
 
     // Callback for Matchmaking JoinLobby
@@ -106,19 +114,19 @@ public class Matchmaking : MonoBehaviour
 
         SteamMatchmaking.SetLobbyMemberData(m_lobbyID, "cid", ClientPlayer.Singleton.Cid.ToString());
 
-        Match.InitMatch();
-
         Match.NetworkLobby.SetSteamIDToConnect(steamid);
         Match.MatchSettings = new MatchSettings(BallersGamemode.SP_BOTS, 5, 4, 60.0 * 12.0, 24.0);
         Match.PlayersNeeded = int.Parse(SteamMatchmaking.GetLobbyData(m_lobbyID, "NeededPlayers")); ;
         Match.MatchID = 1;
 
-        if (steamid == ClientPlayer.Singleton.SteamID)
-        {
-            Match.HostServer = true;
+
+
+        //if (steamid == ClientPlayer.Singleton.SteamID)
+        //{
+            //Match.HostServer = true;
             //Match.AddPlayer(steamid, ClientPlayer.Singleton.Cid);
             //StartCoroutine(Test());
-        }
+        //}
 //         Debug.Log($"{playerCount} / {neededPlayers}");
 //         if (playerCount >= neededPlayers)
 //         {
@@ -163,31 +171,26 @@ public class Matchmaking : MonoBehaviour
 
         print("Player joining... " + steamid );
 
-        string joinedCID = SteamMatchmaking.GetLobbyMemberData(
-            m_lobbyID,
-            new CSteamID(steamid),
-            "cid");
-
-        if (joinedCID == null) return;
         if (lobbyDataUpdate.m_bSuccess == 1)
         {
-            Match.AddPlayer(steamid, int.Parse(joinedCID));
-
             int neededPlayers = int.Parse(SteamMatchmaking.GetLobbyData(m_lobbyID, "NeededPlayers"));
             int playerCount = SteamMatchmaking.GetNumLobbyMembers(m_lobbyID);
 
-            if (new CSteamID(steamid) == Match.HostID)
-            {
-                Match.HostServer = true;
-                Match.AddPlayer(steamid, ClientPlayer.Singleton.Cid);
+            string joinedCID = SteamMatchmaking.GetLobbyMemberData(
+                m_lobbyID,
+                new CSteamID(steamid),
+                "cid");
 
+            if (Match.HostServer)
+            {
+                Match.AddPlayer(steamid, int.Parse(joinedCID));
             }
             Debug.Log($"{playerCount} / {neededPlayers}");
             if (playerCount >= neededPlayers)
             {
                 Debug.Log($"Required players met. Starting...");
-                m_matchSetup.Setup(Match.HostID);
                 SteamMatchmaking.LeaveLobby(m_lobbyID);
+                m_matchSetup.Setup(Match.HostID);
             }
         }
         else

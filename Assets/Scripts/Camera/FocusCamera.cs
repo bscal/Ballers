@@ -1,4 +1,4 @@
-﻿using MLAPI;
+using MLAPI;
 using MLAPI.Spawning;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,7 +18,7 @@ public class FocusCamera : MonoBehaviour
 
     void Start()
     {
-        if (NetworkingManager.Singleton.IsServer && !NetworkingManager.Singleton.IsHost)
+        if (NetworkManager.Singleton.IsServer && !NetworkManager.Singleton.IsHost)
         {
             Destroy(this);
         }
@@ -31,7 +31,7 @@ public class FocusCamera : MonoBehaviour
         // Check if player is null
         if (player == null)
         {
-            player = SpawnManager.GetLocalPlayerObject()?.gameObject;
+            player = NetworkSpawnManager.GetLocalPlayerObject()?.gameObject;
             return;
         }
 

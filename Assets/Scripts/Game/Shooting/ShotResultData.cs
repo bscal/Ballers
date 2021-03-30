@@ -1,4 +1,4 @@
-﻿using MLAPI.Serialization;
+using MLAPI.Serialization;
 using MLAPI.Serialization.Pooled;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ public enum ShotResultType
     BLOCKED
 }
 
-public class ShotResultData : IBitWritable
+public class ShotResultData : INetworkSerializable
 {
 
     public ShotResultType shotMissedType;
@@ -22,7 +22,7 @@ public class ShotResultData : IBitWritable
 
     public void Read(Stream stream)
     {
-        using (PooledBitReader reader = PooledBitReader.Get(stream))
+        using (PooledNetworkReader reader = PooledNetworkReader.Get(stream))
         {
             shotMissedType = (ShotResultType)reader.ReadBits(2);
             grade = (int)reader.ReadBits(4);
@@ -33,7 +33,7 @@ public class ShotResultData : IBitWritable
 
     public void Write(Stream stream)
     {
-        using (PooledBitWriter writer = PooledBitWriter.Get(stream))
+        using (PooledNetworkWriter writer = PooledNetworkWriter.Get(stream))
         {
             writer.WriteBits((byte)shotMissedType, 2);
             writer.WriteBits((byte)grade, 4);
@@ -41,4 +41,14 @@ public class ShotResultData : IBitWritable
             writer.WriteSinglePacked(shotDifficulty);
         }
     }
+
+
+    public void NetworkSerialize(NetworkSerializer serializer)
+    {
+        serializer.Serialize(ref shotMissedType);
+        serializer.Serialize(ref grade);
+        serializer.Serialize(ref releaseDiff);
+        serializer.Serialize(ref shotDifficulty);
+    }
+
 }

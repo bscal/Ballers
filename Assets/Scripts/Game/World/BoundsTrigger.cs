@@ -1,4 +1,4 @@
-﻿using MLAPI;
+using MLAPI;
 using UnityEngine;
 
 public class BoundsTrigger : MonoBehaviour
@@ -6,7 +6,7 @@ public class BoundsTrigger : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (NetworkingManager.Singleton.IsServer)
+        if (NetworkManager.Singleton.IsServer)
         {
             if (other.gameObject.CompareTag("Player"))
             {

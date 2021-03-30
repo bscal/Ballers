@@ -1,6 +1,6 @@
-﻿using MLAPI;
+using MLAPI;
 using MLAPI.Messaging;
-using MLAPI.NetworkedVar.Collections;
+using MLAPI.NetworkVariable.Collections;
 using MLAPI.Serialization.Pooled;
 using MLAPI.Spawning;
 using System;
@@ -18,7 +18,7 @@ public enum TeamType
     AWAY = 1
 }
 
-public class GameManager : NetworkedBehaviour
+public class GameManager : NetworkBehaviour
 {
     public static GameManager Singleton { get; private set; }
 
@@ -32,7 +32,7 @@ public class GameManager : NetworkedBehaviour
     public event Action AllPlayersConnected;
 
     private static BallHandling BallHandling;
-    private readonly static NetworkedList<Player> Players = new NetworkedList<Player>(NetworkConstants.PLAYER_CHANNEL);
+    private readonly static NetworkList<Player> Players = new NetworkList<Player>(NetworkConstants.PLAYER_CHANNEL);
     private readonly static List<BasicDummy> Dummies = new List<BasicDummy>();
     private readonly static List<AIPlayer> AIs = new List<AIPlayer>();
     private static Player LocalPlayer;
@@ -82,9 +82,9 @@ public class GameManager : NetworkedBehaviour
 
         inbounds = GameObject.FindGameObjectsWithTag("Inbound");
 
-        NetworkingManager.Singleton.OnServerStarted += OnServerStarted;
-        NetworkingManager.Singleton.OnClientConnectedCallback += OnConnected;
-        NetworkingManager.Singleton.OnClientDisconnectCallback += OnDisconnected;
+        NetworkManager.Singleton.OnServerStarted += OnServerStarted;
+        NetworkManager.Singleton.OnClientConnectedCallback += OnConnected;
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnDisconnected;
         //GameState.GameEnd += OnGameEnd;
         //GameState.QuarterEnd += OnQuarterEnd;
         GameState.HalfEnd += OnHalfEnd;
@@ -96,13 +96,13 @@ public class GameManager : NetworkedBehaviour
     {
         if (IsClient)
         {
-            NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, this, OnStartGame);
+            //NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, this, OnStartGame);
         }
 
         if (IsServer)
         {
             ball = Instantiate(m_ballPrefab, new Vector3(1, 3, 1), Quaternion.identity);
-            ball.GetComponent<NetworkedObject>().Spawn();
+            ball.GetComponent<NetworkObject>().Spawn();
             BallHandling = ball.GetComponent<BallHandling>();
             ball.SetActive(false);
             ball.name = "Ball";
@@ -138,7 +138,7 @@ public class GameManager : NetworkedBehaviour
         while (true)
         {
             yield return new WaitForSeconds(5);
-            foreach (var v in NetworkingManager.Singleton.ConnectedClients)
+            foreach (var v in NetworkManager.Singleton.ConnectedClients)
             {
                 Debug.Log($"{v.Key} | {v.Value.ClientId}");
             }
@@ -147,8 +147,7 @@ public class GameManager : NetworkedBehaviour
 
     public void LocalPlayerInitilized()
     {
-        Assert.IsNotNull(SpawnManager.GetLocalPlayerObject().gameObject.GetComponent<Player>(), "LocalPlayerObject is null.");
-        LocalPlayer = SpawnManager.GetLocalPlayerObject().gameObject.GetComponent<Player>();
+        Assert.IsNotNull(NetworkSpawnManager.GetLocalPlayerObject().gameObject.GetComponent<Player>(), "LocalPlayerObject is null.");
         LocalPlayerLoaded?.Invoke(LocalPlayer);
     }
 
@@ -168,12 +167,14 @@ public class GameManager : NetworkedBehaviour
         GameState.MatchStateValue = EMatchState.INPROGRESS;
         if (IsClient)
         {
-            NetworkEvents.Singleton.CallEventServer(NetworkEvent.GAME_START);
+            //NetworkEvents.Singleton.CallEventServer(NetworkEvent.GAME_START);
         }
         else if (IsServer)
         {
-            NetworkEvents.Singleton.CallEventAllClients(NetworkEvent.GAME_START);
+            //NetworkEvents.Singleton.CallEventAllClients(NetworkEvent.GAME_START);
+            OnStartGameClientRpc();
         }
+
     }
 
     public void OnAllPlayersConnected()
@@ -181,7 +182,8 @@ public class GameManager : NetworkedBehaviour
         StartPregame();
     }
 
-    public void OnStartGame()
+    [ClientRpc]
+    public void OnStartGameClientRpc()
     {
         GameStarted?.Invoke();
         HasStarted = true;
@@ -227,12 +229,27 @@ public class GameManager : NetworkedBehaviour
         StartGame();
     }
 
+    public void RegisterPlayer(NetworkObject netPlayer, ulong steamid)
+    {
+        Player player = netPlayer.GetComponent<Player>();
 
-    [ServerRPC]
-    public void RegisterPlayerServer(ulong pid, ulong steamid)
+        if (!player.isAI)
+        {
+            player.teamID = ServerManager.Singleton.players[steamid].team;
+            player.slot = ServerManager.Singleton.players[steamid].slot;
+        }
+
+        // Add the player to game.
+        AddPlayer(player, steamid);
+        RegisterPlayerClientRpc(RPCParams.ClientParamsOnlyClient(netPlayer.OwnerClientId));
+        DebugController.Singleton.PrintConsole($"Client registered id:{netPlayer.OwnerClientId} steam:{steamid}.");
+    }
+
+    [ServerRpc]
+    public void RegisterPlayerServerRpc(ulong pid, ulong steamid)
     {
         // Checks if already registered on server
-        NetworkedObject netPlayer = SpawnManager.GetPlayerObject(pid);
+        NetworkObject netPlayer = NetworkSpawnManager.GetPlayerNetworkObject(pid);
 
         Assert.IsNotNull(netPlayer, "NetworkedObject is null");
 
@@ -246,22 +263,23 @@ public class GameManager : NetworkedBehaviour
 
         // Add the player to game.
         AddPlayer(player, steamid);
-        InvokeClientRpcOnClient(RegisterPlayerClient, pid);
+        RegisterPlayerClientRpc(RPCParams.ClientParamsOnlyClient(pid));
         DebugController.Singleton.PrintConsole($"Client registered id:{pid} steam:{steamid}.");
     }
 
-    [ClientRPC]
-    public void RegisterPlayerClient()
+    [ClientRpc]
+    public void RegisterPlayerClientRpc(ClientRpcParams cParams = default)
     {
+        LocalPlayer = NetworkSpawnManager.GetLocalPlayerObject().GetComponent<Player>();
         Assert.IsNotNull(LocalPlayer, "Local Player is null but client registered?");
         Debug.Log("Client successfully registered");
         Singleton.PlayerRegistered?.Invoke(LocalPlayer);
     }
 
-    [ServerRPC]
-    public void UnRegisterPlayerServer(ulong pid)
+    [ServerRpc]
+    public void UnRegisterPlayerServerRpc(ulong pid)
     {
-        NetworkedObject netObj = SpawnManager.GetPlayerObject(pid);
+        NetworkObject netObj = NetworkSpawnManager.GetPlayerNetworkObject(pid);
 
         if (netObj.IsOwnedByServer) return;
 
@@ -331,14 +349,9 @@ public class GameManager : NetworkedBehaviour
             TeamAway.AddPoints(points);
     }
 
-    public static void AddPlayer(NetworkedObject obj, ulong steamid)
-    {
-        AddPlayer(obj.GetComponent<Player>(), steamid);
-    }
-
     public static void AddPlayer(Player p, ulong steamid)
     {
-        print("Adding player " + p.OwnerClientId + " " + p.NetworkId + " " + steamid);
+        print("Adding player " + p.OwnerClientId + " " + p.NetworkObjectId + " " + steamid);
 
         if (Players.Contains(p))
         {
@@ -346,7 +359,7 @@ public class GameManager : NetworkedBehaviour
             return;
         }
 
-        if (NetworkingManager.Singleton.IsServer)
+        if (NetworkManager.Singleton.IsServer)
             Players.Add(p);
 
         p.steamID = steamid;
@@ -354,9 +367,9 @@ public class GameManager : NetworkedBehaviour
         Singleton.teams[p.teamID].teamSlots.Add(p.slot, p);
     }
 
-    public static void RemovePlayer(NetworkedObject netObj)
+    public static void RemovePlayer(NetworkObject netObj)
     {
-        print("Removing player " + netObj.OwnerClientId + " " + netObj.NetworkId);
+        print("Removing player " + netObj.OwnerClientId + " " + netObj.NetworkObjectId);
         Player p = GetPlayerByClientID(netObj.OwnerClientId);
 
         if (p == null)
@@ -450,7 +463,7 @@ public class GameManager : NetworkedBehaviour
         for (int i = 0; i < Players.Count; i++)
         {
             Player p = Players[i];
-            if (p.NetworkId == netID) return Players[i];
+            if (p.NetworkObjectId == netID) return Players[i];
         }
         return null;
     }
@@ -498,7 +511,7 @@ public class GameManager : NetworkedBehaviour
         return false;
     }
 
-    public static NetworkedList<Player> GetPlayers()
+    public static NetworkList<Player> GetPlayers()
     {
         return Players;
     }
@@ -523,7 +536,7 @@ public class GameManager : NetworkedBehaviour
         if (IsServer)
         {
             print(Match.PlayersNeeded);
-            if (NetworkingManager.Singleton.ConnectedClientsList.Count == Match.PlayersNeeded)
+            if (NetworkManager.Singleton.ConnectedClientsList.Count == Match.PlayersNeeded)
             {
                 DebugController.Singleton.PrintConsole("Triggering AllPlayersConnect.");
                 AllPlayersConnected?.Invoke();
@@ -555,15 +568,15 @@ public class GameManager : NetworkedBehaviour
     private void OnDisconnected(ulong clientID)
     {
         Debug.Log($"Disconnecting client {clientID}.");
-        if (SpawnManager.GetLocalPlayerObject() == null || SpawnManager.GetLocalPlayerObject().OwnerClientId == clientID)
+        if (NetworkSpawnManager.GetLocalPlayerObject() == null || NetworkSpawnManager.GetLocalPlayerObject().OwnerClientId == clientID)
             SceneManager.LoadScene(0);
     }
 
     public void RegisterLocalPlayerToServer(ulong pid)
     {
-        //AddPlayer(SpawnManager.GetLocalPlayerObject(), ClientPlayer.Singleton.SteamID);
+        //AddPlayer(NetworkSpawnManager.GetLocalPlayerObject(), ClientPlayer.Singleton.SteamID);
         // Registers player to server
-        InvokeServerRpc(RegisterPlayerServer, pid, ClientPlayer.Singleton.SteamID);
+        //RegisterPlayerServerRpc(pid, ClientPlayer.Singleton.SteamID);
     }
 
     /// <summary>
@@ -581,15 +594,15 @@ public class GameManager : NetworkedBehaviour
     }
 
 
-    [ClientRPC]
-    public void ClientSyncTeamSlots(Stream stream)
+    [ClientRpc]
+    public void ClientSyncTeamSlotsClientRpc()
     {
-        using (PooledBitReader reader = PooledBitReader.Get(stream))
-        {
-            int teamid = reader.ReadInt32Packed();
-            int count = reader.ReadInt32Packed();
-            teams[teamid].ReadSyncTeamSlots(reader, count);
-        }
+        //using (PooledNetworkReader reader = PooledNetworkReader.Get(stream))
+        //{
+        //    int teamid = reader.ReadInt32Packed();
+        //    int count = reader.ReadInt32Packed();
+        //    teams[teamid].ReadSyncTeamSlots(reader, count);
+        //}
     }
 
     /// <summary>

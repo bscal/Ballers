@@ -1,5 +1,5 @@
-﻿using MLAPI;
-using MLAPI.NetworkedVar;
+using MLAPI;
+using MLAPI.NetworkVariable;
 using MLAPI.Serialization.Pooled;
 using System;
 using System.Collections.Generic;
@@ -21,7 +21,7 @@ public struct InternalID
         this.networkID = NetworkID;
     }
 }
-
+/**
 [Serializable]
 public class NetworkVarInternalID : INetworkedVar
 {
@@ -32,7 +32,7 @@ public class NetworkVarInternalID : INetworkedVar
     /// <summary>
     /// The settings for this var
     /// </summary>
-    public readonly NetworkedVarSettings Settings = new NetworkedVarSettings();
+    public readonly NetworkVariableSettings Settings = new NetworkVariableSettings();
     /// <summary>
     /// Gets the last time the variable was synced
     /// </summary>
@@ -47,10 +47,10 @@ public class NetworkVarInternalID : INetworkedVar
     /// The callback to be invoked when the value gets changed
     /// </summary>
     public OnValueChangedDelegate OnValueChanged;
-    private NetworkedBehaviour networkedBehaviour;
+    private NetworkBehaviour networkedBehaviour;
 
     /// <summary>
-    /// Creates a NetworkedVar with the default value and settings
+    /// Creates a NetworkVariable with the default value and settings
     /// </summary>
     public NetworkVarInternalID()
     {
@@ -58,29 +58,29 @@ public class NetworkVarInternalID : INetworkedVar
     }
 
     /// <summary>
-    /// Creates a NetworkedVar with the default value and custom settings
+    /// Creates a NetworkVariable with the default value and custom settings
     /// </summary>
-    /// <param name="settings">The settings to use for the NetworkedVar</param>
-    public NetworkVarInternalID(NetworkedVarSettings settings)
+    /// <param name="settings">The settings to use for the NetworkVariable</param>
+    public NetworkVarInternalID(NetworkVariableSettings settings)
     {
         this.Settings = settings;
     }
 
     /// <summary>
-    /// Creates a NetworkedVar with a custom value and custom settings
+    /// Creates a NetworkVariable with a custom value and custom settings
     /// </summary>
-    /// <param name="settings">The settings to use for the NetworkedVar</param>
-    /// <param name="value">The initial value to use for the NetworkedVar</param>
-    public NetworkVarInternalID(NetworkedVarSettings settings, InternalID value)
+    /// <param name="settings">The settings to use for the NetworkVariable</param>
+    /// <param name="value">The initial value to use for the NetworkVariable</param>
+    public NetworkVarInternalID(NetworkVariableSettings settings, InternalID value)
     {
         this.Settings = settings;
         this.InternalValue = value;
     }
 
     /// <summary>
-    /// Creates a NetworkedVar with a custom value and the default settings
+    /// Creates a NetworkVariable with a custom value and the default settings
     /// </summary>
-    /// <param name="value">The initial value to use for the NetworkedVar</param>
+    /// <param name="value">The initial value to use for the NetworkVariable</param>
     public NetworkVarInternalID(InternalID value)
     {
         this.InternalValue = value;
@@ -89,7 +89,7 @@ public class NetworkVarInternalID : INetworkedVar
     [SerializeField]
     private InternalID InternalValue = default;
     /// <summary>
-    /// The value of the NetworkedVar container
+    /// The value of the NetworkVariable container
     /// </summary>
     public InternalID Value
     {
@@ -114,7 +114,7 @@ public class NetworkVarInternalID : INetworkedVar
     public void ResetDirty()
     {
         isDirty = false;
-        LastSyncedTime = NetworkingManager.Singleton.NetworkTime;
+        LastSyncedTime = NetworkManager.Singleton.NetworkTime;
     }
 
     /// <inheritdoc />
@@ -123,7 +123,7 @@ public class NetworkVarInternalID : INetworkedVar
         if (!isDirty) return false;
         if (Settings.SendTickrate == 0) return true;
         if (Settings.SendTickrate < 0) return false;
-        if (NetworkingManager.Singleton.NetworkTime - LastSyncedTime >= (1f / Settings.SendTickrate)) return true;
+        if (NetworkManager.Singleton.NetworkTime - LastSyncedTime >= (1f / Settings.SendTickrate)) return true;
         return false;
     }
 
@@ -132,13 +132,13 @@ public class NetworkVarInternalID : INetworkedVar
     {
         switch (Settings.ReadPermission)
         {
-            case NetworkedVarPermission.Everyone:
+            case NetworkVariablePermission.Everyone:
                 return true;
-            case NetworkedVarPermission.ServerOnly:
+            case NetworkVariablePermission.ServerOnly:
                 return false;
-            case NetworkedVarPermission.OwnerOnly:
+            case NetworkVariablePermission.OwnerOnly:
                 return networkedBehaviour.OwnerClientId == clientId;
-            case NetworkedVarPermission.Custom:
+            case NetworkVariablePermission.Custom:
                 {
                     if (Settings.ReadPermissionCallback == null) return false;
                     return Settings.ReadPermissionCallback(clientId);
@@ -151,20 +151,20 @@ public class NetworkVarInternalID : INetworkedVar
     /// Writes the variable to the writer
     /// </summary>
     /// <param name="stream">The stream to write the value to</param>
-    public void WriteDelta(Stream stream) => WriteField(stream); //The NetworkedVar is built for simple data types and has no delta.
+    public void WriteDelta(Stream stream) => WriteField(stream); //The NetworkVariable is built for simple data types and has no delta.
 
     /// <inheritdoc />
     public bool CanClientWrite(ulong clientId)
     {
         switch (Settings.WritePermission)
         {
-            case NetworkedVarPermission.Everyone:
+            case NetworkVariablePermission.Everyone:
                 return true;
-            case NetworkedVarPermission.ServerOnly:
+            case NetworkVariablePermission.ServerOnly:
                 return false;
-            case NetworkedVarPermission.OwnerOnly:
+            case NetworkVariablePermission.OwnerOnly:
                 return networkedBehaviour.OwnerClientId == clientId;
-            case NetworkedVarPermission.Custom:
+            case NetworkVariablePermission.Custom:
                 {
                     if (Settings.WritePermissionCallback == null) return false;
                     return Settings.WritePermissionCallback(clientId);
@@ -181,7 +181,7 @@ public class NetworkVarInternalID : INetworkedVar
     /// <param name="keepDirtyDelta">Whether or not the container should keep the dirty delta, or mark the delta as consumed</param>
     public void ReadDelta(Stream stream, bool keepDirtyDelta)
     {
-        using (PooledBitReader reader = PooledBitReader.Get(stream))
+        using (PooledNetworkReader reader = PooledNetworkReader.Get(stream))
         {
             InternalID previousValue = InternalValue;
             InternalValue = new InternalID(reader.ReadUInt64Packed(), reader.ReadUInt64Packed());
@@ -194,7 +194,7 @@ public class NetworkVarInternalID : INetworkedVar
     }
 
     /// <inheritdoc />
-    public void SetNetworkedBehaviour(NetworkedBehaviour behaviour)
+    public void SetNetworkedBehaviour(NetworkBehaviour behaviour)
     {
         networkedBehaviour = behaviour;
     }
@@ -208,7 +208,7 @@ public class NetworkVarInternalID : INetworkedVar
     /// <inheritdoc />
     public void WriteField(Stream stream)
     {
-        using (PooledBitWriter writer = PooledBitWriter.Get(stream))
+        using (PooledNetworkWriter writer = PooledNetworkWriter.Get(stream))
         {
             writer.WriteUInt64Packed(InternalValue.clientID); //BOX
             writer.WriteUInt64Packed(InternalValue.networkID);
@@ -218,6 +218,7 @@ public class NetworkVarInternalID : INetworkedVar
     /// <inheritdoc />
     public string GetChannel()
     {
-        return Settings.SendChannel;
+        return Settings.SendNetworkChannel;
     }
 }
+*/

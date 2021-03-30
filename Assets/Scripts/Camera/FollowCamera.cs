@@ -1,4 +1,4 @@
-﻿using MLAPI;
+using MLAPI;
 using MLAPI.Spawning;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ public class FollowCamera : MonoBehaviour
 
     void Start()
     {
-        if (NetworkingManager.Singleton.IsServer && !NetworkingManager.Singleton.IsHost)
+        if (NetworkManager.Singleton.IsServer && !NetworkManager.Singleton.IsHost)
         {
             Destroy(this);
         }
@@ -23,7 +23,7 @@ public class FollowCamera : MonoBehaviour
         // Check if player is null
         if (target == null)
         {
-            NetworkedObject netPlayer = SpawnManager.GetLocalPlayerObject();
+            NetworkObject netPlayer = NetworkSpawnManager.GetLocalPlayerObject();
             if (!netPlayer) return;
 
             target = netPlayer.gameObject;

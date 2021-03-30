@@ -1,4 +1,4 @@
-﻿using Ballers;
+using Ballers;
 using MLAPI;
 using MLAPI.Spawning;
 using System.Collections;
@@ -34,7 +34,7 @@ public class ShotMeter : MonoBehaviour
 
     void Start()
     {
-        if (!GetComponent<NetworkedObject>().IsLocalPlayer)
+        if (!GetComponent<NetworkObject>().IsLocalPlayer)
         {
             enabled = false;
             return;
@@ -54,7 +54,7 @@ public class ShotMeter : MonoBehaviour
 
         // These can be local because ShotMeter script only effects local clients.
         //SpawnManager.GetLocalPlayerObject().GetComponent<Player>().Shoot += OnShoot;
-        SpawnManager.GetLocalPlayerObject().GetComponent<Player>().Release += OnRelease;
+        NetworkSpawnManager.GetLocalPlayerObject().GetComponent<Player>().Release += OnRelease;
 
         MAX_TARGET_HEIGHT = background.rectTransform.GetHeight();
         BASE_TARGET_HEIGHT = MAX_TARGET_HEIGHT * 0.65f;

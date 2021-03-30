@@ -1,4 +1,4 @@
-﻿using MLAPI;
+using MLAPI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,7 +15,7 @@ public class NetTriggers : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!NetworkingManager.Singleton.IsServer)
+        if (!NetworkManager.Singleton.IsServer)
             return;
 
         if (gameObject.name.Equals("Hitbox Top"))
@@ -44,7 +44,7 @@ public class NetTriggers : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (!NetworkingManager.Singleton.IsServer)
+        if (!NetworkManager.Singleton.IsServer)
             return;
 
         if (gameObject.name.Equals("Hitbox Shot") && GameManager.GetBallHandling().shotInAction)

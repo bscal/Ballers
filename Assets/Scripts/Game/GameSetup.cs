@@ -1,5 +1,6 @@
-﻿using MLAPI;
+using MLAPI;
 using MLAPI.Messaging;
+using MLAPI.Prototyping;
 using MLAPI.Spawning;
 using System.Collections;
 using UnityEngine;
@@ -17,7 +18,7 @@ public enum MatchSlot
 /// <summary>
 /// GameSetup handles getting the game ready for play. Making sure players are connected. MatchGlobals are set.
 /// </summary>
-public class GameSetup : NetworkedBehaviour
+public class GameSetup : NetworkBehaviour
 {
     private const string DEFAULT_LOADING_MSG = "Loading...";
     private const string NETWORK_LOADING_MSG = "Logging you in...";
@@ -35,17 +36,18 @@ public class GameSetup : NetworkedBehaviour
 
     private void Start()
     {
-        if (Match.HostServer)
-            Match.NetworkLobby.HostServer();
-        else
-            Match.NetworkLobby.Connect();
+        //if (Match.HostServer)
+        //Match.NetworkLobby.HostServer();
+        //else
+        //Match.NetworkLobby.Connect();
     }
 
     public override void NetworkStart()
     {
+        print("Starting GameSetup : " + gameObject.name);
         if (IsServer)
         {
-            NetworkingManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
 
             // Initialize ai
             for (int tid = 0; tid < 2; tid++)
@@ -69,14 +71,14 @@ public class GameSetup : NetworkedBehaviour
                     
                     aiLogic.InitPlayer(p, tid);
 
-                    go.GetComponent<NetworkedObject>().Spawn();
+                    go.GetComponent<NetworkObject>().Spawn();
                 }
             }
         }
 
         m_hasClientLoaded = true;
 
-        InvokeServerRpc(PlayerLoaded, NetworkingManager.Singleton.LocalClientId, ClientPlayer.Singleton.SteamID);
+        PlayerLoadedServerRpc(NetworkManager.Singleton.LocalClientId, ClientPlayer.Singleton.SteamID);
     }
 
     void Update()
@@ -90,27 +92,31 @@ public class GameSetup : NetworkedBehaviour
 
         //ServerState.HandlePlayerConnection(steamId);
 
-        InvokeClientRpcOnClient(ConnectedStatus, steamId, hasConnected);
+        ConnectedStatusClientRpc(hasConnected, RPCParams.ClientParamsOnlyClient(steamId));
     }
 
-    [ClientRPC]
-    private void ConnectedStatus(bool hasConnected)
+    [ClientRpc]
+    private void ConnectedStatusClientRpc(bool hasConnected, ClientRpcParams cParams = default)
     {
         m_hasClientConnected = hasConnected;
     }
 
-    [ServerRPC]
-    public void PlayerLoaded(ulong pid, ulong steamID)
+    [ServerRpc]
+    public void PlayerLoadedServerRpc(ulong pid, ulong steamID)
     {
-        NetworkedObject netObj = SpawnManager.GetPlayerObject(pid);
-        GameObject modelObj = Instantiate(PrefabFromTeamID(Match.GetPlayersTeam(steamID)), netObj.transform);
+        GameObject playerObject = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+        NetworkObject netObj = playerObject.GetComponent<NetworkObject>();
+        netObj.SpawnAsPlayerObject(pid);
+        GameObject modelObj = Instantiate(PrefabFromTeamID(Match.GetPlayersTeam(steamID)), playerObject.transform);
         netObj.GetComponent<Player>().InitilizeModel();
 
-        InvokeClientRpcOnClient(PlayerLoaded, pid);
+        GameManager.Singleton.RegisterPlayer(netObj, steamID);
+
+        PlayerLoadedClientRpc(RPCParams.ClientParamsOnlyClient(pid));
     }
 
-    [ClientRPC]
-    public void PlayerLoaded()
+    [ClientRpc]
+    public void PlayerLoadedClientRpc(ClientRpcParams cParams = default)
     {
         ClientPlayer.Singleton.State = ServerPlayerState.READY;
         GameManager.Singleton.LocalPlayerInitilized();

@@ -1,4 +1,4 @@
-﻿using MLAPI;
+using MLAPI;
 using MLAPI.Spawning;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -38,7 +38,7 @@ public class Movement : MonoBehaviour
 
     void Start()
     {
-        if (NetworkingManager.Singleton.IsServer && !NetworkingManager.Singleton.IsHost)
+        if (NetworkManager.Singleton.IsServer && !NetworkManager.Singleton.IsHost)
         {
             Destroy(this);
         }

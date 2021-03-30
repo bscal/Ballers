@@ -1,4 +1,4 @@
-﻿using MLAPI.Spawning;
+using MLAPI.Spawning;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,7 +13,7 @@ public class NoneMirrorableObject : MonoBehaviour
 
     private void Start()
     {
-        m_animator = SpawnManager.GetLocalPlayerObject().GetComponentInChildren<Animator>();
+        m_animator = NetworkSpawnManager.GetLocalPlayerObject().GetComponentInChildren<Animator>();
     }
 
     void Update()

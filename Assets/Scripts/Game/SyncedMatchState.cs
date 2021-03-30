@@ -1,4 +1,4 @@
-﻿using MLAPI;
+using MLAPI;
 using MLAPI.Messaging;
 using MLAPI.Serialization;
 using MLAPI.Serialization.Pooled;
@@ -8,12 +8,13 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-public class SyncedMatchStateData : IBitWritable
+public class SyncedMatchStateData : INetworkSerializable
 {
-    public bool HasStarted { get; set; }
-    public int TeamWithPossession { get; set; }
-    public ulong PlayerWithBall { get; set; }
-    public TeamData[] Teams { get; set; } = new TeamData[2];
+
+    public bool HasStarted;
+    public int TeamWithPossession;
+    public ulong PlayerWithBall;
+    public TeamData[] Teams = new TeamData[2];
 
     public SyncedMatchStateData()
     {
@@ -23,7 +24,7 @@ public class SyncedMatchStateData : IBitWritable
 
     public void Read(Stream stream)
     {
-        using (PooledBitReader reader = PooledBitReader.Get(stream))
+        using (PooledNetworkReader reader = PooledNetworkReader.Get(stream))
         {
             HasStarted = reader.ReadBit();
             reader.SkipPadBits();
@@ -38,7 +39,7 @@ public class SyncedMatchStateData : IBitWritable
 
     public void Write(Stream stream)
     {
-        using (PooledBitWriter writer = PooledBitWriter.Get(stream))
+        using (PooledNetworkWriter writer = PooledNetworkWriter.Get(stream))
         {
             writer.WriteBit(HasStarted);
             writer.WritePadBits();
@@ -49,9 +50,19 @@ public class SyncedMatchStateData : IBitWritable
                 team.Write(stream);
         }
     }
+
+
+    public void NetworkSerialize(NetworkSerializer serializer)
+    {
+        serializer.Serialize(ref HasStarted);
+        serializer.Serialize(ref TeamWithPossession);
+        serializer.Serialize(ref PlayerWithBall);
+        Teams[0].NetworkSerialize(serializer);
+        Teams[1].NetworkSerialize(serializer);
+    }
 }
 
-public class SyncedMatchState : NetworkedBehaviour
+public class SyncedMatchState : NetworkBehaviour
 {
     private SyncedMatchStateData m_state;
     public SyncedMatchStateData State { get { return m_state; } }
@@ -80,9 +91,9 @@ public class SyncedMatchState : NetworkedBehaviour
                 m_state.Teams[(int)TeamType.AWAY] = GameManager.Singleton.teams[(int)TeamType.AWAY].TeamData;
 
 
-//                 using (PooledBitStream stream = PooledBitStream.Get())
+//                 using (PooledNetworkBuffer stream = PooledNetworkBuffer.Get())
 //                 {
-//                     using (PooledBitWriter writer = PooledBitWriter.Get(stream))
+//                     using (PooledNetworkWriter writer = PooledNetworkWriter.Get(stream))
 //                     {
 //                         foreach (Player p in GameManager.GetPlayers())
 //                         {
@@ -96,21 +107,23 @@ public class SyncedMatchState : NetworkedBehaviour
 //                 }
                 
                 // Syncs the MatchState with all players
-                InvokeClientRpcOnEveryoneExcept(SyncMatchState, OwnerClientId, m_lastSync, m_state);
+
+
+                SyncMatchStateClientRpc(m_lastSync, m_state);
             }
         }
     }
 
-    [ClientRPC]
-    public void SyncMatchState(float lastSync, SyncedMatchStateData state)
+    [ClientRpc]
+    public void SyncMatchStateClientRpc(float lastSync, SyncedMatchStateData state)
     {
         GameManager.Singleton.SyncState(state);
     }
 
-    [ClientRPC]
-    public void ReadPlayerFromServer(ulong netID, Stream stream)
+    [ClientRpc]
+    public void ReadPlayerFromServerClientRpc(ulong netID)
     {
-        GameManager.GetPlayerByNetworkID(netID)?.ReadPlayerFromServer(stream);
+        //GameManager.GetPlayerByNetworkID(netID)?.ReadPlayerFromServer(stream);
     }
 
 }

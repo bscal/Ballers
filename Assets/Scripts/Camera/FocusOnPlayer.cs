@@ -1,4 +1,4 @@
-﻿using MLAPI;
+using MLAPI;
 using MLAPI.Spawning;
 using System.Collections;
 using System.Collections.Generic;
@@ -43,7 +43,7 @@ public class FocusOnPlayer : MonoBehaviour
     {
         if (GetLocalPlayerObject)
         {
-            m_target = SpawnManager.GetLocalPlayerObject()?.gameObject;
+            m_target = NetworkSpawnManager.GetLocalPlayerObject()?.gameObject;
         }
         else
         {

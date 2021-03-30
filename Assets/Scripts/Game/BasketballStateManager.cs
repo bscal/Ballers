@@ -1,10 +1,10 @@
-﻿using MLAPI;
-using MLAPI.NetworkedVar;
+using MLAPI;
+using MLAPI.NetworkVariable;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
 
-public class BasketballStateManager : NetworkedBehaviour
+public class BasketballStateManager : NetworkBehaviour
 {
 
     // Constants
@@ -22,16 +22,16 @@ public class BasketballStateManager : NetworkedBehaviour
     public event Action ShotClockViolation;
 
     // Public
-    private NetworkedVarDouble m_inGameTime = new NetworkedVarDouble(NetworkConstants.GAME_STATE_CHANNEL, Match.MatchSettings.QuarterLength);
+    private NetworkVariableDouble m_inGameTime = new NetworkVariableDouble(NetworkConstants.GAME_STATE_CHANNEL, Match.MatchSettings.QuarterLength);
     public double InGameTime { get { return m_inGameTime.Value; } set { m_inGameTime.Value = value; } }
 
-    private NetworkedVarDouble m_shotClock = new NetworkedVarDouble(NetworkConstants.GAME_STATE_CHANNEL, SHOTCLOCK_LENGTH);
+    private NetworkVariableDouble m_shotClock = new NetworkVariableDouble(NetworkConstants.GAME_STATE_CHANNEL, SHOTCLOCK_LENGTH);
     public double ShotClock { get { return m_shotClock.Value; } set { m_shotClock.Value = value; } }
 
-    public NetworkedVarByte m_state = new NetworkedVarByte(NetworkConstants.GAME_STATE_CHANNEL, (byte)EMatchState.PREGAME);
+    public NetworkVariableByte m_state = new NetworkVariableByte(NetworkConstants.GAME_STATE_CHANNEL, (byte)EMatchState.PREGAME);
     public EMatchState MatchStateValue { get { return (EMatchState)Enum.ToObject(typeof(EMatchState), m_state.Value); } set { m_state.Value = (byte)value; } }
     
-    private NetworkedVarByte m_quarter = new NetworkedVarByte(NetworkConstants.GAME_STATE_CHANNEL, 1);
+    private NetworkVariableByte m_quarter = new NetworkVariableByte(NetworkConstants.GAME_STATE_CHANNEL, 1);
     public int Quarter { get { return m_quarter.Value; } set { m_quarter.Value = (byte)value; } }
 
     // Private
