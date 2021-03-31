@@ -17,7 +17,7 @@ public class Defence : MonoBehaviour
 
     void Start()
     {
-        GameManager.Singleton.GameStarted += OnGameStarted;
+        GameManager.Singleton.GameStartedClient += OnGameStarted;
     }
 
     void Update()

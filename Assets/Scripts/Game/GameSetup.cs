@@ -36,10 +36,6 @@ public class GameSetup : NetworkBehaviour
 
     private void Start()
     {
-        //if (Match.HostServer)
-        //Match.NetworkLobby.HostServer();
-        //else
-        //Match.NetworkLobby.Connect();
     }
 
     public override void NetworkStart()
@@ -102,17 +98,20 @@ public class GameSetup : NetworkBehaviour
     }
 
     [ServerRpc]
-    public void PlayerLoadedServerRpc(ulong pid, ulong steamID)
+    public void PlayerLoadedServerRpc(ulong clientId, ulong steamId)
     {
         GameObject playerObject = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
         NetworkObject netObj = playerObject.GetComponent<NetworkObject>();
-        netObj.SpawnAsPlayerObject(pid);
-        GameObject modelObj = Instantiate(PrefabFromTeamID(Match.GetPlayersTeam(steamID)), playerObject.transform);
-        netObj.GetComponent<Player>().InitilizeModel();
+        netObj.SpawnAsPlayerObject(clientId);
+        GameObject modelObj = Instantiate(PrefabFromTeamID(Match.GetPlayersTeam(clientId)), playerObject.transform);
+        Player player = netObj.GetComponent<Player>();
+        player.InitilizeModel();
+        player.steamID = steamId;
+        player.id = clientId;
 
-        GameManager.Singleton.RegisterPlayer(netObj, steamID);
+        GameManager.Singleton.RegisterPlayer(netObj);
 
-        PlayerLoadedClientRpc(RPCParams.ClientParamsOnlyClient(pid));
+        PlayerLoadedClientRpc(RPCParams.ClientParamsOnlyClient(clientId));
     }
 
     [ClientRpc]

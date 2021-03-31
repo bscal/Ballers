@@ -69,7 +69,6 @@ public class PlayerAnimHandler : MonoBehaviour
     {
         if (m_override && m_animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f)
         {
-            print(9);
             return;
         }
         m_override = false;

@@ -121,7 +121,7 @@ public class BallHandling : NetworkBehaviour
 
     private void Awake()
     {
-        GameManager.Singleton.GameStarted += OnGameStarted;
+        GameManager.Singleton.GameStartedServer += OnGameStarted;
         BallHandlerChange += OnChangeBallHandler;
     }
 

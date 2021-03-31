@@ -64,7 +64,7 @@ public class BasketballStateManager : NetworkBehaviour
     {
         if (IsServer)
         {
-            GameManager.Singleton.GameStarted += OnGameStarted;
+            GameManager.Singleton.GameStartedServer += OnGameStarted;
         }
     }
 

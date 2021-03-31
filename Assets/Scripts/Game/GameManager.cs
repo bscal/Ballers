@@ -1,12 +1,10 @@
 using MLAPI;
 using MLAPI.Messaging;
 using MLAPI.NetworkVariable.Collections;
-using MLAPI.Serialization.Pooled;
 using MLAPI.Spawning;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.SceneManagement;
@@ -22,11 +20,12 @@ public class GameManager : NetworkBehaviour
 {
     public static GameManager Singleton { get; private set; }
 
-    public event Action Pregame;            // When all players connected -> all ready or timer
-    public event Action GameStarted;        // Once Pregame ends -> timer
-    public event Action GameTipoff;         // Once the tip starts. Players gain control here
-    public event Action GameEnd;            // When game ends
-    public event Action Postgame;           // After game ends timer
+    public event Action Pregame;                // When all players connected -> all ready or timer
+    public event Action GameStartedServer;      // Once Pregame ends -> timer
+    public event Action GameStartedClient;      // Once Pregame ends -> timer
+    public event Action GameTipoff;             // Once the tip starts. Players gain control here
+    public event Action GameEnd;                // When game ends
+    public event Action Postgame;               // After game ends timer
     public event Action<Player> PlayerRegistered;
     public event Action<Player> LocalPlayerLoaded;
     public event Action AllPlayersConnected;
@@ -82,14 +81,10 @@ public class GameManager : NetworkBehaviour
 
         inbounds = GameObject.FindGameObjectsWithTag("Inbound");
 
-        NetworkManager.Singleton.OnServerStarted += OnServerStarted;
-        NetworkManager.Singleton.OnClientConnectedCallback += OnConnected;
-        NetworkManager.Singleton.OnClientDisconnectCallback += OnDisconnected;
         //GameState.GameEnd += OnGameEnd;
         //GameState.QuarterEnd += OnQuarterEnd;
         GameState.HalfEnd += OnHalfEnd;
         //GameState.ShotClockViolation += OnShotClockViolations;
-        AllPlayersConnected += OnAllPlayersConnected;
     }
 
     public override void NetworkStart()
@@ -133,25 +128,13 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    private IEnumerator DEBUG_SERVER_UPDATE()
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(5);
-            foreach (var v in NetworkManager.Singleton.ConnectedClients)
-            {
-                Debug.Log($"{v.Key} | {v.Value.ClientId}");
-            }
-        }
-    }
-
     public void LocalPlayerInitilized()
     {
         Assert.IsNotNull(NetworkSpawnManager.GetLocalPlayerObject().gameObject.GetComponent<Player>(), "LocalPlayerObject is null.");
         LocalPlayerLoaded?.Invoke(LocalPlayer);
     }
 
-    public void StartPregame()
+    public void BeginPregame()
     {
         if (IsServer)
         {
@@ -165,28 +148,17 @@ public class GameManager : NetworkBehaviour
     {
         // TODO tip ball?
         GameState.MatchStateValue = EMatchState.INPROGRESS;
-        if (IsClient)
-        {
-            //NetworkEvents.Singleton.CallEventServer(NetworkEvent.GAME_START);
-        }
-        else if (IsServer)
-        {
-            //NetworkEvents.Singleton.CallEventAllClients(NetworkEvent.GAME_START);
-            OnStartGameClientRpc();
-        }
+        GameStartedServer?.Invoke();
+        if (IsHost || IsServer)
+            StartGameClientRpc();
 
-    }
-
-    public void OnAllPlayersConnected()
-    {
-        StartPregame();
     }
 
     [ClientRpc]
-    public void OnStartGameClientRpc()
+    public void StartGameClientRpc()
     {
-        GameStarted?.Invoke();
         HasStarted = true;
+        GameStartedClient?.Invoke();
         Debug.Log("Game Starting!");
     }
 
@@ -229,27 +201,26 @@ public class GameManager : NetworkBehaviour
         StartGame();
     }
 
-    public void RegisterPlayer(NetworkObject netPlayer, ulong steamid)
+    public void RegisterPlayer(NetworkObject netPlayer)
     {
         Player player = netPlayer.GetComponent<Player>();
 
         if (!player.isAI)
         {
-            player.teamID = ServerManager.Singleton.players[steamid].team;
-            player.slot = ServerManager.Singleton.players[steamid].slot;
+            player.teamID = ServerManager.Singleton.players[player.id].team;
+            player.slot = ServerManager.Singleton.players[player.id].slot;
         }
 
         // Add the player to game.
-        AddPlayer(player, steamid);
+        AddPlayer(player);
         RegisterPlayerClientRpc(RPCParams.ClientParamsOnlyClient(netPlayer.OwnerClientId));
-        DebugController.Singleton.PrintConsole($"Client registered id:{netPlayer.OwnerClientId} steam:{steamid}.");
     }
 
     [ServerRpc]
-    public void RegisterPlayerServerRpc(ulong pid, ulong steamid)
+    public void RegisterPlayerServerRpc(ulong clientid)
     {
         // Checks if already registered on server
-        NetworkObject netPlayer = NetworkSpawnManager.GetPlayerNetworkObject(pid);
+        NetworkObject netPlayer = NetworkSpawnManager.GetPlayerNetworkObject(clientid);
 
         Assert.IsNotNull(netPlayer, "NetworkedObject is null");
 
@@ -257,14 +228,13 @@ public class GameManager : NetworkBehaviour
 
         if (!player.isAI)
         {
-            player.teamID = ServerManager.Singleton.players[steamid].team;
-            player.slot = ServerManager.Singleton.players[steamid].slot;
+            player.teamID = ServerManager.Singleton.players[player.id].team;
+            player.slot = ServerManager.Singleton.players[player.id].slot;
         }
 
         // Add the player to game.
-        AddPlayer(player, steamid);
-        RegisterPlayerClientRpc(RPCParams.ClientParamsOnlyClient(pid));
-        DebugController.Singleton.PrintConsole($"Client registered id:{pid} steam:{steamid}.");
+        AddPlayer(player);
+        RegisterPlayerClientRpc(RPCParams.ClientParamsOnlyClient(clientid));
     }
 
     [ClientRpc]
@@ -349,20 +319,17 @@ public class GameManager : NetworkBehaviour
             TeamAway.AddPoints(points);
     }
 
-    public static void AddPlayer(Player p, ulong steamid)
+    public static void AddPlayer(Player p)
     {
-        print("Adding player " + p.OwnerClientId + " " + p.NetworkObjectId + " " + steamid);
-
         if (Players.Contains(p))
         {
             Debug.LogWarning("GameManager: Attempted to re registered player. Skipping.");
             return;
         }
 
-        if (NetworkManager.Singleton.IsServer)
+        if (IsServer)
             Players.Add(p);
 
-        p.steamID = steamid;
         p.slot = Singleton.teams[p.teamID].GetOpenSlot();
         Singleton.teams[p.teamID].teamSlots.Add(p.slot, p);
     }
@@ -390,7 +357,7 @@ public class GameManager : NetworkBehaviour
         }
 
         AIs.Add(ai);
-        AddPlayer(ai.GetPlayer(), 0);
+        AddPlayer(ai.GetPlayer());
     }
 
     public static void RemoveAI(AIPlayer ai)
@@ -531,30 +498,6 @@ public class GameManager : NetworkBehaviour
         return Singleton.CurrentBasket;
     }
 
-    private void OnConnected(ulong clientID)
-    {
-        if (IsServer)
-        {
-            print(Match.PlayersNeeded);
-            if (NetworkManager.Singleton.ConnectedClientsList.Count == Match.PlayersNeeded)
-            {
-                DebugController.Singleton.PrintConsole("Triggering AllPlayersConnect.");
-                AllPlayersConnected?.Invoke();
-            }
-        }
-    }
-
-    private void OnServerStarted()
-    {
-        if (IsHost)
-        {
-            // OnClientConnected doesnt run for host so we run it when server starts and we are a host.
-            OnConnected(OwnerClientId);
-        }
-
-    }
-
-
     public bool AreAllPlayersReady()
     {
         for (int i = 0; i < Players.Count; i++)
@@ -563,13 +506,6 @@ public class GameManager : NetworkBehaviour
                 return false;
         }
         return true;
-    }
-
-    private void OnDisconnected(ulong clientID)
-    {
-        Debug.Log($"Disconnecting client {clientID}.");
-        if (NetworkSpawnManager.GetLocalPlayerObject() == null || NetworkSpawnManager.GetLocalPlayerObject().OwnerClientId == clientID)
-            SceneManager.LoadScene(0);
     }
 
     public void RegisterLocalPlayerToServer(ulong pid)

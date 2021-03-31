@@ -3,6 +3,9 @@ using MLAPI;
 using MLAPI.Spawning;
 using MLAPI.Transports.UNET;
 using MLAPI.Transports.SteamP2P;
+using MLAPI.Messaging;
+using System;
+using MLAPI.Logging;
 
 public class NetworkLobby : MonoBehaviour
 {
@@ -30,16 +33,12 @@ public class NetworkLobby : MonoBehaviour
 
     public void Connect()
     {
-        //NetworkManager.Singleton.GetComponent<UNetTransport>().ConnectAddress = host;
-        //NetworkManager.Singleton.GetComponent<UNetTransport>().ConnectPort = port;
         NetworkManager.Singleton.StartClient();
         Debug.Log("Starting in client mode.");
     }
 
     public void HostServer()
     {
-        //NetworkManager.Singleton.StartHost();
-        //NetworkManager.Singleton.StartClient();
         Debug.Log("Starting in server mode.");
     }
 
@@ -66,7 +65,6 @@ public class NetworkLobby : MonoBehaviour
     void OnConnected(ulong client)
     {
         Debug.Log("Client Connected: " + client);
-        Debug.Log("Connected to " + NetworkManager.Singleton.ConnectedHostname);
     }
 
     void OnDisconnected(ulong client)
@@ -79,8 +77,39 @@ public class NetworkLobby : MonoBehaviour
         Debug.Log("Server Started");
     }
 
-    bool OnEvent()
+    [ServerRpc]
+    public void ClientLoadedServerRpc(ServerRpcParams serverRpcParams = default)
     {
-        return false;
+        ServerPlayer sp = ServerManager.Singleton.players[serverRpcParams.Receive.SenderClientId];
+        if (sp != null)
+        {
+            sp.state = ServerPlayerState.READY;
+        }
+    }
+
+    [ServerRpc]
+    public void SendIdsServerRpc(ulong steamId, int cid, ServerRpcParams serverRpcParams = default)
+    {
+        ulong clientId = serverRpcParams.Receive.SenderClientId;
+        Debug.Log($"Ids got : {clientId} | {steamId} | {cid}");
+        if (ServerManager.Singleton.players.TryGetValue(clientId, out ServerPlayer sp))
+        {
+            sp.steamId = steamId;
+            sp.cid = cid;
+
+            Match.SetupPlayer(clientId, steamId, cid);
+
+            sp.state = ServerPlayerState.IDLE;
+            sp.hasBeenSetup = true;
+        }
+    }
+
+    [ClientRpc]
+    public void RequestIdsClientRpc(ClientRpcParams clientRpcParams = default)
+    {
+        Debug.Log("RequestIds got");
+        ulong steam = ClientPlayer.Singleton.SteamID;
+        int cid = ClientPlayer.Singleton.CharData.cid;
+        SendIdsServerRpc(steam, cid);
     }
 }

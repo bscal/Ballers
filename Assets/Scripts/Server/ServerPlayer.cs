@@ -1,12 +1,4 @@
-﻿using MLAPI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-
-/// <summary>
+﻿/// <summary>
 /// Players connection status
 /// </summary>
 public enum ServerPlayerStatus
@@ -24,8 +16,10 @@ public enum ServerPlayerStatus
 public enum ServerPlayerState
 {
     NONE,
-    JOINED,
-    LOADED,
+    JOINING,
+    LOADING,
+    WAITING_FOR_IDS,
+    IDLE,
     READY
 }
 
@@ -35,32 +29,23 @@ public enum ServerPlayerState
 public class ServerPlayer
 {
 
-    public readonly ulong steamId;
-    public readonly int cid;
+    public readonly ulong id;
+    public int cid;
+    public ulong steamId;
     public int team;
     public int slot;
+    public bool hasBeenSetup;
 
     public ServerPlayerStatus status;
     public ServerPlayerState state;
 
-    public ServerPlayer(ulong steamId, int cid)
+    public ServerPlayer(ulong id)
     {
-        this.steamId = steamId;
-        this.cid = cid;
+        this.id = id;
     }
 
-    public void SetTeam(int team)
+    public bool IsFullyConnected()
     {
-        this.team = team;
-    }
-
-    public void SetSlot(int slot)
-    {
-        this.slot = slot;
-    }
-   
-    public void SetStatus(ServerPlayerStatus status)
-    {
-        this.status = status;
+        return (state == ServerPlayerState.IDLE || state == ServerPlayerState.READY) && status == ServerPlayerStatus.CONNECTED;
     }
 }

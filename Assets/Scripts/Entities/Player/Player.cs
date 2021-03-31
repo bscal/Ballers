@@ -17,7 +17,7 @@ public class Player : NetworkBehaviour, INetworkSerializable
     public event Action<float> StopRoundMeter;
 
     [Header("User Ids")]
-    public int id;
+    public ulong id;
     public string username = "test";
     [Header("CPU or Dummy Controls")]
     public bool isDummy = false;
@@ -77,7 +77,7 @@ public class Player : NetworkBehaviour, INetworkSerializable
     /// Returns true if Player is an AI or is a Dummy
     /// </summary>
     public bool IsNpc { get { return isAI || isDummy; } }
-    public bool HasBall { get { return NetworkBehaviourId == GameManager.GetBallHandling().PlayerWithBall; } }
+    public bool HasBall { get { return NetworkObjectId == GameManager.GetBallHandling().PlayerWithBall; } }
     public Vector3 RightHandPos { get { return m_rightHand.transform.position; } }
     public Vector3 LeftHandPos { get { return m_leftHand.transform.position; } }
     public Vector3 CurHandPos { get { return (isBallInLeftHand) ? LeftHandPos : RightHandPos; } }
@@ -119,7 +119,7 @@ public class Player : NetworkBehaviour, INetworkSerializable
 
     private void Start()
     {
-        GameManager.Singleton.GameStarted += OnGameStarted;
+        GameManager.Singleton.GameStartedClient += OnGameStarted;
 
         // This runs only when if we are a dedicated server.
         if (IsServer && !IsHost)
@@ -132,7 +132,6 @@ public class Player : NetworkBehaviour, INetworkSerializable
         m_center = transform.Find("Center").gameObject;
         m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
         m_movement = GetComponent<Movement>();
-        id = username.GetHashCode();
 
         if (!IsNpc)
         {
@@ -203,31 +202,32 @@ public class Player : NetworkBehaviour, INetworkSerializable
 
     public void ShootBall()
     {
-        ShootBallServerRpc(NetworkBehaviourId);
+        ShootBallServerRpc(NetworkObjectId);
     }
 
     [ServerRpc]
-    public void ShootBallServerRpc(ulong netID)
+    public void ShootBallServerRpc(ulong netId)
     {
         if (isShooting && !HasBall) return;
         isShooting = true;
-        ulong clientID = GameManager.GetPlayerByNetworkID(netID).OwnerClientId;
-        ulong rtt = NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetCurrentRtt(clientID);
-        m_shotManager.OnShoot(netID, this, (rtt / 1000 / 2));
+        ulong clientID = GameManager.GetPlayerByNetworkID(netId).OwnerClientId;
+        ulong rtt = ServerManager.GetRTT(clientID);
+        m_shotManager.OnShoot(netId, this, (rtt / 1000 / 2));
     }
 
+    // Client
     public void ReleaseBall()
     {
         if (!isShooting && !HasBall) return;
         isShooting = false;
-        ReleaseServerRpc(NetworkBehaviourId);
+        ReleaseServerRpc(NetworkObjectId);
     }
 
     [ServerRpc]
     public void ReleaseServerRpc(ulong netID)
     {
         ulong clientID = GameManager.GetPlayerByNetworkID(netID).OwnerClientId;
-        ulong rtt = NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetCurrentRtt(clientID);
+        ulong rtt = ServerManager.GetRTT(clientID);
         m_shotManager.OnRelease(netID, (rtt / 1000 / 2));
     }
 
@@ -280,7 +280,7 @@ public class Player : NetworkBehaviour, INetworkSerializable
     {
         if (IsOwner)
         {
-            GameManager.GetBallHandling().PlayerCallForBallServerRpc(NetworkBehaviourId);
+            GameManager.GetBallHandling().PlayerCallForBallServerRpc(NetworkObjectId);
         }
     }
 
@@ -302,7 +302,7 @@ public class Player : NetworkBehaviour, INetworkSerializable
     [ServerRpc]
     public void ReleaseRoundShotMeterServerRpc(ulong clientID, float result)
     {
-        ulong rtt = NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetCurrentRtt(clientID);
+        ulong rtt = ServerManager.GetRTT(clientID);
         m_roundShotMeter.StopMeter(result - (rtt / 1000 /2));
     }
 

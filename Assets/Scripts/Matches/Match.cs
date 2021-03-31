@@ -1,9 +1,5 @@
 ﻿using Steamworks;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 public static class TeamGlobals
 {
@@ -33,8 +29,8 @@ public static class Match
     public static void InitMatch()
     {
         initilized = true;
-        ResetDefaults();
-        ServerManager.Singleton.ResetDefaults();
+        //ResetDefaults();
+        //ServerManager.Singleton.ResetDefaults();
     }
 
     public static void ResetDefaults()
@@ -48,12 +44,8 @@ public static class Match
         };
     }
 
-    public static void AddPlayer(ulong steamid, int cid)
+    public static void SetupPlayer(ulong id, ulong steamid, int cid)
     {
-        if (ServerManager.Singleton.ContainsPlayer(steamid))
-            return;
-        ServerManager.Singleton.AddPlayer(steamid, cid);
-
         int teamID;
 
         if (matchTeams[0].numOfPlayers >= MatchSettings.TeamSize)
@@ -66,16 +58,16 @@ public static class Match
             teamID = 0;
 
         MatchTeam team = matchTeams[teamID];
-        team.playerIds.Add(steamid);
+        team.playerIds.Add(id);
 
-        ServerManager.Singleton.AssignPlayer(steamid, teamID);
+        ServerManager.Singleton.AssignPlayer(id, teamID);
         team.numOfPlayers++;
         team.teamSize++;
     }
 
     public static void RemovePlayer(ulong steamid)
     {
-
+        ServerManager.Singleton.players.Remove(steamid);
     }
 
     public static int GetPlayersTeam(ulong steamid)

@@ -1,26 +1,14 @@
 using MLAPI;
 using MLAPI.Messaging;
 using MLAPI.SceneManagement;
-using MLAPI.Spawning;
 using Steamworks;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.Remoting.Messaging;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-
-public enum GameType
-{
-    ONES,
-    THREES,
-    FIVES
-}
 
 /// <summary>
 /// Handles going from Main Menu scene -> Match scene
 /// </summary>
-public class MatchSetup : NetworkBehaviour
+public class MatchSetup : MonoBehaviour
 {
     private const string CONST_GAME_SCENE_NAME = "Match";
 
@@ -28,37 +16,54 @@ public class MatchSetup : NetworkBehaviour
     public GameObject loadingCanvas;
     public LoadingScreen loadingScreen;
 
-    void Start()
+    [SerializeField]
+    private NetworkLobby m_lobby;
+
+    void Awake()
     {
-        //NetworkSceneManager.OnSceneSwitchStarted += OnSceneSwitchStarted;
+        DontDestroyOnLoad(this);
+        NetworkSceneManager.OnSceneSwitchStarted += OnSceneSwitchStarted;
+        NetworkSceneManager.OnSceneSwitched += OnSceneSwitched;
+        if (!Match.HostServer)
+            ServerManager.AllPlayersLoaded += OnAllPlayersLoaded;
     }
 
     public void Setup(CSteamID hostSteamID)
     {
-        //NetworkSceneManager.SwitchScene(CONST_GAME_SCENE_NAME);
+        if (ServerManager.Singleton.GetStartupState() != StartupState.NONE)
+            return;
+
         if (!Match.HostServer)
             NetworkManager.Singleton.StartClient();
-            
-
-        var prog = NetworkSceneManager.SwitchScene(CONST_GAME_SCENE_NAME);
-        //var operation = SceneManager.LoadSceneAsync(CONST_GAME_SCENE_NAME);
-        OnSceneSwitchStarted(prog);
-
-        print("match setup successful");
+        else if (NetworkManager.Singleton.IsServer)
+            ServerManager.Singleton.SetupServer();
     }
 
-    private void OnSceneSwitchStarted(SceneSwitchProgress operation)
+    private void OnAllPlayersLoaded()
+    {
+        if (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsServer)
+        {
+            NetworkSceneManager.SwitchScene(CONST_GAME_SCENE_NAME);
+        }
+    }
+
+    private void OnSceneSwitchStarted(AsyncOperation operation)
     {
         StartCoroutine(LoadGame(operation));
     }
 
-    private IEnumerator LoadGame(SceneSwitchProgress operation)
+    private void OnSceneSwitched()
+    {
+        m_lobby.ClientLoadedServerRpc();
+    }
+
+    private IEnumerator LoadGame(AsyncOperation operation)
     {
         GameObject canvas = Instantiate(loadingCanvas);
         loadingScreen = canvas.GetComponent<LoadingScreen>();
         loadingScreen.enabled = true;
 
-        while (!operation.IsCompleted)
+        while (!operation.isDone)
         {
             yield return null;
         }

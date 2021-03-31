@@ -12,7 +12,7 @@ public class DefenderDummy : BasicDummy
     protected new void Start()
     {
         base.Start();
-        GameManager.Singleton.GameStarted += OnGameStarted;
+        GameManager.Singleton.GameStartedClient += OnGameStarted;
     }
 
     private void OnGameStarted()

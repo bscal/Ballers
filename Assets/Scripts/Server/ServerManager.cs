@@ -1,61 +1,79 @@
 using MLAPI;
-using MLAPI.Messaging;
-using MLAPI.Spawning;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Assertions;
+
+public enum StartupState
+{
+    NONE,
+    LOADING,
+    SETUP,
+    PREGAME,
+    STARTED
+}
 
 public class ServerManager : NetworkBehaviour
 {
-    public static ServerManager Singleton { get; private set; }
+    public static ServerManager Singleton { get ; private set; }
+
+    public static event Action AllPlayersLoaded;
 
     public readonly Dictionary<ulong, ServerPlayer> players = new Dictionary<ulong, ServerPlayer>();
 
+    private NetworkLobby m_lobby;
     private PlayerHandler m_playerHandler;
+    private StartupState m_startupState = StartupState.NONE;
+
 
     private void Awake()
     {
         Singleton = this;
-        DontDestroyOnLoad(this);
-    }
-
-    private void Start()
-    {
-        NetworkManager.Singleton.OnServerStarted += OnServerStarted;
-
+        m_lobby = GetComponent<NetworkLobby>();
         m_playerHandler = GameObject.Find("NetworkClient").GetComponent<PlayerHandler>();
     }
 
-    public void AddPlayer(ulong steamid, int cid)
+    public void Start()
     {
-        if (Match.HostServer)
-            HandlePlayerConnection(steamid, cid);
+        NetworkManager.Singleton.OnServerStarted += OnServerStarted;
+        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
     }
 
-    public bool ContainsPlayer(ulong steamid)
+    private void Update()
     {
-        return players.ContainsKey(steamid);
-    }
+        if (m_startupState == StartupState.NONE)
+            return;
 
-    public void RemovePlayer(ulong steamid)
-    {
-        if (Match.HostServer)
-            players.Remove(steamid);
-    }
-
-    public ServerPlayer GetPlayer(ulong steamid)
-    {
-        if (Match.HostServer)
+        if (m_startupState == StartupState.LOADING && HaveAllPlayersLoaded())
         {
-            if (players.TryGetValue(steamid, out ServerPlayer sPlayer))
-                return sPlayer;
+            m_startupState = StartupState.PREGAME;
+
+            AllPlayersLoaded?.Invoke();
         }
-        return null;
+
+        if (m_startupState == StartupState.PREGAME && AllPlayersReady())
+        {
+            m_startupState = StartupState.STARTED;
+
+            GameManager.Singleton.BeginPregame();
+        }
+    }
+
+    public void SetupServer()
+    {
+        m_startupState = StartupState.LOADING;
+        OnClientConnected(NetworkManager.Singleton.LocalClientId);
+    }
+
+    public ServerPlayer GetPlayer(ulong id)
+    {
+        return (IsServer) ? players[id] : null;
+    }
+
+    public StartupState GetStartupState()
+    {
+        return m_startupState;
     }
 
     public void ResetDefaults()
@@ -63,54 +81,63 @@ public class ServerManager : NetworkBehaviour
         players.Clear();
     }
 
-    public void AssignPlayer(ulong steamid, int teamID)
+    public void AssignPlayer(ulong id, int teamID)
     {
         if (Match.HostServer)
         {
-            players[steamid].team = teamID;
+            players[id].team = teamID;
+        }
+    }
+
+    public void SetCharIDs(ulong id, ulong steamId, int cid)
+    {
+        if (players.TryGetValue(id, out ServerPlayer sp))
+        {
+            sp.cid = cid;
+            sp.steamId = steamId;
         }
     }
 
     private void OnServerStarted()
     {
-        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
-        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
-
+        //m_startupState = StartupState.LOADING;
         // These statements are a temp solution because starting a server (or host)
         // will not fire OnClientConnectedCallback
-        OnClientConnected(ClientPlayer.Singleton.SteamID);
-        players.TryGetValue(ClientPlayer.Singleton.SteamID, out ServerPlayer sp);
-        sp.state = ServerPlayerState.READY;
-        sp.status = ServerPlayerStatus.CONNECTED;
+        //if (Match.HostServer)
+        //{
+        //    OnClientConnected(NetworkManager.Singleton.LocalClientId);
+        //}
+        
+        //players.TryGetValue(ClientPlayer.Singleton.SteamID, out ServerPlayer sp);
+        //sp.status = ServerPlayerStatus.CONNECTED;
+        //sp.state = ServerPlayerState.LOADING;
 
-        m_playerHandler.GetAllPlayersData();
-
-        StartCoroutine(PlayersLoadedCoroutine(30));
+        //m_playerHandler.GetAllPlayersData();
     }
 
-    private void OnClientConnected(ulong steamId)
+    private void OnClientConnected(ulong id)
     {
-        if (players.TryGetValue(steamId, out ServerPlayer player))
-        {
-            player.status = ServerPlayerStatus.CONNECTED;
-            player.state = ServerPlayerState.READY;
-        }
-    }
-
-    private void OnClientDisconnected(ulong steamId)
-    {
-        if (players.TryGetValue(steamId, out ServerPlayer player))
-        {
-            player.SetStatus(ServerPlayerStatus.DISCONNECTED);
-        }
-    }
-
-    public void HandlePlayerConnection(ulong steamId, int cid)
-    {
-        if (GameManager.ContainsPlayer(steamId))
+        if (players.ContainsKey(id))
             return;
-        else
-            players.Add(steamId, new ServerPlayer(steamId, cid));
+
+        Debug.Log("OnClientConnected " + id);
+
+        ServerPlayer sp = new ServerPlayer(id);
+        sp.status = ServerPlayerStatus.CONNECTED;
+        sp.state = ServerPlayerState.WAITING_FOR_IDS;
+        players.Add(id, sp);
+
+        m_lobby.RequestIdsClientRpc(RPCParams.ClientParamsOnlyClient(id));
+    }
+
+    private void OnClientDisconnected(ulong id)
+    {
+        if (players.TryGetValue(id, out ServerPlayer player))
+        {
+            player.status = ServerPlayerStatus.DISCONNECTED;
+            player.state = ServerPlayerState.NONE;
+            players.Remove(id);
+        }
     }
 
     private IEnumerator PlayersLoadedCoroutine(float timeout)
@@ -138,9 +165,10 @@ public class ServerManager : NetworkBehaviour
     {
         if (players.Count < Match.PlayersNeeded)
             return false;
+
         foreach (ServerPlayer sp in players.Values)
         {
-            if (sp.status == ServerPlayerStatus.DISCONNECTED)
+            if (!sp.IsFullyConnected())
             {
                 return false;
             }
@@ -163,6 +191,7 @@ public class ServerManager : NetworkBehaviour
 
     private void StartMatch()
     {
+        
     }
 
     private void DestroyMatch()
@@ -170,8 +199,21 @@ public class ServerManager : NetworkBehaviour
         Debug.Log("destroying match");
     }
 
-    public void MigrateHost()
+    private void BeginPregame()
+    {
+        Debug.Log("Beginning");
+        GameManager.Singleton.BeginPregame();
+    }
+
+    private void MigrateHost()
     {
 
+    }
+
+    public static ulong GetRTT(ulong clientId)
+    {
+        if (NetworkManager.Singleton.NetworkConfig.NetworkTransport.ServerClientId == clientId)
+            return 0;
+        return NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetCurrentRtt(clientId);
     }
 }
