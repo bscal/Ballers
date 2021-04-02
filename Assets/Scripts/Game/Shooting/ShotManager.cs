@@ -1,9 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using MLAPI;
-using MLAPI.NetworkVariable;
-using UnityEditor.Experimental.GraphView;
+using System.Collections;
+using UnityEngine;
 
 public class ShotManager : MonoBehaviour
 {

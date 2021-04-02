@@ -25,12 +25,6 @@ public class GameSetup : NetworkBehaviour
 
     public bool isReady = false;
 
-    public GameObject playerPrefab;
-    public GameObject aiPrefab;
-
-    public GameObject redPrefab;
-    public GameObject bluePrefab;
-
     private bool m_hasClientLoaded = false;
     private bool m_hasClientConnected = false;
 
@@ -54,8 +48,8 @@ public class GameSetup : NetworkBehaviour
 
                 for (int i = 0; i < aiToCreate; i++)
                 {
-                    GameObject go = Instantiate(aiPrefab, Vector3.zero, Quaternion.identity);
-                    GameObject modelObj = Instantiate(PrefabFromTeamID(tid), go.transform);
+                    GameObject go = Instantiate(ServerManager.Singleton.aiPrefab, Vector3.zero, Quaternion.identity);
+                    GameObject modelObj = Instantiate(ServerManager.PrefabFromTeamID(tid), go.transform);
 
                     Player p = go.GetComponent<Player>();
                     Assert.IsNotNull(p, "aiLogic's Player component is null.");
@@ -100,17 +94,8 @@ public class GameSetup : NetworkBehaviour
     [ServerRpc]
     public void PlayerLoadedServerRpc(ulong clientId, ulong steamId)
     {
-        GameObject playerObject = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
-        NetworkObject netObj = playerObject.GetComponent<NetworkObject>();
-        netObj.SpawnAsPlayerObject(clientId);
-        GameObject modelObj = Instantiate(PrefabFromTeamID(Match.GetPlayersTeam(clientId)), playerObject.transform);
-        Player player = netObj.GetComponent<Player>();
-        player.InitilizeModel();
-        player.steamID = steamId;
-        player.id = clientId;
-
+        NetworkObject netObj = NetworkManager.ConnectedClients[clientId].PlayerObject;
         GameManager.Singleton.RegisterPlayer(netObj);
-
         PlayerLoadedClientRpc(RPCParams.ClientParamsOnlyClient(clientId));
     }
 
@@ -119,13 +104,5 @@ public class GameSetup : NetworkBehaviour
     {
         ClientPlayer.Singleton.State = ServerPlayerState.READY;
         GameManager.Singleton.LocalPlayerInitilized();
-    }
-
-    private GameObject PrefabFromTeamID(int teamID)
-    {
-        if (teamID == 1)
-            return bluePrefab;
-        else
-            return redPrefab;
     }
 }

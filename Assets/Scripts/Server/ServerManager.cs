@@ -17,12 +17,20 @@ public class ServerManager : NetworkBehaviour
 {
     public static ServerManager Singleton { get ; private set; }
 
-    public static event Action AllPlayersLoaded;
+    public event Action AllPlayersLoaded;
 
+    public GameObject playerPrefab;
+    public GameObject aiPrefab;
+
+    public GameObject redPrefab;
+    public GameObject bluePrefab;
+
+    [NonSerialized]
     public readonly Dictionary<ulong, ServerPlayer> players = new Dictionary<ulong, ServerPlayer>();
+    //public readonly Dictionary<ulong
 
     private NetworkLobby m_lobby;
-    private PlayerHandler m_playerHandler;
+    private MatchSetup m_setup;
     private StartupState m_startupState = StartupState.NONE;
 
 
@@ -30,10 +38,10 @@ public class ServerManager : NetworkBehaviour
     {
         Singleton = this;
         m_lobby = GetComponent<NetworkLobby>();
-        m_playerHandler = GameObject.Find("NetworkClient").GetComponent<PlayerHandler>();
+        m_setup = GameObject.Find("MatchManager").GetComponent<MatchSetup>();
     }
 
-    public void Start()
+    private void Start()
     {
         NetworkManager.Singleton.OnServerStarted += OnServerStarted;
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
@@ -47,6 +55,7 @@ public class ServerManager : NetworkBehaviour
 
         if (m_startupState == StartupState.LOADING && HaveAllPlayersLoaded())
         {
+            print("loaded");
             m_startupState = StartupState.PREGAME;
 
             AllPlayersLoaded?.Invoke();
@@ -54,15 +63,15 @@ public class ServerManager : NetworkBehaviour
 
         if (m_startupState == StartupState.PREGAME && AllPlayersReady())
         {
+            print("starting");
             m_startupState = StartupState.STARTED;
 
             GameManager.Singleton.BeginPregame();
         }
     }
 
-    public void SetupServer()
+    public void SetupHost()
     {
-        m_startupState = StartupState.LOADING;
         OnClientConnected(NetworkManager.Singleton.LocalClientId);
     }
 
@@ -100,19 +109,15 @@ public class ServerManager : NetworkBehaviour
 
     private void OnServerStarted()
     {
-        //m_startupState = StartupState.LOADING;
-        // These statements are a temp solution because starting a server (or host)
-        // will not fire OnClientConnectedCallback
-        //if (Match.HostServer)
-        //{
-        //    OnClientConnected(NetworkManager.Singleton.LocalClientId);
-        //}
-        
-        //players.TryGetValue(ClientPlayer.Singleton.SteamID, out ServerPlayer sp);
-        //sp.status = ServerPlayerStatus.CONNECTED;
-        //sp.state = ServerPlayerState.LOADING;
+        if (m_lobby.isDedicated)
+        {
+            Match.MatchSettings = new MatchSettings(BallersGamemode.SP_BOTS, 5, 4, 60.0 * 12.0, 24.0);
+            Match.MatchID = 1;
+        }
 
-        //m_playerHandler.GetAllPlayersData();
+        m_setup.SetServerManagerInstance(this);
+
+        m_startupState = StartupState.LOADING;
     }
 
     private void OnClientConnected(ulong id)
@@ -120,14 +125,25 @@ public class ServerManager : NetworkBehaviour
         if (players.ContainsKey(id))
             return;
 
-        Debug.Log("OnClientConnected " + id);
+        if (IsServer || IsHost)
+        {
+            Debug.Log("OnClientConnected: " + id + " | LocalId = " + NetworkManager.Singleton.LocalClientId);
 
-        ServerPlayer sp = new ServerPlayer(id);
-        sp.status = ServerPlayerStatus.CONNECTED;
-        sp.state = ServerPlayerState.WAITING_FOR_IDS;
-        players.Add(id, sp);
+            ServerPlayer sp = new ServerPlayer(id);
+            sp.status = ServerPlayerStatus.CONNECTED;
+            sp.state = ServerPlayerState.WAITING_FOR_IDS;
+            players.Add(id, sp);
 
-        m_lobby.RequestIdsClientRpc(RPCParams.ClientParamsOnlyClient(id));
+            GameObject playerObject = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+            NetworkObject netObj = playerObject.GetComponent<NetworkObject>();
+            netObj.SpawnAsPlayerObject(id);
+            GameObject modelObj = Instantiate(PrefabFromTeamID(Match.GetPlayersTeam(id)), playerObject.transform);
+            Player player = netObj.GetComponent<Player>();
+            player.InitilizeModel();
+            player.id = id;
+
+            player.RequestIdsClientRpc(RPCParams.ClientParamsOnlyClient(id));
+        }
     }
 
     private void OnClientDisconnected(ulong id)
@@ -199,21 +215,18 @@ public class ServerManager : NetworkBehaviour
         Debug.Log("destroying match");
     }
 
-    private void BeginPregame()
-    {
-        Debug.Log("Beginning");
-        GameManager.Singleton.BeginPregame();
-    }
-
-    private void MigrateHost()
-    {
-
-    }
 
     public static ulong GetRTT(ulong clientId)
     {
         if (NetworkManager.Singleton.NetworkConfig.NetworkTransport.ServerClientId == clientId)
             return 0;
         return NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetCurrentRtt(clientId);
+    }
+    public static GameObject PrefabFromTeamID(int teamID)
+    {
+        if (teamID == 1)
+            return Singleton.bluePrefab;
+        else
+            return Singleton.redPrefab;
     }
 }

@@ -1,6 +1,7 @@
 using MLAPI;
 using MLAPI.Messaging;
 using MLAPI.SceneManagement;
+using MLAPI.Spawning;
 using Steamworks;
 using System.Collections;
 using UnityEngine;
@@ -19,44 +20,58 @@ public class MatchSetup : MonoBehaviour
     [SerializeField]
     private NetworkLobby m_lobby;
 
+    private bool m_hasSetup;
+
     void Awake()
     {
         DontDestroyOnLoad(this);
-        NetworkSceneManager.OnSceneSwitchStarted += OnSceneSwitchStarted;
-        NetworkSceneManager.OnSceneSwitched += OnSceneSwitched;
-        if (!Match.HostServer)
-            ServerManager.AllPlayersLoaded += OnAllPlayersLoaded;
+
+    }
+
+    internal void SetServerManagerInstance(ServerManager serverManager)
+    {
+        serverManager.AllPlayersLoaded += OnAllPlayersLoaded;
     }
 
     public void Setup(CSteamID hostSteamID)
     {
-        if (ServerManager.Singleton.GetStartupState() != StartupState.NONE)
+        if (m_hasSetup)
             return;
 
-        if (!Match.HostServer)
+        m_hasSetup = true;
+        NetworkSceneManager.OnSceneSwitchStarted += OnSceneSwitchStarted;
+        NetworkSceneManager.OnSceneSwitched += OnSceneSwitched;        
+
+        if (NetworkManager.Singleton.IsClient && !NetworkManager.Singleton.IsHost)
             NetworkManager.Singleton.StartClient();
-        else if (NetworkManager.Singleton.IsServer)
-            ServerManager.Singleton.SetupServer();
+        else if (!m_lobby.isDedicated)
+            ServerManager.Singleton.SetupHost();
     }
 
     private void OnAllPlayersLoaded()
     {
-        if (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsServer)
-        {
-            NetworkSceneManager.SwitchScene(CONST_GAME_SCENE_NAME);
-        }
+        print("Switching");
+        NetworkSceneManager.SwitchScene(CONST_GAME_SCENE_NAME);
     }
 
     private void OnSceneSwitchStarted(AsyncOperation operation)
     {
+        print("On Scene Switch Started");
         StartCoroutine(LoadGame(operation));
     }
 
     private void OnSceneSwitched()
     {
-        m_lobby.ClientLoadedServerRpc();
+        print("On Scene Switch Switched");
+        if (NetworkManager.Singleton.IsClient)
+        {
+            NetworkObject localPlayer = NetworkSpawnManager.GetLocalPlayerObject();
+            if (localPlayer != null)
+            {
+                localPlayer.GetComponent<Player>().ClientLoadedServerRpc();
+            }
+        }
     }
-
     private IEnumerator LoadGame(AsyncOperation operation)
     {
         GameObject canvas = Instantiate(loadingCanvas);

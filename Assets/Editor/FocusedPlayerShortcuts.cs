@@ -12,21 +12,28 @@
 //   other members on your team. Pretty much, everyone needs to perform the tedious step of creating a
 //   Player profile manually, and possibly for every install of Unity.
 //
-// Author: Jake Stine
+// Author: Jake Stine  (@MysteriousNixon)
 // GIST URL: https://gist.github.com/jstine35/2a0b491cb1c1822debbc2571b487ad8d
 
 using UnityEngine;
+
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.ShortcutManagement;
+#endif
 
+#if UNITY_EDITOR
 [InitializeOnLoad]
-public class FocusedPlayerShortcuts : MonoBehaviour
+#endif
+
+public class SwapEditorShortcutsOnPlayerFocus : MonoBehaviour
 {
     [Tooltip("Create a playing profile using Edit->Shortcuts")]
     public string PlayingProfileId = "Playing";
 
     private static string LastEditorProfileId;
 
+#if UNITY_EDITOR
     private static void SetActiveProfile(string profileId)
     {
         Debug.Log($"Activating Shortcut profile '{profileId}'");
@@ -49,7 +56,7 @@ public class FocusedPlayerShortcuts : MonoBehaviour
 
             if (string.IsNullOrEmpty(newProfileId))
             {
-                Debug.Log($"PlayingProfileId is empty. Disable component FocusedPlayerShortcuts to silence this warning.");
+                Debug.Log($"PlayingProfileId is empty. Disable component SwapEditorShortcutsOnPlayerFocus to silence this warning.");
                 return;
             }
 
@@ -81,7 +88,7 @@ public class FocusedPlayerShortcuts : MonoBehaviour
     //   fail to send in-game  OnApplicationFocus() callbacks. I haven't specifically seen a case where it
     //   happens, but it's not unreasonable to think it could happen during some attached-debugging operations.
 
-    static FocusedPlayerShortcuts()
+    static SwapEditorShortcutsOnPlayerFocus()
     {
         EditorApplication.playModeStateChanged += DetectEditorPlayModeState;
         EditorApplication.pauseStateChanged += DetectEditorPauseState;
@@ -111,4 +118,5 @@ public class FocusedPlayerShortcuts : MonoBehaviour
             LastEditorProfileId = null;
         }
     }
+#endif
 }

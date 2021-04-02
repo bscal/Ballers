@@ -15442,6 +15442,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f7db4fa36b719842a449b5fc4740b75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hasEnteredGame: 0
   id: 0
   username: test
   isDummy: 0
@@ -15506,7 +15507,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9132637102776717737}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 94f4a65e9e4ca11449d1efea236a1421, type: 3}
   m_Name: 

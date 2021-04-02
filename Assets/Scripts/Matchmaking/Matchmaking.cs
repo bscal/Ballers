@@ -23,6 +23,8 @@ public class Matchmaking : MonoBehaviour
 
     private float m_timer = 0f;
     private MatchSetup m_matchSetup;
+    [SerializeField]
+    private NetworkLobby m_lobby;
 
     private void Start()
     {
@@ -92,14 +94,17 @@ public class Matchmaking : MonoBehaviour
         SteamMatchmaking.SetLobbyData(lobbyID, "Gamemode", "Ballers-1v1");
         // Sets lobby host steamid
         SteamMatchmaking.SetLobbyData(lobbyID, "Host", ClientPlayer.Singleton.SteamID.ToString());
-        SteamMatchmaking.SetLobbyData(lobbyID, "NeededPlayers", $"{1}");
+        SteamMatchmaking.SetLobbyData(lobbyID, "NeededPlayers", "1");
 
-        Match.InitMatch();
-        Match.NetworkLobby.SetSteamIDToConnect(ClientPlayer.Singleton.SteamID);
-        Match.HostID = new CSteamID(ClientPlayer.Singleton.SteamID);
-        Match.HostServer = true;
+        if (!m_lobby.usingDedicated)
+        {
+            Match.InitMatch();
+            Match.NetworkLobby.SetSteamIDToConnect(ClientPlayer.Singleton.SteamID);
+            Match.HostID = new CSteamID(ClientPlayer.Singleton.SteamID);
+            Match.HostServer = true;
 
-        NetworkManager.Singleton.StartHost();
+            NetworkManager.Singleton.StartHost();
+        }
     }
 
     // Callback for Matchmaking JoinLobby
@@ -124,18 +129,21 @@ public class Matchmaking : MonoBehaviour
     private void OnLobbyChatUpdate(LobbyDataUpdate_t lobbyDataUpdate)
     {
         ulong steamid = lobbyDataUpdate.m_ulSteamIDMember;
-
-        print("Player joining... " + steamid );
-
         if (lobbyDataUpdate.m_bSuccess == 1)
         {
-            int neededPlayers = int.Parse(SteamMatchmaking.GetLobbyData(m_lobbyID, "NeededPlayers"));
+            print("Player joining... " + steamid);
+            string pCountStr = SteamMatchmaking.GetLobbyData(m_lobbyID, "NeededPlayers");
+            if (string.IsNullOrEmpty(pCountStr))
+            {
+                Debug.LogWarning("pCountStr is NullOrEmpty");
+                return;
+            }
+            if (!int.TryParse(pCountStr, out int neededPlayers))
+            {
+                Debug.LogWarning("pCountStr is not an int");
+                return;
+            }
             int playerCount = SteamMatchmaking.GetNumLobbyMembers(m_lobbyID);
-
-/*            string joinedCID = SteamMatchmaking.GetLobbyMemberData(
-                m_lobbyID,
-                new CSteamID(steamid),
-                "cid");*/
 
             Debug.Log($"{playerCount} / {neededPlayers}");
             if (playerCount >= neededPlayers)
@@ -157,4 +165,5 @@ public class Matchmaking : MonoBehaviour
     {
 
     }
+
 }

@@ -38,11 +38,6 @@ public class Movement : MonoBehaviour
 
     void Start()
     {
-        if (NetworkManager.Singleton.IsServer && !NetworkManager.Singleton.IsHost)
-        {
-            Destroy(this);
-        }
-
         if (m_player == null)
             m_player = GetComponentInParent<Player>();
         if (m_parent == null)
@@ -52,7 +47,7 @@ public class Movement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!m_player.IsOwner || !isMovementEnabled || m_player.isShooting) return;
+        if (!m_player.IsOwner || !isMovementEnabled || m_player.isShooting || !m_player.hasEnteredGame) return;
         HandleTargetDirection();
         MovePlayer();
         RotatePlayer();

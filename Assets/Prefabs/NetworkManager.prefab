@@ -10,8 +10,10 @@ GameObject:
   m_Component:
   - component: {fileID: 3826671062112935199}
   - component: {fileID: 3826671062112935201}
-  - component: {fileID: 553367645}
   - component: {fileID: 553367646}
+  - component: {fileID: 1827661350794515593}
+  - component: {fileID: 1473776628}
+  - component: {fileID: 1473776633}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -50,7 +52,7 @@ MonoBehaviour:
   LogLevel: 0
   NetworkConfig:
     ProtocolVersion: 0
-    NetworkTransport: {fileID: 553367645}
+    NetworkTransport: {fileID: 1473776628}
     RegisteredScenes:
     - MainMenu
     - Match
@@ -76,7 +78,7 @@ MonoBehaviour:
     MaxReceiveEventsPerTickRate: 500
     EventTickrate: 64
     ClientConnectionBufferTimeout: 10
-    ConnectionApproval: 0
+    ConnectionApproval: 1
     ConnectionData: 
     EnableTimeResync: 0
     TimeResyncInterval: 30
@@ -98,19 +100,6 @@ MonoBehaviour:
       type: {class: NullableBoolSerializable, ns: MLAPI.Configuration, asm: Unity.Multiplayer.MLAPI.Runtime}
       data:
         Value: 1897319656204293034
---- !u!114 &553367645
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3826671062112935203}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3b81d70b2c3b41142a37e631239ef533, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConnectToSteamID: 0
 --- !u!114 &553367646
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -123,6 +112,73 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1ae184a0d814c64f910762761b8afa8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hostServer: 1
+  isDedicated: 0
+  usingDedicated: 1
   host: 
   port: 7777
+--- !u!114 &1827661350794515593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3826671062112935203}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b84c2d8dfe509a34fb59e2b81f8e1319, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MessageBufferSize: 5120
+  MaxConnections: 100
+  MaxSentMessageQueueSize: 128
+  ConnectAddress: 127.0.0.1
+  ConnectPort: 7777
+  ServerListenPort: 7777
+  ServerWebsocketListenPort: 8887
+  SupportWebsocket: 0
+  Channels: []
+  UseMLAPIRelay: 0
+  MLAPIRelayAddress: 184.72.104.138
+  MLAPIRelayPort: 8888
+  MessageSendMode: 0
+--- !u!114 &1473776628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3826671062112935203}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57c3fe0d2bf241e48b7cddeaa1b933af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Port: 7777
+  Address: 198.55.127.254
+  MaxClients: 100
+  Channels: []
+  MessageBufferSize: 5120
+  PingInterval: 500
+  TimeoutLimit: 32
+  TimeoutMinimum: 5000
+  TimeoutMaximum: 30000
+--- !u!114 &1473776633
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3826671062112935203}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47404374bdc62eb47ace651162aab924, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerPrefab: {fileID: 9132637102776717737, guid: b84da050e08d8a743bc9abfc6034bc8d,
+    type: 3}
+  aiPrefab: {fileID: 6191230127883688808, guid: 8abe3a5c5dbbdaf47868c845e29aa5e2,
+    type: 3}
+  redPrefab: {fileID: 8581590456682364847, guid: 0ef8b220239795f4c953f855be37545f,
+    type: 3}
+  bluePrefab: {fileID: 2935085450790121991, guid: ebb6972b28bf8874895d02036bf4f42a,
+    type: 3}

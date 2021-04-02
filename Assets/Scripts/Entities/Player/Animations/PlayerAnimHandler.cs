@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.Animations;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.Experimental.AI;
 
 /// <summary>
 /// Any animations that starts with player@ is an animations that is duplicated and edited in unity.
@@ -67,10 +62,9 @@ public class PlayerAnimHandler : MonoBehaviour
 
     private void Update()
     {
-        if (m_override && m_animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f)
-        {
+        if ((m_override && m_animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f) || !m_player.hasEnteredGame)
             return;
-        }
+
         m_override = false;
         m_newState = null;
 

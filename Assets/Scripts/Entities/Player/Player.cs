@@ -7,7 +7,7 @@ using MLAPI.Serialization;
 using MLAPI.Serialization.Pooled;
 using Ballers;
 
-public class Player : NetworkBehaviour, INetworkSerializable
+public class Player : CommonPlayer, INetworkSerializable
 {
     // Local Player Events
     //  These are not synced over the network and only used by local client.
@@ -117,28 +117,21 @@ public class Player : NetworkBehaviour, INetworkSerializable
     private ShotManager m_shotManager;
     private SpriteRenderer m_playerCircle;
 
+    private void Awake()
+    {
+        base.Awake();
+    }
+
     private void Start()
     {
-        GameManager.Singleton.GameStartedClient += OnGameStarted;
-
-        // This runs only when if we are a dedicated server.
-        if (IsServer && !IsHost)
-        {
-            username = "Server";
-        }
-
         // Initialize Player values
         m_playerCircle = GetComponentInChildren<SpriteRenderer>();
         m_center = transform.Find("Center").gameObject;
-        m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
         m_movement = GetComponent<Movement>();
 
         if (!IsNpc)
         {
             // Initialize Human Player values
-            m_shotmeter = GetComponent<ShotMeter>();
-            m_roundShotMeter = GameObject.Find("HUD/Canvas/RoundShotMeter").GetComponent<RoundShotMeter>();
-
             //GameManager.Singleton.RegisterLocalPlayerToServer(OwnerClientId);
         }
     }
@@ -150,8 +143,7 @@ public class Player : NetworkBehaviour, INetworkSerializable
 
     void Update()
     {
-        if (isDummy) return;
-        if (!GameManager.Singleton.HasStarted) return;
+        if (isDummy || !hasEnteredGame || !GameManager.Singleton.HasStarted) return;
 
         if (IsOwner && !isAI)
         {
@@ -373,8 +365,19 @@ public class Player : NetworkBehaviour, INetworkSerializable
         m_playerCircle.color = color;
     }
 
-    private void OnGameStarted()
+    protected override void OnGameStarted()
     {
+        base.OnGameStarted();
+
+        m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
+        if (!IsNpc)
+        {
+            //m_shotmeter = GetComponent<ShotMeter>();
+            //m_shotmeter.Init();
+            m_shotmeter = gameObject.AddComponent<ShotMeter>();
+            m_roundShotMeter = GameObject.Find("HUD/Canvas/RoundShotMeter").GetComponent<RoundShotMeter>();
+        }
+        Debug.Log("OnGameStarted");
     }
 
     private Player GetNearestEnemy()
