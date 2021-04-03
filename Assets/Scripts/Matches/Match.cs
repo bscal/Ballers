@@ -1,5 +1,6 @@
 ﻿using Steamworks;
 using System.Collections.Generic;
+using UnityEngine;
 
 public static class TeamGlobals
 {
@@ -48,6 +49,7 @@ public static class Match
     {
         int teamID;
 
+        Debug.Log(MatchSettings);
         if (matchTeams[0].numOfPlayers >= MatchSettings.TeamSize)
             teamID = 1;
         else if (matchTeams[1].numOfPlayers >= MatchSettings.TeamSize)

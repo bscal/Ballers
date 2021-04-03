@@ -121,110 +121,116 @@ public class BallHandling : NetworkBehaviour
 
     private void Awake()
     {
-        GameManager.Singleton.GameStartedServer += OnGameStarted;
-        BallHandlerChange += OnChangeBallHandler;
+        if (IsServer)
+        {
+            GameManager.Singleton.GameStartedServer += OnGameStarted;
+            BallHandlerChange += OnChangeBallHandler;
+        }
     }
 
     public override void NetworkStart()
     {
-        if (!IsServer)
+        if (IsServer)
         {
-            return;
+            m_playerDistances = new Dictionary<ulong, float>();
+
+            m_shotManager = GameManager.Singleton.gameObject.GetComponent<ShotManager>();
+            m_ball = NetworkObject.gameObject;
+
+            m_body = gameObject.GetComponent<Rigidbody>();
+            m_body.AddForce(new Vector3(1, 1, 1), ForceMode.Impulse);
+
+            m_collider = GetComponent<SphereCollider>();
         }
-        m_playerDistances = new Dictionary<ulong, float>();
-
-        m_shotManager = GameManager.Singleton.gameObject.GetComponent<ShotManager>();
-        m_ball = NetworkObject.gameObject;
-
-        m_body = gameObject.GetComponent<Rigidbody>();
-        m_body.AddForce(new Vector3(1, 1, 1), ForceMode.Impulse);
-
-        m_collider = GetComponent<SphereCollider>();
     }
 
     void Update()
     {
-        m_timer += Time.deltaTime;
-
-        // Time to run these are around 20x a second
-        if (IsServer && Match.HasGameStarted && m_timer > .05)
+        if (IsServer && Match.HasGameStarted)
         {
-            m_timer = 0;
-            // ============ Lists Closest Players ============
-            foreach (Player player in GameManager.GetPlayers())
+            m_timer += Time.deltaTime;
+
+            // Time to run these are around 20x a second
+            if (m_timer > .05)
             {
-                if (player == null) continue;
-
-                float dist = Vector3.Distance(m_ball.transform.position, player.transform.position);
-                m_playerDistances[player.NetworkObjectId] = dist;
-
-                if (player.playerCollider.bounds.Intersects(m_collider.bounds))
+                m_timer = 0;
+                // ============ Lists Closest Players ============
+                foreach (Player player in GameManager.GetPlayers())
                 {
-                    TouchedBall?.Invoke(player, dist);
-                    PlayerLastTouched = player.NetworkObjectId;
-                }
-            }
-            // ============ Sorts Closest Players ============
-            m_pairs = from pair in m_playerDistances orderby pair.Value descending select pair;
-        }
+                    if (player == null) continue;
 
+                    float dist = Vector3.Distance(m_ball.transform.position, player.transform.position);
+                    m_playerDistances[player.NetworkObjectId] = dist;
+
+                    if (player.playerCollider.bounds.Intersects(m_collider.bounds))
+                    {
+                        TouchedBall?.Invoke(player, dist);
+                        PlayerLastTouched = player.NetworkObjectId;
+                    }
+                }
+                // ============ Sorts Closest Players ============
+                m_pairs = from pair in m_playerDistances orderby pair.Value descending select pair;
+            }
+        }
     }
 
     // FixedUpdate is called 50x per frame
     void FixedUpdate()
     {
-        if (moved)
+        if (IsServer)
         {
-            breakShot = HandleSphereCast(pos, maxDistance);
-            moved = false;
-        }
-
-        // ============ Updates BallStates ============
-        // ============ Loose Ball ============
-        if (State == BallState.LOOSE)
-        {
-            m_body.isKinematic = false;
-            if (m_pairs == null) return;
-
-            foreach (KeyValuePair<ulong, float> pair in m_pairs)
+            if (moved)
             {
-                if (pair.Value < 1.5f && !m_insideHitboxShot)
+                breakShot = HandleSphereCast(pos, maxDistance);
+                moved = false;
+            }
+
+            // ============ Updates BallStates ============
+            // ============ Loose Ball ============
+            if (State == BallState.LOOSE)
+            {
+                m_body.isKinematic = false;
+                if (m_pairs == null) return;
+
+                foreach (KeyValuePair<ulong, float> pair in m_pairs)
                 {
-                    Debug.Log(pair.Key + " picked up ball");
-                    // Player closest to ball picks up the ball.
-                    State = BallState.HELD;
-                    ChangeBallHandler(pair.Key);
-                    break;
+                    if (pair.Value < 1.5f && !m_insideHitboxShot)
+                    {
+                        Debug.Log(pair.Key + " picked up ball");
+                        // Player closest to ball picks up the ball.
+                        State = BallState.HELD;
+                        ChangeBallHandler(pair.Key);
+                        break;
+                    }
                 }
             }
-        }
-        // ============ Ball Held ============
-        else if (State == BallState.HELD)
-        {
-            m_body.isKinematic = true;
+            // ============ Ball Held ============
+            else if (State == BallState.HELD)
+            {
+                m_body.isKinematic = true;
 
-            // Tells the ball which hand to be in.
-            // These should be ok to not be in FixedUpdate
-            if (m_currentPlayer.isBallInLeftHand)
-                m_body.MovePosition(m_currentPlayer.GetLeftHand().transform.position);
-            else
-                m_body.MovePosition(m_currentPlayer.GetRightHand().transform.position);
+                // Tells the ball which hand to be in.
+                // These should be ok to not be in FixedUpdate
+                if (m_currentPlayer.isBallInLeftHand)
+                    m_body.MovePosition(m_currentPlayer.GetLeftHand().transform.position);
+                else
+                    m_body.MovePosition(m_currentPlayer.GetRightHand().transform.position);
+            }
+            // ============ Ball Shoot ============
+            else if (State == BallState.SHOT)
+            {
+                ChangeBallHandler(NO_PLAYER);
+            }
         }
-        // ============ Ball Shoot ============
-        else if (State == BallState.SHOT)
-        {
-            ChangeBallHandler(NO_PLAYER);
-        }
-
     }
 
     public void OnGameStarted()
     {
-        if (!gameObject.activeSelf)
-            gameObject.SetActive(true);
-
         if (IsServer)
         {
+            if (!gameObject.activeSelf)
+                gameObject.SetActive(true);
+
             StopBall();
             m_body.MovePosition(new Vector3(5, 3, 5));
             ChangeBallHandler(NO_PLAYER);

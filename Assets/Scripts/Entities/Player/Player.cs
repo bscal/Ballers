@@ -17,7 +17,6 @@ public class Player : CommonPlayer, INetworkSerializable
     public event Action<float> StopRoundMeter;
 
     [Header("User Ids")]
-    public ulong id;
     public string username = "test";
     [Header("CPU or Dummy Controls")]
     public bool isDummy = false;
@@ -138,7 +137,15 @@ public class Player : CommonPlayer, INetworkSerializable
 
     public override void NetworkStart()
     {
-        if (!IsOwner) return;
+        base.NetworkStart();
+
+        if (IsOwner && !isAI)
+            RequestIdsClient();
+
+        if (IsServer)
+            print("PLAYER START SERVER");
+        else if (IsOwner)
+            print("PLAYER START CLIENT");
     }
 
     void Update()
@@ -165,8 +172,10 @@ public class Player : CommonPlayer, INetworkSerializable
         m_animator = GetComponentInChildren<Animator>();
         m_animHandler = GetComponent<PlayerAnimHandler>();
         m_animHandler.SetAnimator(m_animator);
+
         m_rightHand = FindTransformInChild(transform, "RightBallPos").gameObject;
         m_leftHand = FindTransformInChild(transform, "LeftBallPos").gameObject;
+
         Movement movement = gameObject.GetComponent<Movement>();
         if (!IsNpc && movement != null)
         {
@@ -365,18 +374,23 @@ public class Player : CommonPlayer, INetworkSerializable
         m_playerCircle.color = color;
     }
 
+    protected override void PlayerEnteredGame()
+    {
+        base.PlayerEnteredGame();
+
+        InitilizeModel();
+        m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
+        if (!IsNpc)
+        {
+            m_shotmeter = gameObject.AddComponent<ShotMeter>();
+            m_roundShotMeter = GameObject.Find("HUD/Canvas/RoundShotMeter").GetComponent<RoundShotMeter>();
+        }
+    }
+
     protected override void OnGameStarted()
     {
         base.OnGameStarted();
 
-        m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
-        if (!IsNpc)
-        {
-            //m_shotmeter = GetComponent<ShotMeter>();
-            //m_shotmeter.Init();
-            m_shotmeter = gameObject.AddComponent<ShotMeter>();
-            m_roundShotMeter = GameObject.Find("HUD/Canvas/RoundShotMeter").GetComponent<RoundShotMeter>();
-        }
         Debug.Log("OnGameStarted");
     }
 

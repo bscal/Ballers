@@ -28,6 +28,9 @@ public class Matchmaking : MonoBehaviour
 
     private void Start()
     {
+        if (m_lobby.isDedicated)
+            Destroy(this);
+
         m_matchSetup = GameObject.Find("MatchManager").GetComponent<MatchSetup>();
         m_CallbackLobbyEnter = new Callback<LobbyEnter_t>(OnLobbyJoin);
         m_CallResultLobbyChatUpdate = new Callback<LobbyDataUpdate_t>(OnLobbyChatUpdate);

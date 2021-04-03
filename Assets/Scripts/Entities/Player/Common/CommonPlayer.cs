@@ -9,15 +9,23 @@ using UnityEngine;
 public class CommonPlayer : NetworkBehaviour
 {
 
+    public ulong id;
     public bool hasEnteredGame;
 
     public void Awake()
     {
         DontDestroyOnLoad(this);
-        NetworkSceneManager.OnSceneSwitched += OnSceneSwitched;
+        if (IsServer || IsOwner)
+        {
+            NetworkSceneManager.OnSceneSwitched += OnSceneSwitched;
+        }
     }
 
-    public void PlayerEnteredGame()
+    public override void NetworkStart()
+    {
+    }
+
+    protected virtual void PlayerEnteredGame()
     {
         GameManager.Singleton.GameStartedClient += OnGameStarted;
     }
@@ -29,11 +37,8 @@ public class CommonPlayer : NetworkBehaviour
 
     protected void OnSceneSwitched()
     {
-        if (IsServer || IsHost)
-        {
+        if (IsOwner || IsServer)
             PlayerEnteredGame();
-            GameManager.Singleton.RegisterPlayer(this.NetworkObject);
-        }
     }
 
     [ServerRpc]
@@ -53,22 +58,24 @@ public class CommonPlayer : NetworkBehaviour
         Debug.Log($"Ids got : {clientId} | {steamId} | {cid}");
         if (ServerManager.Singleton.players.TryGetValue(clientId, out ServerPlayer sp))
         {
+            id = clientId;
             sp.steamId = steamId;
             sp.cid = cid;
 
             Match.SetupPlayer(clientId, steamId, cid);
+            ServerManager.Singleton.CreateModel(clientId);
 
             sp.state = ServerPlayerState.IDLE;
             sp.hasBeenSetup = true;
         }
     }
 
-    [ClientRpc]
-    public void RequestIdsClientRpc(ClientRpcParams clientRpcParams = default)
+    public void RequestIdsClient()
     {
         Debug.Log("RequestIds got");
         ulong steam = ClientPlayer.Singleton.SteamID;
         int cid = ClientPlayer.Singleton.CharData.cid;
+        id = OwnerClientId;
         SendIdsServerRpc(steam, cid);
     }
 }

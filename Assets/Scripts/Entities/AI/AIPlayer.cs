@@ -20,7 +20,7 @@ public class AIPlayer : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!IsOwnedByServer) return;
+        if (!IsOwner) return;
         if (GameManager.Singleton.GameState.MatchStateValue == EMatchState.INPROGRESS)
         {
             if (GameManager.GetBallHandling().IsBallLoose())

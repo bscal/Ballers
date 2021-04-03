@@ -17,6 +17,8 @@ public class ServerManager : NetworkBehaviour
 {
     public static ServerManager Singleton { get ; private set; }
 
+    public static bool IsDedicated;
+
     public event Action AllPlayersLoaded;
 
     public GameObject playerPrefab;
@@ -43,6 +45,7 @@ public class ServerManager : NetworkBehaviour
 
     private void Start()
     {
+        print("testing555");
         NetworkManager.Singleton.OnServerStarted += OnServerStarted;
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
         NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
@@ -70,6 +73,12 @@ public class ServerManager : NetworkBehaviour
         }
     }
 
+    public void CreateModel(ulong clientId)
+    {
+        //NetworkObject netObj = NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject;
+
+    }
+
     public void SetupHost()
     {
         OnClientConnected(NetworkManager.Singleton.LocalClientId);
@@ -92,7 +101,7 @@ public class ServerManager : NetworkBehaviour
 
     public void AssignPlayer(ulong id, int teamID)
     {
-        if (Match.HostServer)
+        if (IsServer)
         {
             players[id].team = teamID;
         }
@@ -111,13 +120,18 @@ public class ServerManager : NetworkBehaviour
     {
         if (m_lobby.isDedicated)
         {
+            Match.ResetDefaults();
+
             Match.MatchSettings = new MatchSettings(BallersGamemode.SP_BOTS, 5, 4, 60.0 * 12.0, 24.0);
+            Match.PlayersNeeded = 1;
             Match.MatchID = 1;
         }
 
         m_setup.SetServerManagerInstance(this);
 
         m_startupState = StartupState.LOADING;
+
+        print("starting");
     }
 
     private void OnClientConnected(ulong id)
@@ -125,10 +139,8 @@ public class ServerManager : NetworkBehaviour
         if (players.ContainsKey(id))
             return;
 
-        if (IsServer || IsHost)
+        if (IsServer)
         {
-            Debug.Log("OnClientConnected: " + id + " | LocalId = " + NetworkManager.Singleton.LocalClientId);
-
             ServerPlayer sp = new ServerPlayer(id);
             sp.status = ServerPlayerStatus.CONNECTED;
             sp.state = ServerPlayerState.WAITING_FOR_IDS;
@@ -137,12 +149,12 @@ public class ServerManager : NetworkBehaviour
             GameObject playerObject = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
             NetworkObject netObj = playerObject.GetComponent<NetworkObject>();
             netObj.SpawnAsPlayerObject(id);
-            GameObject modelObj = Instantiate(PrefabFromTeamID(Match.GetPlayersTeam(id)), playerObject.transform);
-            Player player = netObj.GetComponent<Player>();
-            player.InitilizeModel();
-            player.id = id;
 
-            player.RequestIdsClientRpc(RPCParams.ClientParamsOnlyClient(id));
+
+            GameObject modelObj = Instantiate(PrefabFromTeamID(Match.GetPlayersTeam(id)), playerObject.transform);
+            modelObj.GetComponent<NetworkObject>().SpawnWithOwnership(id);
+
+            playerObject.GetComponent<Player>().InitilizeModel();
         }
     }
 

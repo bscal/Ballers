@@ -295,6 +295,8 @@ GameObject:
   - component: {fileID: 2628674445970811501}
   - component: {fileID: 3037654956912278558}
   - component: {fileID: -3945977296943855769}
+  - component: {fileID: -6054091846825037959}
+  - component: {fileID: 7622223446909304560}
   m_Layer: 0
   m_Name: model_player_blue
   m_TagString: Untagged
@@ -366,6 +368,35 @@ MonoBehaviour:
   SendRate: 0.1
   m_Animator: {fileID: 2628674445970811501}
   m_TrackedParamFlags: 0
+--- !u!114 &-6054091846825037959
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2935085450790121991}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3caac8877bd9b584b8538f2a96fce932, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &7622223446909304560
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2935085450790121991}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  NetworkInstanceId: 0
+  PrefabHash: 14437746975532231723
+  PrefabHashGenerator: model_player_blue
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
 --- !u!1 &2975530746618077791
 GameObject:
   m_ObjectHideFlags: 0

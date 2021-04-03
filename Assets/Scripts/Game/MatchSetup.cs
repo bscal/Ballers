@@ -40,11 +40,14 @@ public class MatchSetup : MonoBehaviour
 
         m_hasSetup = true;
         NetworkSceneManager.OnSceneSwitchStarted += OnSceneSwitchStarted;
-        NetworkSceneManager.OnSceneSwitched += OnSceneSwitched;        
+        NetworkSceneManager.OnSceneSwitched += OnSceneSwitched;
 
-        if (NetworkManager.Singleton.IsClient && !NetworkManager.Singleton.IsHost)
+        if (m_lobby.isDedicated)
+            return;
+
+        if (!Match.HostServer)
             NetworkManager.Singleton.StartClient();
-        else if (!m_lobby.isDedicated)
+        else
             ServerManager.Singleton.SetupHost();
     }
 

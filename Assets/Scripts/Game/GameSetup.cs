@@ -1,8 +1,5 @@
 using MLAPI;
 using MLAPI.Messaging;
-using MLAPI.Prototyping;
-using MLAPI.Spawning;
-using System.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -27,10 +24,6 @@ public class GameSetup : NetworkBehaviour
 
     private bool m_hasClientLoaded = false;
     private bool m_hasClientConnected = false;
-
-    private void Start()
-    {
-    }
 
     public override void NetworkStart()
     {
@@ -66,29 +59,34 @@ public class GameSetup : NetworkBehaviour
             }
         }
 
-        m_hasClientLoaded = true;
-
-        PlayerLoadedServerRpc(NetworkManager.Singleton.LocalClientId, ClientPlayer.Singleton.SteamID);
+        if (IsOwner)
+        {
+            m_hasClientLoaded = true;
+            PlayerLoadedServerRpc(NetworkManager.Singleton.LocalClientId, ClientPlayer.Singleton.SteamID);
+        }
     }
 
     void Update()
     {
-        isReady = (m_hasClientLoaded && m_hasClientConnected);
+        if (IsOwner)
+            isReady = (m_hasClientLoaded && m_hasClientConnected);
     }
 
     private void OnClientConnected(ulong steamId)
     {
-        bool hasConnected = true;
+        if (IsOwner)
+        {
+            bool hasConnected = true;
+            ConnectedStatusClientRpc(hasConnected, RPCParams.ClientParamsOnlyClient(steamId));
+        }
 
-        //ServerState.HandlePlayerConnection(steamId);
-
-        ConnectedStatusClientRpc(hasConnected, RPCParams.ClientParamsOnlyClient(steamId));
     }
 
     [ClientRpc]
     private void ConnectedStatusClientRpc(bool hasConnected, ClientRpcParams cParams = default)
     {
-        m_hasClientConnected = hasConnected;
+        if (IsOwner)
+            m_hasClientConnected = hasConnected;
     }
 
     [ServerRpc]
@@ -102,7 +100,10 @@ public class GameSetup : NetworkBehaviour
     [ClientRpc]
     public void PlayerLoadedClientRpc(ClientRpcParams cParams = default)
     {
-        ClientPlayer.Singleton.State = ServerPlayerState.READY;
-        GameManager.Singleton.LocalPlayerInitilized();
+        if (IsOwner)
+        {
+            ClientPlayer.Singleton.State = ServerPlayerState.READY;
+            GameManager.Singleton.LocalPlayerInitilized();
+        }
     }
 }
