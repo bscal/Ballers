@@ -378,7 +378,9 @@ public class Player : CommonPlayer, INetworkSerializable
     {
         base.PlayerEnteredGame();
 
+        Instantiate(ServerManager.PrefabFromTeamID(Match.GetPlayersTeam(OwnerClientId)), transform);
         InitilizeModel();
+
         m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
         if (!IsNpc)
         {

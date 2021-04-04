@@ -45,7 +45,6 @@ public class ServerManager : NetworkBehaviour
 
     private void Start()
     {
-        print("testing555");
         NetworkManager.Singleton.OnServerStarted += OnServerStarted;
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
         NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
@@ -75,8 +74,6 @@ public class ServerManager : NetworkBehaviour
 
     public void CreateModel(ulong clientId)
     {
-        //NetworkObject netObj = NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject;
-
     }
 
     public void SetupHost()
@@ -149,12 +146,7 @@ public class ServerManager : NetworkBehaviour
             GameObject playerObject = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
             NetworkObject netObj = playerObject.GetComponent<NetworkObject>();
             netObj.SpawnAsPlayerObject(id);
-
-
-            GameObject modelObj = Instantiate(PrefabFromTeamID(Match.GetPlayersTeam(id)), playerObject.transform);
-            modelObj.GetComponent<NetworkObject>().SpawnWithOwnership(id);
-
-            playerObject.GetComponent<Player>().InitilizeModel();
+            //playerObject.GetComponent<Player>().InitilizeModel();
         }
     }
 

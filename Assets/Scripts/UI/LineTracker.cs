@@ -16,10 +16,10 @@ public class LineTracker : MonoBehaviour
         if (GameManager.Singleton != null && GameManager.Singleton.HasStarted)
         {
             Player p = GameManager.GetPlayer();
-            if (!p.IsOwner)
+            if (p == null || !p.IsOwner)
                 return;
             Player assignment = p.Assignment;
-            if (p == null || assignment == null)
+            if (assignment == null)
                 return;
 
             Vector3 eulers = Quaternion.LookRotation(p.transform.forward, assignment.transform.forward).eulerAngles;

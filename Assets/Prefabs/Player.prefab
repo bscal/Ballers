@@ -15442,8 +15442,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f7db4fa36b719842a449b5fc4740b75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hasEnteredGame: 0
   id: 0
+  hasEnteredGame: 0
   username: test
   isDummy: 0
   aiPlayerID: 0

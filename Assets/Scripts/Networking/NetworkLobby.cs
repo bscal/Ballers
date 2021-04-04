@@ -5,8 +5,7 @@ using UnityEngine;
 
 public class NetworkLobby : MonoBehaviour
 {
-
-    public bool isDedicated;
+    public bool isDedicated { get { return SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null; } }
     public bool usingDedicated;
     public string host = "";
     public int port = 7777;

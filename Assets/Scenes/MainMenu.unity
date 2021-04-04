@@ -782,7 +782,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 553367646, guid: 2cf0204740b240345837345804dbec80, type: 3}
       propertyPath: isDedicated
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 553367646, guid: 2cf0204740b240345837345804dbec80, type: 3}
       propertyPath: usingDedicated
