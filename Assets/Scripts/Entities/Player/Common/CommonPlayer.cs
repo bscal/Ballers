@@ -12,13 +12,11 @@ public class CommonPlayer : NetworkBehaviour
     public ulong id;
     public bool hasEnteredGame;
 
+    protected float m_timer;
+
     public void Awake()
     {
-        DontDestroyOnLoad(this);
-        if (IsServer || IsOwner)
-        {
-            NetworkSceneManager.OnSceneSwitched += OnSceneSwitched;
-        }
+        NetworkSceneManager.OnSceneSwitched += OnSceneSwitched;
     }
 
     public override void NetworkStart()
@@ -37,9 +35,9 @@ public class CommonPlayer : NetworkBehaviour
 
     protected void OnSceneSwitched()
     {
-        if (IsOwner || IsServer)
-            PlayerEnteredGame();
+        PlayerEnteredGame();
     }
+
 
     [ServerRpc]
     public void ClientLoadedServerRpc(ServerRpcParams serverRpcParams = default)
@@ -63,7 +61,6 @@ public class CommonPlayer : NetworkBehaviour
             sp.cid = cid;
 
             Match.SetupPlayer(clientId, steamId, cid);
-            ServerManager.Singleton.CreateModel(clientId);
 
             sp.state = ServerPlayerState.IDLE;
             sp.hasBeenSetup = true;

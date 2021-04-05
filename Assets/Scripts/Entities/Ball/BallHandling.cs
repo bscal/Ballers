@@ -130,17 +130,16 @@ public class BallHandling : NetworkBehaviour
 
     public override void NetworkStart()
     {
+        GameManager.SetBallHandlingInstance(this);
+        m_shotManager = GameManager.Singleton.gameObject.GetComponent<ShotManager>();
+        m_ball = NetworkObject.gameObject;
+        m_collider = GetComponent<SphereCollider>();
+        name = "Ball";
         if (IsServer)
         {
             m_playerDistances = new Dictionary<ulong, float>();
-
-            m_shotManager = GameManager.Singleton.gameObject.GetComponent<ShotManager>();
-            m_ball = NetworkObject.gameObject;
-
             m_body = gameObject.GetComponent<Rigidbody>();
             m_body.AddForce(new Vector3(1, 1, 1), ForceMode.Impulse);
-
-            m_collider = GetComponent<SphereCollider>();
         }
     }
 

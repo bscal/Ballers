@@ -11,6 +11,9 @@ using UnityEngine.Networking;
 public class BackendManager : MonoBehaviour
 {
     public const string STATUS_OK = "Ok";
+    public const string HOST = "bscal.me";
+    public const string PORT = "9090";
+    public const string URL = HOST + ":" + PORT;
 
     void Awake()
     {
@@ -19,7 +22,7 @@ public class BackendManager : MonoBehaviour
     public static IEnumerator Login(ulong steamid, Action<UserData, string> callback)
     {
         print("Trying to log in...");
-        using (UnityWebRequest webRequest = UnityWebRequest.Get("bscal.me:9090/login/" + steamid))
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(URL + "/login/" + steamid))
         {
             yield return webRequest.SendWebRequest();
 
@@ -52,7 +55,7 @@ public class BackendManager : MonoBehaviour
         form.AddField("wingspan", 6 * 12 + 7);
         form.AddField("weight", 250);
 
-        using (UnityWebRequest www = UnityWebRequest.Post("bscal.me:9090/character/create", form))
+        using (UnityWebRequest www = UnityWebRequest.Post(URL + "/character/create", form))
         {
             yield return www.SendWebRequest();
 
@@ -73,7 +76,7 @@ public class BackendManager : MonoBehaviour
         form.AddField("steamid", steamid.ToString());
         form.AddField("cid", cid);
 
-        using (UnityWebRequest www = UnityWebRequest.Post("bscal.me:9090/character/delete", form))
+        using (UnityWebRequest www = UnityWebRequest.Post(URL + "/character/delete", form))
         {
             yield return www.SendWebRequest();
 
@@ -90,7 +93,7 @@ public class BackendManager : MonoBehaviour
 
     public static IEnumerator FetchAIFromServer(int aiPlayerID, Action<CharacterData, string> callback)
     {
-        using (UnityWebRequest webRequest = UnityWebRequest.Get(string.Format("bscal.me:9090/character/ai/{0}", aiPlayerID)))
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(string.Format(URL + "/character/ai/{0}", aiPlayerID)))
         {
             yield return webRequest.SendWebRequest();
 
@@ -124,7 +127,7 @@ public class BackendManager : MonoBehaviour
         form.AddField("character", JsonConvert.SerializeObject(cData));
         form.AddField("stats", JsonConvert.SerializeObject(cData.stats));
 
-        using (UnityWebRequest www = UnityWebRequest.Post("bscal.me:9090/character/save", form))
+        using (UnityWebRequest www = UnityWebRequest.Post(URL + "/character/save", form))
         {
             yield return www.SendWebRequest();
 
@@ -141,7 +144,7 @@ public class BackendManager : MonoBehaviour
 
     public static IEnumerator FetchCharacterFromServer(ulong steamid, int cid, Action<CharacterData, string> callback = null)
     {
-        using (UnityWebRequest webRequest = UnityWebRequest.Get(string.Format("bscal.me:9090/character/{0}/{1}", steamid, cid)))
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(string.Format(URL + "/character/{0}/{1}", steamid, cid)))
         {
             yield return webRequest.SendWebRequest();
 
@@ -164,7 +167,7 @@ public class BackendManager : MonoBehaviour
 
     public static IEnumerator FetchAllCharacters(ulong steamid, Action<List<CharacterData>, string> callback)
     {
-        using (UnityWebRequest webRequest = UnityWebRequest.Get(string.Format("bscal.me:9090/character/{0}/all", steamid)))
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(string.Format(URL + "/character/{0}/all", steamid)))
         {
             yield return webRequest.SendWebRequest();
 
@@ -304,7 +307,7 @@ public class BackendManager : MonoBehaviour
             form.AddField("memeber_cid_" + i, cidIds[i]);
         }
 
-        using (UnityWebRequest www = UnityWebRequest.Post("bscal.me:9090/matchmaking/join", form))
+        using (UnityWebRequest www = UnityWebRequest.Post(URL + "/matchmaking/join", form))
         {
             yield return www.SendWebRequest();
 
@@ -321,7 +324,7 @@ public class BackendManager : MonoBehaviour
 
     public static IEnumerator StopFinding(ulong steamid)
     {
-        using (UnityWebRequest www = UnityWebRequest.Post("bscal.me:9090/matchmaking/leave", steamid.ToString()))
+        using (UnityWebRequest www = UnityWebRequest.Post(URL + "/matchmaking/leave", steamid.ToString()))
         {
             yield return www.SendWebRequest();
 
@@ -338,7 +341,7 @@ public class BackendManager : MonoBehaviour
 
     public static IEnumerator UpdateFinding(ulong steamid, int cid, Action<bool, string> callback)
     {
-        using (UnityWebRequest webRequest = UnityWebRequest.Get(string.Format("bscal.me:9090/matchmaking/{0}", steamid)))
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(string.Format(URL + "/matchmaking/{0}", steamid)))
         {
             yield return webRequest.SendWebRequest();
 

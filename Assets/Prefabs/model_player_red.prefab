@@ -1084,7 +1084,6 @@ GameObject:
   - component: {fileID: 3079357640688713583}
   - component: {fileID: 1807941417799796512}
   - component: {fileID: 1372954983495354678}
-  - component: {fileID: 7937474532684632110}
   m_Layer: 0
   m_Name: model_player_red
   m_TagString: Untagged
@@ -1156,23 +1155,6 @@ MonoBehaviour:
   SendRate: 0.1
   m_Animator: {fileID: 3079357640688713583}
   m_TrackedParamFlags: 0
---- !u!114 &7937474532684632110
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8581590456682364847}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  NetworkInstanceId: 0
-  PrefabHash: 6073440974875396152
-  PrefabHashGenerator: model_red
-  AlwaysReplicateAsRoot: 0
-  DontDestroyWithOwner: 0
 --- !u!1 &8669636957381716287
 GameObject:
   m_ObjectHideFlags: 0

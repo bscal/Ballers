@@ -51,9 +51,6 @@ public class PlayerControls : NetworkBehaviour
 
     void Start()
     {
-        if (!IsOwner)
-            return;
-
         m_player = GetComponent<Player>();
         m_animator = GetComponentInChildren<Animator>();
         m_animHandler = GetComponent<PlayerAnimHandler>();
@@ -90,7 +87,7 @@ public class PlayerControls : NetworkBehaviour
 
     private void CallForBall(InputAction.CallbackContext context)
     {
-        if (!m_player.HasBall && m_player.IsOnOffense())
+        if (IsOwner && !m_player.HasBall && m_player.IsOnOffense())
         {
             m_player.CallForBall();
         }
@@ -98,35 +95,42 @@ public class PlayerControls : NetworkBehaviour
 
     private void TryPassBall(InputAction.CallbackContext context)
     {
-        int passCode = 0;
-        if (context.action.name == "Pass_1")
-            passCode = 1;
-        else if (context.action.name == "Pass_2")
-            passCode = 2;
-        else if(context.action.name == "Pass_3")
-            passCode = 3;
-        else if(context.action.name == "Pass_4")
-            passCode = 4;
-        else if(context.action.name == "Pass_5")
-            passCode = 5;
-        if (passCode != 0)
+        if (IsOwner)
         {
-            PassType type = PassType.CHESS;
-            if (Keyboard.current.leftShiftKey.ReadValue() > 0)
+            int passCode = 0;
+            if (context.action.name == "Pass_1")
+                passCode = 1;
+            else if (context.action.name == "Pass_2")
+                passCode = 2;
+            else if (context.action.name == "Pass_3")
+                passCode = 3;
+            else if (context.action.name == "Pass_4")
+                passCode = 4;
+            else if (context.action.name == "Pass_5")
+                passCode = 5;
+            if (passCode != 0)
             {
-                type = PassType.BOUNCE;
+                PassType type = PassType.CHESS;
+                if (Keyboard.current.leftShiftKey.ReadValue() > 0)
+                {
+                    type = PassType.BOUNCE;
+                }
+                if (Keyboard.current.leftCtrlKey.ReadValue() > 0)
+                {
+                    type = PassType.LOB;
+                }
+                GameManager.GetBallHandling().TryPassBall(m_player, passCode, type);
             }
-            if (Keyboard.current.leftCtrlKey.ReadValue() > 0)
-            {
-                type = PassType.LOB;
-            }
-            GameManager.GetBallHandling().TryPassBall(m_player, passCode, type);
         }
+
     }
 
     private void ReleasePass(InputAction.CallbackContext context)
     {
-        m_player.ReleasePass();
+        if (IsOwner)
+        {
+            m_player.ReleasePass();
+        }
     }
 
     IEnumerator ShotInput()
@@ -200,29 +204,33 @@ public class PlayerControls : NetworkBehaviour
 
     IEnumerator OnKeyHeldDown()
     {
-
-        //StartShot();
-
-        //Move 1 unit every frame until edge detection is reached!
-        while (pressTimer < MAX_TIME)
+        if (IsOwner)
         {
-            if (actions.Keyboard.Shoot.ReadValue<float>() == 0) break;
+            //StartShot();
+            //Move 1 unit every frame until edge detection is reached!
+            while (pressTimer < MAX_TIME)
+            {
+                if (actions.Keyboard.Shoot.ReadValue<float>() == 0) break;
 
-            //Start incrementing timer
-            pressTimer += Time.deltaTime;
+                //Start incrementing timer
+                pressTimer += Time.deltaTime;
 
-            //Wait for a frame
+                //Wait for a frame
+                yield return null;
+            }
+
+            //StopShot();
+            pressTimer = 0f;
             yield return null;
         }
 
-        //StopShot();
-        pressTimer = 0f;
-        yield return null;
+
+
     }
 
     void Pumpfake(InputAction.CallbackContext context)
     {
-        if (m_shootCooldown < Time.time)
+        if (IsOwner && m_shootCooldown < Time.time)
         {
             m_player.PumpfakeServerRpc();
             m_animHandler.Play(AnimNames.REG_PUMPFAKE);
@@ -232,7 +240,7 @@ public class PlayerControls : NetworkBehaviour
 
     void StartShot(InputAction.CallbackContext context)
     {
-        if (m_shootCooldown < Time.time)
+        if (IsOwner && m_shootCooldown < Time.time)
         {
             m_player.ShootBall();
             m_shootCooldown = Time.time + .2f;
@@ -241,7 +249,7 @@ public class PlayerControls : NetworkBehaviour
 
     void StopShot(InputAction.CallbackContext context)
     {
-        if (m_shootCooldown < Time.time)
+        if (IsOwner && m_shootCooldown < Time.time)
         {
             m_player.ReleaseBall();
             m_shootCooldown = Time.time + .2f;

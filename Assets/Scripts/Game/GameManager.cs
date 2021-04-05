@@ -154,6 +154,11 @@ public class GameManager : NetworkBehaviour
 
     }
 
+    internal static void SetBallHandlingInstance(BallHandling ballHandling)
+    {
+        BallHandling = ballHandling;
+    }
+
     [ClientRpc]
     public void StartGameClientRpc()
     {

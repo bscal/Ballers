@@ -150,6 +150,20 @@ public class Player : CommonPlayer, INetworkSerializable
 
     void Update()
     {
+        if (IsServer)
+        {
+            m_timer += Time.deltaTime;
+            if (m_timer > 60)
+            {
+                m_timer -= 60;
+
+                if (IsServer)
+                {
+                    ServerSendPlayerClientRpc(this);
+                }
+            }
+        }
+
         if (isDummy || !hasEnteredGame || !GameManager.Singleton.HasStarted) return;
 
         if (IsOwner && !isAI)
@@ -164,6 +178,33 @@ public class Player : CommonPlayer, INetworkSerializable
 
     }
 
+    protected override void PlayerEnteredGame()
+    {
+        base.PlayerEnteredGame();
+
+        GameObject prefab = ServerManager.PrefabFromTeamID(Match.GetPlayersTeam(OwnerClientId));
+        print($"Client {OwnerClientId} | {NetworkObjectId} model = {prefab.name}");
+        Instantiate(prefab, gameObject.transform); 
+        InitilizeModel();
+
+        if (IsServer || IsOwner)
+        {
+            m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
+            if (!IsNpc)
+            {
+                m_shotmeter = gameObject.AddComponent<ShotMeter>();
+                m_roundShotMeter = GameObject.Find("HUD/Canvas/RoundShotMeter").GetComponent<RoundShotMeter>();
+            }
+        }
+    }
+
+    protected override void OnGameStarted()
+    {
+        base.OnGameStarted();
+
+        Debug.Log("OnGameStarted");
+    }
+
     /// <summary>
     /// Called when the model is Instantiated
     /// </summary>
@@ -176,11 +217,14 @@ public class Player : CommonPlayer, INetworkSerializable
         m_rightHand = FindTransformInChild(transform, "RightBallPos").gameObject;
         m_leftHand = FindTransformInChild(transform, "LeftBallPos").gameObject;
 
-        Movement movement = gameObject.GetComponent<Movement>();
-        if (!IsNpc && movement != null)
+        if (IsOwner)
         {
-            movement.animator = m_animator;
-            movement.playerAnim = m_animHandler;
+            Movement movement = gameObject.GetComponent<Movement>();
+            if (!IsNpc && movement != null)
+            {
+                movement.animator = m_animator;
+                movement.playerAnim = m_animHandler;
+            }
         }
     }
 
@@ -374,28 +418,6 @@ public class Player : CommonPlayer, INetworkSerializable
         m_playerCircle.color = color;
     }
 
-    protected override void PlayerEnteredGame()
-    {
-        base.PlayerEnteredGame();
-
-        Instantiate(ServerManager.PrefabFromTeamID(Match.GetPlayersTeam(OwnerClientId)), transform);
-        InitilizeModel();
-
-        m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
-        if (!IsNpc)
-        {
-            m_shotmeter = gameObject.AddComponent<ShotMeter>();
-            m_roundShotMeter = GameObject.Find("HUD/Canvas/RoundShotMeter").GetComponent<RoundShotMeter>();
-        }
-    }
-
-    protected override void OnGameStarted()
-    {
-        base.OnGameStarted();
-
-        Debug.Log("OnGameStarted");
-    }
-
     private Player GetNearestEnemy()
     {
         Player shortestPlayer = null;
@@ -575,6 +597,30 @@ public class Player : CommonPlayer, INetworkSerializable
 
             writer.WriteVector3Packed(m_target);
         }
+    }
+
+    [ClientRpc]
+    public void ServerSendPlayerClientRpc(Player player, ClientRpcParams clientRpcParams = default)
+    {
+        this.teamID = player.teamID;
+        this.isAI = player.isAI;
+        this.isRightHanded = player.isRightHanded;
+        this.isMoving = player.isMoving;
+        this.isSprinting = player.isSprinting;
+        this.isDribbling = player.isDribbling;
+        this.isScreening = player.isScreening;
+        this.isHelping = player.isHelping;
+        this.isBallInLeftHand = player.isBallInLeftHand;
+        this.isCtrlDown = player.isCtrlDown;
+        this.isAltDown = player.isAltDown;
+        this.movingFoward = player.movingFoward;
+        this.movingBack = player.movingBack;
+        this.movingLeft = player.movingLeft;
+        this.movingRight = player.movingRight;
+        this.isContesting = player.isContesting;
+        this.isBlocking = player.isBlocking;
+        this.isStealing = player.isStealing;
+        this.m_target = player.m_target;
     }
 
     public void NetworkSerialize(NetworkSerializer serializer)
