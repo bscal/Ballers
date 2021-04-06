@@ -54,8 +54,8 @@ public class AIPlayer : NetworkBehaviour
     public void InitPlayer(Player p, int teamID)
     {
         SetPlayer(p);
-        m_player.isAI = true;
-        m_player.teamID = teamID;
+        m_player.props.isAI = true;
+        m_player.props.teamID = teamID;
         m_player.hasReadyUp = true;
 
         GameManager.AddAI(this);

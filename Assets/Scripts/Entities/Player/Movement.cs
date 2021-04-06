@@ -47,7 +47,7 @@ public class Movement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!m_player.IsOwner || !isMovementEnabled || m_player.isShooting || !m_player.hasEnteredGame) return;
+        if (!m_player.IsOwner || !isMovementEnabled || m_player.props.isShooting || !m_player.hasEnteredGame) return;
         HandleTargetDirection();
         MovePlayer();
         RotatePlayer();
@@ -72,11 +72,11 @@ public class Movement : MonoBehaviour
 
     private void MovePlayer()
     {
-        float ms = (m_player.isSprinting ? m_sprintSpeed : m_movementSpeed) * Time.deltaTime;
+        float ms = (m_player.props.isSprinting ? m_sprintSpeed : m_movementSpeed) * Time.deltaTime;
         Vector3 mov = (GameManager.Singleton.Possession == 0 ? Vector3.forward : -Vector3.forward) * ms;
 
         Vector2 move = actions.Keyboard.Move.ReadValue<Vector2>();
-        m_player.isMoving = move != Vector2.zero;
+        m_player.props.isMoving = move != Vector2.zero;
 
         bool foward = move.y > 0;    //1
         bool back = move.y < 0;  //-1
@@ -84,36 +84,36 @@ public class Movement : MonoBehaviour
         bool right = move.x > 0; //1
 
         // Crossover the ball
-        if (left && m_player.movingRight && m_player.isSprinting)
+        if (left && m_player.props.movingRight && m_player.props.isSprinting)
         {
             print("ball right to left");
         }
         // Crossover the ball
-        else if (right && m_player.movingLeft && m_player.isSprinting)
+        else if (right && m_player.props.movingLeft && m_player.props.isSprinting)
         {
             print("ball left to right");
         }
 
-        m_player.movingFoward = foward; //1
-        m_player.movingBack = back;     //-1
-        m_player.movingLeft = left;     //-1
-        m_player.movingRight = right;   //1
+        m_player.props.movingFoward = foward; //1
+        m_player.props.movingBack = back;     //-1
+        m_player.props.movingLeft = left;     //-1
+        m_player.props.movingRight = right;   //1
 
-        if (m_player.movingFoward)
+        if (m_player.props.movingFoward)
         {
             m_parent.transform.position += mov;
         }
-        else if (m_player.movingBack)
+        else if (m_player.props.movingBack)
         {
             m_parent.transform.position -= mov;
         }
 
         mov = (GameManager.Singleton.Possession == 0 ? Vector3.left : -Vector3.left) * ms;
-        if (m_player.movingLeft)
+        if (m_player.props.movingLeft)
         {
             m_parent.transform.position += mov;
         }
-        else if (m_player.movingRight)
+        else if (m_player.props.movingRight)
         {
             m_parent.transform.position -= mov;
         }

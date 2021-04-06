@@ -26,7 +26,7 @@ public class PlayerCircleColor : MonoBehaviour
         {
             if (p.Equals(current))
                 current.SetCircleColor(PLAYER_COLOR);
-            else if (p.teamID == current.teamID)
+            else if (p.props.teamID == current.props.teamID)
                 p.SetCircleColor(ALLY_COLOR);
             else
                 p.SetCircleColor(ENEMY_COLOR);

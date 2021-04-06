@@ -1,4 +1,5 @@
 using MLAPI;
+using MLAPI.Connection;
 using MLAPI.Messaging;
 using MLAPI.NetworkVariable.Collections;
 using MLAPI.Spawning;
@@ -210,10 +211,10 @@ public class GameManager : NetworkBehaviour
     {
         Player player = netPlayer.GetComponent<Player>();
 
-        if (!player.isAI)
+        if (!player.props.isAI)
         {
-            player.teamID = ServerManager.Singleton.players[player.id].team;
-            player.slot = ServerManager.Singleton.players[player.id].slot;
+            player.props.teamID = ServerManager.Singleton.players[player.id].team;
+            player.props.slot = ServerManager.Singleton.players[player.id].slot;
         }
 
         // Add the player to game.
@@ -231,10 +232,10 @@ public class GameManager : NetworkBehaviour
 
         Player player = netPlayer.GetComponent<Player>();
 
-        if (!player.isAI)
+        if (!player.props.isAI)
         {
-            player.teamID = ServerManager.Singleton.players[player.id].team;
-            player.slot = ServerManager.Singleton.players[player.id].slot;
+            player.props.teamID = ServerManager.Singleton.players[player.id].team;
+            player.props.slot = ServerManager.Singleton.players[player.id].slot;
         }
 
         // Add the player to game.
@@ -335,8 +336,8 @@ public class GameManager : NetworkBehaviour
         if (IsServer)
             Players.Add(p);
 
-        p.slot = Singleton.teams[p.teamID].GetOpenSlot();
-        Singleton.teams[p.teamID].teamSlots.Add(p.slot, p);
+        p.props.slot = Singleton.teams[p.props.teamID].GetOpenSlot();
+        Singleton.teams[p.props.teamID].teamSlots.Add(p.props.slot, p);
     }
 
     public static void RemovePlayer(NetworkObject netObj)
@@ -459,7 +460,7 @@ public class GameManager : NetworkBehaviour
     {
         for (int i = 0; i < Players.Count; i++)
         {
-            if (Players[i].steamID == steamid) return Players[i];
+            if (Players[i].props.steamID == steamid) return Players[i];
         }
         return null;
     }

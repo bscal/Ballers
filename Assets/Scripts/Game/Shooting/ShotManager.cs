@@ -45,7 +45,7 @@ public class ShotManager : MonoBehaviour
         m_shotData.type = ShotController.GetShotType(p, dist, m_shotData.direction);
         m_shotData.style = ShotController.GetShotStyle(p, dist, m_shotData.direction, m_shotData.type);
         m_shotData.bankshot = IsBankShot(p, m_shotData.type);
-        m_shotData.leftHanded = p.isBallInLeftHand;
+        m_shotData.leftHanded = p.props.isBallInLeftHand;
         m_shotData.contest = p.GetContestRating();
         m_shotData.shotValue = GetShotValue(p);
         m_shotData.offSkill = 50.0f;
@@ -91,7 +91,7 @@ public class ShotManager : MonoBehaviour
     {
         if (GameManager.Singleton.isFreeThrow)
             return 1;
-        else if (p.isInsideThree)
+        else if (p.props.isInsideThree)
             return 2;
         else
             return 3;
@@ -150,11 +150,11 @@ public class ShotManager : MonoBehaviour
     {
         if (type == ShotType.LAYUP && ShotController.GetShotRange(type) == ShotRange.CLOSE)
         {
-            if (p.movingLeft) return BankType.LEFT;
-            else if (p.movingRight) return BankType.RIGHT;
+            if (p.props.movingLeft) return BankType.LEFT;
+            else if (p.props.movingRight) return BankType.RIGHT;
             else return GetClosestBank(p.transform.position);
         }
-        else if (type == ShotType.SHOT && p.isCtrlDown)
+        else if (type == ShotType.SHOT && p.props.isCtrlDown)
         {
             return GetClosestBank(p.transform.position);
         }
@@ -172,9 +172,9 @@ public class ShotManager : MonoBehaviour
                 || p.m_outerCollider.bounds.Contains(badPos))
             {
                 float dist = Vector3.Distance(badPos, p.transform.position);
-                if (badPlayer.isContesting)
+                if (badPlayer.props.isContesting)
                     rating += 10;
-                else if (badPlayer.isBlocking)
+                else if (badPlayer.props.isBlocking)
                     rating += 5;
             }
         }

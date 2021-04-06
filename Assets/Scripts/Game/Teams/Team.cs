@@ -125,13 +125,13 @@ public class Team
     public void SetSlot(int slotID, Player p)
     {
         teamSlots[slotID] = p;
-        p.slot = slotID;
+        p.props.slot = slotID;
     }
 
     public void ReplaceSlots(Player p1, Player p2)
     {
-        int tempSlot = p1.slot;
-        SetSlot(p2.slot, p1);
+        int tempSlot = p1.props.slot;
+        SetSlot(p2.props.slot, p1);
         SetSlot(tempSlot, p2);
     }
 

@@ -84,17 +84,17 @@ public static class ShotController
     /// </summary>
     public static ShotType GetShotType(Player p, float dist, ShotDirection direction)
     {
-        if (p.isPostShot)
+        if (p.props.isPostShot)
             return ShotType.POST_SHOT;
 
-        if (p.isPostMove)
+        if (p.props.isPostMove)
             return ShotType.POST_MOVE;
 
         if (dist < RIM_RANGE)
         {
 
-            if (p.isSprinting) return ShotType.DUNK;
-            else if (p.isMoving) return ShotType.LAYUP;
+            if (p.props.isSprinting) return ShotType.DUNK;
+            else if (p.props.isMoving) return ShotType.LAYUP;
         }
         else if (dist < CLOSE_RANGE)
             return ShotType.SHOT_CLOSE;

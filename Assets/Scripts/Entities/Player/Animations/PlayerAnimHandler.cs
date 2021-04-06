@@ -68,34 +68,34 @@ public class PlayerAnimHandler : MonoBehaviour
         m_override = false;
         m_newState = null;
 
-        if (m_player.isMoving)
+        if (m_player.props.isMoving)
         {
-            if (!m_player.isSprinting)
+            if (!m_player.props.isSprinting)
             {
-                if (m_player.movingFoward)
+                if (m_player.props.movingFoward)
                 {
-                    if (m_player.isDribbling)
+                    if (m_player.props.isDribbling)
                         TryNewState(AnimNames.JOG_DRIB);
                     else
                         TryNewState(AnimNames.JOG);
                 }
-                else if (m_player.movingBack)
+                else if (m_player.props.movingBack)
                 {
-                    if (m_player.isDribbling)
+                    if (m_player.props.isDribbling)
                         TryNewState(AnimNames.BACKPEDDLE_BALL);
                     else
                         TryNewState(AnimNames.BACKPEDDLE);
                 }
-                if (m_player.movingLeft)
+                if (m_player.props.movingLeft)
                 {
-                    if (m_player.isDribbling)
+                    if (m_player.props.isDribbling)
                         TryNewState(AnimNames.STRAFE_DRIBBLE_LEFT);
                     else
                         TryNewState(AnimNames.STRAFE_LEFT);
                 }
-                else if (m_player.movingRight)
+                else if (m_player.props.movingRight)
                 {
-                    if (m_player.isDribbling)
+                    if (m_player.props.isDribbling)
                         TryNewState(AnimNames.STRAFE_DRIBBLE_RIGHT);
                     else
                         TryNewState(AnimNames.STRAFE_RIGHT);
@@ -103,14 +103,14 @@ public class PlayerAnimHandler : MonoBehaviour
             }
             else
             {
-                if (m_player.isDribbling)
+                if (m_player.props.isDribbling)
                     TryNewState(AnimNames.RUN_DRIB);
                 else
                     TryNewState(AnimNames.RUN);
             }
         }
 
-        if (m_player.isDribbling)
+        if (m_player.props.isDribbling)
             TryNewState(AnimNames.IDLE_DRIB);
         else if (m_player.HasBall)
             TryNewState(AnimNames.TRIPLE_THREAT);

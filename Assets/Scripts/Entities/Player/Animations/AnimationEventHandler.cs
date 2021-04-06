@@ -17,7 +17,7 @@ public class AnimationEventHandler : MonoBehaviour
     {
         if (player.HasBall)
         {
-            player.isBallInLeftHand = !player.isBallInLeftHand;
+            player.props.isBallInLeftHand = !player.props.isBallInLeftHand;
         }
     }
 }

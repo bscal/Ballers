@@ -7,7 +7,7 @@ using MLAPI.Serialization;
 using MLAPI.Serialization.Pooled;
 using Ballers;
 
-public class Player : CommonPlayer, INetworkSerializable
+public class Player : CommonPlayer
 {
     // Local Player Events
     //  These are not synced over the network and only used by local client.
@@ -19,15 +19,15 @@ public class Player : CommonPlayer, INetworkSerializable
     [Header("User Ids")]
     public string username = "test";
     [Header("CPU or Dummy Controls")]
-    public bool isDummy = false;
+    public bool isDummy;
+    public bool isAi;
     public int aiPlayerID = 0;
-    public int slot = 3;
-    public float height = 2.35f;
-    public int teamID;
+    [Header("Server Values")]
+    public float height;
     public bool hasReadyUp;
-    public bool isAI;
-    [NonSerialized]
-    public ulong steamID;
+
+    public PlayerProperties props = new PlayerProperties();
+
     [NonSerialized]
     public CharacterData cData;
 
@@ -43,46 +43,19 @@ public class Player : CommonPlayer, INetworkSerializable
     [Header("Player Collider")]
     public BoxCollider playerCollider;
 
-    // Client Values
-    public bool isRightHanded;
-    public bool isMoving;
-    public bool isSprinting;
-    public bool isScreening;
-    public bool isHardScreening;
-    public bool isShooting;
-    public bool isHelping;
-    public bool isBallInLeftHand;
-    public bool isCtrlDown;
-    public bool isAltDown;
-    public bool movingFoward;
-    public bool movingBack;
-    public bool movingLeft;
-    public bool movingRight;
-    public bool isContesting;
-    public bool isBlocking;
-    public bool isStealing;
-    public bool isDribbling;
 
-
-    // Server values
-    public bool isInsideThree;
-    public bool isInbounds;
-    public bool isPostShot;
-    public bool isPostMove;
-
-
-    public int OtherTeam { get { return FlipTeamID(teamID); } }
+    public int OtherTeam { get { return FlipTeamID(props.teamID); } }
     /// <summary>
     /// Returns true if Player is an AI or is a Dummy
     /// </summary>
-    public bool IsNpc { get { return isAI || isDummy; } }
+    public bool IsNpc { get { return props.isAI || isDummy; } }
     public bool HasBall { get { return NetworkObjectId == GameManager.GetBallHandling().PlayerWithBall; } }
     public Vector3 RightHandPos { get { return m_rightHand.transform.position; } }
     public Vector3 LeftHandPos { get { return m_leftHand.transform.position; } }
-    public Vector3 CurHandPos { get { return (isBallInLeftHand) ? LeftHandPos : RightHandPos; } }
+    public Vector3 CurHandPos { get { return (props.isBallInLeftHand) ? LeftHandPos : RightHandPos; } }
     public Vector3 CenterPos { get { return m_center.transform.position; } }
-    public Transform OwnBasket { get { return GameManager.Singleton.baskets[teamID].transform; } }
-    public Transform OtherBasket { get { return GameManager.Singleton.baskets[FlipTeamID(teamID)].transform; } }
+    public Transform OwnBasket { get { return GameManager.Singleton.baskets[props.teamID].transform; } }
+    public Transform OtherBasket { get { return GameManager.Singleton.baskets[FlipTeamID(props.teamID)].transform; } }
     public bool OnLeftSide { get { return transform.position.x < 0; } }
     private Vector3 m_target;
     public Vector3 TargetPos { get { return m_target; } }
@@ -94,8 +67,8 @@ public class Player : CommonPlayer, INetworkSerializable
         get
         {
             if (IsOnOffense() || GameManager.GetBallHandling().IsBallLoose()) return null;
-            if (isHelping) return GameManager.Singleton.BallHandler;
-            else if (m_assignment == null) m_assignment = GameManager.GetPlayerBySlot(FlipTeamID(teamID), slot);
+            if (props.isHelping) return GameManager.Singleton.BallHandler;
+            else if (m_assignment == null) m_assignment = GameManager.GetPlayerBySlot(FlipTeamID(props.teamID), props.slot);
             return (m_assignment == null) ? null : m_assignment;
         }
         set { m_assignment = value; }
@@ -139,7 +112,7 @@ public class Player : CommonPlayer, INetworkSerializable
     {
         base.NetworkStart();
 
-        if (IsOwner && !isAI)
+        if (IsOwner && !props.isAI)
             RequestIdsClient();
 
         if (IsServer)
@@ -153,20 +126,20 @@ public class Player : CommonPlayer, INetworkSerializable
         if (IsServer)
         {
             m_timer += Time.deltaTime;
-            if (m_timer > 60)
+            if (m_timer > 1)
             {
-                m_timer -= 60;
+                m_timer -= 1;
 
                 if (IsServer)
                 {
-                    ServerSendPlayerClientRpc(this);
+                    ServerSendPlayerClientRpc(props);
                 }
             }
         }
 
         if (isDummy || !hasEnteredGame || !GameManager.Singleton.HasStarted) return;
 
-        if (IsOwner && !isAI)
+        if (IsOwner && !props.isAI)
         {
             if (IsOnDefense())
                 m_targetTracker.gameObject.SetActive(true);
@@ -182,7 +155,7 @@ public class Player : CommonPlayer, INetworkSerializable
     {
         base.PlayerEnteredGame();
 
-        GameObject prefab = ServerManager.PrefabFromTeamID(Match.GetPlayersTeam(OwnerClientId));
+        GameObject prefab = ServerManager.PrefabFromTeamID(props.teamID);
         print($"Client {OwnerClientId} | {NetworkObjectId} model = {prefab.name}");
         Instantiate(prefab, gameObject.transform); 
         InitilizeModel();
@@ -253,8 +226,8 @@ public class Player : CommonPlayer, INetworkSerializable
     [ServerRpc]
     public void ShootBallServerRpc(ulong netId)
     {
-        if (isShooting && !HasBall) return;
-        isShooting = true;
+        if (props.isShooting && !HasBall) return;
+        props.isShooting = true;
         ulong clientID = GameManager.GetPlayerByNetworkID(netId).OwnerClientId;
         ulong rtt = ServerManager.GetRTT(clientID);
         m_shotManager.OnShoot(netId, this, (rtt / 1000 / 2));
@@ -263,8 +236,8 @@ public class Player : CommonPlayer, INetworkSerializable
     // Client
     public void ReleaseBall()
     {
-        if (!isShooting && !HasBall) return;
-        isShooting = false;
+        if (!props.isShooting && !HasBall) return;
+        props.isShooting = false;
         ReleaseServerRpc(NetworkObjectId);
     }
 
@@ -281,10 +254,10 @@ public class Player : CommonPlayer, INetworkSerializable
     public void ClientShootBallClientRpc(ulong netID, ShotData shotData, ShotBarData shotBarData, ClientRpcParams cParams = default)
     {
         Player p = GameManager.GetPlayerByNetworkID(netID);
-        if (p.isCtrlDown)
+        if (p.props.isCtrlDown)
             p.ChangeHand();
         
-        if (!p.isAI)
+        if (!p.props.isAI)
             m_shotmeter.OnShoot(p, shotData, shotBarData);
         p.PlayAnimationForType(shotData.type, shotData.leftHanded);
         Shoot?.Invoke(shotData, shotBarData);
@@ -368,7 +341,7 @@ public class Player : CommonPlayer, INetworkSerializable
     [ServerRpc]
     public void PumpfakeServerRpc()
     {
-        isDribbling = false;
+        props.isDribbling = false;
     }
 
     public void Jump()
@@ -395,12 +368,12 @@ public class Player : CommonPlayer, INetworkSerializable
 
     public bool IsOnOffense()
     {
-        return GameManager.GetBallHandling().Possession == teamID;
+        return GameManager.GetBallHandling().Possession == props.teamID;
     }
 
     public bool IsOnDefense()
     {
-        return FlipTeamID(GameManager.Singleton.Possession) == teamID;
+        return FlipTeamID(GameManager.Singleton.Possession) == props.teamID;
     }
 
     public GameObject GetLeftHand()
@@ -423,7 +396,7 @@ public class Player : CommonPlayer, INetworkSerializable
         Player shortestPlayer = null;
         float shortestDist = float.MaxValue;
 
-        Team enemyTeam = GameManager.Singleton.teams[FlipTeamID(teamID)];
+        Team enemyTeam = GameManager.Singleton.teams[FlipTeamID(props.teamID)];
         for (int i = 0; i < Match.MatchSettings.TeamSize; i++)
         {
             Player p = enemyTeam.teamSlots[i];
@@ -442,12 +415,12 @@ public class Player : CommonPlayer, INetworkSerializable
 
     public void ChangeHand()
     {
-        isBallInLeftHand = !isBallInLeftHand;
+        props.isBallInLeftHand = !props.isBallInLeftHand;
     }
 
     public bool SameTeam(Player other)
     {
-        return teamID == other.teamID;
+        return props.teamID == other.props.teamID;
     }
 
     public float GetContestRating()
@@ -474,12 +447,12 @@ public class Player : CommonPlayer, INetworkSerializable
     private float GetPlayerContestRating(Player other, float dist, float mod)
     {
         float res = dist + mod;
-        if (other.isBlocking) res += .5f * other.cData.stats.blocking;
-        if (other.isContesting) res += .25f * other.cData.stats.blocking;
+        if (other.props.isBlocking) res += .5f * other.cData.stats.blocking;
+        if (other.props.isContesting) res += .25f * other.cData.stats.blocking;
         if (WithinFOV(GetForwardAngle(transform, other.transform), 45f)) res += .5f;
         if (WithinFOV(GetForwardAngle(transform, other.transform), 20f)) res += .5f;
         DebugController.Singleton.PrintConsoleValues("Contest", new object[] {
-            dist, mod, other.isBlocking, other.isContesting, GetForwardAngle(transform, other.transform), WithinFOV(GetForwardAngle(transform, other.transform), 5f)
+            dist, mod, other.props.isBlocking, other.props.isContesting, GetForwardAngle(transform, other.transform), WithinFOV(GetForwardAngle(transform, other.transform), 5f)
         }, LogType.WARNING);
         return res;
     }
@@ -517,8 +490,8 @@ public class Player : CommonPlayer, INetworkSerializable
         using (PooledNetworkReader reader = PooledNetworkReader.Get(stream))
         {
             // THIS CURRENT ISNT UPDATED BECAUSE LOOP NEVER SENDS
-            isInsideThree = reader.ReadBool();
-            isInbounds = reader.ReadBool();
+            props.isInsideThree = reader.ReadBool();
+            props.isInbounds = reader.ReadBool();
             //HasBall = reader.ReadBool();
         }
     }
@@ -535,7 +508,7 @@ public class Player : CommonPlayer, INetworkSerializable
         this.hasReadyUp = isReady;
     }
 
-    public void Read(Stream stream)
+/*    public void Read(Stream stream)
     {
         using (PooledNetworkReader reader = PooledNetworkReader.Get(stream))
         {
@@ -598,31 +571,13 @@ public class Player : CommonPlayer, INetworkSerializable
             writer.WriteVector3Packed(m_target);
         }
     }
-
+*/
     [ClientRpc]
-    public void ServerSendPlayerClientRpc(Player player, ClientRpcParams clientRpcParams = default)
+    public void ServerSendPlayerClientRpc(PlayerProperties props, ClientRpcParams clientRpcParams = default)
     {
-        this.teamID = player.teamID;
-        this.isAI = player.isAI;
-        this.isRightHanded = player.isRightHanded;
-        this.isMoving = player.isMoving;
-        this.isSprinting = player.isSprinting;
-        this.isDribbling = player.isDribbling;
-        this.isScreening = player.isScreening;
-        this.isHelping = player.isHelping;
-        this.isBallInLeftHand = player.isBallInLeftHand;
-        this.isCtrlDown = player.isCtrlDown;
-        this.isAltDown = player.isAltDown;
-        this.movingFoward = player.movingFoward;
-        this.movingBack = player.movingBack;
-        this.movingLeft = player.movingLeft;
-        this.movingRight = player.movingRight;
-        this.isContesting = player.isContesting;
-        this.isBlocking = player.isBlocking;
-        this.isStealing = player.isStealing;
-        this.m_target = player.m_target;
+        this.props = props;
     }
-
+/*
     public void NetworkSerialize(NetworkSerializer serializer)
     {
         serializer.Serialize(ref teamID);
@@ -644,5 +599,5 @@ public class Player : CommonPlayer, INetworkSerializable
         serializer.Serialize(ref isBlocking);
         serializer.Serialize(ref isStealing);
         serializer.Serialize(ref m_target);
-    }
+    }*/
 }

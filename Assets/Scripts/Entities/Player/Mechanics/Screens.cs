@@ -47,7 +47,7 @@ public class Screens : MonoBehaviour
         {
             if (other.gameObject != gameObject && other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("Dummy"))
             {
-                if (m_player.isScreening) {
+                if (m_player.props.isScreening) {
                     float dist = Vector3.Distance(gameObject.transform.position, other.gameObject.transform.position);
                     m_duration = 0;
                     m_in = true;

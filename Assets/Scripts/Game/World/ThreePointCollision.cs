@@ -14,7 +14,7 @@ public class ThreePointCollision : MonoBehaviour
             if (other.gameObject.CompareTag(PLAYER_TAG))
             {
                 Player p = other.gameObject.GetComponent<Player>();
-                p.isInsideThree = true;
+                p.props.isInsideThree = true;
             }
         }
     }
@@ -26,7 +26,7 @@ public class ThreePointCollision : MonoBehaviour
             if (other.gameObject.CompareTag(PLAYER_TAG))
             {
                 Player p = other.gameObject.GetComponent<Player>();
-                p.isInsideThree = false;
+                p.props.isInsideThree = false;
             }
         }
     }

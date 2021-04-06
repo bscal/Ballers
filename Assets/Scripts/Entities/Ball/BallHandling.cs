@@ -131,12 +131,12 @@ public class BallHandling : NetworkBehaviour
     public override void NetworkStart()
     {
         GameManager.SetBallHandlingInstance(this);
-        m_shotManager = GameManager.Singleton.gameObject.GetComponent<ShotManager>();
         m_ball = NetworkObject.gameObject;
         m_collider = GetComponent<SphereCollider>();
         name = "Ball";
         if (IsServer)
         {
+            m_shotManager = GameManager.Singleton.gameObject.GetComponent<ShotManager>();
             m_playerDistances = new Dictionary<ulong, float>();
             m_body = gameObject.GetComponent<Rigidbody>();
             m_body.AddForce(new Vector3(1, 1, 1), ForceMode.Impulse);
@@ -210,7 +210,7 @@ public class BallHandling : NetworkBehaviour
 
                 // Tells the ball which hand to be in.
                 // These should be ok to not be in FixedUpdate
-                if (m_currentPlayer.isBallInLeftHand)
+                if (m_currentPlayer.props.isBallInLeftHand)
                     m_body.MovePosition(m_currentPlayer.GetLeftHand().transform.position);
                 else
                     m_body.MovePosition(m_currentPlayer.GetRightHand().transform.position);
@@ -478,10 +478,10 @@ public class BallHandling : NetworkBehaviour
     public void TryPassBall(Player passer, int playerSlot, PassType type)
     {
         if (!passer.HasBall) return;
-        if (passer.slot == playerSlot) return; //TODO fake pass? here because i have not decides on how to handle this
+        if (passer.props.slot == playerSlot) return; //TODO fake pass? here because i have not decides on how to handle this
 
-        Player target = GameManager.GetPlayerBySlot(passer.teamID, playerSlot);
-        PassBallServerRpc(passer, target, type);
+        Player target = GameManager.GetPlayerBySlot(passer.props.teamID, playerSlot);
+        TryPassBall(passer, target, type);
     }
 
     public void TryPassBall(ulong passerPid, ulong targetPid, PassType type)
@@ -495,19 +495,18 @@ public class BallHandling : NetworkBehaviour
     {
         Player passer = GameManager.GetPlayerByNetworkID(passerPid);
         Player target = GameManager.GetPlayerByNetworkID(targetPid);
-        PassBallServerRpc(passer, target, type);
+        TryPassBall(passer, target, type);
     }
 
 
-    [ServerRpc]
-    public void PassBallServerRpc(Player passer, Player target, PassType type)
+    public void TryPassBall(Player passer, Player target, PassType type)
     {
         if (!IsServer) return;
 
         // Set the ball to NO_PLAYER because ball is in air
         ChangeBallHandler(NO_PLAYER);
         // Trigger shot meter for passer
-        if (!passer.isAI)
+        if (!passer.props.isAI)
         {
             //passer.InvokeClientRpcOnClient(passer.TriggerRoundShotMeter, passer.OwnerClientId, 1.0f, 1.0f);
             passer.ServerCheckRSM(passer.OwnerClientId, passer.NetworkObjectId, pass_speed, 1.0f, (netID, score) => {
@@ -695,9 +694,9 @@ public class BallHandling : NetworkBehaviour
     {
         Vector3 pos;
 
-        if (target.isSprinting)
+        if (target.props.isSprinting)
             pos = target.CenterPos + target.transform.forward * sprint_offset;
-        else if (target.isMoving)
+        else if (target.props.isMoving)
             pos = target.CenterPos + target.transform.forward * walk_offset;
         else
             pos = target.CenterPos + target.transform.forward;
@@ -730,9 +729,9 @@ public class BallHandling : NetworkBehaviour
     {
         Player target = GameManager.GetPlayerByNetworkID(netID);
         if (target == m_currentPlayer) return;
-        if (m_currentPlayer.isAI && m_currentPlayer.IsOnOffense() && m_currentPlayer.SameTeam(target))
+        if (m_currentPlayer.props.isAI && m_currentPlayer.IsOnOffense() && m_currentPlayer.SameTeam(target))
         {
-            PassBallServerRpc(m_currentPlayer, target, PassType.CHESS);
+            TryPassBall(m_currentPlayer, target, PassType.CHESS);
         }
     }
 
@@ -830,15 +829,26 @@ public class BallHandling : NetworkBehaviour
         };
     }
 
+    public void SetPlayerHandlerServer(ulong netID, bool isHandler)
+    {
+        Player passer = GameManager.GetPlayerByNetworkID(netID);
+        passer.props.isDribbling = isHandler;
+
+        if (isHandler)
+        {
+            m_currentPlayer.props.isBallInLeftHand = !m_currentPlayer.props.isRightHanded;
+        }
+    }
+
     [ClientRpc]
     public void SetPlayerHandlerClientRpc(ulong netID, bool isHandler, ClientRpcParams cParams = default)
     {
         Player passer = GameManager.GetPlayerByNetworkID(netID);
-        passer.isDribbling = isHandler;
+        passer.props.isDribbling = isHandler;
 
         if (isHandler)
         {
-            m_currentPlayer.isBallInLeftHand = !m_currentPlayer.isRightHanded;
+            m_currentPlayer.props.isBallInLeftHand = !m_currentPlayer.props.isRightHanded;
         }
     }
 
@@ -857,7 +867,8 @@ public class BallHandling : NetworkBehaviour
 
         // Alerts the last player with possession if not null hes not holding the ball.
         if (m_currentPlayer != null)
-            SetPlayerHandlerClientRpc(m_currentPlayer.NetworkObjectId, false, RPCParams.ClientParamsOnlyClient(m_currentPlayer.OwnerClientId));
+            SetPlayerHandlerServer(m_currentPlayer.NetworkObjectId, true);
+        //SetPlayerHandlerClientRpc(m_currentPlayer.NetworkObjectId, false, RPCParams.ClientParamsOnlyClient(m_currentPlayer.OwnerClientId));
 
         int teamToSwitch = (int)TeamType.NONE;
         // If newPlayer is set to NO_PLAYER id the ball should be loose.
@@ -871,17 +882,18 @@ public class BallHandling : NetworkBehaviour
         else
         {
             m_currentPlayer = GameManager.GetPlayerByNetworkID(newNetworkID);
-            SetPlayerHandlerClientRpc(m_currentPlayer.NetworkObjectId, true, RPCParams.ClientParamsOnlyClient(m_currentPlayer.OwnerClientId));
+            //SetPlayerHandlerClientRpc(m_currentPlayer.NetworkObjectId, true, RPCParams.ClientParamsOnlyClient(m_currentPlayer.OwnerClientId));
+            SetPlayerHandlerServer(m_currentPlayer.NetworkObjectId, true);
             BallHandlerChange?.Invoke(PlayerLastPossesion, PlayerWithBall);
 
             // if old id and new id are same don't change teams.
-            if (Possession == m_currentPlayer.teamID) return;
+            if (Possession == m_currentPlayer.props.teamID) return;
 
             // Temp like this in case i want to change something.
             if (IsBallLoose())
-                teamToSwitch = m_currentPlayer.teamID;
+                teamToSwitch = m_currentPlayer.props.teamID;
             else
-                teamToSwitch = m_currentPlayer.teamID;
+                teamToSwitch = m_currentPlayer.props.teamID;
         }
         ChangePossession(teamToSwitch, false, false);
     }

@@ -63,15 +63,15 @@ public class PlayerControls : NetworkBehaviour
         if (!IsOwner)
             return;
 
-        m_player.isSprinting = Keyboard.current.shiftKey.ReadValue() > 0.0f;
-        m_player.isCtrlDown = Keyboard.current.ctrlKey.ReadValue() > 0.0f;
-        m_player.isAltDown = Keyboard.current.altKey.ReadValue() > 0.0f;
+        m_player.props.isSprinting = Keyboard.current.shiftKey.ReadValue() > 0.0f;
+        m_player.props.isCtrlDown = Keyboard.current.ctrlKey.ReadValue() > 0.0f;
+        m_player.props.isAltDown = Keyboard.current.altKey.ReadValue() > 0.0f;
 
         Vector2 dribVec = actions.Keyboard.Dribble.ReadValue<Vector2>();
-        m_player.movingFoward = dribVec.y > 0; //1
-        m_player.movingBack = dribVec.y < 0; //-1
-        m_player.movingLeft = dribVec.x < 0; //-1
-        m_player.movingRight = dribVec.x > 0; //1
+        m_player.props.movingFoward = dribVec.y > 0; //1
+        m_player.props.movingBack = dribVec.y < 0; //-1
+        m_player.props.movingLeft = dribVec.x < 0; //-1
+        m_player.props.movingRight = dribVec.x > 0; //1
 
         if (actions.Keyboard.Jump.triggered && m_jumpCooldown < Time.time)
         {
@@ -139,7 +139,7 @@ public class PlayerControls : NetworkBehaviour
         bool held = false;
         while (true)
         {
-            if (m_shootCooldown < Time.time || m_player.isShooting) yield return new WaitForSeconds(0.1f);
+            if (m_shootCooldown < Time.time || m_player.props.isShooting) yield return new WaitForSeconds(0.1f);
 
             //Check when the key is pressed
             if (actions.Keyboard.Shoot.ReadValue<float>() > 0)

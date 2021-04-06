@@ -23,7 +23,7 @@ public class BasicDummy : MonoBehaviour
     protected void Awake()
     {
         m_player = GetComponent<Player>();
-        m_player.teamID = (int)TeamType.AWAY;
+        m_player.props.teamID = (int)TeamType.AWAY;
     }
 
     protected void Start()
@@ -34,7 +34,7 @@ public class BasicDummy : MonoBehaviour
         {
             case DummyType.BASIC: break;
             case DummyType.SCREENER:
-                m_player.isScreening = true;
+                m_player.props.isScreening = true;
                 break;
             default: break;
         }
