@@ -54,7 +54,10 @@ public class GameSetup : NetworkBehaviour
                     
                     aiLogic.InitPlayer(p, tid);
 
-                    go.GetComponent<NetworkObject>().Spawn();
+                    NetworkObject obj = go.GetComponent<NetworkObject>();
+                    obj.Spawn();
+
+                    ServerManager.Singleton.playerObjects.Add(obj.NetworkObjectId, go);
                 }
             }
         }

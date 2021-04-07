@@ -20,6 +20,7 @@ public enum ServerPlayerState
     LOADING,
     WAITING_FOR_IDS,
     IDLE,
+    ENTERED_GAME,
     READY
 }
 

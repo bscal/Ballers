@@ -16,7 +16,6 @@ public class CommonPlayer : NetworkBehaviour
 
     public void Awake()
     {
-        NetworkSceneManager.OnSceneSwitched += OnSceneSwitched;
     }
 
     public override void NetworkStart()
@@ -25,19 +24,13 @@ public class CommonPlayer : NetworkBehaviour
 
     protected virtual void PlayerEnteredGame()
     {
+        hasEnteredGame = true;
         GameManager.Singleton.GameStartedClient += OnGameStarted;
     }
 
     protected virtual void OnGameStarted()
     {
-        hasEnteredGame = true;
     }
-
-    protected void OnSceneSwitched()
-    {
-        PlayerEnteredGame();
-    }
-
 
     [ServerRpc]
     public void ClientLoadedServerRpc(ServerRpcParams serverRpcParams = default)

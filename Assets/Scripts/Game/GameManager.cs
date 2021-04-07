@@ -32,7 +32,7 @@ public class GameManager : NetworkBehaviour
     public event Action AllPlayersConnected;
 
     private static BallHandling BallHandling;
-    private readonly static NetworkList<Player> Players = new NetworkList<Player>(NetworkConstants.PLAYER_CHANNEL);
+    private readonly static List<Player> Players = new List<Player>();
     private readonly static List<BasicDummy> Dummies = new List<BasicDummy>();
     private readonly static List<AIPlayer> AIs = new List<AIPlayer>();
     private static Player LocalPlayer;
@@ -484,7 +484,7 @@ public class GameManager : NetworkBehaviour
         return false;
     }
 
-    public static NetworkList<Player> GetPlayers()
+    public static List<Player> GetPlayers()
     {
         return Players;
     }

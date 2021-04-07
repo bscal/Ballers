@@ -1,11 +1,9 @@
+using MLAPI.Messaging;
+using MLAPI.SceneManagement;
+using MLAPI.Serialization.Pooled;
 using System;
 using System.IO;
 using UnityEngine;
-using MLAPI;
-using MLAPI.Messaging;
-using MLAPI.Serialization;
-using MLAPI.Serialization.Pooled;
-using Ballers;
 
 public class Player : CommonPlayer
 {
@@ -92,6 +90,8 @@ public class Player : CommonPlayer
     private void Awake()
     {
         base.Awake();
+
+        NetworkSceneManager.OnSceneSwitched += OnSceneSwitched;
     }
 
     private void Start()
@@ -100,12 +100,6 @@ public class Player : CommonPlayer
         m_playerCircle = GetComponentInChildren<SpriteRenderer>();
         m_center = transform.Find("Center").gameObject;
         m_movement = GetComponent<Movement>();
-
-        if (!IsNpc)
-        {
-            // Initialize Human Player values
-            //GameManager.Singleton.RegisterLocalPlayerToServer(OwnerClientId);
-        }
     }
 
     public override void NetworkStart()
@@ -130,10 +124,7 @@ public class Player : CommonPlayer
             {
                 m_timer -= 1;
 
-                if (IsServer)
-                {
-                    ServerSendPlayerClientRpc(props);
-                }
+                ServerSendPlayerClientRpc(props);
             }
         }
 
@@ -171,6 +162,7 @@ public class Player : CommonPlayer
         }
     }
 
+
     protected override void OnGameStarted()
     {
         base.OnGameStarted();
@@ -199,6 +191,35 @@ public class Player : CommonPlayer
                 movement.playerAnim = m_animHandler;
             }
         }
+    }
+
+    protected void OnSceneSwitched()
+    {
+        if (IsOwner)
+            SceneChangeServerRpc();
+    }
+
+    [ClientRpc]
+    public void EnterGameClientRpc(PlayerProperties props, ClientRpcParams clientRpcParams = default)
+    {
+        if (!IsHost && IsClient)
+        {
+            this.props = props;
+            GameManager.GetPlayers().Add(this);
+            GameManager.GetPlayerByNetworkID(NetworkObjectId).props = props;
+
+            PlayerEnteredGame();
+        }
+    }
+
+    [ServerRpc]
+    public void SceneChangeServerRpc(ServerRpcParams serverRpcParams = default)
+    {
+        EnterGameClientRpc(props);
+
+        ServerManager.Singleton.PlayerSceneChanged(OwnerClientId, NetworkObjectId);
+
+        PlayerEnteredGame();
     }
 
     public static Transform FindTransformInChild(Transform transform, string objectName)
@@ -575,7 +596,10 @@ public class Player : CommonPlayer
     [ClientRpc]
     public void ServerSendPlayerClientRpc(PlayerProperties props, ClientRpcParams clientRpcParams = default)
     {
+        print("Recieving Props -> " + NetworkObjectId);
         this.props = props;
+        if (!IsHost && hasEnteredGame)
+            GameManager.GetPlayerByNetworkID(NetworkObjectId).props = props;
     }
 /*
     public void NetworkSerialize(NetworkSerializer serializer)

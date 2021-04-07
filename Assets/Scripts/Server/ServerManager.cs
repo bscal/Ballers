@@ -1,4 +1,6 @@
 using MLAPI;
+using MLAPI.Connection;
+using MLAPI.Messaging;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,15 +9,16 @@ using UnityEngine;
 public enum StartupState
 {
     NONE,
-    LOADING,
     SETUP,
+    LOADING,
+    ENTER_GAME,
     PREGAME,
     STARTED
 }
 
 public class ServerManager : NetworkBehaviour
 {
-    public static ServerManager Singleton { get ; private set; }
+    public static ServerManager Singleton { get; private set; }
 
     public static bool IsDedicated;
 
@@ -29,7 +32,8 @@ public class ServerManager : NetworkBehaviour
 
     [NonSerialized]
     public readonly Dictionary<ulong, ServerPlayer> players = new Dictionary<ulong, ServerPlayer>();
-    //public readonly Dictionary<ulong
+    [NonSerialized]
+    public readonly Dictionary<ulong, GameObject> playerObjects = new Dictionary<ulong, GameObject>();
 
     private NetworkLobby m_lobby;
     private MatchSetup m_setup;
@@ -58,9 +62,17 @@ public class ServerManager : NetworkBehaviour
         if (m_startupState == StartupState.LOADING && HaveAllPlayersLoaded())
         {
             print("loaded");
+            m_startupState = StartupState.ENTER_GAME;
+
+            LoadAllPlayers();
+        }
+
+        if (m_startupState == StartupState.ENTER_GAME && HaveAllPlayersEntered())
+        {
+            print("entering");
             m_startupState = StartupState.PREGAME;
 
-            AllPlayersLoaded?.Invoke();
+            AllPlayersEnteredGame();
         }
 
         if (m_startupState == StartupState.PREGAME && AllPlayersReady())
@@ -70,6 +82,11 @@ public class ServerManager : NetworkBehaviour
 
             GameManager.Singleton.BeginPregame();
         }
+    }
+
+    public void LoadAllPlayers()
+    {
+        AllPlayersLoaded?.Invoke();
     }
 
     public void CreateModel(ulong clientId)
@@ -146,6 +163,8 @@ public class ServerManager : NetworkBehaviour
             GameObject playerObject = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
             NetworkObject netObj = playerObject.GetComponent<NetworkObject>();
             netObj.SpawnAsPlayerObject(id);
+
+            playerObjects.Add(netObj.NetworkObjectId, playerObject);
             //playerObject.GetComponent<Player>().InitilizeModel();
         }
     }
@@ -197,6 +216,19 @@ public class ServerManager : NetworkBehaviour
         return true;
     }
 
+
+    private bool HaveAllPlayersEntered()
+    {
+        foreach (ServerPlayer sp in players.Values)
+        {
+            if (sp.state != ServerPlayerState.ENTERED_GAME)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public bool AllPlayersReady()
     {
         foreach (ServerPlayer sp in players.Values)
@@ -232,5 +264,19 @@ public class ServerManager : NetworkBehaviour
             return Singleton.bluePrefab;
         else
             return Singleton.redPrefab;
+    }
+
+    public void PlayerSceneChanged(ulong ownerClientId, ulong networkObjectId)
+    {
+        players[ownerClientId].state = ServerPlayerState.ENTERED_GAME;
+    }
+
+    private void AllPlayersEnteredGame()
+    {
+        foreach (var pairs in playerObjects)
+        {
+            Player p = pairs.Value.GetComponent<Player>();
+            p.EnterGameClientRpc(p.props);
+        }
     }
 }
