@@ -35,7 +35,7 @@ public class GameManager : NetworkBehaviour
     private readonly static List<Player> Players = new List<Player>();
     private readonly static List<BasicDummy> Dummies = new List<BasicDummy>();
     private readonly static List<AIPlayer> AIs = new List<AIPlayer>();
-    private static Player LocalPlayer;
+    private static Player LocalPlayer => Match.localPlayer;
 
     public Player BallHandler { get { return GetPlayerByNetworkID(BallHandling.PlayerWithBall); } }
     public Basket CurrentBasket { get { return Singleton.baskets[BallHandling.PossessionOrHome]; } }
@@ -222,32 +222,11 @@ public class GameManager : NetworkBehaviour
         RegisterPlayerClientRpc(RPCParams.ClientParamsOnlyClient(netPlayer.OwnerClientId));
     }
 
-    [ServerRpc]
-    public void RegisterPlayerServerRpc(ulong clientid)
-    {
-        // Checks if already registered on server
-        NetworkObject netPlayer = NetworkSpawnManager.GetPlayerNetworkObject(clientid);
-
-        Assert.IsNotNull(netPlayer, "NetworkedObject is null");
-
-        Player player = netPlayer.GetComponent<Player>();
-
-        if (!player.props.isAI)
-        {
-            player.props.teamID = ServerManager.Singleton.players[player.id].team;
-            player.props.slot = ServerManager.Singleton.players[player.id].slot;
-        }
-
-        // Add the player to game.
-        AddPlayer(player);
-        RegisterPlayerClientRpc(RPCParams.ClientParamsOnlyClient(clientid));
-    }
-
     [ClientRpc]
     public void RegisterPlayerClientRpc(ClientRpcParams cParams = default)
     {
-        LocalPlayer = NetworkSpawnManager.GetLocalPlayerObject().GetComponent<Player>();
-        Assert.IsNotNull(LocalPlayer, "Local Player is null but client registered?");
+        //LocalPlayer = NetworkSpawnManager.GetLocalPlayerObject().GetComponent<Player>();
+        //Assert.IsNotNull(LocalPlayer, "Local Player is null but client registered?");
         Debug.Log("Client successfully registered");
         Singleton.PlayerRegistered?.Invoke(LocalPlayer);
     }

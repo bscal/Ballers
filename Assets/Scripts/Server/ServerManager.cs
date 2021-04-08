@@ -34,6 +34,8 @@ public class ServerManager : NetworkBehaviour
     public readonly Dictionary<ulong, ServerPlayer> players = new Dictionary<ulong, ServerPlayer>();
     [NonSerialized]
     public readonly Dictionary<ulong, GameObject> playerObjects = new Dictionary<ulong, GameObject>();
+    [NonSerialized]
+    public readonly List<Player> playersList = new List<Player>();
 
     private NetworkLobby m_lobby;
     private MatchSetup m_setup;
@@ -165,6 +167,7 @@ public class ServerManager : NetworkBehaviour
             netObj.SpawnAsPlayerObject(id);
 
             playerObjects.Add(netObj.NetworkObjectId, playerObject);
+            playersList.Add(playerObject.GetComponent<Player>());
             //playerObject.GetComponent<Player>().InitilizeModel();
         }
     }
@@ -251,6 +254,11 @@ public class ServerManager : NetworkBehaviour
         Debug.Log("destroying match");
     }
 
+    public void AddPlayer(ulong id, GameObject playerObj, Player player)
+    {
+        playerObjects.Add(id, playerObj);
+        playersList.Add(player);
+    }
 
     public static ulong GetRTT(ulong clientId)
     {

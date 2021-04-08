@@ -66,14 +66,6 @@ public class MatchSetup : MonoBehaviour
     private void OnSceneSwitched()
     {
         print("On Scene Switch Switched");
-        if (NetworkManager.Singleton.IsClient)
-        {
-            NetworkObject localPlayer = NetworkSpawnManager.GetLocalPlayerObject();
-            if (localPlayer != null)
-            {
-                localPlayer.GetComponent<Player>().ClientLoadedServerRpc();
-            }
-        }
     }
     private IEnumerator LoadGame(AsyncOperation operation)
     {

@@ -96,6 +96,7 @@ public class Player : CommonPlayer
 
     private void Start()
     {
+        Match.localPlayer = this;
         // Initialize Player values
         m_playerCircle = GetComponentInChildren<SpriteRenderer>();
         m_center = transform.Find("Center").gameObject;
@@ -108,6 +109,9 @@ public class Player : CommonPlayer
 
         if (IsOwner && !props.isAI)
             RequestIdsClient();
+
+        if (!IsServer)
+            ServerManager.Singleton.AddPlayer(OwnerClientId, gameObject, this);
 
         if (IsServer)
             print("PLAYER START SERVER");
@@ -150,15 +154,11 @@ public class Player : CommonPlayer
         print($"Client {OwnerClientId} | {NetworkObjectId} model = {prefab.name}");
         Instantiate(prefab, gameObject.transform); 
         InitilizeModel();
-
-        if (IsServer || IsOwner)
+        m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
+        if (IsOwner && !IsNpc)
         {
-            m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
-            if (!IsNpc)
-            {
-                m_shotmeter = gameObject.AddComponent<ShotMeter>();
-                m_roundShotMeter = GameObject.Find("HUD/Canvas/RoundShotMeter").GetComponent<RoundShotMeter>();
-            }
+            m_shotmeter = GameObject.Find("HUD/Canvas/ShotMeter").GetComponent<ShotMeter>();
+            m_roundShotMeter = GameObject.Find("HUD/Canvas/RoundShotMeter").GetComponent<RoundShotMeter>();
         }
     }
 
@@ -210,6 +210,9 @@ public class Player : CommonPlayer
 
             PlayerEnteredGame();
         }
+
+        if (IsOwner && !props.isAI)
+            ClientLoadedServerRpc();
     }
 
     [ServerRpc]

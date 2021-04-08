@@ -20,6 +20,9 @@ public static class Match
     public static CSteamID HostID { get; set; }
     public static bool HostServer { get; set; }
     public static bool HasGameStarted { get { return GameManager.Singleton.HasStarted; } }
+
+    public static Player localPlayer;
+
     public static MatchTeam[] matchTeams = new MatchTeam[] {
         new MatchTeam(),
         new MatchTeam()
