@@ -12761,7 +12761,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1132911714}
-  - component: {fileID: 1132911715}
   - component: {fileID: 1132911718}
   - component: {fileID: 1132911716}
   - component: {fileID: 1132911723}
@@ -12791,18 +12790,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1132911715
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1132911713}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bc370e3f38a67a643b3e38713710a687, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1132911716
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12910,14 +12897,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isReady: 0
-  playerPrefab: {fileID: 9132637102776717737, guid: b84da050e08d8a743bc9abfc6034bc8d,
-    type: 3}
-  aiPrefab: {fileID: 6191230127883688808, guid: 8abe3a5c5dbbdaf47868c845e29aa5e2,
-    type: 3}
-  redPrefab: {fileID: 8581590456682364847, guid: 0ef8b220239795f4c953f855be37545f,
-    type: 3}
-  bluePrefab: {fileID: 2935085450790121991, guid: ebb6972b28bf8874895d02036bf4f42a,
-    type: 3}
 --- !u!114 &1132911723
 MonoBehaviour:
   m_ObjectHideFlags: 0

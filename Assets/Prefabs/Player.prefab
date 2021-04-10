@@ -15363,7 +15363,6 @@ GameObject:
   - component: {fileID: 5977831723216924839}
   - component: {fileID: 7447245464667065532}
   - component: {fileID: 5179076237109872503}
-  - component: {fileID: 5179076237109872492}
   - component: {fileID: 2128526360333151305}
   - component: {fileID: 5400875483028027819}
   - component: {fileID: -258293390516097271}
@@ -15446,40 +15445,16 @@ MonoBehaviour:
   hasEnteredGame: 0
   username: test
   isDummy: 0
+  isAi: 0
   aiPlayerID: 0
-  slot: 3
   height: 2.35
-  teamID: 0
   hasReadyUp: 0
-  isAI: 0
   m_screenHitboxes: {fileID: 465271389445967199}
   m_screenCollider: {fileID: 8285789891948093697}
   m_hardScreenCollider: {fileID: 499513842373943136}
   m_innerCollider: {fileID: 9017073906844803023}
   m_outerCollider: {fileID: 1399444623876531351}
   playerCollider: {fileID: 5805129176901056585}
-  isRightHanded: 1
-  isMoving: 0
-  isSprinting: 0
-  isScreening: 0
-  isHardScreening: 0
-  isShooting: 0
-  isHelping: 0
-  isBallInLeftHand: 0
-  isCtrlDown: 0
-  isAltDown: 0
-  movingFoward: 0
-  movingBack: 0
-  movingLeft: 0
-  movingRight: 0
-  isContesting: 0
-  isBlocking: 0
-  isStealing: 0
-  isDribbling: 0
-  isInsideThree: 0
-  isInbounds: 0
-  isPostShot: 0
-  isPostMove: 0
   m_rightHand: {fileID: 1367100140280164334}
   m_leftHand: {fileID: 5912948185960104492}
   m_targetTracker: {fileID: 7405135027028517589}
@@ -15500,25 +15475,6 @@ MonoBehaviour:
   PrefabHashGenerator: Player
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
---- !u!114 &5179076237109872492
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9132637102776717737}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 94f4a65e9e4ca11449d1efea236a1421, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  meter: {fileID: 0}
-  background: {fileID: 0}
-  fill: {fileID: 0}
-  target: {fileID: 0}
-  targetGood: {fileID: 0}
-  targetOk: {fileID: 0}
-  glow: {fileID: 0}
 --- !u!114 &2128526360333151305
 MonoBehaviour:
   m_ObjectHideFlags: 0

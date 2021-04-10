@@ -108,15 +108,20 @@ public class Player : CommonPlayer
         base.NetworkStart();
 
         if (IsOwner && !props.isAI)
+        {
             RequestIdsClient();
+        }
 
-        if (!IsServer)
-            ServerManager.Singleton.AddPlayer(OwnerClientId, gameObject, this);
-
+        ServerManager.Singleton.AddPlayer(NetworkObjectId, gameObject, this);
         if (IsServer)
-            print("PLAYER START SERVER");
-        else if (IsOwner)
-            print("PLAYER START CLIENT");
+        {
+            GameObject prefab = ServerManager.PrefabFromTeamID(props.teamID);
+            print($"Client {OwnerClientId} | {NetworkObjectId} model = {prefab.name}");
+            Instantiate(prefab, gameObject.transform);
+        }
+
+        //if ((IsServer || !IsOwner) && m_shotmeter != null)
+            //Destroy(m_shotmeter);
     }
 
     void Update()
@@ -150,14 +155,15 @@ public class Player : CommonPlayer
     {
         base.PlayerEnteredGame();
 
-        GameObject prefab = ServerManager.PrefabFromTeamID(props.teamID);
-        print($"Client {OwnerClientId} | {NetworkObjectId} model = {prefab.name}");
-        Instantiate(prefab, gameObject.transform); 
+        
         InitilizeModel();
+
         m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
         if (IsOwner && !IsNpc)
         {
-            m_shotmeter = GameObject.Find("HUD/Canvas/ShotMeter").GetComponent<ShotMeter>();
+            m_shotmeter = gameObject.AddComponent<ShotMeter>();
+            if (m_shotmeter != null)
+                m_shotmeter.enabled = false;
             m_roundShotMeter = GameObject.Find("HUD/Canvas/RoundShotMeter").GetComponent<RoundShotMeter>();
         }
     }
@@ -218,11 +224,13 @@ public class Player : CommonPlayer
     [ServerRpc]
     public void SceneChangeServerRpc(ServerRpcParams serverRpcParams = default)
     {
+        PlayerEnteredGame();
+
         EnterGameClientRpc(props);
 
         ServerManager.Singleton.PlayerSceneChanged(OwnerClientId, NetworkObjectId);
 
-        PlayerEnteredGame();
+        
     }
 
     public static Transform FindTransformInChild(Transform transform, string objectName)

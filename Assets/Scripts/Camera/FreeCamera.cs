@@ -47,8 +47,9 @@ public class FreeCamera : MonoBehaviour
         if (GameManager.GetPlayer() == null)
             return;
         if (m_movement == null)
-            m_movement = GameManager.GetPlayer().GetComponentInChildren<Movement>();
-        m_movement.isMovementEnabled = false;
+            m_movement = GameManager.GetPlayer().GetComponent<Movement>();
+        if (m_movement != null)
+            m_movement.isMovementEnabled = false;
     }
 
     private void OnDisable()
@@ -56,7 +57,8 @@ public class FreeCamera : MonoBehaviour
         if (GameManager.GetPlayer() == null)
             return;
         if (m_movement == null)
-            m_movement = GameManager.GetPlayer().GetComponentInChildren<Movement>();
-        m_movement.isMovementEnabled = true;
+            m_movement = GameManager.GetPlayer().GetComponent<Movement>();
+        if (m_movement != null)
+            m_movement.isMovementEnabled = true;
     }
 }
