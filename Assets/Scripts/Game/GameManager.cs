@@ -412,10 +412,10 @@ public class GameManager : NetworkBehaviour
     /// </summary>
     public static Player GetPlayerByNetworkID(ulong netID)
     {
-        for (int i = 0; i < Players.Count; i++)
+        for (int i = 0; i < ServerManager.Singleton.playersList.Count; i++)
         {
-            Player p = Players[i];
-            if (p.NetworkObjectId == netID) return Players[i];
+            Player p = ServerManager.Singleton.playersList[i];
+            if (p.NetworkObjectId == netID) return ServerManager.Singleton.playersList[i];
         }
         return null;
     }

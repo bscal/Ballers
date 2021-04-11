@@ -112,13 +112,8 @@ public class Player : CommonPlayer
             RequestIdsClient();
         }
 
-        ServerManager.Singleton.AddPlayer(NetworkObjectId, gameObject, this);
-        if (IsServer)
-        {
-            GameObject prefab = ServerManager.PrefabFromTeamID(props.teamID);
-            print($"Client {OwnerClientId} | {NetworkObjectId} model = {prefab.name}");
-            Instantiate(prefab, gameObject.transform);
-        }
+        if (!IsServer)
+            ServerManager.Singleton.AddPlayer(NetworkObjectId, gameObject, this);
 
         //if ((IsServer || !IsOwner) && m_shotmeter != null)
             //Destroy(m_shotmeter);
@@ -155,7 +150,9 @@ public class Player : CommonPlayer
     {
         base.PlayerEnteredGame();
 
-        
+        GameObject prefab = ServerManager.PrefabFromTeamID(props.teamID);
+        print($"Client {OwnerClientId} | {NetworkObjectId} model = {prefab.name}");
+        Instantiate(prefab, gameObject.transform);
         InitilizeModel();
 
         m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
@@ -226,7 +223,7 @@ public class Player : CommonPlayer
     {
         PlayerEnteredGame();
 
-        EnterGameClientRpc(props);
+        //EnterGameClientRpc(props);
 
         ServerManager.Singleton.PlayerSceneChanged(OwnerClientId, NetworkObjectId);
 

@@ -238,7 +238,7 @@ public class BallHandling : NetworkBehaviour
 
     public void OnChangeBallHandler(ulong lastPlayer, ulong newPlayer)
     {
-        if (shotInAction)
+        if (IsServer && shotInAction)
         {
             OnShotMissed();
         }
@@ -247,11 +247,14 @@ public class BallHandling : NetworkBehaviour
     // =================================== RPCs ===================================
     public void OnShoot(ulong netID, ShotData shotData, ShotBarData shotBarData)
     {
-        m_shooter = netID;
-        m_shotData = shotData;
-        m_shotBarData = shotBarData;
-        m_body.isKinematic = false;
-        Reset();
+        if (IsServer)
+        {
+            m_shooter = netID;
+            m_shotData = shotData;
+            m_shotBarData = shotBarData;
+            m_body.isKinematic = false;
+            Reset();
+        }
     }
 
     [ServerRpc]
@@ -262,7 +265,8 @@ public class BallHandling : NetworkBehaviour
     // =================================== Public Functions ===================================
     public void StopBall()
     {
-        m_body.velocity = Vector3.zero;
+        if (IsServer)
+            m_body.velocity = Vector3.zero;
     }
 
     public void BallFollowArc(ulong netID, float releaseDist, float releaseDiff)

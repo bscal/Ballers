@@ -166,9 +166,7 @@ public class ServerManager : NetworkBehaviour
             NetworkObject netObj = playerObject.GetComponent<NetworkObject>();
             netObj.SpawnAsPlayerObject(id);
 
-            playerObjects.Add(netObj.NetworkObjectId, playerObject);
-            playersList.Add(playerObject.GetComponent<Player>());
-            //playerObject.GetComponent<Player>().InitilizeModel();
+            AddPlayer(netObj.NetworkObjectId, playerObject, playerObject.GetComponent<Player>());
         }
     }
 

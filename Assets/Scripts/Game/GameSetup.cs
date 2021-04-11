@@ -57,7 +57,7 @@ public class GameSetup : NetworkBehaviour
                     NetworkObject obj = go.GetComponent<NetworkObject>();
                     obj.Spawn();
 
-                    ServerManager.Singleton.playerObjects.Add(obj.NetworkObjectId, go);
+                    ServerManager.Singleton.AddPlayer(obj.NetworkObjectId, go, p);
                 }
             }
         }
