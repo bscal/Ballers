@@ -786,7 +786,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 553367646, guid: 2cf0204740b240345837345804dbec80, type: 3}
       propertyPath: usingDedicated
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1473776628, guid: 2cf0204740b240345837345804dbec80, type: 3}
       propertyPath: m_Enabled
@@ -795,7 +795,7 @@ PrefabInstance:
     - target: {fileID: 1827661350794515593, guid: 2cf0204740b240345837345804dbec80,
         type: 3}
       propertyPath: ConnectAddress
-      value: 198.55.127.254
+      value: 127.0.0.1
       objectReference: {fileID: 0}
     - target: {fileID: 3826671062112935199, guid: 2cf0204740b240345837345804dbec80,
         type: 3}

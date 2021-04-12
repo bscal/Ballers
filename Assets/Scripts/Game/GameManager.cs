@@ -32,7 +32,7 @@ public class GameManager : NetworkBehaviour
     public event Action AllPlayersConnected;
 
     private static BallHandling BallHandling;
-    private readonly static List<Player> Players = new List<Player>();
+    private static List<Player> Players = new List<Player>();
     private readonly static List<BasicDummy> Dummies = new List<BasicDummy>();
     private readonly static List<AIPlayer> AIs = new List<AIPlayer>();
     private static Player LocalPlayer => Match.localPlayer;
@@ -86,6 +86,8 @@ public class GameManager : NetworkBehaviour
         //GameState.QuarterEnd += OnQuarterEnd;
         GameState.HalfEnd += OnHalfEnd;
         //GameState.ShotClockViolation += OnShotClockViolations;
+
+        Players = ServerManager.Singleton.playersList;
     }
 
     public override void NetworkStart()
@@ -100,7 +102,6 @@ public class GameManager : NetworkBehaviour
             ball = Instantiate(m_ballPrefab, new Vector3(1, 3, 1), Quaternion.identity);
             ball.GetComponent<NetworkObject>().Spawn();
             BallHandling = ball.GetComponent<BallHandling>();
-            ball.SetActive(false);
             ball.name = "Ball";
         }
         if (IsServer)
@@ -211,7 +212,7 @@ public class GameManager : NetworkBehaviour
     {
         Player player = netPlayer.GetComponent<Player>();
 
-        if (!player.props.isAI)
+        if (player.props.isAI)
         {
             player.props.teamID = ServerManager.Singleton.players[player.id].team;
             player.props.slot = ServerManager.Singleton.players[player.id].slot;
@@ -220,6 +221,26 @@ public class GameManager : NetworkBehaviour
         // Add the player to game.
         AddPlayer(player);
         RegisterPlayerClientRpc(RPCParams.ClientParamsOnlyClient(netPlayer.OwnerClientId));
+    }
+
+    [ServerRpc]
+    public void PlayerLoadedServerRpc(ulong clientId, ulong netId, ulong steamId)
+    {
+        Player p = GetPlayerByNetworkID(netId);
+        RegisterPlayer(p.NetworkObject);
+        PlayerLoadedClientRpc(netId);
+    }
+
+    [ClientRpc]
+    public void PlayerLoadedClientRpc(ulong netId, ClientRpcParams cParams = default)
+    {
+        if (IsOwner)
+        {
+            ClientPlayer.Singleton.State = ServerPlayerState.READY;
+            LocalPlayerInitilized();
+        }
+        if (!IsServer)
+            RegisterPlayer(GetPlayerByNetworkID(netId).NetworkObject);
     }
 
     [ClientRpc]
@@ -311,9 +332,6 @@ public class GameManager : NetworkBehaviour
             Debug.LogWarning("GameManager: Attempted to re registered player. Skipping.");
             return;
         }
-
-        if (IsServer)
-            Players.Add(p);
 
         p.props.slot = Singleton.teams[p.props.teamID].GetOpenSlot();
         Singleton.teams[p.props.teamID].teamSlots.Add(p.props.slot, p);
@@ -450,7 +468,7 @@ public class GameManager : NetworkBehaviour
     public static Player GetPlayerBySlot(int teamID, int slot)
     {
         int clampTeamID = Mathf.Clamp(teamID, 0, 1);
-        int campSlot = Mathf.Clamp(slot, 0, Match.MatchSettings.TeamSize);
+        int campSlot = Mathf.Clamp(slot, 0, Match.MatchSettings.TeamSize - 1);
         return Singleton.teams[clampTeamID].teamSlots[campSlot];
     }
 

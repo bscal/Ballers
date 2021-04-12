@@ -150,6 +150,9 @@ public class Player : CommonPlayer
     {
         base.PlayerEnteredGame();
 
+        if (IsOwner)
+            GameManager.Singleton.PlayerLoadedServerRpc(OwnerClientId, NetworkObjectId, ClientPlayer.Singleton.SteamID);
+
         GameObject prefab = ServerManager.PrefabFromTeamID(props.teamID);
         print($"Client {OwnerClientId} | {NetworkObjectId} model = {prefab.name}");
         Instantiate(prefab, gameObject.transform);
@@ -159,8 +162,6 @@ public class Player : CommonPlayer
         if (IsOwner && !IsNpc)
         {
             m_shotmeter = gameObject.AddComponent<ShotMeter>();
-            if (m_shotmeter != null)
-                m_shotmeter.enabled = false;
             m_roundShotMeter = GameObject.Find("HUD/Canvas/RoundShotMeter").GetComponent<RoundShotMeter>();
         }
     }

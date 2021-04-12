@@ -109,7 +109,7 @@ public class SyncedMatchState : NetworkBehaviour
                 // Syncs the MatchState with all players
 
 
-                SyncMatchStateClientRpc(m_lastSync, m_state);
+                //SyncMatchStateClientRpc(m_lastSync, m_state);
             }
         }
     }

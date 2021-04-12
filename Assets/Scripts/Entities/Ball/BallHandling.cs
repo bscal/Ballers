@@ -133,7 +133,6 @@ public class BallHandling : NetworkBehaviour
         GameManager.SetBallHandlingInstance(this);
         m_ball = NetworkObject.gameObject;
         m_collider = GetComponent<SphereCollider>();
-        name = "Ball";
         if (IsServer)
         {
             m_shotManager = GameManager.Singleton.gameObject.GetComponent<ShotManager>();

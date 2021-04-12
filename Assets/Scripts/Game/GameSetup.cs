@@ -65,7 +65,6 @@ public class GameSetup : NetworkBehaviour
         if (IsOwner)
         {
             m_hasClientLoaded = true;
-            PlayerLoadedServerRpc(NetworkManager.Singleton.LocalClientId, ClientPlayer.Singleton.SteamID);
         }
     }
 
@@ -90,23 +89,5 @@ public class GameSetup : NetworkBehaviour
     {
         if (IsOwner)
             m_hasClientConnected = hasConnected;
-    }
-
-    [ServerRpc]
-    public void PlayerLoadedServerRpc(ulong clientId, ulong steamId)
-    {
-        NetworkObject netObj = NetworkManager.ConnectedClients[clientId].PlayerObject;
-        GameManager.Singleton.RegisterPlayer(netObj);
-        PlayerLoadedClientRpc(RPCParams.ClientParamsOnlyClient(clientId));
-    }
-
-    [ClientRpc]
-    public void PlayerLoadedClientRpc(ClientRpcParams cParams = default)
-    {
-        if (IsOwner)
-        {
-            ClientPlayer.Singleton.State = ServerPlayerState.READY;
-            GameManager.Singleton.LocalPlayerInitilized();
-        }
     }
 }
