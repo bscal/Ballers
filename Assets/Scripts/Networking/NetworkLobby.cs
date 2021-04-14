@@ -22,17 +22,15 @@ public class NetworkLobby : MonoBehaviour
         NetworkManager.Singleton.OnClientDisconnectCallback += OnDisconnected;
         NetworkManager.Singleton.OnServerStarted += OnServerReady;
 
-
-        LeanTween.delayedCall(5.0f, () => {
-            if (isDedicated)
-            {
-                Debug.Log("Starting Server on delay!");
+        if (isDedicated)
+        {
+            Debug.Log("Headless detected starting server in 5 seconds...");
+            LeanTween.delayedCall(5.0f, () => {
+                Debug.Log("Starting Server!");
                 NetworkManager.Singleton.StartServer();
-            }
-        });
-
-        
-            
+                Match.InitMatch(5);
+            });
+        }
     }
 
     // Used for SteamP2P which was remvoed. Kept incase want to readd.

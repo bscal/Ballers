@@ -1,15 +1,4 @@
 ﻿using Steamworks;
-using System.Collections.Generic;
-using UnityEngine;
-
-public static class TeamGlobals
-{
-    public static List<ulong> HomeIds { get; set; }
-    public static List<ulong> AwayIds { get; set; }
-    public static Dictionary<int, ulong> HomeIdsByPosition { get; set; }
-    public static Dictionary<int, ulong> AwayIdsByPosition { get; set; }
-
-}
 
 public static class Match
 {
@@ -23,18 +12,18 @@ public static class Match
 
     public static Player localPlayer;
 
-    public static MatchTeam[] matchTeams = new MatchTeam[] {
-        new MatchTeam(),
-        new MatchTeam()
-    };
+    public static MatchTeam[] matchTeams;
 
     public static bool initilized = false;
 
-    public static void InitMatch()
+    public static void InitMatch(int size)
     {
         initilized = true;
-        //ResetDefaults();
-        //ServerManager.Singleton.ResetDefaults();
+        PlayersNeeded = size;
+        matchTeams = new MatchTeam[] {
+            new MatchTeam(size),
+            new MatchTeam(size)
+        };
     }
 
     public static void ResetDefaults()
@@ -42,17 +31,13 @@ public static class Match
         MatchID = 0;
         HostID = CSteamID.Nil;
         HostServer = false;
-        matchTeams = new MatchTeam[] {
-            new MatchTeam(),
-            new MatchTeam()
-        };
+        matchTeams = null;
     }
 
     public static void SetupPlayer(ulong id, ulong steamid, int cid)
     {
         int teamID;
 
-        Debug.Log(MatchSettings);
         if (matchTeams[0].numOfPlayers >= MatchSettings.TeamSize)
             teamID = 1;
         else if (matchTeams[1].numOfPlayers >= MatchSettings.TeamSize)
@@ -68,6 +53,24 @@ public static class Match
         ServerManager.Singleton.AssignPlayer(id, teamID);
         team.numOfPlayers++;
         team.teamSize++;
+    }
+
+    public static void AssignPlayer(Player player)
+    {
+        int openHome = matchTeams[0].GetNumOfOpenSlots();
+        int openAway = matchTeams[1].GetNumOfOpenSlots();
+
+        int teamId;
+
+        if (openHome > 0 && openHome >= openAway)
+            teamId = 0;
+        else
+            teamId = 1;
+
+        MatchTeam team = matchTeams[teamId];
+        team.AddSlot(team.NextSlot(), player);
+        team.numOfPlayers++;
+        player.props.teamID = teamId;
     }
 
     public static void RemovePlayer(ulong steamid)

@@ -47,6 +47,9 @@ public class GameSetup : NetworkBehaviour
                     Player p = go.GetComponent<Player>();
                     Assert.IsNotNull(p, "aiLogic's Player component is null.");
 
+                    //p.props.teamID = tid;
+
+                    Match.AssignPlayer(p);
                     p.InitilizeModel();
 
                     AIPlayer aiLogic = go.GetComponent<AIPlayer>();
@@ -57,7 +60,8 @@ public class GameSetup : NetworkBehaviour
                     NetworkObject obj = go.GetComponent<NetworkObject>();
                     obj.Spawn();
 
-                    ServerManager.Singleton.AddPlayer(obj.NetworkObjectId, go, p);
+                    //p.props.slot = Singleton.teams[p.props.teamID].GetOpenSlot();
+                    //ServerManager.Singleton.AddPlayer(obj.NetworkObjectId, go, p);
                 }
             }
         }

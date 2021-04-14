@@ -18,7 +18,6 @@ public class Player : CommonPlayer
     public string username = "test";
     [Header("CPU or Dummy Controls")]
     public bool isDummy;
-    public bool isAi;
     public int aiPlayerID = 0;
     [Header("Server Values")]
     public float height;
@@ -124,9 +123,9 @@ public class Player : CommonPlayer
         if (IsServer)
         {
             m_timer += Time.deltaTime;
-            if (m_timer > 1)
+            if (m_timer > .2f)
             {
-                m_timer -= 1;
+                m_timer -= .2f;
 
                 ServerSendPlayerClientRpc(props);
             }
@@ -151,7 +150,7 @@ public class Player : CommonPlayer
         base.PlayerEnteredGame();
 
         if (IsOwner)
-            GameManager.Singleton.PlayerLoadedServerRpc(OwnerClientId, NetworkObjectId, ClientPlayer.Singleton.SteamID);
+            PlayerLoadedServerRpc(OwnerClientId, NetworkObjectId, ClientPlayer.Singleton.SteamID);
 
         GameObject prefab = ServerManager.PrefabFromTeamID(props.teamID);
         print($"Client {OwnerClientId} | {NetworkObjectId} model = {prefab.name}");
@@ -229,6 +228,12 @@ public class Player : CommonPlayer
         ServerManager.Singleton.PlayerSceneChanged(OwnerClientId, NetworkObjectId);
 
         
+    }
+
+    [ServerRpc]
+    public void PlayerLoadedServerRpc(ulong clientId, ulong netId, ulong steamId)
+    {
+        GameManager.Singleton.PlayerLoaded(clientId, netId, steamId);
     }
 
     public static Transform FindTransformInChild(Transform transform, string objectName)
@@ -605,9 +610,8 @@ public class Player : CommonPlayer
     [ClientRpc]
     public void ServerSendPlayerClientRpc(PlayerProperties props, ClientRpcParams clientRpcParams = default)
     {
-        print("Recieving Props -> " + NetworkObjectId);
         this.props = props;
-        if (!IsHost && hasEnteredGame)
+        if (hasEnteredGame)
             GameManager.GetPlayerByNetworkID(NetworkObjectId).props = props;
     }
 /*

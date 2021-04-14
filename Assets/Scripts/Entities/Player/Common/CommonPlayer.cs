@@ -35,6 +35,7 @@ public class CommonPlayer : NetworkBehaviour
     [ServerRpc]
     public void ClientLoadedServerRpc(ServerRpcParams serverRpcParams = default)
     {
+        print("loading " + serverRpcParams.Receive.SenderClientId);
         ServerPlayer sp = ServerManager.Singleton.players[serverRpcParams.Receive.SenderClientId];
         if (sp != null)
         {

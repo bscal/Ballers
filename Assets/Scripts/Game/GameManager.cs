@@ -92,27 +92,18 @@ public class GameManager : NetworkBehaviour
 
     public override void NetworkStart()
     {
-        if (IsClient)
-        {
-            //NetworkEvents.Singleton.RegisterEvent(NetworkEvent.GAME_START, this, OnStartGame);
-        }
-
         if (IsServer)
         {
             ball = Instantiate(m_ballPrefab, new Vector3(1, 3, 1), Quaternion.identity);
-            ball.GetComponent<NetworkObject>().Spawn();
             BallHandling = ball.GetComponent<BallHandling>();
             ball.name = "Ball";
-        }
-        if (IsServer)
-        {
-            //StartCoroutine(DEBUG_SERVER_UPDATE());
+            ball.GetComponent<NetworkObject>().Spawn();
         }
     }
 
     void Update()
     {
-        if (IsServer)
+/*        if (IsServer)
         {
             if (!HasStarted)
             {
@@ -122,12 +113,7 @@ public class GameManager : NetworkBehaviour
                     HasStarted = true;
                 }
             }
-        }
-
-        if (BallHandling == null)
-        {
-            BallHandling = GameObject.FindGameObjectWithTag("Ball")?.GetComponent<BallHandling>();
-        }
+        }*/
     }
 
     public void LocalPlayerInitilized()
@@ -151,6 +137,7 @@ public class GameManager : NetworkBehaviour
         // TODO tip ball?
         GameState.MatchStateValue = EMatchState.INPROGRESS;
         GameStartedServer?.Invoke();
+        HasStarted = true;
         if (IsHost || IsServer)
             StartGameClientRpc();
 
@@ -223,8 +210,7 @@ public class GameManager : NetworkBehaviour
         RegisterPlayerClientRpc(RPCParams.ClientParamsOnlyClient(netPlayer.OwnerClientId));
     }
 
-    [ServerRpc]
-    public void PlayerLoadedServerRpc(ulong clientId, ulong netId, ulong steamId)
+    public void PlayerLoaded(ulong clientId, ulong netId, ulong steamId)
     {
         Player p = GetPlayerByNetworkID(netId);
         RegisterPlayer(p.NetworkObject);
@@ -234,11 +220,6 @@ public class GameManager : NetworkBehaviour
     [ClientRpc]
     public void PlayerLoadedClientRpc(ulong netId, ClientRpcParams cParams = default)
     {
-        if (IsOwner)
-        {
-            ClientPlayer.Singleton.State = ServerPlayerState.READY;
-            LocalPlayerInitilized();
-        }
         if (!IsServer)
             RegisterPlayer(GetPlayerByNetworkID(netId).NetworkObject);
     }
@@ -325,7 +306,7 @@ public class GameManager : NetworkBehaviour
             TeamAway.AddPoints(points);
     }
 
-    public static void AddPlayer(Player p)
+    private static void AddPlayer(Player p)
     {
         if (Players.Contains(p))
         {
@@ -333,7 +314,6 @@ public class GameManager : NetworkBehaviour
             return;
         }
 
-        p.props.slot = Singleton.teams[p.props.teamID].GetOpenSlot();
         Singleton.teams[p.props.teamID].teamSlots.Add(p.props.slot, p);
     }
 

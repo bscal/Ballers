@@ -1,15 +1,11 @@
-using UnityEngine;
 using MLAPI;
-using MLAPI.Connection;
-using MLAPI.NetworkVariable;
 using MLAPI.Messaging;
-using MLAPI.Spawning;
+using MLAPI.NetworkVariable;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
-using UnityEditor;
+using UnityEngine;
 
 [Serializable]
 public enum BallState
@@ -149,9 +145,9 @@ public class BallHandling : NetworkBehaviour
             m_timer += Time.deltaTime;
 
             // Time to run these are around 20x a second
-            if (m_timer > .05)
+            if (m_timer > .05f)
             {
-                m_timer = 0;
+                m_timer -= .05f;
                 // ============ Lists Closest Players ============
                 foreach (Player player in GameManager.GetPlayers())
                 {
@@ -159,7 +155,7 @@ public class BallHandling : NetworkBehaviour
 
                     float dist = Vector3.Distance(m_ball.transform.position, player.transform.position);
                     m_playerDistances[player.NetworkObjectId] = dist;
-
+                    print("playerDist: " + player.NetworkObjectId + " = " + dist);
                     if (player.playerCollider.bounds.Intersects(m_collider.bounds))
                     {
                         TouchedBall?.Invoke(player, dist);
@@ -870,7 +866,7 @@ public class BallHandling : NetworkBehaviour
 
         // Alerts the last player with possession if not null hes not holding the ball.
         if (m_currentPlayer != null)
-            SetPlayerHandlerServer(m_currentPlayer.NetworkObjectId, true);
+            SetPlayerHandlerServer(m_currentPlayer.NetworkObjectId, false);
         //SetPlayerHandlerClientRpc(m_currentPlayer.NetworkObjectId, false, RPCParams.ClientParamsOnlyClient(m_currentPlayer.OwnerClientId));
 
         int teamToSwitch = (int)TeamType.NONE;
@@ -934,16 +930,6 @@ public class BallHandling : NetworkBehaviour
     public bool IsBallLoose()
     {
         return Possession == -1;
-    }
-
-    public bool IsBallNotInPlay()
-    {
-        return Possession < -1 && Possession > 1;
-    }
-
-    private int RandNegOrPos()
-    {
-        return (UnityEngine.Random.value > .5f) ? 1 : -1;
     }
 
     private void Reset()

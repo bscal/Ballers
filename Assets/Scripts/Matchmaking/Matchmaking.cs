@@ -101,7 +101,7 @@ public class Matchmaking : MonoBehaviour
 
         if (!m_lobby.usingDedicated)
         {
-            Match.InitMatch();
+            Match.InitMatch(5);
             Match.NetworkLobby.SetSteamIDToConnect(ClientPlayer.Singleton.SteamID);
             Match.HostID = new CSteamID(ClientPlayer.Singleton.SteamID);
             Match.HostServer = true;
