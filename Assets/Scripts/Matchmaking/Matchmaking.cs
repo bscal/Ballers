@@ -101,7 +101,7 @@ public class Matchmaking : MonoBehaviour
 
         if (!m_lobby.usingDedicated)
         {
-            Match.InitMatch(5);
+            Match.InitMatch(new MatchSettings(BallersGamemode.SP_BOTS, 5, 4, 60.0 * 12.0, 24.0));
             Match.NetworkLobby.SetSteamIDToConnect(ClientPlayer.Singleton.SteamID);
             Match.HostID = new CSteamID(ClientPlayer.Singleton.SteamID);
             Match.HostServer = true;

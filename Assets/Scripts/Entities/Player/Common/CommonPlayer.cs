@@ -1,9 +1,5 @@
 using MLAPI;
 using MLAPI.Messaging;
-using MLAPI.SceneManagement;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CommonPlayer : NetworkBehaviour
@@ -35,7 +31,6 @@ public class CommonPlayer : NetworkBehaviour
     [ServerRpc]
     public void ClientLoadedServerRpc(ServerRpcParams serverRpcParams = default)
     {
-        print("loading " + serverRpcParams.Receive.SenderClientId);
         ServerPlayer sp = ServerManager.Singleton.players[serverRpcParams.Receive.SenderClientId];
         if (sp != null)
         {
@@ -54,10 +49,9 @@ public class CommonPlayer : NetworkBehaviour
             sp.steamId = steamId;
             sp.cid = cid;
 
-            Match.SetupPlayer(clientId, steamId, cid);
+            //Match.SetupPlayer(clientId, steamId, cid);
 
             sp.state = ServerPlayerState.IDLE;
-            sp.hasBeenSetup = true;
         }
     }
 

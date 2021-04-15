@@ -1,14 +1,11 @@
 using MLAPI;
-using MLAPI.Connection;
 using MLAPI.Messaging;
-using MLAPI.NetworkVariable.Collections;
 using MLAPI.Spawning;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.SceneManagement;
 
 public enum TeamType
 {
@@ -29,20 +26,18 @@ public class GameManager : NetworkBehaviour
     public event Action Postgame;               // After game ends timer
     public event Action<Player> PlayerRegistered;
     public event Action<Player> LocalPlayerLoaded;
-    public event Action AllPlayersConnected;
 
     private static BallHandling BallHandling;
     private static List<Player> Players = new List<Player>();
     private readonly static List<BasicDummy> Dummies = new List<BasicDummy>();
     private readonly static List<AIPlayer> AIs = new List<AIPlayer>();
-    private static Player LocalPlayer => Match.localPlayer;
 
     public Player BallHandler { get { return GetPlayerByNetworkID(BallHandling.PlayerWithBall); } }
     public Basket CurrentBasket { get { return Singleton.baskets[BallHandling.PossessionOrHome]; } }
     public int Possession { get { return BallHandling.PossessionOrHome; } }
-    public Team TeamHome { get { return teams[0]; } }
-    public Team TeamAway { get { return teams[1]; } }
-    public bool HasStarted { get; private set; }
+    public MatchTeam TeamHome { get { return Match.matchTeams[0]; } }
+    public MatchTeam TeamAway { get { return Match.matchTeams[1]; } }
+    public bool HasStarted => Match.HasGameStarted;
     public BasketballStateManager GameState { get; private set; }
 
     public bool lastShotMade;
@@ -50,14 +45,12 @@ public class GameManager : NetworkBehaviour
     public GameObject ball;
     public Vector3 centerCourt;
     public List<Vector3> inboundPositions;
-    public Team[] teams = new Team[2];
     public Basket[] baskets = new Basket[2];
     public Vector3[] freethrowPos = new Vector3[2];
     public GameObject[] inbounds;
     public GameObject loaderPrefab;
 
     private ShotManager m_shotManager;
-    private float m_pregameTime = 0;
 
     [SerializeField]
     private GameObject m_ballPrefab;
@@ -75,10 +68,6 @@ public class GameManager : NetworkBehaviour
         baskets[1].id = 1;
 
         centerCourt = GameObject.Find("CenterCourt").transform.position;
-
-        teams = new Team[2];
-        teams[0] = new Team((int)TeamType.HOME, Match.MatchSettings.TeamSize);
-        teams[1] = new Team((int)TeamType.AWAY, Match.MatchSettings.TeamSize);
 
         inbounds = GameObject.FindGameObjectsWithTag("Inbound");
 
@@ -103,23 +92,12 @@ public class GameManager : NetworkBehaviour
 
     void Update()
     {
-/*        if (IsServer)
-        {
-            if (!HasStarted)
-            {
-                m_pregameTime += Time.deltaTime;
-                if (m_pregameTime > 30.0 * 1000.0)
-                {
-                    HasStarted = true;
-                }
-            }
-        }*/
     }
 
     public void LocalPlayerInitilized()
     {
         Assert.IsNotNull(NetworkSpawnManager.GetLocalPlayerObject().gameObject.GetComponent<Player>(), "LocalPlayerObject is null.");
-        LocalPlayerLoaded?.Invoke(LocalPlayer);
+        LocalPlayerLoaded?.Invoke(ClientPlayer.Singleton.localPlayer);
     }
 
     public void BeginPregame()
@@ -134,13 +112,13 @@ public class GameManager : NetworkBehaviour
 
     public void StartGame()
     {
-        // TODO tip ball?
-        GameState.MatchStateValue = EMatchState.INPROGRESS;
-        GameStartedServer?.Invoke();
-        HasStarted = true;
-        if (IsHost || IsServer)
+        if (IsServer)
+        {
+            GameState.MatchStateValue = EMatchState.INPROGRESS;
+            Match.HasGameStarted = true;
+            GameStartedServer?.Invoke();
             StartGameClientRpc();
-
+        }
     }
 
     internal static void SetBallHandlingInstance(BallHandling ballHandling)
@@ -151,7 +129,7 @@ public class GameManager : NetworkBehaviour
     [ClientRpc]
     public void StartGameClientRpc()
     {
-        HasStarted = true;
+        Match.HasGameStarted = true;
         GameStartedClient?.Invoke();
         Debug.Log("Game Starting!");
     }
@@ -195,54 +173,6 @@ public class GameManager : NetworkBehaviour
         StartGame();
     }
 
-    public void RegisterPlayer(NetworkObject netPlayer)
-    {
-        Player player = netPlayer.GetComponent<Player>();
-
-        if (player.props.isAI)
-        {
-            player.props.teamID = ServerManager.Singleton.players[player.id].team;
-            player.props.slot = ServerManager.Singleton.players[player.id].slot;
-        }
-
-        // Add the player to game.
-        AddPlayer(player);
-        RegisterPlayerClientRpc(RPCParams.ClientParamsOnlyClient(netPlayer.OwnerClientId));
-    }
-
-    public void PlayerLoaded(ulong clientId, ulong netId, ulong steamId)
-    {
-        Player p = GetPlayerByNetworkID(netId);
-        RegisterPlayer(p.NetworkObject);
-        PlayerLoadedClientRpc(netId);
-    }
-
-    [ClientRpc]
-    public void PlayerLoadedClientRpc(ulong netId, ClientRpcParams cParams = default)
-    {
-        if (!IsServer)
-            RegisterPlayer(GetPlayerByNetworkID(netId).NetworkObject);
-    }
-
-    [ClientRpc]
-    public void RegisterPlayerClientRpc(ClientRpcParams cParams = default)
-    {
-        //LocalPlayer = NetworkSpawnManager.GetLocalPlayerObject().GetComponent<Player>();
-        //Assert.IsNotNull(LocalPlayer, "Local Player is null but client registered?");
-        Debug.Log("Client successfully registered");
-        Singleton.PlayerRegistered?.Invoke(LocalPlayer);
-    }
-
-    [ServerRpc]
-    public void UnRegisterPlayerServerRpc(ulong pid)
-    {
-        NetworkObject netObj = NetworkSpawnManager.GetPlayerNetworkObject(pid);
-
-        if (netObj.IsOwnedByServer) return;
-
-        RemovePlayer(netObj);
-    }
-
     public void HandleTurnover(Player p)
     {
         BallHandling.ChangePossession(p.OtherTeam, true, false);
@@ -260,7 +190,7 @@ public class GameManager : NetworkBehaviour
     /// <summary> Returns size 2 int array. index 0 = home, 1 = away </summary>
     public int[] GetScores()
     {
-        return new int[] { TeamHome.TeamData.points, TeamAway.TeamData.points };
+        return new int[] { TeamHome.teamData.points, TeamAway.teamData.points };
     }
 
     /// <summary> 
@@ -269,7 +199,7 @@ public class GameManager : NetworkBehaviour
     /// </summary>
     public int GetScoreDifference()
     {
-        return TeamHome.TeamData.points - TeamAway.TeamData.points;
+        return TeamHome.teamData.points - TeamAway.teamData.points;
     }
 
     public GameObject GetClosestInbound(Vector3 pos)
@@ -306,31 +236,6 @@ public class GameManager : NetworkBehaviour
             TeamAway.AddPoints(points);
     }
 
-    private static void AddPlayer(Player p)
-    {
-        if (Players.Contains(p))
-        {
-            Debug.LogWarning("GameManager: Attempted to re registered player. Skipping.");
-            return;
-        }
-
-        Singleton.teams[p.props.teamID].teamSlots.Add(p.props.slot, p);
-    }
-
-    public static void RemovePlayer(NetworkObject netObj)
-    {
-        print("Removing player " + netObj.OwnerClientId + " " + netObj.NetworkObjectId);
-        Player p = GetPlayerByClientID(netObj.OwnerClientId);
-
-        if (p == null)
-        {
-            Debug.LogError("GameManager: Attempted to remove non registered/null player.");
-            return;
-        }
-
-        Players.Remove(p);
-    }
-
     public static void AddAI(AIPlayer ai)
     {
         if (AIs.Contains(ai))
@@ -340,7 +245,6 @@ public class GameManager : NetworkBehaviour
         }
 
         AIs.Add(ai);
-        AddPlayer(ai.GetPlayer());
     }
 
     public static void RemoveAI(AIPlayer ai)
@@ -380,7 +284,7 @@ public class GameManager : NetworkBehaviour
 
     public static Player GetPlayer()
     {
-        return LocalPlayer;
+        return ClientPlayer.Singleton.localPlayer;
     }
 
     public static List<Player> GetPlayersInRadius(float radius)
@@ -388,7 +292,7 @@ public class GameManager : NetworkBehaviour
         List<Player> res = new List<Player>();
         foreach (Player p in Players)
         {
-            if (LocalPlayer.Dist(p.transform.position) < radius)
+            if (ClientPlayer.Singleton.localPlayer.Dist(p.transform.position) < radius)
                 res.Add(p);
         }
         return res;
@@ -397,9 +301,9 @@ public class GameManager : NetworkBehaviour
     public static List<Player> GetEnemeiesInRadius(float radius)
     {
         List<Player> res = new List<Player>();
-        foreach (Player p in Singleton.teams[LocalPlayer.OtherTeam].teamSlots.Values)
+        foreach (Player p in Match.matchTeams[ClientPlayer.Singleton.localPlayer.OtherTeam].slotToPlayer.Values)
         {
-            if (LocalPlayer.Dist(p.transform.position) < radius)
+            if (ClientPlayer.Singleton.localPlayer.Dist(p.transform.position) < radius)
                 res.Add(p);
         }
         return res;
@@ -410,12 +314,7 @@ public class GameManager : NetworkBehaviour
     /// </summary>
     public static Player GetPlayerByNetworkID(ulong netID)
     {
-        for (int i = 0; i < ServerManager.Singleton.playersList.Count; i++)
-        {
-            Player p = ServerManager.Singleton.playersList[i];
-            if (p.NetworkObjectId == netID) return ServerManager.Singleton.playersList[i];
-        }
-        return null;
+        return Players.Find((player) => player.NetworkObjectId == netID);
     }
 
     /// <summary>
@@ -440,25 +339,6 @@ public class GameManager : NetworkBehaviour
             if (Players[i].props.steamID == steamid) return Players[i];
         }
         return null;
-    }
-
-    /// <summary>
-    /// Takes a team and slot id and returns a Player from that team slot.
-    /// </summary>
-    public static Player GetPlayerBySlot(int teamID, int slot)
-    {
-        int clampTeamID = Mathf.Clamp(teamID, 0, 1);
-        int campSlot = Mathf.Clamp(slot, 0, Match.MatchSettings.TeamSize - 1);
-        return Singleton.teams[clampTeamID].teamSlots[campSlot];
-    }
-
-    public static bool ContainsPlayer(ulong id)
-    {
-        for (int i = 0; i < Players.Count; i++)
-        {
-            if (Players[i].OwnerClientId == id) return true;
-        }
-        return false;
     }
 
     public static List<Player> GetPlayers()
@@ -491,13 +371,6 @@ public class GameManager : NetworkBehaviour
         return true;
     }
 
-    public void RegisterLocalPlayerToServer(ulong pid)
-    {
-        //AddPlayer(NetworkSpawnManager.GetLocalPlayerObject(), ClientPlayer.Singleton.SteamID);
-        // Registers player to server
-        //RegisterPlayerServerRpc(pid, ClientPlayer.Singleton.SteamID);
-    }
-
     /// <summary>
     /// Synces the state the the given state data.
     /// This sync is done throughout the game.
@@ -505,11 +378,9 @@ public class GameManager : NetworkBehaviour
     /// <param name="state"></param>
     public void SyncState(SyncedMatchStateData state)
     {
-        HasStarted = state.HasStarted;
+        Match.HasGameStarted = state.HasStarted;
         BallHandling.PlayerWithBall = state.PlayerWithBall;
         BallHandling.Possession = state.TeamWithPossession;
-        teams[(int)TeamType.HOME].TeamData = state.Teams[(int)TeamType.HOME];
-        teams[(int)TeamType.AWAY].TeamData = state.Teams[(int)TeamType.AWAY];
     }
 
 
@@ -523,14 +394,4 @@ public class GameManager : NetworkBehaviour
         //    teams[teamid].ReadSyncTeamSlots(reader, count);
         //}
     }
-
-    /// <summary>
-    /// Syncs the essential data with the given client.
-    /// Useful for reconnects, host changes, new connections.
-    /// </summary>
-    public void FullGameSync(ulong clientid)
-    {
-
-    }
-
 }

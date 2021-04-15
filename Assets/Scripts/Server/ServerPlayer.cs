@@ -33,9 +33,6 @@ public class ServerPlayer
     public readonly ulong id;
     public int cid;
     public ulong steamId;
-    public int team;
-    public int slot;
-    public bool hasBeenSetup;
 
     public ServerPlayerStatus status;
     public ServerPlayerState state;
@@ -45,8 +42,18 @@ public class ServerPlayer
         this.id = id;
     }
 
-    public bool IsFullyConnected()
+    public bool IsFullyLoaded()
     {
-        return (state == ServerPlayerState.IDLE || state == ServerPlayerState.READY) && status == ServerPlayerStatus.CONNECTED;
+        return state == ServerPlayerState.IDLE && status == ServerPlayerStatus.CONNECTED;
+    }
+
+    public bool IsReady()
+    {
+        return state == ServerPlayerState.READY;
+    }
+
+    public bool IsConnected()
+    {
+        return status == ServerPlayerStatus.CONNECTED;
     }
 }

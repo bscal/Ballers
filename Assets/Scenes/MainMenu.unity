@@ -527,8 +527,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cb9efc37c15f5b468c9d6cfc6173ab1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  status: 0
   lastCharacterUpdate: 0
+  localPlayer: {fileID: 0}
 --- !u!4 &250698572
 Transform:
   m_ObjectHideFlags: 0
@@ -786,7 +786,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 553367646, guid: 2cf0204740b240345837345804dbec80, type: 3}
       propertyPath: usingDedicated
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1473776628, guid: 2cf0204740b240345837345804dbec80, type: 3}
       propertyPath: m_Enabled
@@ -795,7 +795,7 @@ PrefabInstance:
     - target: {fileID: 1827661350794515593, guid: 2cf0204740b240345837345804dbec80,
         type: 3}
       propertyPath: ConnectAddress
-      value: 198.55.127.254
+      value: 127.0.0.1
       objectReference: {fileID: 0}
     - target: {fileID: 3826671062112935199, guid: 2cf0204740b240345837345804dbec80,
         type: 3}

@@ -21,7 +21,8 @@ public class Player : CommonPlayer
     public int aiPlayerID = 0;
     [Header("Server Values")]
     public float height;
-    public bool hasReadyUp;
+    // TODO handle this
+    public bool hasReadyUp = true;
 
     public PlayerProperties props = new PlayerProperties();
 
@@ -65,7 +66,7 @@ public class Player : CommonPlayer
         {
             if (IsOnOffense() || GameManager.GetBallHandling().IsBallLoose()) return null;
             if (props.isHelping) return GameManager.Singleton.BallHandler;
-            else if (m_assignment == null) m_assignment = GameManager.GetPlayerBySlot(FlipTeamID(props.teamID), props.slot);
+            else if (m_assignment == null) m_assignment = Match.matchTeams[OtherTeam].GetPlayerBySlot(props.slot);
             return (m_assignment == null) ? null : m_assignment;
         }
         set { m_assignment = value; }
@@ -95,7 +96,7 @@ public class Player : CommonPlayer
 
     private void Start()
     {
-        Match.localPlayer = this;
+        ClientPlayer.Singleton.localPlayer = this;
         // Initialize Player values
         m_playerCircle = GetComponentInChildren<SpriteRenderer>();
         m_center = transform.Find("Center").gameObject;
@@ -111,11 +112,7 @@ public class Player : CommonPlayer
             RequestIdsClient();
         }
 
-        if (!IsServer)
-            ServerManager.Singleton.AddPlayer(NetworkObjectId, gameObject, this);
-
-        //if ((IsServer || !IsOwner) && m_shotmeter != null)
-            //Destroy(m_shotmeter);
+        ServerManager.Singleton.AddPlayer(NetworkObjectId, gameObject, this);
     }
 
     void Update()
@@ -148,9 +145,6 @@ public class Player : CommonPlayer
     protected override void PlayerEnteredGame()
     {
         base.PlayerEnteredGame();
-
-        if (IsOwner)
-            PlayerLoadedServerRpc(OwnerClientId, NetworkObjectId, ClientPlayer.Singleton.SteamID);
 
         GameObject prefab = ServerManager.PrefabFromTeamID(props.teamID);
         print($"Client {OwnerClientId} | {NetworkObjectId} model = {prefab.name}");
@@ -222,18 +216,7 @@ public class Player : CommonPlayer
     public void SceneChangeServerRpc(ServerRpcParams serverRpcParams = default)
     {
         PlayerEnteredGame();
-
-        //EnterGameClientRpc(props);
-
         ServerManager.Singleton.PlayerSceneChanged(OwnerClientId, NetworkObjectId);
-
-        
-    }
-
-    [ServerRpc]
-    public void PlayerLoadedServerRpc(ulong clientId, ulong netId, ulong steamId)
-    {
-        GameManager.Singleton.PlayerLoaded(clientId, netId, steamId);
     }
 
     public static Transform FindTransformInChild(Transform transform, string objectName)
@@ -431,10 +414,10 @@ public class Player : CommonPlayer
         Player shortestPlayer = null;
         float shortestDist = float.MaxValue;
 
-        Team enemyTeam = GameManager.Singleton.teams[FlipTeamID(props.teamID)];
+        MatchTeam enemyTeam = Match.matchTeams[FlipTeamID(props.teamID)];
         for (int i = 0; i < Match.MatchSettings.TeamSize; i++)
         {
-            Player p = enemyTeam.teamSlots[i];
+            Player p = enemyTeam.GetPlayerBySlot(i);
             if (!p) continue;
             float dist = Vector3.Distance(transform.position, p.transform.position);
             if (dist < shortestDist)
@@ -463,7 +446,7 @@ public class Player : CommonPlayer
         float result = 0;
         for (int i = 0; i < Match.MatchSettings.TeamSize; i++)
         {
-            Player otherPlayer = GameManager.GetPlayerBySlot(OtherTeam, i);
+            Player otherPlayer = Match.matchTeams[OtherTeam].GetPlayerBySlot(i);
 
             if (m_outerCollider.bounds.Contains(otherPlayer.transform.position))
             {

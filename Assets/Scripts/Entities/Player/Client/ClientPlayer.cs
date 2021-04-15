@@ -11,8 +11,6 @@ public class ClientPlayer : MonoBehaviour
 {
     public static ClientPlayer Singleton { get; private set; }
 
-    public int status = 0;
-
     public int Cid { get { return (UserData != null) ? UserData.lastChar : 0; } }
     public UserData UserData { get; private set; }
     public CharacterData CharData
@@ -34,6 +32,8 @@ public class ClientPlayer : MonoBehaviour
     // Primarily for non essential or non gameplay tasks. ie. character selection menu
     public Dictionary<int, CharacterData> characterStats = new Dictionary<int, CharacterData>();
     public float lastCharacterUpdate;
+
+    public Player localPlayer;
 
     //private GameSetup m_gameSetup;
     //private SteamP2PTransport.SteamP2PTransport m_transport;
@@ -68,8 +68,6 @@ public class ClientPlayer : MonoBehaviour
 
         yield return null;
 
-        //m_gameSetup.hasClientLoaded = true;
-        status = 1;
         print("Finished loading client");
     }
 

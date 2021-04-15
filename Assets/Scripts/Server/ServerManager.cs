@@ -66,7 +66,8 @@ public class ServerManager : NetworkBehaviour
             print("loaded");
             m_startupState = StartupState.ENTER_GAME;
 
-            LoadAllPlayers();
+            CreateAI();
+            LeanTween.delayedCall(1.0f, () => LoadAllPlayers());
         }
 
         if (m_startupState == StartupState.ENTER_GAME && HaveAllPlayersEntered())
@@ -91,10 +92,6 @@ public class ServerManager : NetworkBehaviour
         AllPlayersLoaded?.Invoke();
     }
 
-    public void CreateModel(ulong clientId)
-    {
-    }
-
     public void SetupHost()
     {
         OnClientConnected(NetworkManager.Singleton.LocalClientId);
@@ -110,35 +107,12 @@ public class ServerManager : NetworkBehaviour
         return m_startupState;
     }
 
-    public void ResetDefaults()
-    {
-        players.Clear();
-    }
-
-    public void AssignPlayer(ulong id, int teamID)
-    {
-        if (IsServer)
-        {
-            players[id].team = teamID;
-        }
-    }
-
-    public void SetCharIDs(ulong id, ulong steamId, int cid)
-    {
-        if (players.TryGetValue(id, out ServerPlayer sp))
-        {
-            sp.cid = cid;
-            sp.steamId = steamId;
-        }
-    }
-
     private void OnServerStarted()
     {
         if (m_lobby.isDedicated)
         {
             Match.ResetDefaults();
-
-            Match.MatchSettings = new MatchSettings(BallersGamemode.SP_BOTS, 5, 4, 60.0 * 12.0, 24.0);
+            Match.InitMatch(new MatchSettings(BallersGamemode.SP_BOTS, 5, 4, 60.0 * 12.0, 24.0));
             Match.PlayersNeeded = 1;
             Match.MatchID = 1;
         }
@@ -146,8 +120,6 @@ public class ServerManager : NetworkBehaviour
         m_setup.SetServerManagerInstance(this);
 
         m_startupState = StartupState.LOADING;
-
-        print("starting");
     }
 
     private void OnClientConnected(ulong id)
@@ -164,9 +136,9 @@ public class ServerManager : NetworkBehaviour
 
             GameObject playerObject = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
             NetworkObject netObj = playerObject.GetComponent<NetworkObject>();
+            Player player = playerObject.GetComponent<Player>();
+            Match.AssignPlayer(player);
             netObj.SpawnAsPlayerObject(id);
-
-            AddPlayer(netObj.NetworkObjectId, playerObject, playerObject.GetComponent<Player>());
         }
     }
 
@@ -184,21 +156,10 @@ public class ServerManager : NetworkBehaviour
     {
         const float WAIT_TIME = 3f;
         float timer = 0f;
-        while (timeout > timer)
-        {
-            timer += WAIT_TIME;
-            if (HaveAllPlayersLoaded())
-            {
-                StartMatch();
-                break;
-            }
-            if (timer > timeout)
-            {
-                DestroyMatch();
-                break;
-            }
+        //while (timeout > timer)
+        //{
             yield return new WaitForSeconds(WAIT_TIME);
-        }
+        //}
     }
 
     private bool HaveAllPlayersLoaded()
@@ -208,7 +169,7 @@ public class ServerManager : NetworkBehaviour
 
         foreach (ServerPlayer sp in players.Values)
         {
-            if (!sp.IsFullyConnected())
+            if (!sp.IsFullyLoaded())
             {
                 return false;
             }
@@ -234,7 +195,7 @@ public class ServerManager : NetworkBehaviour
     {
         foreach (ServerPlayer sp in players.Values)
         {
-            if (sp.state != ServerPlayerState.READY)
+            if (!sp.IsReady())
             {
                 return false;
             }
@@ -242,14 +203,38 @@ public class ServerManager : NetworkBehaviour
         return true;
     }
 
-    private void StartMatch()
+    private void CreateAI()
     {
-        
-    }
+        if (IsServer)
+        {
+            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
 
-    private void DestroyMatch()
-    {
-        Debug.Log("destroying match");
+            // Initialize ai
+            for (int tid = 0; tid < 2; tid++)
+            {
+                MatchTeam team = Match.matchTeams[tid];
+
+                int aiToCreate = Match.MatchSettings.TeamSize - team.numOfPlayers;
+
+                for (int i = 0; i < aiToCreate; i++)
+                {
+                    GameObject go = Instantiate(aiPrefab, Vector3.zero, Quaternion.identity);
+                    GameObject modelObj = Instantiate(PrefabFromTeamID(tid), go.transform);
+
+                    Player p = go.GetComponent<Player>();
+
+                    Match.AssignPlayerWithTeam(p, tid);
+                    p.InitilizeModel();
+
+                    AIPlayer aiLogic = go.GetComponent<AIPlayer>();
+
+                    aiLogic.InitPlayer(p, tid);
+
+                    NetworkObject obj = go.GetComponent<NetworkObject>();
+                    obj.Spawn();
+                }
+            }
+        }
     }
 
     public void AddPlayer(ulong id, GameObject playerObj, Player player)
@@ -264,6 +249,7 @@ public class ServerManager : NetworkBehaviour
             return 0;
         return NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetCurrentRtt(clientId);
     }
+
     public static GameObject PrefabFromTeamID(int teamID)
     {
         if (teamID == 1)

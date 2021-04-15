@@ -155,7 +155,6 @@ public class BallHandling : NetworkBehaviour
 
                     float dist = Vector3.Distance(m_ball.transform.position, player.transform.position);
                     m_playerDistances[player.NetworkObjectId] = dist;
-                    print("playerDist: " + player.NetworkObjectId + " = " + dist);
                     if (player.playerCollider.bounds.Intersects(m_collider.bounds))
                     {
                         TouchedBall?.Invoke(player, dist);
@@ -479,7 +478,8 @@ public class BallHandling : NetworkBehaviour
         if (!passer.HasBall) return;
         if (passer.props.slot == playerSlot) return; //TODO fake pass? here because i have not decides on how to handle this
 
-        Player target = GameManager.GetPlayerBySlot(passer.props.teamID, playerSlot);
+        
+        Player target = Match.matchTeams[passer.props.teamID].GetPlayerBySlot(playerSlot);
         TryPassBall(passer, target, type);
     }
 

@@ -165,7 +165,7 @@ public class ShotManager : MonoBehaviour
     private float GetContestRating(Player p)
     {
         float rating = 0;
-        foreach (Player badPlayer in GameManager.Singleton.teams[p.OtherTeam].teamSlots.Values)
+        foreach (Player badPlayer in Match.matchTeams[p.OtherTeam].slotToPlayer.Values)
         {
             Vector3 badPos = badPlayer.transform.position;
             if (p.m_innerCollider.bounds.Contains(badPos)

@@ -28,7 +28,6 @@ public class NetworkLobby : MonoBehaviour
             LeanTween.delayedCall(5.0f, () => {
                 Debug.Log("Starting Server!");
                 NetworkManager.Singleton.StartServer();
-                Match.InitMatch(5);
             });
         }
     }
