@@ -1,14 +1,12 @@
 using MLAPI;
-using MLAPI.Messaging;
-using System;
 using UnityEngine;
 
 public class NetworkLobby : MonoBehaviour
 {
-    public bool isDedicated { get { return SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null; } }
+
     public bool usingDedicated;
-    public string host = "";
-    public int port = 7777;
+
+    public bool IsDedicated { get { return Application.isBatchMode; } }
 
     private void Awake()
     {
@@ -22,12 +20,14 @@ public class NetworkLobby : MonoBehaviour
         NetworkManager.Singleton.OnClientDisconnectCallback += OnDisconnected;
         NetworkManager.Singleton.OnServerStarted += OnServerReady;
 
-        if (isDedicated)
+        if (IsDedicated)
         {
-            Debug.Log("Headless detected starting server in 5 seconds...");
-            LeanTween.delayedCall(5.0f, () => {
-                Debug.Log("Starting Server!");
-                NetworkManager.Singleton.StartServer();
+            LeanTween.delayedCall(1.0f, () => {
+                Debug.Log("Headless detected starting server in 5 seconds...");
+                LeanTween.delayedCall(5.0f, () => {
+                    Debug.Log("Starting Server!");
+                    NetworkManager.Singleton.StartServer();
+                });
             });
         }
     }

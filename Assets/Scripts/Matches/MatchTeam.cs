@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MatchTeam
+public class MatchTeam : INetworkSerializable
 {
     public const int SLOT_NULL = -1;
     public const int SLOT_PG = 0;
@@ -102,6 +102,11 @@ public class MatchTeam
     public void AddFouls(int fouls)
     {
         teamData.fouls += fouls;
+    }
+
+    public void NetworkSerialize(NetworkSerializer serializer)
+    {
+        teamData.NetworkSerialize(serializer);
     }
 }
 

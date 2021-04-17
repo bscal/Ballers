@@ -20,6 +20,8 @@ public class ServerManager : NetworkBehaviour
 {
     public static ServerManager Singleton { get; private set; }
 
+    public const float SYNC_TIME = 1.0f;
+
     public static bool IsDedicated;
 
     public event Action AllPlayersLoaded;
@@ -40,6 +42,7 @@ public class ServerManager : NetworkBehaviour
     private NetworkLobby m_lobby;
     private MatchSetup m_setup;
     private StartupState m_startupState = StartupState.NONE;
+    private float m_syncCounter;
 
 
     private void Awake()
@@ -58,32 +61,43 @@ public class ServerManager : NetworkBehaviour
 
     private void Update()
     {
-        if (m_startupState == StartupState.NONE)
-            return;
-
-        if (m_startupState == StartupState.LOADING && HaveAllPlayersLoaded())
+        if (IsServer)
         {
-            print("loaded");
-            m_startupState = StartupState.ENTER_GAME;
+            if (m_startupState == StartupState.NONE)
+                return;
 
-            CreateAI();
-            LeanTween.delayedCall(1.0f, () => LoadAllPlayers());
-        }
+            if (m_startupState == StartupState.LOADING && HaveAllPlayersLoaded())
+            {
+                print("loaded");
+                m_startupState = StartupState.ENTER_GAME;
 
-        if (m_startupState == StartupState.ENTER_GAME && HaveAllPlayersEntered())
-        {
-            print("entering");
-            m_startupState = StartupState.PREGAME;
+                CreateAI();
+                LeanTween.delayedCall(1.0f, () => LoadAllPlayers());
+            }
 
-            AllPlayersEnteredGame();
-        }
+            if (m_startupState == StartupState.ENTER_GAME && HaveAllPlayersEntered())
+            {
+                print("entering");
+                m_startupState = StartupState.PREGAME;
 
-        if (m_startupState == StartupState.PREGAME && AllPlayersReady())
-        {
-            print("starting");
-            m_startupState = StartupState.STARTED;
+                AllPlayersEnteredGame();
+            }
 
-            GameManager.Singleton.BeginPregame();
+            if (m_startupState == StartupState.PREGAME && AllPlayersReady())
+            {
+                print("starting");
+                m_startupState = StartupState.STARTED;
+
+                GameManager.Singleton.BeginPregame();
+            }
+
+            m_syncCounter += Time.deltaTime;
+            if (m_syncCounter > SYNC_TIME)
+            {
+                m_syncCounter -= SYNC_TIME;
+                SyncMatchClientRpc(Match.matchTeams[0].teamData, Match.matchTeams[1].teamData);
+            }
+            
         }
     }
 
@@ -109,7 +123,7 @@ public class ServerManager : NetworkBehaviour
 
     private void OnServerStarted()
     {
-        if (m_lobby.isDedicated)
+        if (m_lobby.IsDedicated)
         {
             Match.ResetDefaults();
             Match.InitMatch(new MatchSettings(BallersGamemode.SP_BOTS, 5, 4, 60.0 * 12.0, 24.0));
@@ -270,5 +284,12 @@ public class ServerManager : NetworkBehaviour
             Player p = pairs.Value.GetComponent<Player>();
             p.EnterGameClientRpc(p.props);
         }
+    }
+
+    [ClientRpc]
+    private void SyncMatchClientRpc(TeamData home, TeamData away)
+    {
+        Match.matchTeams[0].teamData = home;
+        Match.matchTeams[1].teamData = away;
     }
 }

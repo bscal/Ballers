@@ -42,7 +42,7 @@ public class MatchSetup : MonoBehaviour
         NetworkSceneManager.OnSceneSwitchStarted += OnSceneSwitchStarted;
         NetworkSceneManager.OnSceneSwitched += OnSceneSwitched;
 
-        if (m_lobby.isDedicated)
+        if (m_lobby.IsDedicated)
             return;
 
         if (!Match.HostServer)
