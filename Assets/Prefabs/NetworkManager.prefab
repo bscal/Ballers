@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 553367646}
   - component: {fileID: 1827661350794515593}
   - component: {fileID: 1473776628}
-  - component: {fileID: 1473776633}
+  - component: {fileID: 1576199446420147784}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -49,10 +49,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DontDestroy: 1
   RunInBackground: 0
-  LogLevel: 0
+  LogLevel: 2
   NetworkConfig:
     ProtocolVersion: 0
-    NetworkTransport: {fileID: 1473776628}
+    NetworkTransport: {fileID: 1827661350794515593}
     RegisteredScenes:
     - MainMenu
     - Match
@@ -89,7 +89,7 @@ MonoBehaviour:
     UsePrefabSync: 0
     RecycleNetworkIds: 1
     NetworkIdRecycleDelay: 120
-    RpcHashSize: 0
+    RpcHashSize: 1
     LoadSceneTimeOut: 120
     EnableMessageBuffering: 1
     MessageBufferTimeout: 20
@@ -112,10 +112,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1ae184a0d814c64f910762761b8afa8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isDedicated: 0
   usingDedicated: 1
-  host: 
-  port: 7777
 --- !u!114 &1827661350794515593
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -131,7 +128,7 @@ MonoBehaviour:
   MessageBufferSize: 5120
   MaxConnections: 100
   MaxSentMessageQueueSize: 128
-  ConnectAddress: 127.0.0.1
+  ConnectAddress: 198.55.127.254
   ConnectPort: 7777
   ServerListenPort: 7777
   ServerWebsocketListenPort: 8887
@@ -148,7 +145,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3826671062112935203}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 57c3fe0d2bf241e48b7cddeaa1b933af, type: 3}
   m_Name: 
@@ -162,7 +159,7 @@ MonoBehaviour:
   TimeoutLimit: 32
   TimeoutMinimum: 5000
   TimeoutMaximum: 30000
---- !u!114 &1473776633
+--- !u!114 &1576199446420147784
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -182,3 +179,5 @@ MonoBehaviour:
     type: 3}
   bluePrefab: {fileID: 2935085450790121991, guid: ebb6972b28bf8874895d02036bf4f42a,
     type: 3}
+  m_lobby: {fileID: 553367646}
+  m_setup: {fileID: 0}

@@ -101,7 +101,6 @@ public class Matchmaking : MonoBehaviour
 
         if (!m_lobby.usingDedicated)
         {
-            Match.InitMatch(new MatchSettings(BallersGamemode.SP_BOTS, 5, 4, 60.0 * 12.0, 24.0));
             Match.NetworkLobby.SetSteamIDToConnect(ClientPlayer.Singleton.SteamID);
             Match.HostID = new CSteamID(ClientPlayer.Singleton.SteamID);
             Match.HostServer = true;
@@ -121,6 +120,7 @@ public class Matchmaking : MonoBehaviour
 
         SteamMatchmaking.SetLobbyMemberData(m_lobbyID, "cid", ClientPlayer.Singleton.Cid.ToString());
 
+        Match.InitMatch(new MatchSettings(BallersGamemode.SP_BOTS, 5, 4, 60.0 * 12.0, 24.0));
         Match.NetworkLobby.SetSteamIDToConnect(steamid);
         Match.MatchSettings = new MatchSettings(BallersGamemode.SP_BOTS, 5, 4, 60.0 * 12.0, 24.0);
         Match.PlayersNeeded = int.Parse(SteamMatchmaking.GetLobbyData(m_lobbyID, "NeededPlayers"));

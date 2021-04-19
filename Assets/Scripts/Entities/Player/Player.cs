@@ -208,7 +208,7 @@ public class Player : CommonPlayer
             PlayerEnteredGame();
         }
 
-        if (IsOwner && !props.isAI)
+        if (IsOwner)
             ClientLoadedServerRpc();
     }
 

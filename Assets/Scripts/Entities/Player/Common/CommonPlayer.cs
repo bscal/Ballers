@@ -63,4 +63,14 @@ public class CommonPlayer : NetworkBehaviour
         id = OwnerClientId;
         SendIdsServerRpc(steam, cid);
     }
+
+    [ClientRpc]
+    public void SyncMatchClientRpc(MatchTeam home, MatchTeam away, ClientRpcParams cParams = default)
+    {
+        if (!IsServer)
+        {
+            Match.matchTeams[0] = home;
+            Match.matchTeams[1] = away;
+        }
+    }
 }

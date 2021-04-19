@@ -32,6 +32,9 @@ public class ServerManager : NetworkBehaviour
     public GameObject redPrefab;
     public GameObject bluePrefab;
 
+    public NetworkLobby m_lobby;
+    public MatchSetup m_setup;
+
     [NonSerialized]
     public readonly Dictionary<ulong, ServerPlayer> players = new Dictionary<ulong, ServerPlayer>();
     [NonSerialized]
@@ -39,8 +42,6 @@ public class ServerManager : NetworkBehaviour
     [NonSerialized]
     public readonly List<Player> playersList = new List<Player>();
 
-    private NetworkLobby m_lobby;
-    private MatchSetup m_setup;
     private StartupState m_startupState = StartupState.NONE;
     private float m_syncCounter;
 
@@ -48,12 +49,12 @@ public class ServerManager : NetworkBehaviour
     private void Awake()
     {
         Singleton = this;
-        m_lobby = GetComponent<NetworkLobby>();
-        m_setup = GameObject.Find("MatchManager").GetComponent<MatchSetup>();
     }
 
     private void Start()
     {
+        m_lobby = GameObject.Find("NetworkManager").GetComponent<NetworkLobby>();
+        m_setup = GameObject.Find("MatchManager").GetComponent<MatchSetup>();
         NetworkManager.Singleton.OnServerStarted += OnServerStarted;
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
         NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
@@ -95,9 +96,10 @@ public class ServerManager : NetworkBehaviour
             if (m_syncCounter > SYNC_TIME)
             {
                 m_syncCounter -= SYNC_TIME;
-                SyncMatchClientRpc(Match.matchTeams[0].teamData, Match.matchTeams[1].teamData);
+                playersList.ForEach((player) => player.SyncMatchClientRpc(Match.matchTeams[0], Match.matchTeams[1], RPCParams.ClientParamsOnlyClient(player.OwnerClientId)));
+
             }
-            
+
         }
     }
 
@@ -172,7 +174,7 @@ public class ServerManager : NetworkBehaviour
         float timer = 0f;
         //while (timeout > timer)
         //{
-            yield return new WaitForSeconds(WAIT_TIME);
+        yield return new WaitForSeconds(WAIT_TIME);
         //}
     }
 
@@ -285,11 +287,5 @@ public class ServerManager : NetworkBehaviour
             p.EnterGameClientRpc(p.props);
         }
     }
-
-    [ClientRpc]
-    private void SyncMatchClientRpc(TeamData home, TeamData away)
-    {
-        Match.matchTeams[0].teamData = home;
-        Match.matchTeams[1].teamData = away;
-    }
 }
+
