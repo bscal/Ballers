@@ -1,0 +1,19 @@
+{
+    "name": "Project.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:761c4e1eae8d93e45abfc73a1055fe24",
+        "GUID:343deaaf83e0cee4ca978e7df0b80d21"
+    ],
+    "includePlatforms": [
+        "CloudRendering"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

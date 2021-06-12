@@ -208,8 +208,6 @@ public class BallHandling : NetworkBehaviour
                     m_body.MovePosition(m_currentPlayer.leftPos);
                 else
                     m_body.MovePosition(m_currentPlayer.rightPos);
-
-                print(m_currentPlayer.rightPos);
             }
             // ============ Ball Shoot ============
             else if (State == BallState.SHOT)
@@ -871,7 +869,7 @@ public class BallHandling : NetworkBehaviour
             SetPlayerHandlerServer(m_currentPlayer.NetworkObjectId, false);
         //SetPlayerHandlerClientRpc(m_currentPlayer.NetworkObjectId, false, RPCParams.ClientParamsOnlyClient(m_currentPlayer.OwnerClientId));
 
-        int teamToSwitch = (int)TeamType.NONE;
+        int teamToSwitch = Possession;
         // If newPlayer is set to NO_PLAYER id the ball should be loose.
         // There is no need to update that client or change possession until ball is picked up.
         if (newNetworkID == NO_PLAYER)
