@@ -20,7 +20,6 @@ public class CommonPlayer : NetworkBehaviour
 
     protected virtual void PlayerEnteredGame()
     {
-        hasEnteredGame = true;
         GameManager.Singleton.GameStartedClient += OnGameStarted;
     }
 

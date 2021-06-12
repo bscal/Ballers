@@ -205,9 +205,11 @@ public class BallHandling : NetworkBehaviour
                 // Tells the ball which hand to be in.
                 // These should be ok to not be in FixedUpdate
                 if (m_currentPlayer.props.isBallInLeftHand)
-                    m_body.MovePosition(m_currentPlayer.GetLeftHand().transform.position);
+                    m_body.MovePosition(m_currentPlayer.leftPos);
                 else
-                    m_body.MovePosition(m_currentPlayer.GetRightHand().transform.position);
+                    m_body.MovePosition(m_currentPlayer.rightPos);
+
+                print(m_currentPlayer.rightPos);
             }
             // ============ Ball Shoot ============
             else if (State == BallState.SHOT)
@@ -881,6 +883,7 @@ public class BallHandling : NetworkBehaviour
         else
         {
             m_currentPlayer = GameManager.GetPlayerByNetworkID(newNetworkID);
+            print("CURRENT_PLAYER = " + ((m_currentPlayer == null) ? "NULL" : m_currentPlayer.gameObject.name));
             //SetPlayerHandlerClientRpc(m_currentPlayer.NetworkObjectId, true, RPCParams.ClientParamsOnlyClient(m_currentPlayer.OwnerClientId));
             SetPlayerHandlerServer(m_currentPlayer.NetworkObjectId, true);
             BallHandlerChange?.Invoke(PlayerLastPossesion, PlayerWithBall);

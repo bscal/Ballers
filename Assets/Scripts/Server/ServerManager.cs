@@ -248,6 +248,7 @@ public class ServerManager : NetworkBehaviour
 
                     NetworkObject obj = go.GetComponent<NetworkObject>();
                     obj.Spawn();
+                    
                 }
             }
         }

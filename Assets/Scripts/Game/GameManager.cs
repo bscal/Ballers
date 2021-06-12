@@ -92,6 +92,7 @@ public class GameManager : NetworkBehaviour
 
     void Update()
     {
+
     }
 
     public void LocalPlayerInitilized()
@@ -136,7 +137,7 @@ public class GameManager : NetworkBehaviour
 
     private IEnumerator PregameTimer()
     {
-        const float TIMEOUT = 30;
+        const float TIMEOUT = 5;
         float timer = 0;
 
         DebugController.Singleton.PrintConsole($"Starting pregame... Game starts in {TIMEOUT} seconds or all players ready.");

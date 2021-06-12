@@ -73,10 +73,6 @@ public class Player : CommonPlayer
     }
 
     [SerializeField]
-    private GameObject m_rightHand;
-    [SerializeField]
-    private GameObject m_leftHand;
-    [SerializeField]
     private LineTracker m_targetTracker;
     private GameObject m_center;
     private ShotMeter m_shotmeter;
@@ -86,6 +82,10 @@ public class Player : CommonPlayer
     private Movement m_movement;
     private ShotManager m_shotManager;
     private SpriteRenderer m_playerCircle;
+    private GameObject m_rightHand;
+    private GameObject m_leftHand;
+    public Vector3 rightPos = Vector3.zero;
+    public Vector3 leftPos = Vector3.zero;
 
     private void Awake()
     {
@@ -101,6 +101,7 @@ public class Player : CommonPlayer
         m_playerCircle = GetComponentInChildren<SpriteRenderer>();
         m_center = transform.Find("Center").gameObject;
         m_movement = GetComponent<Movement>();
+        props.isRightHanded = true;
     }
 
     public override void NetworkStart()
@@ -132,6 +133,9 @@ public class Player : CommonPlayer
 
         if (IsOwner && !props.isAI)
         {
+            HandToServerServerRpc(m_rightHand.transform.position, m_leftHand.transform.position);
+            print(m_rightHand.transform.position);
+
             if (IsOnDefense())
                 m_targetTracker.gameObject.SetActive(true);
             else 
@@ -150,6 +154,7 @@ public class Player : CommonPlayer
         print($"Client {OwnerClientId} | {NetworkObjectId} model = {prefab.name}");
         Instantiate(prefab, gameObject.transform);
         InitilizeModel();
+        hasEnteredGame = true;
 
         m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
         if (IsOwner && !IsNpc)
@@ -239,6 +244,13 @@ public class Player : CommonPlayer
     public void ShootBall()
     {
         ShootBallServerRpc(NetworkObjectId);
+    }
+
+    [ServerRpc]
+    private void HandToServerServerRpc(Vector3 rightPos, Vector3 leftPos)
+    {
+        this.rightPos = rightPos;
+        this.leftPos = leftPos;
     }
 
     [ServerRpc]
