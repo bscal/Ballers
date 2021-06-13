@@ -1,3 +1,4 @@
+using MLAPI;
 using MLAPI.Messaging;
 using MLAPI.SceneManagement;
 using MLAPI.Serialization.Pooled;
@@ -5,7 +6,7 @@ using System;
 using System.IO;
 using UnityEngine;
 
-public class Player : CommonPlayer
+public class Player : NetworkBehaviour
 {
     // Local Player Events
     //  These are not synced over the network and only used by local client.
@@ -23,6 +24,10 @@ public class Player : CommonPlayer
     public float height;
     // TODO handle this
     public bool hasReadyUp = true;
+
+    public ulong id;
+    public bool hasEnteredGame;
+    protected float m_timer;
 
     public PlayerProperties props = new PlayerProperties();
 
@@ -89,8 +94,6 @@ public class Player : CommonPlayer
 
     private void Awake()
     {
-        base.Awake();
-
         NetworkSceneManager.OnSceneSwitched += OnSceneSwitched;
     }
 
@@ -134,21 +137,19 @@ public class Player : CommonPlayer
         if (IsOwner && !props.isAI)
         {
             HandToServerServerRpc(m_rightHand.transform.position, m_leftHand.transform.position);
-            print(m_rightHand.transform.position);
 
             if (IsOnDefense())
                 m_targetTracker.gameObject.SetActive(true);
             else 
                 m_targetTracker.gameObject.SetActive(false);
-
-            m_target = GameManager.Singleton.baskets[GameManager.Singleton.Possession].gameObject.transform.position;
         }
 
+        m_target = GameManager.Singleton.baskets[GameManager.Singleton.Possession].gameObject.transform.position;
     }
 
-    protected override void PlayerEnteredGame()
+    protected void PlayerEnteredGame()
     {
-        base.PlayerEnteredGame();
+        GameManager.Singleton.GameStartedClient += OnGameStarted;
 
         GameObject prefab = ServerManager.PrefabFromTeamID(props.teamID);
         print($"Client {OwnerClientId} | {NetworkObjectId} model = {prefab.name}");
@@ -157,18 +158,13 @@ public class Player : CommonPlayer
         hasEnteredGame = true;
 
         m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
-        if (IsOwner && !IsNpc)
-        {
-            m_shotmeter = gameObject.AddComponent<ShotMeter>();
-            m_roundShotMeter = GameObject.Find("HUD/Canvas/RoundShotMeter").GetComponent<RoundShotMeter>();
-        }
+        m_shotmeter = gameObject.AddComponent<ShotMeter>();
+        m_roundShotMeter = GameObject.Find("HUD/Canvas/RoundShotMeter").GetComponent<RoundShotMeter>();
     }
 
 
-    protected override void OnGameStarted()
+    protected void OnGameStarted()
     {
-        base.OnGameStarted();
-
         Debug.Log("OnGameStarted");
     }
 
@@ -254,28 +250,31 @@ public class Player : CommonPlayer
     }
 
     [ServerRpc]
-    public void ShootBallServerRpc(ulong netId)
+    public void ShootBallServerRpc(ulong netID)
     {
-        if (props.isShooting && !HasBall) return;
+        if (props.isShooting || !HasBall) return;
         props.isShooting = true;
-        ulong clientID = GameManager.GetPlayerByNetworkID(netId).OwnerClientId;
+        ulong clientID = GameManager.GetPlayerByNetworkID(netID).OwnerClientId;
         ulong rtt = ServerManager.GetRTT(clientID);
-        m_shotManager.OnShoot(netId, this, (rtt / 1000 / 2));
+        print(netID + " shoots ball");
+        m_shotManager.OnShoot(netID, this, (rtt / 1000 / 2));
     }
 
     // Client
     public void ReleaseBall()
     {
-        if (!props.isShooting && !HasBall) return;
-        props.isShooting = false;
         ReleaseServerRpc(NetworkObjectId);
     }
 
     [ServerRpc]
     public void ReleaseServerRpc(ulong netID)
     {
+        props.isShooting = false;
+        if (netID != GameManager.GetBallHandling().PlayerWithBall)
+            return;
         ulong clientID = GameManager.GetPlayerByNetworkID(netID).OwnerClientId;
         ulong rtt = ServerManager.GetRTT(clientID);
+        print(netID + " releases ball");
         m_shotManager.OnRelease(netID, (rtt / 1000 / 2));
     }
 
@@ -283,13 +282,13 @@ public class Player : CommonPlayer
     [ClientRpc]
     public void ClientShootBallClientRpc(ulong netID, ShotData shotData, ShotBarData shotBarData, ClientRpcParams cParams = default)
     {
-        Player p = GameManager.GetPlayerByNetworkID(netID);
-        if (p.props.isCtrlDown)
-            p.ChangeHand();
-        
-        if (!p.props.isAI)
-            m_shotmeter.OnShoot(p, shotData, shotBarData);
-        p.PlayAnimationForType(shotData.type, shotData.leftHanded);
+        //Player p = GameManager.GetPlayerByNetworkID(netID);
+        //if (p.props.isCtrlDown)
+        //p.ChangeHand();
+        print("hello");
+        if (!props.isAI)
+            m_shotmeter.OnShoot(this, shotData, shotBarData);
+        PlayAnimationForType(shotData.type, shotData.leftHanded);
         Shoot?.Invoke(shotData, shotBarData);
     }
 
@@ -538,70 +537,52 @@ public class Player : CommonPlayer
         this.hasReadyUp = isReady;
     }
 
-/*    public void Read(Stream stream)
+    [ServerRpc]
+    public void ClientLoadedServerRpc(ServerRpcParams serverRpcParams = default)
     {
-        using (PooledNetworkReader reader = PooledNetworkReader.Get(stream))
+        ServerPlayer sp = ServerManager.Singleton.players[serverRpcParams.Receive.SenderClientId];
+        if (sp != null)
         {
-            teamID = reader.ReadInt32Packed();
-
-            isAI = reader.ReadBool();
-            isRightHanded = reader.ReadBool();
-            isMoving = reader.ReadBool();
-            isSprinting = reader.ReadBool();
-            isDribbling = reader.ReadBit();
-            isScreening = reader.ReadBool();
-            isHardScreening = reader.ReadBool();
-            isShooting = reader.ReadBool();
-
-            isHelping = reader.ReadBool();
-            isBallInLeftHand = reader.ReadBool();
-            isCtrlDown = reader.ReadBool();
-            isAltDown = reader.ReadBool();
-            movingFoward = reader.ReadBool();
-            movingBack = reader.ReadBool();
-            movingLeft = reader.ReadBool();
-            movingRight = reader.ReadBool();
-
-            isContesting = reader.ReadBool();
-            isBlocking = reader.ReadBool();
-            isStealing = reader.ReadBool();
-
-            m_target = reader.ReadVector3Packed();
+            sp.state = ServerPlayerState.READY;
         }
     }
 
-    public void Write(Stream stream)
+    [ServerRpc]
+    public void SendIdsServerRpc(ulong steamId, int cid, ServerRpcParams serverRpcParams = default)
     {
-        using (PooledNetworkWriter writer = PooledNetworkWriter.Get(stream))
+        ulong clientId = serverRpcParams.Receive.SenderClientId;
+        Debug.Log($"Ids got : {clientId} | {steamId} | {cid}");
+        if (ServerManager.Singleton.players.TryGetValue(clientId, out ServerPlayer sp))
         {
-            writer.WriteInt32Packed(teamID);
+            id = clientId;
+            sp.steamId = steamId;
+            sp.cid = cid;
 
-            writer.WriteBool(isAI);
-            writer.WriteBool(isRightHanded);
-            writer.WriteBool(isMoving);
-            writer.WriteBool(isSprinting);
-            writer.WriteBool(isDribbling);
-            writer.WriteBool(isScreening);
-            writer.WriteBool(isHardScreening);
-            writer.WriteBool(isShooting);
+            //Match.SetupPlayer(clientId, steamId, cid);
 
-            writer.WriteBool(isHelping);
-            writer.WriteBool(isBallInLeftHand);
-            writer.WriteBool(isCtrlDown);
-            writer.WriteBool(isAltDown);
-            writer.WriteBool(movingFoward);
-            writer.WriteBool(movingBack);
-            writer.WriteBool(movingLeft);
-            writer.WriteBool(movingRight);
-
-            writer.WriteBool(isContesting);
-            writer.WriteBool(isBlocking);
-            writer.WriteBool(isStealing);
-
-            writer.WriteVector3Packed(m_target);
+            sp.state = ServerPlayerState.IDLE;
         }
     }
-*/
+
+    public void RequestIdsClient()
+    {
+        Debug.Log("RequestIds got");
+        ulong steam = ClientPlayer.Singleton.SteamID;
+        int cid = ClientPlayer.Singleton.CharData.cid;
+        id = OwnerClientId;
+        SendIdsServerRpc(steam, cid);
+    }
+
+    [ClientRpc]
+    public void SyncMatchClientRpc(MatchTeam home, MatchTeam away, ClientRpcParams cParams = default)
+    {
+        if (!IsServer)
+        {
+            Match.matchTeams[0] = home;
+            Match.matchTeams[1] = away;
+        }
+    }
+
     [ClientRpc]
     public void ServerSendPlayerClientRpc(PlayerProperties props, ClientRpcParams clientRpcParams = default)
     {
@@ -609,27 +590,4 @@ public class Player : CommonPlayer
         if (hasEnteredGame)
             GameManager.GetPlayerByNetworkID(NetworkObjectId).props = props;
     }
-/*
-    public void NetworkSerialize(NetworkSerializer serializer)
-    {
-        serializer.Serialize(ref teamID);
-        serializer.Serialize(ref isAI);
-        serializer.Serialize(ref isRightHanded);
-        serializer.Serialize(ref isMoving);
-        serializer.Serialize(ref isSprinting);
-        serializer.Serialize(ref isDribbling);
-        serializer.Serialize(ref isScreening);
-        serializer.Serialize(ref isHelping);
-        serializer.Serialize(ref isBallInLeftHand);
-        serializer.Serialize(ref isCtrlDown);
-        serializer.Serialize(ref isAltDown);
-        serializer.Serialize(ref movingFoward);
-        serializer.Serialize(ref movingBack);
-        serializer.Serialize(ref movingLeft);
-        serializer.Serialize(ref movingRight);
-        serializer.Serialize(ref isContesting);
-        serializer.Serialize(ref isBlocking);
-        serializer.Serialize(ref isStealing);
-        serializer.Serialize(ref m_target);
-    }*/
 }

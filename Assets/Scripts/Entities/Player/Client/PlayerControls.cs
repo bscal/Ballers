@@ -18,6 +18,7 @@ public class PlayerControls : NetworkBehaviour
 
     private float m_shootCooldown = 0;
     private float m_jumpCooldown = 0;
+    private bool m_isShooting;
 
     private Controls actions;
 
@@ -40,7 +41,7 @@ public class PlayerControls : NetworkBehaviour
         actions.Keyboard.Pass_5.canceled += ReleasePass;
 
         actions.Keyboard.Shoot.performed += StartShot;
-        actions.Keyboard.Release.performed += StopShot;
+        actions.Keyboard.Release.canceled += StopShot;
         actions.Keyboard.Pumpfake.performed += Pumpfake;
     }
 
@@ -139,7 +140,8 @@ public class PlayerControls : NetworkBehaviour
         bool held = false;
         while (true)
         {
-            if (m_shootCooldown < Time.time || m_player.props.isShooting) yield return new WaitForSeconds(0.1f);
+            m_shootCooldown -= Time.deltaTime;
+            if (m_shootCooldown <= 0f || m_player.props.isShooting) yield return new WaitForSeconds(0.1f);
 
             //Check when the key is pressed
             if (actions.Keyboard.Shoot.ReadValue<float>() > 0)
@@ -204,55 +206,51 @@ public class PlayerControls : NetworkBehaviour
 
     IEnumerator OnKeyHeldDown()
     {
-        if (IsOwner)
+        while (pressTimer < MAX_TIME && m_isShooting)
         {
-            //StartShot();
-            //Move 1 unit every frame until edge detection is reached!
-            while (pressTimer < MAX_TIME)
-            {
-                if (actions.Keyboard.Shoot.ReadValue<float>() == 0) break;
-
-                //Start incrementing timer
-                pressTimer += Time.deltaTime;
-
-                //Wait for a frame
-                yield return null;
-            }
-
-            //StopShot();
-            pressTimer = 0f;
+            if (actions.Keyboard.Shoot.ReadValue<float>() == 0) break;
+            pressTimer += Time.deltaTime;
             yield return null;
         }
-
-
-
+        pressTimer = 0f;
+        FinishShot();
+        yield return null;
     }
 
     void Pumpfake(InputAction.CallbackContext context)
     {
-        if (IsOwner && m_shootCooldown < Time.time)
+        if (IsOwner && m_shootCooldown <= 0f)
         {
             m_player.PumpfakeServerRpc();
             m_animHandler.Play(AnimNames.REG_PUMPFAKE);
-            m_shootCooldown = Time.time + .2f;
+            m_shootCooldown = .2f;
         }
     }
 
     void StartShot(InputAction.CallbackContext context)
     {
-        if (IsOwner && m_shootCooldown < Time.time)
+        if (IsOwner && m_shootCooldown <= 0f && !m_isShooting)
         {
+            m_isShooting = true;
+            m_shootCooldown = .2f;
             m_player.ShootBall();
-            m_shootCooldown = Time.time + .2f;
+            StartCoroutine(OnKeyHeldDown());
         }
     }
 
     void StopShot(InputAction.CallbackContext context)
     {
-        if (IsOwner && m_shootCooldown < Time.time)
+        if (IsOwner)
         {
-            m_player.ReleaseBall();
-            m_shootCooldown = Time.time + .2f;
+            FinishShot();
         }
+    }
+
+    private void FinishShot()
+    {
+        if (m_isShooting)
+            m_player.ReleaseBall();
+
+        m_isShooting = false;
     }
 }

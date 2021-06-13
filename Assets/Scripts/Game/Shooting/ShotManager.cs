@@ -52,7 +52,7 @@ public class ShotManager : MonoBehaviour
         m_shotData.defSkill = 50.0f;
         m_shotData.passRating = 50.0f;
 
-        m_shotBarData.speed = UnityEngine.Random.Range(1, 1) * BASE_SPEED;
+        m_shotBarData.speed = 1f;
         m_shotBarData.targetOffset = 0f;
         m_shotBarData.targetFadeSpd = 0f;
         m_shotBarData.barShake = 0f;
@@ -65,7 +65,7 @@ public class ShotManager : MonoBehaviour
         m_shotBarData.targetHeight = (ShotMeter.BASE_TARGET_HEIGHT + m_shotBarData.targetOffset);
 
         GameManager.GetBallHandling().OnShoot(netID, m_shotData, m_shotBarData);
-       p.ClientShootBallClientRpc(netID, m_shotData, m_shotBarData, RPCParams.ClientParamsOnlyClient(p.OwnerClientId));
+        p.ClientShootBallClientRpc(netID, m_shotData, m_shotBarData, RPCParams.ClientParamsOnlyClient(p.OwnerClientId));
         //p.InvokeClientRpcOnEveryone(p.ClientShootBall, m_shotData, m_shotBarData);
         StartCoroutine(ShotQuality(p, rttDelay));
     }
@@ -104,12 +104,13 @@ public class ShotManager : MonoBehaviour
     private IEnumerator ShotQuality(Player p, float rttDelay)
     {
         // rtt delay is how much input lag was on the StartShot
+        print("quality " + ShotMeter.MAX_TARGET_HEIGHT + ", rtt = " + rttDelay);
         float timer = rttDelay;
         while (m_isShot)
         {
             yield return null;
 
-            timer += m_shotBarData.speed * Time.deltaTime;
+            timer -= m_shotBarData.speed * Time.deltaTime;
 
             if (timer > ShotMeter.MAX_TARGET_HEIGHT)
             {

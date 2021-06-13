@@ -364,6 +364,8 @@ public class BallHandling : NetworkBehaviour
                 ShotMeter.MAX_TARGET_HEIGHT, m_shotBarData.PerfectLength, m_shotBarData.GoodLength, m_shotBarData.OkLength });
 
 
+        Debug.Log($"Bank:{m_shotData.bankshot} | Pos:{Possession} | State:{State}");
+
         if (m_shotData.bankshot == BankType.NONE)
             StartCoroutine(FollowArc(m_ball.transform.position, basketPos + offset, h, d));
         else
@@ -399,9 +401,6 @@ public class BallHandling : NetworkBehaviour
             this.pos = pos;
             this.maxDistance = fracComplete;
             this.moved = true;
-            //if (HandleSphereCast(pos, fracComplete))
-                //break;
-
             yield return new WaitForFixedUpdate();
         }
         breakShot = false;

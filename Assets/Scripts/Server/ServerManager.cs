@@ -4,7 +4,10 @@ using MLAPI.Messaging;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using UnityEngine;
+using static UnityEngine.Application;
 
 public enum StartupState
 {
@@ -19,6 +22,8 @@ public enum StartupState
 public class ServerManager : NetworkBehaviour
 {
     public static ServerManager Singleton { get; private set; }
+
+    const string PATH = "./ballers_server.log";
 
     public const float SYNC_TIME = 1.0f;
 
@@ -44,7 +49,7 @@ public class ServerManager : NetworkBehaviour
 
     private StartupState m_startupState = StartupState.NONE;
     private float m_syncCounter;
-
+    private FileStream m_file;
 
     private void Awake()
     {
@@ -58,6 +63,27 @@ public class ServerManager : NetworkBehaviour
         NetworkManager.Singleton.OnServerStarted += OnServerStarted;
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
         NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+        if (Application.isBatchMode)
+        {
+            
+            if (File.Exists(PATH))
+            {
+                m_file = File.OpenWrite(PATH);
+                m_file.SetLength(0);
+                m_file.Flush();
+            }
+            else
+            {
+                m_file = File.Create(PATH);
+            }
+            m_file.Close();
+            Application.logMessageReceivedThreaded += OnLogMessageCallback;
+        }
+        
+    }
+
+    private void OnApplicationQuit()
+    {
     }
 
     private void Update()
@@ -102,6 +128,17 @@ public class ServerManager : NetworkBehaviour
 
         }
     }
+
+    private void OnLogMessageCallback(string condition, string stackTrace, UnityEngine.LogType type)
+    {
+        using FileStream fs = File.Open(PATH, FileMode.Append);
+        string formattedSting = $"[{DateTime.Now.ToString("HH:mm:ss.ff")}][{type}]: {condition}\n";
+        byte[] data = Encoding.UTF8.GetBytes(formattedSting);
+        fs.Write(data, 0, data.Length);
+        byte[] stackData = Encoding.UTF8.GetBytes(stackTrace + "\n");
+        fs.Write(stackData, 0, stackData.Length);
+    }
+
 
     public void LoadAllPlayers()
     {

@@ -11,8 +11,8 @@ public class ShotMeter : MonoBehaviour
     public const float BASE_TARGET = 3.0f;
     public const float BAR_OFFSET = 3.0f;
 
-    public static float MAX_TARGET_HEIGHT { get; private set; }
-    public static float BASE_TARGET_HEIGHT { get; private set; }
+    public const float MAX_TARGET_HEIGHT = 177;
+    public const float BASE_TARGET_HEIGHT = MAX_TARGET_HEIGHT * 0.65f;
 
     public GameObject meter;
     public RawImage background;
@@ -56,8 +56,6 @@ public class ShotMeter : MonoBehaviour
         //SpawnManager.GetLocalPlayerObject().GetComponent<Player>().Shoot += OnShoot;
         NetworkSpawnManager.GetLocalPlayerObject().GetComponent<Player>().Release += OnRelease;
 
-        MAX_TARGET_HEIGHT = background.rectTransform.GetHeight();
-        BASE_TARGET_HEIGHT = MAX_TARGET_HEIGHT * 0.65f;
         meter.SetActive(false);
     }
 
