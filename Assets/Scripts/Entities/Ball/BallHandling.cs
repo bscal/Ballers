@@ -79,6 +79,8 @@ public class BallHandling : NetworkBehaviour
     public float pass_speed = 6.0f;
     public float walk_offset = 2.5f;
     public float sprint_offset = 6.0f;
+    public bool hitTopTrigger;
+    public bool shotInAction;
 
     // =================================== Private ===================================
 
@@ -91,24 +93,13 @@ public class BallHandling : NetworkBehaviour
     private ShotData m_shotData;
     private ShotBarData m_shotBarData;
 
-    private ulong m_shooter;
     private int m_grade;
     private float m_timer;
     private float m_passScore;
     private float m_releaseDiff;
     private float m_shotDifficulty;
-    private bool m_hitRim;
-    private bool m_isAboveRim;
-    private bool m_shotPastArc;
-    public bool hitTopTrigger;
-    public bool shotInAction;
-    private bool m_collisionCheck;
     private bool m_insideHitboxShot;
-
-    private Vector3 pos;
-    private float maxDistance;
-    private bool moved;
-    private bool breakShot;
+    private float m_tickDuringShot;
 
     private Dictionary<ulong, float> m_playerDistances;
     private IOrderedEnumerable<KeyValuePair<ulong, float>> m_pairs;
@@ -164,6 +155,21 @@ public class BallHandling : NetworkBehaviour
                 // ============ Sorts Closest Players ============
                 m_pairs = from pair in m_playerDistances orderby pair.Value descending select pair;
             }
+
+            if (shotInAction)
+            {
+                m_tickDuringShot -= Time.deltaTime;
+                if (m_tickDuringShot <= 0)
+                {
+                    // TODO maybe track collisions also?
+                    Vector3 basketPos = GameManager.Singleton.baskets[Possession].transform.position;
+                    if (Vector3.Distance(basketPos, m_ball.transform.position) > 2.0f)
+                    {
+                        OnShotMissed();
+                    }
+                }
+            }
+            
         }
     }
 
@@ -172,11 +178,6 @@ public class BallHandling : NetworkBehaviour
     {
         if (IsServer)
         {
-            if (moved)
-            {
-                breakShot = HandleSphereCast(pos, maxDistance);
-                moved = false;
-            }
 
             // ============ Updates BallStates ============
             // ============ Loose Ball ============
@@ -209,11 +210,6 @@ public class BallHandling : NetworkBehaviour
                 else
                     m_body.MovePosition(m_currentPlayer.rightPos);
             }
-            // ============ Ball Shoot ============
-            else if (State == BallState.SHOT)
-            {
-                ChangeBallHandler(NO_PLAYER);
-            }
         }
     }
 
@@ -243,7 +239,6 @@ public class BallHandling : NetworkBehaviour
     {
         if (IsServer)
         {
-            m_shooter = netID;
             m_shotData = shotData;
             m_shotBarData = shotBarData;
             m_body.isKinematic = false;
@@ -366,6 +361,7 @@ public class BallHandling : NetworkBehaviour
 
         Debug.Log($"Bank:{m_shotData.bankshot} | Pos:{Possession} | State:{State}");
 
+        m_tickDuringShot = d;
         if (m_shotData.bankshot == BankType.NONE)
             StartCoroutine(FollowArc(m_ball.transform.position, basketPos + offset, h, d));
         else
@@ -385,10 +381,8 @@ public class BallHandling : NetworkBehaviour
     {
         float startTime = Time.fixedTime;
         float fracComplete = 0;
-        while (fracComplete < 1)
+        while (fracComplete < 1 && shotInAction)
         {
-            if (!shotInAction || m_collisionCheck || breakShot) break;
-            if (fracComplete < .5f) m_shotPastArc = true;
             // Fraction of journey completed equals current distance divided by total distance.
             fracComplete = (Time.fixedTime - startTime) / duration;
             // Calculate arc
@@ -397,14 +391,11 @@ public class BallHandling : NetworkBehaviour
 
             // Sends out a spherecast to make sure we can move the ball.
             // the rigidbody is move here and returns if we should break the loop.
+            if (HandleSphereCast(pos, fracComplete))
+                break;
 
-            this.pos = pos;
-            this.maxDistance = fracComplete;
-            this.moved = true;
             yield return new WaitForFixedUpdate();
         }
-        breakShot = false;
-        m_shotPastArc = false;
         State = BallState.LOOSE;
     }
 
@@ -540,7 +531,7 @@ public class BallHandling : NetworkBehaviour
         State = BallState.PASS;
 
         // Tell the client they are getting the balled passed to them.
-        PassBallClientRpc(target.NetworkObjectId, endPosition, type, RPCParams.ClientParamsOnlyClient(target.OwnerClientId));
+        PassBallClientRpc(target.NetworkObjectId, endPosition, type, target.rpcParams);
 
         Debug.Log(string.Format("Pass {0} -> {1} | Type: {2}", passer, target, type));
 
@@ -747,49 +738,13 @@ public class BallHandling : NetworkBehaviour
         PlayerWithBall = netId;
     }
 
-    const string BACKBOARD_TAG = "Backboard";
-    const string RIM_TAG = "RimColliders";
-    const string FLOOR_TAG = "Floor";
     private void OnCollisionEnter(Collision collision)
     {
-        // backboard is stored in several chunk objects. its
-        // parents "Chunks" is tagged.
-        if (collision.gameObject.CompareTag(BACKBOARD_TAG))
-        {
-            m_collisionCheck = true;
-        }
-        if (collision.gameObject.CompareTag(RIM_TAG))
-        {
-            m_collisionCheck = true;
-            m_hitRim = true;
-        }
-        if (collision.gameObject.CompareTag(FLOOR_TAG))
+        // Ball hits the Floor collider make sure we set the shot to missed.
+        if (collision.gameObject.CompareTag("Floor"))
         {
             if (shotInAction)
                 OnShotMissed();
-        }
-    }
-
-    private void OnCollisionStay(Collision collision)
-    {
-        // Ball Rigidbody -> AboveRim Collider
-        if (collision.gameObject.CompareTag("AboveRim"))
-        {
-            m_isAboveRim = true;
-            // Ball Collider -> Player Rigidboy
-            if (collision.gameObject.CompareTag("Player"))
-            {
-                // If both then goaltend
-                print("goaltend");
-            }
-        }
-    }
-
-    private void OnCollisionExit(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("AboveRim"))
-        {
-            m_isAboveRim = false;
         }
     }
 
@@ -855,7 +810,7 @@ public class BallHandling : NetworkBehaviour
     /// If NO_PLAYER id is set sets State to LOOSE.<br></br>
     /// Possession is also changed to correct possession if needed.
     /// </summary>
-    private void ChangeBallHandler(ulong newNetworkID)
+    public void ChangeBallHandler(ulong newNetworkID)
     {
         //if (newNetworkID == PlayerWithBall) return;
 
@@ -935,8 +890,6 @@ public class BallHandling : NetworkBehaviour
     private void Reset()
     {
         shotInAction = false;
-        hitTopTrigger = false;
-        m_collisionCheck = false;
     }
 
 }

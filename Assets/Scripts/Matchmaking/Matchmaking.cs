@@ -28,7 +28,7 @@ public class Matchmaking : MonoBehaviour
 
     private void Start()
     {
-        if (m_lobby.IsDedicated)
+        if (ServerManager.isDedicatedServer)
             Destroy(this);
 
         m_matchSetup = GameObject.Find("MatchManager").GetComponent<MatchSetup>();

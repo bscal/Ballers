@@ -6,8 +6,6 @@ public class NetworkLobby : MonoBehaviour
 
     public bool usingDedicated;
 
-    public bool IsDedicated { get { return Application.isBatchMode; } }
-
     private void Awake()
     {
         Match.NetworkLobby = this;
@@ -20,7 +18,7 @@ public class NetworkLobby : MonoBehaviour
         NetworkManager.Singleton.OnClientDisconnectCallback += OnDisconnected;
         NetworkManager.Singleton.OnServerStarted += OnServerReady;
 
-        if (IsDedicated)
+        if (ServerManager.isDedicatedServer)
         {
             LeanTween.delayedCall(1.0f, () => {
                 Debug.Log("Headless detected starting server in 5 seconds...");

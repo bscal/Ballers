@@ -714,6 +714,17 @@ PrefabInstance:
       propertyPath: m_setup
       value: 
       objectReference: {fileID: 104518295}
+    - target: {fileID: 1576199446420147784, guid: 2cf0204740b240345837345804dbec80,
+        type: 3}
+      propertyPath: clientPrefab
+      value: 
+      objectReference: {fileID: 6329698905141704266, guid: 80d78ef38d91eb04da3425c03ae872ce,
+        type: 3}
+    - target: {fileID: 1576199446420147784, guid: 2cf0204740b240345837345804dbec80,
+        type: 3}
+      propertyPath: ballersClient
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 1827661350794515593, guid: 2cf0204740b240345837345804dbec80,
         type: 3}
       propertyPath: ConnectAddress
@@ -774,6 +785,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3826671062112935201, guid: 2cf0204740b240345837345804dbec80,
+        type: 3}
+      propertyPath: NetworkConfig.RpcHashSize
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3826671062112935201, guid: 2cf0204740b240345837345804dbec80,
+        type: 3}
+      propertyPath: NetworkConfig.NetworkPrefabs.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3826671062112935201, guid: 2cf0204740b240345837345804dbec80,
+        type: 3}
+      propertyPath: NetworkConfig.NetworkPrefabs.Array.data[4].Prefab
+      value: 
+      objectReference: {fileID: 6329698905141704266, guid: 80d78ef38d91eb04da3425c03ae872ce,
+        type: 3}
     - target: {fileID: 3826671062112935203, guid: 2cf0204740b240345837345804dbec80,
         type: 3}
       propertyPath: m_Name
@@ -4244,6 +4271,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5459705951234261108, guid: 44bb75510ecb4aa4ba1e64d0caeb6644,
+        type: 3}
+      propertyPath: ballersClient
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 5459705951234261111, guid: 44bb75510ecb4aa4ba1e64d0caeb6644,
         type: 3}

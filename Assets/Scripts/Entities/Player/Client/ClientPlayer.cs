@@ -34,6 +34,7 @@ public class ClientPlayer : MonoBehaviour
     public float lastCharacterUpdate;
 
     public Player localPlayer;
+    public BallersClient ballersClient;
 
     //private GameSetup m_gameSetup;
     //private SteamP2PTransport.SteamP2PTransport m_transport;

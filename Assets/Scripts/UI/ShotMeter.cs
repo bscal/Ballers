@@ -27,57 +27,58 @@ public class ShotMeter : MonoBehaviour
     private static readonly Color GOOD_COLOR = new Color(1, 1, 0, 1);
     private static readonly Color PERFECT_COLOR = new Color(51f / 255f, 204f / 255f, 51f / 255f, 1);
 
+    private Player m_player;
     private RectTransform m_meterTransform;
     private ShotBarData m_shotBarData;
-    private float m_timer;
-    private bool m_isShooting;
+    private float m_rectFillTimer;
+    private float m_hideMeterTimer;
 
     void Start()
     {
-        if (!GetComponent<NetworkObject>().IsLocalPlayer)
+        // This is purely ui for the Local player.
+        // Shot bar quality is handle serverside in ShotManager.
+        m_player = GameManager.GetPlayer();
+        if (m_player.IsOwner)
         {
-            enabled = false;
-            return;
+            meter = GameObject.Find("ShotMeter");
+            if (meter != null)
+            {
+                m_meterTransform = meter.GetComponent<RectTransform>();
+                background = GameObject.Find("ShotMeterBG").GetComponent<RawImage>();
+                fill = GameObject.Find("ShotMeterBar").GetComponent<RawImage>();
+                target = GameObject.Find("TargetLine").GetComponent<Image>();
+                targetGood = GameObject.Find("TargetLine_GOOD").GetComponent<Image>();
+                targetOk = GameObject.Find("TargetLine_OK").GetComponent<Image>();
+                glow = GameObject.Find("Glow").GetComponent<RawImage>();
+            }
+            meter.SetActive(false);
         }
-
-        meter = GameObject.Find("ShotMeter");
-        if (meter != null)
-        {
-            m_meterTransform = meter.GetComponent<RectTransform>();
-            background  = GameObject.Find("ShotMeterBG").GetComponent<RawImage>();
-            fill        = GameObject.Find("ShotMeterBar").GetComponent<RawImage>();
-            target      = GameObject.Find("TargetLine").GetComponent<Image>();
-            targetGood  = GameObject.Find("TargetLine_GOOD").GetComponent<Image>();
-            targetOk    = GameObject.Find("TargetLine_OK").GetComponent<Image>();
-            glow        = GameObject.Find("Glow").GetComponent<RawImage>();
-        }
-
-        // These can be local because ShotMeter script only effects local clients.
-        //SpawnManager.GetLocalPlayerObject().GetComponent<Player>().Shoot += OnShoot;
-        NetworkSpawnManager.GetLocalPlayerObject().GetComponent<Player>().Release += OnRelease;
-
-        meter.SetActive(false);
     }
 
     private void Update()
     {
-        if (m_isShooting)
+        if (m_player.props.isShooting)
         {
-            m_timer += m_shotBarData.speed * Time.deltaTime;
+            // Increments the height for the fill bar.
+            m_rectFillTimer += m_shotBarData.speed * Time.deltaTime;
+            fill.rectTransform.SetHeight(m_rectFillTimer);
 
+            // Moves the meter to offset next to the local player.
             m_meterTransform.position = PlayerSettings.Singleton.Current.WorldToScreenPoint(GameManager.GetPlayer().transform.position) - Vector3.left * 64;
 
-            fill.rectTransform.SetHeight(m_timer);
-
-            // Overflowed bar -> Failed shot + disable
+            // If we have gone over the max height auto fail shot.
             if (fill.rectTransform.GetHeight() >= MAX_TARGET_HEIGHT)
             {
-                StopShooting();
-                StartCoroutine(Hide(1.0f));
                 print("failed");
             }
         }
 
+        // This just hide the meter if have not shot the ball in X time.
+        m_hideMeterTimer -= Time.deltaTime;
+        if (m_hideMeterTimer < 0)
+        {
+            Reset();
+        }
     }
 
     public void OnShoot(Player p, ShotData shotData, ShotBarData shotBarData)
@@ -96,14 +97,14 @@ public class ShotMeter : MonoBehaviour
         targetOk.rectTransform.SetHeight(m_shotBarData.OkLength);
         targetOk.rectTransform.anchoredPosition = GetBarPosition(m_shotBarData.FinalTargetHeight - m_shotBarData.OkLength / 2);
 
+        m_hideMeterTimer = MAX_TARGET_HEIGHT / shotBarData.speed + 2f;
         meter.SetActive(true);
-        m_isShooting = true;
 
         if (shotBarData.targetFadeSpd != 0f)
             LeanTween.alpha(target.rectTransform, 0f, shotBarData.targetFadeSpd);
     }
 
-    private void OnRelease(float dist, float diff)
+    public void OnRelease(float dist, float diff)
     {
         int grade = m_shotBarData.GetShotGrade(dist);
         if (grade == ShotBarData.GRADE_PERFECT)
@@ -116,8 +117,6 @@ public class ShotMeter : MonoBehaviour
             SetColors(BAD_COLOR);
 
         glow.gameObject.SetActive(true);
-        StopShooting();
-        StartCoroutine(Hide(3.0f));
     }
 
     private void SetColors(Color color)
@@ -133,24 +132,12 @@ public class ShotMeter : MonoBehaviour
         return pos;
     }
 
-    private IEnumerator Hide(float t_wait)
-    {
-        yield return new WaitForSeconds(t_wait);
-        if (!m_isShooting)
-            Reset();
-    }
-
-    private void StopShooting()
-    {
-        m_isShooting = false;
-    }
-
     private void Reset()
     {
         fill.color = Color.white;
         fill.rectTransform.SetHeight(0);
-        meter.SetActive(false);
+        m_rectFillTimer = 0.0f;
         glow.gameObject.SetActive(false);
-        m_timer = 0.0f;
+        meter.SetActive(false);
     }
 }

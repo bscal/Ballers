@@ -10,18 +10,18 @@ public class PlayerCircleColor : MonoBehaviour
     private readonly static Color ENEMY_COLOR = Color.red;
     private readonly static Color DUMMY_COLOR = Color.gray;
 
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        
+        if (ServerManager.isDedicatedServer)
+            Destroy(this);
     }
 
     // Update is called once per frame
     void Update()
     {
         if (!GameManager.Singleton.HasStarted) return;
+
         Player current = GameManager.GetPlayer();
-        
         foreach (Player p in GameManager.GetPlayers())
         {
             if (p.Equals(current))

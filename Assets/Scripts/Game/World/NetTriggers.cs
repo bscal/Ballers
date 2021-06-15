@@ -51,7 +51,7 @@ public class NetTriggers : MonoBehaviour
         {
             if (!other.bounds.Contains(GameManager.GetBallHandling().gameObject.transform.position))
             {
-                GameManager.GetBallHandling().OnShotMissed();
+                //GameManager.GetBallHandling().OnShotMissed();
             }
         }
     }

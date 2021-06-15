@@ -30,6 +30,7 @@ public class Player : NetworkBehaviour
     protected float m_timer;
 
     public PlayerProperties props = new PlayerProperties();
+    public ClientRpcParams rpcParams;
 
     [NonSerialized]
     public CharacterData cData;
@@ -99,7 +100,6 @@ public class Player : NetworkBehaviour
 
     private void Start()
     {
-        ClientPlayer.Singleton.localPlayer = this;
         // Initialize Player values
         m_playerCircle = GetComponentInChildren<SpriteRenderer>();
         m_center = transform.Find("Center").gameObject;
@@ -109,10 +109,12 @@ public class Player : NetworkBehaviour
 
     public override void NetworkStart()
     {
-        base.NetworkStart();
+        rpcParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new ulong[] { OwnerClientId } } };
 
         if (IsOwner && !props.isAI)
         {
+            ClientPlayer.Singleton.localPlayer = this;
+
             RequestIdsClient();
         }
 
@@ -158,8 +160,11 @@ public class Player : NetworkBehaviour
         hasEnteredGame = true;
 
         m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
-        m_shotmeter = gameObject.AddComponent<ShotMeter>();
-        m_roundShotMeter = GameObject.Find("HUD/Canvas/RoundShotMeter").GetComponent<RoundShotMeter>();
+        if (IsOwner)
+        {
+            m_shotmeter = gameObject.AddComponent<ShotMeter>();
+            m_roundShotMeter = GameObject.Find("HUD/Canvas/RoundShotMeter").GetComponent<RoundShotMeter>();
+        }
     }
 
 
@@ -252,12 +257,16 @@ public class Player : NetworkBehaviour
     [ServerRpc]
     public void ShootBallServerRpc(ulong netID)
     {
-        if (props.isShooting || !HasBall) return;
-        props.isShooting = true;
-        ulong clientID = GameManager.GetPlayerByNetworkID(netID).OwnerClientId;
-        ulong rtt = ServerManager.GetRTT(clientID);
-        print(netID + " shoots ball");
-        m_shotManager.OnShoot(netID, this, (rtt / 1000 / 2));
+        if (HasBall)
+        {
+            props.isShooting = true;
+
+            ulong clientID = GameManager.GetPlayerByNetworkID(netID).OwnerClientId;
+            ulong rtt = ServerManager.GetRTT(clientID);
+            m_shotManager.OnShoot(netID, this, (rtt / 1000 / 2));
+
+            print(netID + " shoots ball");
+        }
     }
 
     // Client
@@ -269,13 +278,17 @@ public class Player : NetworkBehaviour
     [ServerRpc]
     public void ReleaseServerRpc(ulong netID)
     {
-        props.isShooting = false;
-        if (netID != GameManager.GetBallHandling().PlayerWithBall)
-            return;
-        ulong clientID = GameManager.GetPlayerByNetworkID(netID).OwnerClientId;
-        ulong rtt = ServerManager.GetRTT(clientID);
-        print(netID + " releases ball");
-        m_shotManager.OnRelease(netID, (rtt / 1000 / 2));
+        if (HasBall)
+        {
+            props.isShooting = false;
+
+            ulong clientID = GameManager.GetPlayerByNetworkID(netID).OwnerClientId;
+            ulong rtt = ServerManager.GetRTT(clientID);
+            m_shotManager.OnRelease(netID, (rtt / 1000 / 2));
+            GameManager.GetBallHandling().ChangeBallHandler(BallHandling.NO_PLAYER);
+
+            print(netID + " releases ball");
+        }
     }
 
 
@@ -285,16 +298,19 @@ public class Player : NetworkBehaviour
         //Player p = GameManager.GetPlayerByNetworkID(netID);
         //if (p.props.isCtrlDown)
         //p.ChangeHand();
-        print("hello");
-        if (!props.isAI)
-            m_shotmeter.OnShoot(this, shotData, shotBarData);
-        PlayAnimationForType(shotData.type, shotData.leftHanded);
-        Shoot?.Invoke(shotData, shotBarData);
+        if (IsOwner)
+        {
+            if (!props.isAI)
+                m_shotmeter.OnShoot(this, shotData, shotBarData);
+            PlayAnimationForType(shotData.type, shotData.leftHanded);
+            Shoot?.Invoke(shotData, shotBarData);
+        }
     }
 
     [ClientRpc]
     public void ClientReleaseBallClientRpc(float distance, float difference, ClientRpcParams cParams = default)
     {
+        m_shotmeter.OnRelease(distance, difference);
         Release?.Invoke(distance, difference);
     }
 
@@ -357,7 +373,7 @@ public class Player : NetworkBehaviour
     {
         if (IsServer)
         {
-            TriggerRoundShotMeterClientRpc(speed, difficulty, RPCParams.ClientParamsOnlyClient(clientID));
+            TriggerRoundShotMeterClientRpc(speed, difficulty, GameManager.GetPlayerByClientID(clientID).rpcParams);
             StartCoroutine(m_roundShotMeter.ServerTimer(netID, speed, difficulty, cb));
         }
     }
@@ -574,20 +590,8 @@ public class Player : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void SyncMatchClientRpc(MatchTeam home, MatchTeam away, ClientRpcParams cParams = default)
-    {
-        if (!IsServer)
-        {
-            Match.matchTeams[0] = home;
-            Match.matchTeams[1] = away;
-        }
-    }
-
-    [ClientRpc]
     public void ServerSendPlayerClientRpc(PlayerProperties props, ClientRpcParams clientRpcParams = default)
     {
         this.props = props;
-        if (hasEnteredGame)
-            GameManager.GetPlayerByNetworkID(NetworkObjectId).props = props;
     }
 }

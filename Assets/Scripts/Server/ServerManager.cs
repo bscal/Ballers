@@ -1,6 +1,7 @@
 using MLAPI;
 using MLAPI.Connection;
 using MLAPI.Messaging;
+using MLAPI.Spawning;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -27,7 +28,7 @@ public class ServerManager : NetworkBehaviour
 
     public const float SYNC_TIME = 1.0f;
 
-    public static bool IsDedicated;
+    public static bool isDedicatedServer;
 
     public event Action AllPlayersLoaded;
 
@@ -39,6 +40,10 @@ public class ServerManager : NetworkBehaviour
 
     public NetworkLobby m_lobby;
     public MatchSetup m_setup;
+
+    [Header("Ballers Client")]
+    public GameObject clientPrefab;
+    public BallersClient ballersClient;
 
     [NonSerialized]
     public readonly Dictionary<ulong, ServerPlayer> players = new Dictionary<ulong, ServerPlayer>();
@@ -54,6 +59,7 @@ public class ServerManager : NetworkBehaviour
     private void Awake()
     {
         Singleton = this;
+        isDedicatedServer = Application.isBatchMode;
     }
 
     private void Start()
@@ -118,14 +124,15 @@ public class ServerManager : NetworkBehaviour
                 GameManager.Singleton.BeginPregame();
             }
 
-            m_syncCounter += Time.deltaTime;
-            if (m_syncCounter > SYNC_TIME)
+            if (ballersClient != null)
             {
-                m_syncCounter -= SYNC_TIME;
-                playersList.ForEach((player) => player.SyncMatchClientRpc(Match.matchTeams[0], Match.matchTeams[1], RPCParams.ClientParamsOnlyClient(player.OwnerClientId)));
-
+                m_syncCounter += Time.deltaTime;
+                if (m_syncCounter > SYNC_TIME)
+                {
+                    m_syncCounter -= SYNC_TIME;
+                    ballersClient.SyncMatchClientRpc(Match.matchTeams[0].teamData, Match.matchTeams[1].teamData);
+                }
             }
-
         }
     }
 
@@ -162,13 +169,18 @@ public class ServerManager : NetworkBehaviour
 
     private void OnServerStarted()
     {
-        if (m_lobby.IsDedicated)
+        if (isDedicatedServer)
         {
             Match.ResetDefaults();
             Match.InitMatch(new MatchSettings(BallersGamemode.SP_BOTS, 5, 4, 60.0 * 12.0, 24.0));
             Match.PlayersNeeded = 1;
             Match.MatchID = 1;
         }
+
+        GameObject client = Instantiate(clientPrefab);
+        client.name = "BallersClient";
+        client.GetComponent<NetworkObject>().Spawn();
+        ballersClient = client.GetComponent<BallersClient>();
 
         m_setup.SetServerManagerInstance(this);
 

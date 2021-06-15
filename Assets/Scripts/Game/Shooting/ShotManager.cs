@@ -9,7 +9,6 @@ public class ShotManager : MonoBehaviour
 
     // =================================== Private Varibles ===================================
 
-    private bool m_isShot = false;
     private ShotData m_shotData;
     private ShotBarData m_shotBarData;
     private float m_releaseDist;
@@ -36,8 +35,6 @@ public class ShotManager : MonoBehaviour
         float dist = Vector3.Distance(p.transform.position, p.TargetPos);
         float angle = Quaternion.Angle(transform.rotation, p.TargetRotation);
 
-        m_isShot = true;
-
         m_shotData.shooter = netID;
         m_shotData.position = p.transform.position;
         m_shotData.distance = dist;
@@ -52,7 +49,7 @@ public class ShotManager : MonoBehaviour
         m_shotData.defSkill = 50.0f;
         m_shotData.passRating = 50.0f;
 
-        m_shotBarData.speed = 1f;
+        m_shotBarData.speed = 35f;
         m_shotBarData.targetOffset = 0f;
         m_shotBarData.targetFadeSpd = 0f;
         m_shotBarData.barShake = 0f;
@@ -65,14 +62,13 @@ public class ShotManager : MonoBehaviour
         m_shotBarData.targetHeight = (ShotMeter.BASE_TARGET_HEIGHT + m_shotBarData.targetOffset);
 
         GameManager.GetBallHandling().OnShoot(netID, m_shotData, m_shotBarData);
-        p.ClientShootBallClientRpc(netID, m_shotData, m_shotBarData, RPCParams.ClientParamsOnlyClient(p.OwnerClientId));
+         p.ClientShootBallClientRpc(netID, m_shotData, m_shotBarData, p.rpcParams);
         //p.InvokeClientRpcOnEveryone(p.ClientShootBall, m_shotData, m_shotBarData);
         StartCoroutine(ShotQuality(p, rttDelay));
     }
 
     public void OnRelease(ulong netId, float rttOffset)
     {
-        m_isShot = false;
         m_rttOffset = rttOffset;
     }
 
@@ -106,25 +102,22 @@ public class ShotManager : MonoBehaviour
         // rtt delay is how much input lag was on the StartShot
         print("quality " + ShotMeter.MAX_TARGET_HEIGHT + ", rtt = " + rttDelay);
         float timer = rttDelay;
-        while (m_isShot)
+        while (p.props.isShooting)
         {
-            yield return null;
-
-            timer -= m_shotBarData.speed * Time.deltaTime;
-
-            if (timer > ShotMeter.MAX_TARGET_HEIGHT)
-            {
+            timer += m_shotBarData.speed * Time.deltaTime;
+            if (timer >= ShotMeter.MAX_TARGET_HEIGHT)
                 break;
-            }
+
+            yield return null;
         }
         // rtt offset is how much the input lag was on the ReleaseShot
-        m_releaseDiff = m_shotBarData.FinalTargetHeight - timer - m_rttOffset;
+        m_releaseDiff = (m_shotBarData.FinalTargetHeight + rttDelay) - timer;
         m_releaseDist = Mathf.Abs(m_releaseDiff);
         int grade = m_shotBarData.GetShotGrade(m_releaseDist);
 
         print("Server: " + m_shotBarData.FinalTargetHeight + ", " + timer + ", dist = " + m_releaseDist + ", grade = " + grade + ", diff = " + m_releaseDiff);
 
-        p.ClientReleaseBallClientRpc(m_releaseDist, m_releaseDiff, RPCParams.ClientParamsOnlyClient(p.OwnerClientId));
+        p.ClientReleaseBallClientRpc(m_releaseDist, m_releaseDiff, p.rpcParams);
         HandleShot(p.NetworkObjectId);
     }
 

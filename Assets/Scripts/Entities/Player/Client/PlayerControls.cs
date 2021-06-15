@@ -18,7 +18,6 @@ public class PlayerControls : NetworkBehaviour
 
     private float m_shootCooldown = 0;
     private float m_jumpCooldown = 0;
-    private bool m_isShooting;
 
     private Controls actions;
 
@@ -41,7 +40,7 @@ public class PlayerControls : NetworkBehaviour
         actions.Keyboard.Pass_5.canceled += ReleasePass;
 
         actions.Keyboard.Shoot.performed += StartShot;
-        actions.Keyboard.Release.canceled += StopShot;
+        actions.Keyboard.Release.performed += StopShot;
         actions.Keyboard.Pumpfake.performed += Pumpfake;
     }
 
@@ -56,34 +55,36 @@ public class PlayerControls : NetworkBehaviour
         m_animator = GetComponentInChildren<Animator>();
         m_animHandler = GetComponent<PlayerAnimHandler>();
         m_menu = GameObject.Find("Menu Panel");
-        StartCoroutine(ShotInput());
+        //StartCoroutine(ShotInput());
     }
 
     void Update()
     {
-        if (!IsOwner)
-            return;
-
-        m_player.props.isSprinting = Keyboard.current.shiftKey.ReadValue() > 0.0f;
-        m_player.props.isCtrlDown = Keyboard.current.ctrlKey.ReadValue() > 0.0f;
-        m_player.props.isAltDown = Keyboard.current.altKey.ReadValue() > 0.0f;
-
-        Vector2 dribVec = actions.Keyboard.Dribble.ReadValue<Vector2>();
-        m_player.props.movingFoward = dribVec.y > 0; //1
-        m_player.props.movingBack = dribVec.y < 0; //-1
-        m_player.props.movingLeft = dribVec.x < 0; //-1
-        m_player.props.movingRight = dribVec.x > 0; //1
-
-        if (actions.Keyboard.Jump.triggered && m_jumpCooldown < Time.time)
+        if (IsOwner)
         {
-            m_player.Jump();
-            m_jumpCooldown = Time.time + 1.5f;
+            m_shootCooldown -= Time.deltaTime;
+
+            m_player.props.isSprinting = Keyboard.current.shiftKey.ReadValue() > 0.0f;
+            m_player.props.isCtrlDown = Keyboard.current.ctrlKey.ReadValue() > 0.0f;
+            m_player.props.isAltDown = Keyboard.current.altKey.ReadValue() > 0.0f;
+
+            Vector2 dribVec = actions.Keyboard.Dribble.ReadValue<Vector2>();
+            m_player.props.movingFoward = dribVec.y > 0; //1
+            m_player.props.movingBack = dribVec.y < 0; //-1
+            m_player.props.movingLeft = dribVec.x < 0; //-1
+            m_player.props.movingRight = dribVec.x > 0; //1
+
+            if (actions.Keyboard.Jump.triggered && m_jumpCooldown < Time.time)
+            {
+                m_player.Jump();
+                m_jumpCooldown = Time.time + 1.5f;
+            }
+
+            if (Keyboard.current.escapeKey.isPressed)
+                m_menu.SetActive(!m_menu.activeSelf);
+
+            if (Keyboard.current.uKey.isPressed) m_animator.SetTrigger("Crossover");
         }
-
-        if (Keyboard.current.escapeKey.isPressed)
-            m_menu.SetActive(!m_menu.activeSelf);
-
-        if (Keyboard.current.uKey.isPressed) m_animator.SetTrigger("Crossover");
     }
 
     private void CallForBall(InputAction.CallbackContext context)
@@ -206,14 +207,13 @@ public class PlayerControls : NetworkBehaviour
 
     IEnumerator OnKeyHeldDown()
     {
-        while (pressTimer < MAX_TIME && m_isShooting)
+        while (pressTimer < MAX_TIME && m_player.props.isShooting)
         {
             if (actions.Keyboard.Shoot.ReadValue<float>() == 0) break;
             pressTimer += Time.deltaTime;
             yield return null;
         }
         pressTimer = 0f;
-        FinishShot();
         yield return null;
     }
 
@@ -229,12 +229,14 @@ public class PlayerControls : NetworkBehaviour
 
     void StartShot(InputAction.CallbackContext context)
     {
-        if (IsOwner && m_shootCooldown <= 0f && !m_isShooting)
+        if (IsOwner)
         {
-            m_isShooting = true;
-            m_shootCooldown = .2f;
-            m_player.ShootBall();
-            StartCoroutine(OnKeyHeldDown());
+            if (!m_player.props.isShooting && m_shootCooldown <= 0f && m_player.HasBall)
+            {
+                m_shootCooldown = .2f;
+                m_player.ShootBall();
+                //StartCoroutine(OnKeyHeldDown());
+            }
         }
     }
 
@@ -242,15 +244,8 @@ public class PlayerControls : NetworkBehaviour
     {
         if (IsOwner)
         {
-            FinishShot();
+            if (m_player.props.isShooting)
+                m_player.ReleaseBall();
         }
-    }
-
-    private void FinishShot()
-    {
-        if (m_isShooting)
-            m_player.ReleaseBall();
-
-        m_isShooting = false;
     }
 }
