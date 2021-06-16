@@ -67,7 +67,7 @@ public class BallHandling : NetworkBehaviour
 
     // BallState
     private readonly NetworkVariableByte m_state = new NetworkVariableByte(NetworkConstants.BALL_CHANNEL, 0);
-    public BallState State { get { return (BallState) Enum.ToObject(typeof(BallState), m_state.Value); } set { m_state.Value = (byte)value; BallStateChange?.Invoke(value); } }
+    public BallState State { get { return (BallState)Enum.ToObject(typeof(BallState), m_state.Value); } set { m_state.Value = (byte)value; BallStateChange?.Invoke(value); } }
 
     // TeamID with possession
     private readonly NetworkVariableSByte m_possession = new NetworkVariableSByte(NetworkConstants.BALL_CHANNEL, -1);
@@ -100,7 +100,6 @@ public class BallHandling : NetworkBehaviour
     private float m_shotDifficulty;
     private bool m_insideHitboxShot;
     private float m_tickDuringShot;
-    private bool m_stopShotMovement;
 
     private Dictionary<ulong, float> m_playerDistances;
     private IOrderedEnumerable<KeyValuePair<ulong, float>> m_pairs;
@@ -134,8 +133,6 @@ public class BallHandling : NetworkBehaviour
     {
         if (IsServer && Match.HasGameStarted)
         {
-            Physics.SphereCast(m_body.position, .2f, m_ball.transform.position, out RaycastHit hitInfo);
-
             m_timer += Time.deltaTime;
 
             // Time to run these are around 20x a second
@@ -172,7 +169,7 @@ public class BallHandling : NetworkBehaviour
                     }
                 }
             }
-            
+
         }
     }
 
@@ -181,12 +178,14 @@ public class BallHandling : NetworkBehaviour
     {
         if (IsServer)
         {
+            if (State != BallState.HELD)
+                m_body.isKinematic = false;
 
             // ============ Updates BallStates ============
             // ============ Loose Ball ============
             if (State == BallState.LOOSE)
             {
-                m_body.isKinematic = false;
+                //m_body.isKinematic = false;
                 if (m_pairs == null) return;
 
                 foreach (KeyValuePair<ulong, float> pair in m_pairs)
@@ -213,6 +212,8 @@ public class BallHandling : NetworkBehaviour
                 else
                     m_body.MovePosition(m_currentPlayer.rightPos);
             }
+
+
         }
     }
 
@@ -244,7 +245,6 @@ public class BallHandling : NetworkBehaviour
         {
             m_shotData = shotData;
             m_shotBarData = shotBarData;
-            m_body.isKinematic = false;
             Reset();
         }
     }
@@ -275,6 +275,7 @@ public class BallHandling : NetworkBehaviour
 
         State = BallState.SHOT;
         shotInAction = true;
+        m_body.isKinematic = false;
 
         float h = ShotController.GetShotRange(m_shotData.type)
             == ShotRange.LONG ? UnityEngine.Random.Range(10f, 12f)
@@ -364,11 +365,12 @@ public class BallHandling : NetworkBehaviour
 
         Debug.Log($"Bank:{m_shotData.bankshot} | Pos:{Possession} | State:{State}");
 
-        m_tickDuringShot = d;
+        // Duration for the shot + small amount for any errors
+        m_tickDuringShot = d + .1f;
         if (m_shotData.bankshot == BankType.NONE)
-            StartCoroutine(FollowArc(m_ball.transform.position, basketPos + offset, h, d));
+            StartCoroutine(FollowArc(m_body.position, basketPos + offset, h, d));
         else
-            StartCoroutine(FollowBackboard(m_shotData, m_ball.transform.position, basketPos + offset, h, d));
+            StartCoroutine(FollowBackboard(m_shotData, m_body.position, basketPos + offset, h, d));
 
     }
 
@@ -471,7 +473,7 @@ public class BallHandling : NetworkBehaviour
         if (!passer.HasBall) return;
         if (passer.props.slot == playerSlot) return; //TODO fake pass? here because i have not decides on how to handle this
 
-        
+
         Player target = Match.matchTeams[passer.props.teamID].GetPlayerBySlot(playerSlot);
         TryPassBall(passer, target, type);
     }
@@ -646,33 +648,43 @@ public class BallHandling : NetworkBehaviour
     }
 
     /// <summary>
-    /// Sends a SphereCast from ball rigidbody to given position.
-    /// Will move the rigidbody correctly. If the ray hits a collider
-    /// the ball will move towards the contact point. Returns true if a collision
-    /// has happen.
+    /// Runs a <c>Physics.SphereCastAll</c> and checks all hits on the default layer.<br></br>
+    /// <br></br>
+    /// If hits a trigger, will make no change to the position the ball wants to move to.<br></br>
+    /// <t>- If trigger is "Hitbox Bot" on the basket object will alert the trigger thats the ball has enter.<br></br>
+    /// If hits a collider the new position will be set to the collider hit point and cancels any further processing.<br></br>
+    /// <br></br>
+    /// Will finally <c>RigidBody.MovePosition</c> to the new position.
     /// </summary>
     /// <param name="pos">Position to move too</param>
     /// <param name="fracComplete">Max move distance</param>
-    /// <returns>true if collision too place. false if not</returns>
+    /// <returns>true if Collider collision. false otherwise.</returns>
     private bool HandleSphereCast(Vector3 pos, float fracComplete)
     {
-        Physics.SphereCast(m_body.position, .2f, pos, out RaycastHit hitInfo, fracComplete);
-        if (!hitInfo.collider)
-            m_body.MovePosition(pos);
-        else if (hitInfo.collider.isTrigger)
+        const int DEFAULT_LAYER = 0;
+        Vector3 posToMove = pos;
+        bool cancel = false;
+
+        RaycastHit[] hitInfo = Physics.SphereCastAll(m_body.position, .2f, pos, fracComplete, DEFAULT_LAYER);
+        foreach (RaycastHit hit in hitInfo)
         {
-            m_body.MovePosition(pos);
-            if (hitInfo.collider.name == "Hitbox Bot")
+            if (hit.collider.isTrigger)
             {
-                hitInfo.collider.SendMessage("OnTriggerEnter", m_collider);
+                if (hit.collider.name == "Hitbox Bot")
+                {
+                    hit.collider.SendMessage("OnTriggerEnter", m_collider);
+                }
+            }
+            else
+            {
+                posToMove = hit.point;
+                cancel = true;
+                break;
             }
         }
-        else if (!hitInfo.collider.isTrigger)
-        {
-            m_body.MovePosition(hitInfo.point);
-            return true;
-        }
-        return false;
+        print($"IS_K={m_body.isKinematic} :: M->P={posToMove} :: C={cancel}");
+        m_body.MovePosition(posToMove);
+        return cancel;
     }
 
 

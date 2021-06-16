@@ -57,14 +57,14 @@ public class ShotMeter : MonoBehaviour
 
     private void Update()
     {
+        // Moves the meter to offset next to the local player.
+        m_meterTransform.position = PlayerSettings.Singleton.Current.WorldToScreenPoint(GameManager.GetPlayer().transform.position) - Vector3.left * 64;
+
         if (m_player.props.isShooting)
         {
             // Increments the height for the fill bar.
             m_rectFillTimer += m_shotBarData.speed * Time.deltaTime;
             fill.rectTransform.SetHeight(m_rectFillTimer);
-
-            // Moves the meter to offset next to the local player.
-            m_meterTransform.position = PlayerSettings.Singleton.Current.WorldToScreenPoint(GameManager.GetPlayer().transform.position) - Vector3.left * 64;
 
             // If we have gone over the max height auto fail shot.
             if (fill.rectTransform.GetHeight() >= MAX_TARGET_HEIGHT)
