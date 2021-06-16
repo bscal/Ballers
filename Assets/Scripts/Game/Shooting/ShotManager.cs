@@ -115,6 +115,7 @@ public class ShotManager : MonoBehaviour
         m_releaseDist = Mathf.Abs(m_releaseDiff);
         int grade = m_shotBarData.GetShotGrade(m_releaseDist);
 
+
         print("Server: " + m_shotBarData.FinalTargetHeight + ", " + timer + ", dist = " + m_releaseDist + ", grade = " + grade + ", diff = " + m_releaseDiff);
 
         p.ClientReleaseBallClientRpc(m_releaseDist, m_releaseDiff, p.rpcParams);

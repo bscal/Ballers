@@ -100,6 +100,7 @@ public class BallHandling : NetworkBehaviour
     private float m_shotDifficulty;
     private bool m_insideHitboxShot;
     private float m_tickDuringShot;
+    private bool m_stopShotMovement;
 
     private Dictionary<ulong, float> m_playerDistances;
     private IOrderedEnumerable<KeyValuePair<ulong, float>> m_pairs;
@@ -133,6 +134,8 @@ public class BallHandling : NetworkBehaviour
     {
         if (IsServer && Match.HasGameStarted)
         {
+            Physics.SphereCast(m_body.position, .2f, m_ball.transform.position, out RaycastHit hitInfo);
+
             m_timer += Time.deltaTime;
 
             // Time to run these are around 20x a second
