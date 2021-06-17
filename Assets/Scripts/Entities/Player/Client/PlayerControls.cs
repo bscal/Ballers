@@ -235,7 +235,6 @@ public class PlayerControls : NetworkBehaviour
             {
                 m_shootCooldown = .2f;
                 m_player.ShootBall();
-                //StartCoroutine(OnKeyHeldDown());
             }
         }
     }

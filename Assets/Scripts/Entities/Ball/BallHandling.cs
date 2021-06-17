@@ -72,7 +72,7 @@ public class BallHandling : NetworkBehaviour
     // TeamID with possession
     private readonly NetworkVariableSByte m_possession = new NetworkVariableSByte(NetworkConstants.BALL_CHANNEL, -1);
     public int Possession { get { return m_possession.Value; } set { if (value < -1 || value > 1) value = -1; m_possession.Value = (sbyte)value; } }
-    public int PossessionOrHome { get { return (Possession != 1) ? 0 : 1; } }
+    public int PossessionOrHome { get { return (m_possession.Value == 1) ? 1 : 0; } }
 
     // =================================== Public ===================================
 
@@ -84,7 +84,6 @@ public class BallHandling : NetworkBehaviour
 
     // =================================== Private ===================================
 
-    private ShotManager m_shotManager;
     private Player m_currentPlayer;
     private GameObject m_ball;
     private Rigidbody m_body;
@@ -98,10 +97,9 @@ public class BallHandling : NetworkBehaviour
     private float m_passScore;
     private float m_releaseDiff;
     private float m_shotDifficulty;
-    private bool m_insideHitboxShot;
     private float m_tickDuringShot;
 
-    private Dictionary<ulong, float> m_playerDistances;
+    private Dictionary<ulong, float> m_playerDistances = new Dictionary<ulong, float>();
     private IOrderedEnumerable<KeyValuePair<ulong, float>> m_pairs;
 
     // =================================== Functions ===================================
@@ -118,15 +116,18 @@ public class BallHandling : NetworkBehaviour
     public override void NetworkStart()
     {
         GameManager.SetBallHandlingInstance(this);
-        m_ball = NetworkObject.gameObject;
+        m_ball = gameObject;
         m_collider = GetComponent<SphereCollider>();
+        m_body = gameObject.GetComponent<Rigidbody>();
         if (IsServer)
         {
-            m_shotManager = GameManager.Singleton.gameObject.GetComponent<ShotManager>();
-            m_playerDistances = new Dictionary<ulong, float>();
-            m_body = gameObject.GetComponent<Rigidbody>();
+            // TODO debug
             m_body.AddForce(new Vector3(1, 1, 1), ForceMode.Impulse);
         }
+    }
+    private void Reset()
+    {
+        shotInAction = false;
     }
 
     void Update()
@@ -190,7 +191,7 @@ public class BallHandling : NetworkBehaviour
 
                 foreach (KeyValuePair<ulong, float> pair in m_pairs)
                 {
-                    if (pair.Value < 1.5f && !m_insideHitboxShot)
+                    if (pair.Value < 1.5f)
                     {
                         Debug.Log(pair.Key + " picked up ball");
                         // Player closest to ball picks up the ball.
@@ -212,8 +213,6 @@ public class BallHandling : NetworkBehaviour
                 else
                     m_body.MovePosition(m_currentPlayer.rightPos);
             }
-
-
         }
     }
 
@@ -238,8 +237,11 @@ public class BallHandling : NetworkBehaviour
         }
     }
 
-    // =================================== RPCs ===================================
-    public void OnShoot(ulong netID, ShotData shotData, ShotBarData shotBarData)
+    /// <summary>
+    /// Called as a shot is started, before release. Used to set shot data.<br></br>
+    /// There should never be 2 shots that happen simultaneously.<br></br>
+    /// </summary>
+    public void OnShootBegin(ulong netID, ShotData shotData, ShotBarData shotBarData)
     {
         if (IsServer)
         {
@@ -254,14 +256,11 @@ public class BallHandling : NetworkBehaviour
     {
     }
 
-    // =================================== Public Functions ===================================
-    public void StopBall()
-    {
-        if (IsServer)
-            m_body.velocity = Vector3.zero;
-    }
-
-    public void BallFollowArc(ulong netID, float releaseDist, float releaseDiff)
+    /// <summary>
+    /// Called when the shot it "released" on the server. Will determine the type of shot and calculate<br></br>
+    /// additional data like the position the ball will goto. This will then call the correct shot processing function.
+    /// </summary>
+    public void CalculateShot(ulong netID, float releaseDist, float releaseDiff)
     {
         if (!IsServer) return;
 
@@ -368,20 +367,11 @@ public class BallHandling : NetworkBehaviour
         // Duration for the shot + small amount for any errors
         m_tickDuringShot = d + .1f;
         if (m_shotData.bankshot == BankType.NONE)
-            StartCoroutine(FollowArc(m_body.position, basketPos + offset, h, d));
+            StartCoroutine(ProcessJumpShot(m_body.position, basketPos + offset, h, d));
         else
-            StartCoroutine(FollowBackboard(m_shotData, m_body.position, basketPos + offset, h, d));
-
+            StartCoroutine(ProcessBankShot(m_body.position, basketPos + offset, h, d));
     }
 
-    private Vector3 GetRandOffsetFromRanges(Vector2 x, Vector2 y, Vector2 z)
-    {
-        return new Vector3() {
-            x = UnityEngine.Random.Range(x.x, x.y),
-            y = UnityEngine.Random.Range(y.x, y.y),
-            z = UnityEngine.Random.Range(z.x, z.y)
-        };
-    }
     private IEnumerator FollowArc(Vector3 start, Vector3 end, float height, float duration)
     {
         float startTime = Time.fixedTime;
@@ -401,69 +391,33 @@ public class BallHandling : NetworkBehaviour
 
             yield return new WaitForFixedUpdate();
         }
+    }
+
+    private IEnumerator ProcessJumpShot(Vector3 start, Vector3 end, float height, float duration)
+    {
+        yield return FollowArc(start, end, height, duration);
         State = BallState.LOOSE;
     }
 
     // Bank shots and layup
-    private IEnumerator FollowBackboard(ShotData shot, Vector3 start, Vector3 end, float height, float duration)
+    private IEnumerator ProcessBankShot(Vector3 start, Vector3 end, float height, float duration)
     {
-        Vector3 bankPos = GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[(int)shot.bankshot].transform.position;
+        Vector3 bankPos = GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[(int)m_shotData.bankshot].transform.position;
 
-        float startTime = Time.fixedTime;
-        float fracComplete = 0;
-        // This is the loop for slerp the ball position from the player to the bank position
-        // This statement will break itself at 99% completion of journey
-        while (fracComplete < 1)
-        {
-            if (!shotInAction) break;
-            // Fraction of journey completed equals current distance divided by total distance.
-            fracComplete = (Time.fixedTime - startTime) / duration;
-            // Calculate arc
-            Vector3 pos = Vector3.Lerp(start, bankPos, fracComplete);
-            pos.y += Mathf.Sin(Mathf.PI * fracComplete) * height;
-
-            // Sends out a spherecast to make sure we can move the ball.
-            // the rigidbody is move here and returns if we should break the loop.
-            if (HandleSphereCast(pos, fracComplete))
-                break;
-
-            yield return new WaitForFixedUpdate();
-        }
-
-        //Resets values
-        startTime = Time.fixedTime;
-        fracComplete = 0;
-        // This is the loop for lerp ball position from bank spot on backboard to basket.
-        while (fracComplete < 1)
-        {
-            if (!shotInAction) break;
-            // Using duration here does not makes sense since its a constant distance between the bank and the
-            // basket. Think about moveing this to a static const or some better way?
-            fracComplete = (Time.fixedTime - startTime) / (duration * .75f);
-
-            Vector3 pos = Vector3.Lerp(bankPos, end, fracComplete);
-            pos.y += Mathf.Sin(Mathf.PI * fracComplete) * height;
-
-            // Sends out a spherecast to make sure we can move the ball.
-            // the rigidbody is move here and returns if we should break the loop.
-            if (HandleSphereCast(pos, fracComplete))
-                break;
-
-            yield return new WaitForFixedUpdate();
-        }
+        yield return FollowArc(start, bankPos, height, duration);
+        yield return FollowArc(bankPos, end, 1f, .25f);
 
         State = BallState.LOOSE;
     }
 
-    private IEnumerator FingerRoll(ShotData shot, Vector3 start, Vector3 end, float height, float duration)
+    private IEnumerator ProcessLayup(Vector3 start, Vector3 end, float duration)
     {
-        yield return null;
-    }
+        Vector3 bankPos = GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[(int)m_shotData.bankshot].transform.position;
 
-    /// Returns the team that does not have possession.
-    public int FlipTeam()
-    {
-        return Mathf.Clamp(Possession ^ 1, 0, 1);
+        yield return FollowArc(start, bankPos, 1f, duration);
+        yield return FollowArc(bankPos, end, 1f, .5f);
+
+        State = BallState.LOOSE;
     }
 
     // =================================== Passing ===================================
@@ -682,7 +636,6 @@ public class BallHandling : NetworkBehaviour
                 break;
             }
         }
-        print($"IS_K={m_body.isKinematic} :: M->P={posToMove} :: C={cancel}");
         m_body.MovePosition(posToMove);
         return cancel;
     }
@@ -739,27 +692,16 @@ public class BallHandling : NetworkBehaviour
         }
     }
 
-    // =================================== End Passing ===================================
-
-    // =================================== Private Functions ===================================
-
-    private void SetPlayerIDs(ulong netId)
-    {
-        if (netId != NO_PLAYER)
-        {
-            PlayerLastPossesion = PlayerWithBall;
-            PlayerLastTouched = PlayerWithBall;
-        }
-        PlayerWithBall = netId;
-    }
-
     private void OnCollisionEnter(Collision collision)
     {
-        // Ball hits the Floor collider make sure we set the shot to missed.
-        if (collision.gameObject.CompareTag("Floor"))
+        if (IsServer)
         {
-            if (shotInAction)
-                OnShotMissed();
+            // Ball hits the Floor collider make sure we set the shot to missed.
+            if (collision.gameObject.CompareTag("Floor"))
+            {
+                if (shotInAction)
+                    OnShotMissed();
+            }
         }
     }
 
@@ -808,63 +750,65 @@ public class BallHandling : NetworkBehaviour
         }
     }
 
-    [ClientRpc]
-    public void SetPlayerHandlerClientRpc(ulong netID, bool isHandler, ClientRpcParams cParams = default)
-    {
-        Player passer = GameManager.GetPlayerByNetworkID(netID);
-        passer.props.isDribbling = isHandler;
-
-        if (isHandler)
-        {
-            m_currentPlayer.props.isBallInLeftHand = !m_currentPlayer.props.isRightHanded;
-        }
-    }
-
     /// <summary>
-    /// Changes the Player with ball and updates clients that have the ball.<br></br>
-    /// If NO_PLAYER id is set sets State to LOOSE.<br></br>
-    /// Possession is also changed to correct possession if needed.
+    /// Changes the ball handlers to the new newId or NO_PLAYER. If NO_PLAYER id is used, set State to LOOSE.<br></br>
+    /// Updates ids, player.props, and will set the possession to the correct team.<br></br>
+    /// Does not call any client rpcs because BallHandling ids and player.props are already synced.
     /// </summary>
     public void ChangeBallHandler(ulong newNetworkID)
     {
-        //if (newNetworkID == PlayerWithBall) return;
-
-        SetPlayerIDs(newNetworkID);
-
-        if (newNetworkID == DUMMY_PLAYER) return;
-
-        // Alerts the last player with possession if not null hes not holding the ball.
-        if (m_currentPlayer != null)
-            SetPlayerHandlerServer(m_currentPlayer.NetworkObjectId, false);
-        //SetPlayerHandlerClientRpc(m_currentPlayer.NetworkObjectId, false, RPCParams.ClientParamsOnlyClient(m_currentPlayer.OwnerClientId));
-
-        int teamToSwitch = Possession;
-        // If newPlayer is set to NO_PLAYER id the ball should be loose.
-        // There is no need to update that client or change possession until ball is picked up.
-        if (newNetworkID == NO_PLAYER)
+        if (IsServer)
         {
-            if (State != BallState.SHOT)
-                State = BallState.LOOSE;
-            return;
-        }
-        else
-        {
-            m_currentPlayer = GameManager.GetPlayerByNetworkID(newNetworkID);
-            print("CURRENT_PLAYER = " + ((m_currentPlayer == null) ? "NULL" : m_currentPlayer.gameObject.name));
-            //SetPlayerHandlerClientRpc(m_currentPlayer.NetworkObjectId, true, RPCParams.ClientParamsOnlyClient(m_currentPlayer.OwnerClientId));
-            SetPlayerHandlerServer(m_currentPlayer.NetworkObjectId, true);
-            BallHandlerChange?.Invoke(PlayerLastPossesion, PlayerWithBall);
+            SetPlayerIDs(newNetworkID);
 
-            // if old id and new id are same don't change teams.
-            if (Possession == m_currentPlayer.props.teamID) return;
+            if (newNetworkID == DUMMY_PLAYER) return;
 
-            // Temp like this in case i want to change something.
-            if (IsBallLoose())
-                teamToSwitch = m_currentPlayer.props.teamID;
+            // Alerts the last player with possession if not null hes not holding the ball.
+            if (m_currentPlayer != null)
+                SetPlayerHandlerServer(m_currentPlayer.NetworkObjectId, false);
+
+            // If newPlayer is set to NO_PLAYER id the ball should be loose.
+            // There is no need to update that client or change possession until ball is picked up.
+            if (newNetworkID == NO_PLAYER)
+            {
+                if (State != BallState.SHOT)
+                    State = BallState.LOOSE;
+                return;
+            }
             else
-                teamToSwitch = m_currentPlayer.props.teamID;
+            {
+                m_currentPlayer = GameManager.GetPlayerByNetworkID(newNetworkID);
+                SetPlayerHandlerServer(m_currentPlayer.NetworkObjectId, true);
+                BallHandlerChange?.Invoke(PlayerLastPossesion, PlayerWithBall);
+
+                // If the current teamid and new player's teamid do not match change possession.
+                if (Possession != m_currentPlayer.props.teamID)
+                    ChangePossession(m_currentPlayer.props.teamID, false, false);
+            }
         }
-        ChangePossession(teamToSwitch, false, false);
+    }
+
+    public void ChangePossession(int team, bool inbound, bool loose)
+    {
+        if (IsServer)
+        {
+            GameObject inboundObj = GameManager.Singleton.GetClosestInbound(m_ball.transform.position);
+
+            print("changing to " + team);
+            Possession = team;
+
+            if (inbound)
+            {
+                State = BallState.INBOUND;
+
+                SetupInbound(team, inboundObj);
+            }
+            else if (loose)
+            {
+                State = BallState.LOOSE;
+            }
+            PossessionChange?.Invoke(team);
+        }
     }
 
     private void SetupInbound(int team, GameObject inbound)
@@ -876,25 +820,20 @@ public class BallHandling : NetworkBehaviour
         // Setup Inbound Coroutine
     }
 
-    public void ChangePossession(int team, bool inbound, bool loose)
+    private void SetPlayerIDs(ulong netId)
     {
-        GameObject inboundObj = GameManager.Singleton.GetClosestInbound(m_ball.transform.position);
-
-        //ChangeBallHandler(NO_PLAYER);
-        print("changing to " + team);
-        Possession = team;
-
-        if (inbound)
+        if (netId != NO_PLAYER)
         {
-            State = BallState.INBOUND;
+            PlayerLastPossesion = PlayerWithBall;
+            PlayerLastTouched = PlayerWithBall;
+        }
+        PlayerWithBall = netId;
+    }
 
-            SetupInbound(team, inboundObj);
-        }
-        else if (loose)
-        {
-            State = BallState.LOOSE;
-        }
-        PossessionChange?.Invoke(team);
+    public void StopBall()
+    {
+        if (IsServer)
+            m_body.velocity = Vector3.zero;
     }
 
     public bool IsBallLoose()
@@ -902,9 +841,18 @@ public class BallHandling : NetworkBehaviour
         return Possession == -1;
     }
 
-    private void Reset()
+    /// Returns the team that does not have possession.
+    public int FlipTeam()
     {
-        shotInAction = false;
+        return Mathf.Clamp(Possession ^ 1, 0, 1);
     }
 
+    private Vector3 GetRandOffsetFromRanges(Vector2 x, Vector2 y, Vector2 z)
+    {
+        return new Vector3() {
+            x = UnityEngine.Random.Range(x.x, x.y),
+            y = UnityEngine.Random.Range(y.x, y.y),
+            z = UnityEngine.Random.Range(z.x, z.y)
+        };
+    }
 }

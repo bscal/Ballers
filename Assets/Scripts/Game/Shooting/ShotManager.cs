@@ -61,7 +61,7 @@ public class ShotManager : MonoBehaviour
         m_shotBarData.targetSize = (ShotMeter.MAX_TARGET_HEIGHT * m_shotBarData.BonusHeight) + ShotMeter.BASE_TARGET;
         m_shotBarData.targetHeight = (ShotMeter.BASE_TARGET_HEIGHT + m_shotBarData.targetOffset);
 
-        GameManager.GetBallHandling().OnShoot(netID, m_shotData, m_shotBarData);
+        GameManager.GetBallHandling().OnShootBegin(netID, m_shotData, m_shotBarData);
          p.ClientShootBallClientRpc(netID, m_shotData, m_shotBarData, p.rpcParams);
         //p.InvokeClientRpcOnEveryone(p.ClientShootBall, m_shotData, m_shotBarData);
         StartCoroutine(ShotQuality(p, rttDelay));
@@ -80,7 +80,7 @@ public class ShotManager : MonoBehaviour
 
     private void HandleShot(ulong netID)
     {
-        GameManager.GetBallHandling().BallFollowArc(netID, m_releaseDist, m_releaseDiff);
+        GameManager.GetBallHandling().CalculateShot(netID, m_releaseDist, m_releaseDiff);
     }
 
     private int GetShotValue(Player p)
