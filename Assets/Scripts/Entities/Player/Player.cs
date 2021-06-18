@@ -53,13 +53,13 @@ public class Player : NetworkBehaviour
     /// Returns true if Player is an AI or is a Dummy
     /// </summary>
     public bool IsNpc { get { return props.isAI || isDummy; } }
-    public bool HasBall { get { return NetworkObjectId == GameManager.GetBallHandling().PlayerWithBall; } }
+    public bool HasBall { get { return NetworkObjectId == GameManager.Instance.ballController.PlayerWithBall; } }
     public Vector3 RightHandPos { get { return m_rightHand.transform.position; } }
     public Vector3 LeftHandPos { get { return m_leftHand.transform.position; } }
     public Vector3 CurHandPos { get { return (props.isBallInLeftHand) ? LeftHandPos : RightHandPos; } }
     public Vector3 CenterPos { get { return m_center.transform.position; } }
-    public Transform OwnBasket { get { return GameManager.Singleton.baskets[props.teamID].transform; } }
-    public Transform OtherBasket { get { return GameManager.Singleton.baskets[FlipTeamID(props.teamID)].transform; } }
+    public Transform OwnBasket { get { return GameManager.Instance.baskets[props.teamID].transform; } }
+    public Transform OtherBasket { get { return GameManager.Instance.baskets[FlipTeamID(props.teamID)].transform; } }
     public bool OnLeftSide { get { return transform.position.x < 0; } }
     private Vector3 m_target;
     public Vector3 TargetPos { get { return m_target; } }
@@ -70,8 +70,8 @@ public class Player : NetworkBehaviour
     {
         get
         {
-            if (IsOnOffense() || GameManager.GetBallHandling().IsBallLoose()) return null;
-            if (props.isHelping) return GameManager.Singleton.BallHandler;
+            if (IsOnOffense() || GameManager.Instance.ballController.IsBallLoose()) return null;
+            if (props.isHelping) return GameManager.Instance.BallHandler;
             else if (m_assignment == null) m_assignment = Match.matchTeams[OtherTeam].GetPlayerBySlot(props.slot);
             return (m_assignment == null) ? null : m_assignment;
         }
@@ -113,12 +113,12 @@ public class Player : NetworkBehaviour
 
         if (IsOwner && !props.isAI)
         {
-            ClientPlayer.Singleton.localPlayer = this;
+            ClientPlayer.Instance.localPlayer = this;
 
             RequestIdsClient();
         }
 
-        ServerManager.Singleton.AddPlayer(NetworkObjectId, gameObject, this);
+        ServerManager.Instance.AddPlayer(NetworkObjectId, gameObject, this);
     }
 
     void Update()
@@ -134,7 +134,7 @@ public class Player : NetworkBehaviour
             }
         }
 
-        if (isDummy || !hasEnteredGame || !GameManager.Singleton.HasStarted) return;
+        if (isDummy || !hasEnteredGame || !GameManager.Instance.HasStarted) return;
 
         if (IsOwner && !props.isAI)
         {
@@ -146,12 +146,12 @@ public class Player : NetworkBehaviour
                 m_targetTracker.gameObject.SetActive(false);
         }
 
-        m_target = GameManager.Singleton.baskets[GameManager.Singleton.Possession].gameObject.transform.position;
+        m_target = GameManager.Instance.baskets[GameManager.Instance.Possession].gameObject.transform.position;
     }
 
     protected void PlayerEnteredGame()
     {
-        GameManager.Singleton.GameStartedClient += OnGameStarted;
+        GameManager.Instance.GameStartedClient += OnGameStarted;
 
         GameObject prefab = ServerManager.PrefabFromTeamID(props.teamID);
         print($"Client {OwnerClientId} | {NetworkObjectId} model = {prefab.name}");
@@ -222,7 +222,7 @@ public class Player : NetworkBehaviour
     public void SceneChangeServerRpc(ServerRpcParams serverRpcParams = default)
     {
         PlayerEnteredGame();
-        ServerManager.Singleton.PlayerSceneChanged(OwnerClientId, NetworkObjectId);
+        ServerManager.Instance.PlayerSceneChanged(OwnerClientId, NetworkObjectId);
     }
 
     public static Transform FindTransformInChild(Transform transform, string objectName)
@@ -285,7 +285,7 @@ public class Player : NetworkBehaviour
             ulong clientID = GameManager.GetPlayerByNetworkID(netID).OwnerClientId;
             ulong rtt = ServerManager.GetRTT(clientID);
             m_shotManager.OnRelease(netID, (rtt / 1000 / 2));
-            GameManager.GetBallHandling().ChangeBallHandler(BallHandling.NO_PLAYER);
+            GameManager.Instance.ballController.ChangeBallHandler(BallController.NO_PLAYER);
 
             print(netID + " releases ball");
         }
@@ -343,7 +343,7 @@ public class Player : NetworkBehaviour
     {
         if (IsOwner)
         {
-            GameManager.GetBallHandling().PlayerCallForBallServerRpc(NetworkObjectId);
+            GameManager.Instance.ballController.PlayerCallForBallServerRpc(NetworkObjectId);
         }
     }
 
@@ -413,12 +413,12 @@ public class Player : NetworkBehaviour
 
     public bool IsOnOffense()
     {
-        return GameManager.GetBallHandling().Possession == props.teamID;
+        return GameManager.Instance.ballController.Possession == props.teamID;
     }
 
     public bool IsOnDefense()
     {
-        return FlipTeamID(GameManager.Singleton.Possession) == props.teamID;
+        return FlipTeamID(GameManager.Instance.Possession) == props.teamID;
     }
 
     public GameObject GetLeftHand()
@@ -556,7 +556,7 @@ public class Player : NetworkBehaviour
     [ServerRpc]
     public void ClientLoadedServerRpc(ServerRpcParams serverRpcParams = default)
     {
-        ServerPlayer sp = ServerManager.Singleton.players[serverRpcParams.Receive.SenderClientId];
+        ServerPlayer sp = ServerManager.Instance.players[serverRpcParams.Receive.SenderClientId];
         if (sp != null)
         {
             sp.state = ServerPlayerState.READY;
@@ -568,7 +568,7 @@ public class Player : NetworkBehaviour
     {
         ulong clientId = serverRpcParams.Receive.SenderClientId;
         Debug.Log($"Ids got : {clientId} | {steamId} | {cid}");
-        if (ServerManager.Singleton.players.TryGetValue(clientId, out ServerPlayer sp))
+        if (ServerManager.Instance.players.TryGetValue(clientId, out ServerPlayer sp))
         {
             id = clientId;
             sp.steamId = steamId;
@@ -583,8 +583,8 @@ public class Player : NetworkBehaviour
     public void RequestIdsClient()
     {
         Debug.Log("RequestIds got");
-        ulong steam = ClientPlayer.Singleton.SteamID;
-        int cid = ClientPlayer.Singleton.CharData.cid;
+        ulong steam = ClientPlayer.Instance.SteamID;
+        int cid = ClientPlayer.Instance.CharData.cid;
         id = OwnerClientId;
         SendIdsServerRpc(steam, cid);
     }

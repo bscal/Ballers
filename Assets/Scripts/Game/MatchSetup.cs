@@ -48,7 +48,7 @@ public class MatchSetup : MonoBehaviour
         if (!Match.HostServer)
             NetworkManager.Singleton.StartClient();
         else
-            ServerManager.Singleton.SetupHost();
+            ServerManager.Instance.SetupHost();
     }
 
     private void OnAllPlayersLoaded()

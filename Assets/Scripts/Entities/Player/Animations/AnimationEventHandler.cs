@@ -10,7 +10,7 @@ public class AnimationEventHandler : MonoBehaviour
 
     public void ShootAnimationHighest()
     {
-        GameManager.GetBallHandling().AnimationReleaseServerRpc();
+        GameManager.Instance.ballController.AnimationReleaseServerRpc();
     }
 
     public void OnCrossover(int tooLeft)

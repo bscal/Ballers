@@ -12,7 +12,7 @@ public class DefenderDummy : BasicDummy
     protected new void Start()
     {
         base.Start();
-        GameManager.Singleton.GameStartedClient += OnGameStarted;
+        GameManager.Instance.GameStartedClient += OnGameStarted;
     }
 
     private void OnGameStarted()
@@ -22,7 +22,7 @@ public class DefenderDummy : BasicDummy
 
     void Update()
     {
-        if (!GameManager.Singleton.HasStarted) return;
+        if (!GameManager.Instance.HasStarted) return;
         m_target = NetworkSpawnManager.GetLocalPlayerObject();
         if (m_target == null) return;
         transform.position = m_target.gameObject.transform.position + (m_target.gameObject.transform.forward * 6);

@@ -38,16 +38,16 @@ public class SyncedMatchState : NetworkBehaviour
 
     void Update()
     {
-        if (IsServer && GameManager.Singleton.HasStarted)
+        if (IsServer && GameManager.Instance.HasStarted)
         {
             m_timerSync += Time.deltaTime;
             if (m_timerSync > m_lastSync)
             {
                 m_lastSync = m_timerSync + 500;
 
-                m_state.HasStarted = GameManager.Singleton.HasStarted;
-                m_state.PlayerWithBall = (GameManager.Singleton.BallHandler) ? GameManager.Singleton.BallHandler.OwnerClientId : 0;
-                m_state.TeamWithPossession = GameManager.Singleton.Possession;
+                m_state.HasStarted = GameManager.Instance.HasStarted;
+                m_state.PlayerWithBall = (GameManager.Instance.BallHandler) ? GameManager.Instance.BallHandler.OwnerClientId : 0;
+                m_state.TeamWithPossession = GameManager.Instance.Possession;
 
                 //SyncMatchStateClientRpc(m_lastSync, m_state);
             }
@@ -57,7 +57,7 @@ public class SyncedMatchState : NetworkBehaviour
     [ClientRpc]
     public void SyncMatchStateClientRpc(float lastSync, SyncedMatchStateData state)
     {
-        GameManager.Singleton.SyncState(state);
+        GameManager.Instance.SyncState(state);
     }
 
     [ClientRpc]

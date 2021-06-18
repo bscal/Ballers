@@ -17,7 +17,7 @@ public class Defence : MonoBehaviour
 
     void Start()
     {
-        GameManager.Singleton.GameStartedClient += OnGameStarted;
+        GameManager.Instance.GameStartedClient += OnGameStarted;
     }
 
     void Update()
@@ -27,7 +27,7 @@ public class Defence : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!GameManager.Singleton.HasStarted) return;
+        if (!GameManager.Instance.HasStarted) return;
         if (m_player == null || !m_player.IsOwner) return;
         if (m_showTrackers)
         {

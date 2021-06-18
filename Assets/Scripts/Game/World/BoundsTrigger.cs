@@ -10,11 +10,11 @@ public class BoundsTrigger : MonoBehaviour
         {
             if (other.gameObject.CompareTag("Player"))
             {
-                GameManager.Singleton.OutOfBounds();
+                GameManager.Instance.OutOfBounds();
             }
             else if (other.gameObject.CompareTag("Ball"))
             {
-                GameManager.Singleton.OutOfBounds();
+                GameManager.Instance.OutOfBounds();
             }
         }
     }

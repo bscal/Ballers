@@ -59,6 +59,6 @@ public static class Match
 
     public static void RemovePlayer(ulong steamid)
     {
-        ServerManager.Singleton.players.Remove(steamid);
+        ServerManager.Instance.players.Remove(steamid);
     }
 }

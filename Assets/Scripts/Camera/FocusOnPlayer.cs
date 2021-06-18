@@ -17,7 +17,7 @@ public class FocusOnPlayer : MonoBehaviour
     void Start()
     {
         if (GetLocalPlayerObject)
-            GameManager.Singleton.LocalPlayerLoaded += OnLocalPlayerLoaded;
+            GameManager.Instance.LocalPlayerLoaded += OnLocalPlayerLoaded;
 
         if (startDisabled)
             gameObject.SetActive(false);

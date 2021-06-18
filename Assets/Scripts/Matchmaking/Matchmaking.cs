@@ -96,13 +96,13 @@ public class Matchmaking : MonoBehaviour
         // Sets lobby gamemode
         SteamMatchmaking.SetLobbyData(lobbyID, "Gamemode", "Ballers-1v1");
         // Sets lobby host steamid
-        SteamMatchmaking.SetLobbyData(lobbyID, "Host", ClientPlayer.Singleton.SteamID.ToString());
+        SteamMatchmaking.SetLobbyData(lobbyID, "Host", ClientPlayer.Instance.SteamID.ToString());
         SteamMatchmaking.SetLobbyData(lobbyID, "NeededPlayers", "1");
 
         if (!m_lobby.usingDedicated)
         {
-            Match.NetworkLobby.SetSteamIDToConnect(ClientPlayer.Singleton.SteamID);
-            Match.HostID = new CSteamID(ClientPlayer.Singleton.SteamID);
+            Match.NetworkLobby.SetSteamIDToConnect(ClientPlayer.Instance.SteamID);
+            Match.HostID = new CSteamID(ClientPlayer.Instance.SteamID);
             Match.HostServer = true;
 
             NetworkManager.Singleton.StartHost();
@@ -118,7 +118,7 @@ public class Matchmaking : MonoBehaviour
         string hostSteamID = SteamMatchmaking.GetLobbyData(m_lobbyID, "Host");
         ulong steamid = ulong.Parse(hostSteamID);
 
-        SteamMatchmaking.SetLobbyMemberData(m_lobbyID, "cid", ClientPlayer.Singleton.Cid.ToString());
+        SteamMatchmaking.SetLobbyMemberData(m_lobbyID, "cid", ClientPlayer.Instance.Cid.ToString());
 
         Match.InitMatch(new MatchSettings(BallersGamemode.SP_BOTS, 5, 4, 60.0 * 12.0, 24.0));
         Match.NetworkLobby.SetSteamIDToConnect(steamid);
@@ -126,7 +126,7 @@ public class Matchmaking : MonoBehaviour
         Match.PlayersNeeded = int.Parse(SteamMatchmaking.GetLobbyData(m_lobbyID, "NeededPlayers"));
         Match.MatchID = 1;
 
-        ClientPlayer.Singleton.State = ServerPlayerState.JOINING;
+        ClientPlayer.Instance.State = ServerPlayerState.JOINING;
     }
 
     private void OnLobbyChatUpdate(LobbyDataUpdate_t lobbyDataUpdate)

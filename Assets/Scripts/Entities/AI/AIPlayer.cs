@@ -21,9 +21,9 @@ public class AIPlayer : NetworkBehaviour
     void Update()
     {
         if (!IsOwner || !Match.HasGameStarted) return;
-        if (GameManager.Singleton.GameState.MatchStateValue == EMatchState.INPROGRESS)
+        if (GameManager.Instance.GameState.MatchStateValue == EMatchState.INPROGRESS)
         {
-            if (GameManager.GetBallHandling().IsBallLoose())
+            if (GameManager.Instance.ballController.IsBallLoose())
             {
                 // TODO should player try and get ball?
                 return;

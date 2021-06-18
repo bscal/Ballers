@@ -61,7 +61,7 @@ public class ShotManager : MonoBehaviour
         m_shotBarData.targetSize = (ShotMeter.MAX_TARGET_HEIGHT * m_shotBarData.BonusHeight) + ShotMeter.BASE_TARGET;
         m_shotBarData.targetHeight = (ShotMeter.BASE_TARGET_HEIGHT + m_shotBarData.targetOffset);
 
-        GameManager.GetBallHandling().OnShootBegin(netID, m_shotData, m_shotBarData);
+        GameManager.Instance.ballController.OnShootBegin(netID, m_shotData, m_shotBarData);
          p.ClientShootBallClientRpc(netID, m_shotData, m_shotBarData, p.rpcParams);
         //p.InvokeClientRpcOnEveryone(p.ClientShootBall, m_shotData, m_shotBarData);
         StartCoroutine(ShotQuality(p, rttDelay));
@@ -80,12 +80,12 @@ public class ShotManager : MonoBehaviour
 
     private void HandleShot(ulong netID)
     {
-        GameManager.GetBallHandling().CalculateShot(netID, m_releaseDist, m_releaseDiff);
+        GameManager.Instance.ballController.CalculateShot(netID, m_releaseDist, m_releaseDiff);
     }
 
     private int GetShotValue(Player p)
     {
-        if (GameManager.Singleton.isFreeThrow)
+        if (GameManager.Instance.isFreeThrow)
             return 1;
         else if (p.props.isInsideThree)
             return 2;
@@ -177,17 +177,17 @@ public class ShotManager : MonoBehaviour
     }
     private static Vector3 GetClosestBankPos(Vector3 current)
     {
-        float distL = Vector3.Distance(current, GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[0].transform.position);
-        float distR = Vector3.Distance(current, GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[1].transform.position);
+        float distL = Vector3.Distance(current, GameManager.Instance.baskets[GameManager.Instance.Possession].banks[0].transform.position);
+        float distR = Vector3.Distance(current, GameManager.Instance.baskets[GameManager.Instance.Possession].banks[1].transform.position);
         return (distL < distR) ?
-            GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[0].transform.position :
-            GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[1].transform.position;
+            GameManager.Instance.baskets[GameManager.Instance.Possession].banks[0].transform.position :
+            GameManager.Instance.baskets[GameManager.Instance.Possession].banks[1].transform.position;
     }
 
     private static BankType GetClosestBank(Vector3 current)
     {
-        float distL = Vector3.Distance(current, GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[0].transform.position);
-        float distR = Vector3.Distance(current, GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[1].transform.position);
+        float distL = Vector3.Distance(current, GameManager.Instance.baskets[GameManager.Instance.Possession].banks[0].transform.position);
+        float distR = Vector3.Distance(current, GameManager.Instance.baskets[GameManager.Instance.Possession].banks[1].transform.position);
         return (distL < distR) ?
             BankType.LEFT :
             BankType.RIGHT;

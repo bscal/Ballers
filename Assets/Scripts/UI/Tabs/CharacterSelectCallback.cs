@@ -15,7 +15,7 @@ public class CharacterSelectCallback : TabCallback
     private void Start()
     {
         m_charUi = GameObject.Find("CharacterUI").GetComponent<CharacterUI>();
-        m_client = ClientPlayer.Singleton;
+        m_client = ClientPlayer.Instance;
     }
 
     public override void OnDeselect(TabButton tabButton) {}

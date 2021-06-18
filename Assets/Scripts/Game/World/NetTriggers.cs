@@ -28,7 +28,7 @@ public class NetTriggers : MonoBehaviour
             Debug.Break();
             Vector3 dir = (transform.position - other.transform.position).normalized;
             // Detect if coming from above the collider.
-            GameManager.GetBallHandling().OnShotMade((int)m_basket.id);
+            GameManager.Instance.ballController.OnShotMade((int)m_basket.id);
             m_basket.netCloth.externalAcceleration = new Vector3() {
                 x = UnityEngine.Random.Range(5, 12),
                 y = UnityEngine.Random.Range(32, 48),
@@ -47,9 +47,9 @@ public class NetTriggers : MonoBehaviour
         if (!NetworkManager.Singleton.IsServer)
             return;
 
-        if (gameObject.name.Equals("Hitbox Shot") && GameManager.GetBallHandling().shotInAction)
+        if (gameObject.name.Equals("Hitbox Shot") && GameManager.Instance.ballController.shotInAction)
         {
-            if (!other.bounds.Contains(GameManager.GetBallHandling().gameObject.transform.position))
+            if (!other.bounds.Contains(GameManager.Instance.ballController.gameObject.transform.position))
             {
                 //GameManager.GetBallHandling().OnShotMissed();
             }

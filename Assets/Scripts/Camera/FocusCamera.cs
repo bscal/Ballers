@@ -39,10 +39,10 @@ public class FocusCamera : MonoBehaviour
         // If there is sets the new basket and to rotate
 
 
-        if (m_lastPossession != GameManager.GetBallHandling().PossessionOrHome)
+        if (m_lastPossession != GameManager.Instance.ballController.PossessionOrHome)
         {
             // Sets basket based on which team has possession of ball
-            basket = GameManager.Singleton.baskets[GameManager.GetBallHandling().PossessionOrHome].gameObject;
+            basket = GameManager.Instance.baskets[GameManager.Instance.ballController.PossessionOrHome].gameObject;
             // Does the camera need to rotate?
             m_isRotating = true;
         }
@@ -60,7 +60,7 @@ public class FocusCamera : MonoBehaviour
 
         // Handles settings of position and applying proper offset
         float dist = Vector3.Distance(basket.transform.position, player.transform.position) * .4f;
-        target.Set(0, 10, (GameManager.GetBallHandling().PossessionOrHome == 0) ? -dist : dist);
+        target.Set(0, 10, (GameManager.Instance.ballController.PossessionOrHome == 0) ? -dist : dist);
         cam.transform.position = Vector3.Lerp(cam.transform.position, target, 1.5f * Time.deltaTime);
         target = player.transform.position + basket.transform.position + ((ball != null) ? ball.transform.position : Vector3.zero);
     }

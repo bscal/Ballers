@@ -19,7 +19,7 @@ public class PlayerCircleColor : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Singleton.HasStarted) return;
+        if (!GameManager.Instance.HasStarted) return;
 
         Player current = GameManager.GetPlayer();
         foreach (Player p in GameManager.GetPlayers())

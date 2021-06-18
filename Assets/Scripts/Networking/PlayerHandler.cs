@@ -44,7 +44,7 @@ public class PlayerHandler : MonoBehaviour
     {
         if (!NetworkManager.Singleton.IsServer) return;
 
-        if (!ServerManager.Singleton.players.TryGetValue(player.props.steamID, out ServerPlayer sPlayer)) return;
+        if (!ServerManager.Instance.players.TryGetValue(player.props.steamID, out ServerPlayer sPlayer)) return;
 
         StartCoroutine(BackendManager.FetchCharacterFromServer(player.props.steamID, sPlayer.cid, (cData, status) => {
             if (status == BackendManager.STATUS_OK)
@@ -68,7 +68,7 @@ public class PlayerHandler : MonoBehaviour
         {
             if (!player.props.isAI)
             {
-                ServerPlayer sp = ServerManager.Singleton.GetPlayer(player.props.steamID);
+                ServerPlayer sp = ServerManager.Instance.GetPlayer(player.props.steamID);
                 StartCoroutine(BackendManager.FetchCharacterFromServer(player.props.steamID, sp.cid, (cData, status) => {
                     if (status == BackendManager.STATUS_OK)
                     {

@@ -64,7 +64,7 @@ public class BasketballStateManager : NetworkBehaviour
     {
         if (IsServer)
         {
-            GameManager.Singleton.GameStartedServer += OnGameStarted;
+            GameManager.Instance.GameStartedServer += OnGameStarted;
         }
     }
 
@@ -145,7 +145,7 @@ public class BasketballStateManager : NetworkBehaviour
                 //End Game
             }
 
-            if (GameManager.Singleton.GetScoreDifference() == 0)
+            if (GameManager.Instance.GetScoreDifference() == 0)
             {
                 m_OvertimeCount++;
             }
@@ -166,8 +166,8 @@ public class BasketballStateManager : NetworkBehaviour
 
     private void UpdateUI()
     {
-        m_UIHomeScore.text = GameManager.Singleton.TeamHome.teamData.points.ToString();
-        m_UIAwayScore.text = GameManager.Singleton.TeamAway.teamData.points.ToString();
+        m_UIHomeScore.text = GameManager.Instance.TeamHome.teamData.points.ToString();
+        m_UIAwayScore.text = GameManager.Instance.TeamAway.teamData.points.ToString();
         m_UIQuarter.text = (m_OvertimeCount > 0) ? "OT" + m_OvertimeCount : Quarter.ToString();
         if (InGameTime < 60.0)
             m_UIClock.text = TimeSpan.FromSeconds(InGameTime).ToString("ss\\:f");

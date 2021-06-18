@@ -121,7 +121,7 @@ public class PlayerControls : NetworkBehaviour
                 {
                     type = PassType.LOB;
                 }
-                GameManager.GetBallHandling().TryPassBall(m_player, passCode, type);
+                GameManager.Instance.ballController.TryPassBall(m_player, passCode, type);
             }
         }
 

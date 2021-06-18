@@ -16,7 +16,7 @@ public enum TeamType
 
 public class GameManager : NetworkBehaviour
 {
-    public static GameManager Singleton { get; private set; }
+    public static GameManager Instance { get; private set; }
 
     public event Action Pregame;                // When all players connected -> all ready or timer
     public event Action GameStartedServer;      // Once Pregame ends -> timer
@@ -27,19 +27,19 @@ public class GameManager : NetworkBehaviour
     public event Action<Player> PlayerRegistered;
     public event Action<Player> LocalPlayerLoaded;
 
-    private static BallHandling BallHandling;
     private static List<Player> Players = new List<Player>();
     private readonly static List<BasicDummy> Dummies = new List<BasicDummy>();
     private readonly static List<AIPlayer> AIs = new List<AIPlayer>();
 
-    public Player BallHandler { get { return GetPlayerByNetworkID(BallHandling.PlayerWithBall); } }
-    public Basket CurrentBasket { get { return Singleton.baskets[BallHandling.PossessionOrHome]; } }
-    public int Possession { get { return BallHandling.PossessionOrHome; } }
+    public Player BallHandler { get { return GetPlayerByNetworkID(ballController.PlayerWithBall); } }
+    public Basket CurrentBasket { get { return Instance.baskets[ballController.PossessionOrHome]; } }
+    public int Possession { get { return ballController.PossessionOrHome; } }
     public MatchTeam TeamHome { get { return Match.matchTeams[0]; } }
     public MatchTeam TeamAway { get { return Match.matchTeams[1]; } }
     public bool HasStarted => Match.HasGameStarted;
     public BasketballStateManager GameState { get; private set; }
 
+    public BallController ballController;
     public bool lastShotMade;
     public bool isFreeThrow;
     public GameObject ball;
@@ -57,7 +57,7 @@ public class GameManager : NetworkBehaviour
 
     void Awake()
     {
-        Singleton = this;
+        Instance = this;
 
         GameState = GetComponent<BasketballStateManager>();
         m_shotManager = GetComponent<ShotManager>();
@@ -76,7 +76,7 @@ public class GameManager : NetworkBehaviour
         GameState.HalfEnd += OnHalfEnd;
         //GameState.ShotClockViolation += OnShotClockViolations;
 
-        Players = ServerManager.Singleton.playersList;
+        Players = ServerManager.Instance.playersList;
     }
 
     public override void NetworkStart()
@@ -84,7 +84,7 @@ public class GameManager : NetworkBehaviour
         if (IsServer)
         {
             ball = Instantiate(m_ballPrefab, new Vector3(1, 3, 1), Quaternion.identity);
-            BallHandling = ball.GetComponent<BallHandling>();
+            ballController = ball.GetComponent<BallController>();
             ball.name = "Ball";
             ball.GetComponent<NetworkObject>().Spawn();
         }
@@ -98,7 +98,7 @@ public class GameManager : NetworkBehaviour
     public void LocalPlayerInitilized()
     {
         Assert.IsNotNull(NetworkSpawnManager.GetLocalPlayerObject().gameObject.GetComponent<Player>(), "LocalPlayerObject is null.");
-        LocalPlayerLoaded?.Invoke(ClientPlayer.Singleton.localPlayer);
+        LocalPlayerLoaded?.Invoke(ClientPlayer.Instance.localPlayer);
     }
 
     public void BeginPregame()
@@ -120,11 +120,6 @@ public class GameManager : NetworkBehaviour
             GameStartedServer?.Invoke();
             StartGameClientRpc();
         }
-    }
-
-    internal static void SetBallHandlingInstance(BallHandling ballHandling)
-    {
-        BallHandling = ballHandling;
     }
 
     [ClientRpc]
@@ -176,7 +171,7 @@ public class GameManager : NetworkBehaviour
 
     public void HandleTurnover(Player p)
     {
-        BallHandling.ChangePossession(p.OtherTeam, true, false);
+        ballController.ChangePossession(p.OtherTeam, true, false);
     }
 
     public void OnHalfEnd()
@@ -226,7 +221,7 @@ public class GameManager : NetworkBehaviour
 
     public void ChangePossession()
     {
-        BallHandling.ChangePossession(BallHandling.FlipTeam(), false, true);
+        ballController.ChangePossession(ballController.FlipTeam(), false, true);
     }
 
     public void AddScore(int id, int points)
@@ -256,19 +251,19 @@ public class GameManager : NetworkBehaviour
     public void OutOfBounds()
     {
         Player p;
-        if (BallHandling.PlayerWithBall == BallHandling.NO_PLAYER)
+        if (ballController.PlayerWithBall == BallController.NO_PLAYER)
         {
-            if (BallHandling.PlayerLastTouched == BallHandling.NO_PLAYER)
+            if (ballController.PlayerLastTouched == BallController.NO_PLAYER)
             {
                 // If this happens something probably went wrong. We just handle with a jumpball.
                 Debug.LogError("Both PlayerWithBall and PlayerLastTouched = NO_PLAYER");
                 return;
             }
-            p = GetPlayerByNetworkID(BallHandling.PlayerLastTouched);
+            p = GetPlayerByNetworkID(ballController.PlayerLastTouched);
             HandleTurnover(p);
             return;
         }
-        p = GetPlayerByNetworkID(BallHandling.PlayerWithBall);
+        p = GetPlayerByNetworkID(ballController.PlayerWithBall);
         if (!p.HasBall && p.transform.position.y > 0.1f) return;
         HandleTurnover(p);
     }
@@ -278,14 +273,14 @@ public class GameManager : NetworkBehaviour
         return m_shotManager;
     }
 
-    public static BallHandling GetBallHandling()
+    public BallController GetBallHandling()
     {
-        return BallHandling;
+        return ballController;
     }
 
     public static Player GetPlayer()
     {
-        return ClientPlayer.Singleton.localPlayer;
+        return ClientPlayer.Instance.localPlayer;
     }
 
     public static List<Player> GetPlayersInRadius(float radius)
@@ -293,7 +288,7 @@ public class GameManager : NetworkBehaviour
         List<Player> res = new List<Player>();
         foreach (Player p in Players)
         {
-            if (ClientPlayer.Singleton.localPlayer.Dist(p.transform.position) < radius)
+            if (ClientPlayer.Instance.localPlayer.Dist(p.transform.position) < radius)
                 res.Add(p);
         }
         return res;
@@ -302,9 +297,9 @@ public class GameManager : NetworkBehaviour
     public static List<Player> GetEnemeiesInRadius(float radius)
     {
         List<Player> res = new List<Player>();
-        foreach (Player p in Match.matchTeams[ClientPlayer.Singleton.localPlayer.OtherTeam].slotToPlayer.Values)
+        foreach (Player p in Match.matchTeams[ClientPlayer.Instance.localPlayer.OtherTeam].slotToPlayer.Values)
         {
-            if (ClientPlayer.Singleton.localPlayer.Dist(p.transform.position) < radius)
+            if (ClientPlayer.Instance.localPlayer.Dist(p.transform.position) < radius)
                 res.Add(p);
         }
         return res;
@@ -359,7 +354,7 @@ public class GameManager : NetworkBehaviour
 
     public static Basket GetBasket()
     {
-        return Singleton.CurrentBasket;
+        return Instance.CurrentBasket;
     }
 
     public bool AreAllPlayersReady()
@@ -380,8 +375,8 @@ public class GameManager : NetworkBehaviour
     public void SyncState(SyncedMatchStateData state)
     {
         Match.HasGameStarted = state.HasStarted;
-        BallHandling.PlayerWithBall = state.PlayerWithBall;
-        BallHandling.Possession = state.TeamWithPossession;
+        ballController.PlayerWithBall = state.PlayerWithBall;
+        ballController.Possession = state.TeamWithPossession;
     }
 
 

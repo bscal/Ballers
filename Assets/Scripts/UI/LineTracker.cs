@@ -13,7 +13,7 @@ public class LineTracker : MonoBehaviour
 
     void Update()
     {
-        if (GameManager.Singleton != null && GameManager.Singleton.HasStarted)
+        if (GameManager.Instance != null && GameManager.Instance.HasStarted)
         {
             Player p = GameManager.GetPlayer();
             if (p == null || !p.IsOwner)

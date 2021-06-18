@@ -22,7 +22,7 @@ public enum StartupState
 
 public class ServerManager : NetworkBehaviour
 {
-    public static ServerManager Singleton { get; private set; }
+    public static ServerManager Instance { get; private set; }
 
     const string PATH = "./ballers_server.log";
 
@@ -58,7 +58,7 @@ public class ServerManager : NetworkBehaviour
 
     private void Awake()
     {
-        Singleton = this;
+        Instance = this;
         isDedicatedServer = Application.isBatchMode;
     }
 
@@ -121,7 +121,7 @@ public class ServerManager : NetworkBehaviour
                 print("starting");
                 m_startupState = StartupState.STARTED;
 
-                GameManager.Singleton.BeginPregame();
+                GameManager.Instance.BeginPregame();
             }
 
             if (ballersClient != null)
@@ -319,9 +319,9 @@ public class ServerManager : NetworkBehaviour
     public static GameObject PrefabFromTeamID(int teamID)
     {
         if (teamID == 1)
-            return Singleton.bluePrefab;
+            return Instance.bluePrefab;
         else
-            return Singleton.redPrefab;
+            return Instance.redPrefab;
     }
 
     public void PlayerSceneChanged(ulong ownerClientId, ulong networkObjectId)

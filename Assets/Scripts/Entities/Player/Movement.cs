@@ -55,10 +55,10 @@ public class Movement : MonoBehaviour
 
     private void HandleTargetDirection()
     {
-        int possesion = GameManager.GetBallHandling().PossessionOrHome;
+        int possesion = GameManager.Instance.ballController.PossessionOrHome;
         if (m_player.HasBall && possesion != -1)
         {
-            m_targetDirection = GameManager.Singleton.baskets[possesion].gameObject.transform.position - m_parent.transform.position;
+            m_targetDirection = GameManager.Instance.baskets[possesion].gameObject.transform.position - m_parent.transform.position;
         }
         else if (m_player.Assignment)
         {
@@ -66,14 +66,14 @@ public class Movement : MonoBehaviour
         }
         else
         {
-            m_targetDirection = GameManager.Singleton.baskets[possesion].gameObject.transform.position - m_parent.transform.position;
+            m_targetDirection = GameManager.Instance.baskets[possesion].gameObject.transform.position - m_parent.transform.position;
         }
     }
 
     private void MovePlayer()
     {
         float ms = (m_player.props.isSprinting ? m_sprintSpeed : m_movementSpeed) * Time.deltaTime;
-        Vector3 mov = (GameManager.Singleton.Possession == 0 ? Vector3.forward : -Vector3.forward) * ms;
+        Vector3 mov = (GameManager.Instance.Possession == 0 ? Vector3.forward : -Vector3.forward) * ms;
 
         Vector2 move = actions.Keyboard.Move.ReadValue<Vector2>();
         m_player.props.isMoving = move != Vector2.zero;
@@ -108,7 +108,7 @@ public class Movement : MonoBehaviour
             m_parent.transform.position -= mov;
         }
 
-        mov = (GameManager.Singleton.Possession == 0 ? Vector3.left : -Vector3.left) * ms;
+        mov = (GameManager.Instance.Possession == 0 ? Vector3.left : -Vector3.left) * ms;
         if (m_player.props.movingLeft)
         {
             m_parent.transform.position += mov;
