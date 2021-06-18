@@ -9,7 +9,7 @@ using UnityEngine;
 /// </summary>
 public class ClientPlayer : MonoBehaviour
 {
-    public static ClientPlayer Singleton { get; private set; }
+    public static ClientPlayer Instance { get; private set; }
 
     public int Cid { get { return (UserData != null) ? UserData.lastChar : 0; } }
     public UserData UserData { get; private set; }
@@ -34,15 +34,14 @@ public class ClientPlayer : MonoBehaviour
     public float lastCharacterUpdate;
 
     public Player localPlayer;
-    public BallersClient ballersClient;
+    public BallersClient localBallersClient;
 
     //private GameSetup m_gameSetup;
     //private SteamP2PTransport.SteamP2PTransport m_transport;
 
     void Awake()
     {
-        DontDestroyOnLoad(gameObject);
-        Singleton = this;
+        Instance = this;
         if (SteamManager.Initialized)
             SteamID = SteamUser.GetSteamID().m_SteamID;
         gameObject.AddComponent(typeof(PlayerHandler));

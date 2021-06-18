@@ -23,7 +23,7 @@ public class BallersClient : NetworkBehaviour
     {
         if (IsClient)
         {
-            ClientPlayer.Singleton.ballersClient = this;
+            ClientPlayer.Instance.localBallersClient = this;
         }
     }
 

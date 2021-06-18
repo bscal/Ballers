@@ -30,7 +30,7 @@ public enum PassType
     ALLEY_OOP
 }
 
-public class BallHandling : NetworkBehaviour
+public class BallController : NetworkBehaviour
 {
     // =================================== Constants ===================================
 
@@ -108,14 +108,13 @@ public class BallHandling : NetworkBehaviour
     {
         if (IsServer)
         {
-            GameManager.Singleton.GameStartedServer += OnGameStarted;
+            GameManager.Instance.GameStartedServer += OnGameStarted;
             BallHandlerChange += OnChangeBallHandler;
         }
     }
 
     public override void NetworkStart()
     {
-        GameManager.SetBallHandlingInstance(this);
         m_ball = gameObject;
         m_collider = GetComponent<SphereCollider>();
         m_body = gameObject.GetComponent<Rigidbody>();
@@ -163,7 +162,7 @@ public class BallHandling : NetworkBehaviour
                 if (m_tickDuringShot <= 0)
                 {
                     // TODO maybe track collisions also?
-                    Vector3 basketPos = GameManager.Singleton.baskets[Possession].transform.position;
+                    Vector3 basketPos = GameManager.Instance.baskets[Possession].transform.position;
                     if (Vector3.Distance(basketPos, m_ball.transform.position) > 2.0f)
                     {
                         OnShotMissed();
@@ -353,7 +352,7 @@ public class BallHandling : NetworkBehaviour
         }
 
         print(offset);
-        Vector3 basketPos = GameManager.Singleton.CurrentBasket.netPos.position;
+        Vector3 basketPos = GameManager.Instance.CurrentBasket.netPos.position;
 
         DebugController.Singleton.PrintConsoleTable("Shot", 128,
             new string[] {"pos", "offset", "grade", "dist", "diff", "target_h",
@@ -402,7 +401,7 @@ public class BallHandling : NetworkBehaviour
     // Bank shots and layup
     private IEnumerator ProcessBankShot(Vector3 start, Vector3 end, float height, float duration)
     {
-        Vector3 bankPos = GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[(int)m_shotData.bankshot].transform.position;
+        Vector3 bankPos = GameManager.Instance.baskets[GameManager.Instance.Possession].banks[(int)m_shotData.bankshot].transform.position;
 
         yield return FollowArc(start, bankPos, height, duration);
         yield return FollowArc(bankPos, end, 1f, .25f);
@@ -412,7 +411,7 @@ public class BallHandling : NetworkBehaviour
 
     private IEnumerator ProcessLayup(Vector3 start, Vector3 end, float duration)
     {
-        Vector3 bankPos = GameManager.Singleton.baskets[GameManager.Singleton.Possession].banks[(int)m_shotData.bankshot].transform.position;
+        Vector3 bankPos = GameManager.Instance.baskets[GameManager.Instance.Possession].banks[(int)m_shotData.bankshot].transform.position;
 
         yield return FollowArc(start, bankPos, 1f, duration);
         yield return FollowArc(bankPos, end, 1f, .5f);
@@ -709,7 +708,7 @@ public class BallHandling : NetworkBehaviour
     {
         if (IsServer && shotInAction)
         {
-            GameManager.Singleton.AddScore(teamID, m_shotData.shotValue);
+            GameManager.Instance.AddScore(teamID, m_shotData.shotValue);
             ShotResultData result = GetShotResultData(ShotResultType.MADE);
             DebugController.Singleton.PrintObjAsTable(result);
             ShotMade?.Invoke(teamID, m_shotData, result);
@@ -792,7 +791,7 @@ public class BallHandling : NetworkBehaviour
     {
         if (IsServer)
         {
-            GameObject inboundObj = GameManager.Singleton.GetClosestInbound(m_ball.transform.position);
+            GameObject inboundObj = GameManager.Instance.GetClosestInbound(m_ball.transform.position);
 
             print("changing to " + team);
             Possession = team;

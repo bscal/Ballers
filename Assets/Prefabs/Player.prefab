@@ -15368,6 +15368,7 @@ GameObject:
   - component: {fileID: -258293390516097271}
   - component: {fileID: 429915856476162270}
   - component: {fileID: 5449942521669478251}
+  - component: {fileID: 2249988726101840498}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -15441,22 +15442,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f7db4fa36b719842a449b5fc4740b75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  id: 0
-  hasEnteredGame: 0
   username: test
   isDummy: 0
   aiPlayerID: 0
   height: 2.35
   hasReadyUp: 0
+  id: 0
+  hasEnteredGame: 0
   m_screenHitboxes: {fileID: 465271389445967199}
   m_screenCollider: {fileID: 8285789891948093697}
   m_hardScreenCollider: {fileID: 499513842373943136}
   m_innerCollider: {fileID: 9017073906844803023}
   m_outerCollider: {fileID: 1399444623876531351}
   playerCollider: {fileID: 5805129176901056585}
-  m_rightHand: {fileID: 1367100140280164334}
-  m_leftHand: {fileID: 5912948185960104492}
   m_targetTracker: {fileID: 7405135027028517589}
+  rightPos: {x: 0, y: 0, z: 0}
+  leftPos: {x: 0, y: 0, z: 0}
 --- !u!114 &5179076237109872503
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15576,6 +15577,20 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &2249988726101840498
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9132637102776717737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c066e472cf4c8c741b74ceacbf022478, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 7447245464667065532}
+  clientControls: {fileID: 429915856476162270}
 --- !u!1001 &5637285327473977496
 PrefabInstance:
   m_ObjectHideFlags: 0
