@@ -1,5 +1,6 @@
 using MLAPI;
 using MLAPI.Messaging;
+using MLAPI.SceneManagement;
 using MLAPI.Spawning;
 using System;
 using System.Collections;
@@ -25,7 +26,6 @@ public class GameManager : NetworkBehaviour
     public event Action GameEnd;                // When game ends
     public event Action Postgame;               // After game ends timer
     public event Action<Player> PlayerRegistered;
-    public event Action<Player> LocalPlayerLoaded;
 
     private static List<Player> Players = new List<Player>();
     private readonly static List<BasicDummy> Dummies = new List<BasicDummy>();
@@ -49,8 +49,11 @@ public class GameManager : NetworkBehaviour
     public Vector3[] freethrowPos = new Vector3[2];
     public GameObject[] inbounds;
     public GameObject loaderPrefab;
+    public bool isReady;
 
     private ShotManager m_shotManager;
+    private bool m_startRan;
+    private bool m_networkStartRan;
 
     [SerializeField]
     private GameObject m_ballPrefab;
@@ -79,26 +82,52 @@ public class GameManager : NetworkBehaviour
         Players = ServerManager.Instance.playersList;
     }
 
+    private void Start()
+    {
+        if (IsServer)
+        {
+            m_startRan = true;
+        }
+    }
+
     public override void NetworkStart()
     {
         if (IsServer)
         {
-            ball = Instantiate(m_ballPrefab, new Vector3(1, 3, 1), Quaternion.identity);
-            ballController = ball.GetComponent<BallController>();
-            ball.name = "Ball";
-            ball.GetComponent<NetworkObject>().Spawn();
+            m_networkStartRan = true;
         }
+    }
+
+    public IEnumerator BeginStart()
+    {
+        ball = Instantiate(m_ballPrefab, new Vector3(1, 3, 1), Quaternion.identity);
+        ballController = ball.GetComponent<BallController>();
+        ball.name = "Ball";
+        ball.GetComponent<NetworkObject>().Spawn();
+        while (!m_startRan || !m_networkStartRan)
+        {
+            yield return null;
+        }
+        print("Fully starting");
+        FullStart();
+    }
+
+    private void FullStart()
+    {
+        isReady = true;
+        FullStartClientRpc();
+    }
+
+    [ClientRpc]
+    private void FullStartClientRpc()
+    {
+        ClientPlayer.Instance.localPlayer.clientControlsEnabled = true;
+        isReady = true;
     }
 
     void Update()
     {
 
-    }
-
-    public void LocalPlayerInitilized()
-    {
-        Assert.IsNotNull(NetworkSpawnManager.GetLocalPlayerObject().gameObject.GetComponent<Player>(), "LocalPlayerObject is null.");
-        LocalPlayerLoaded?.Invoke(ClientPlayer.Instance.localPlayer);
     }
 
     public void BeginPregame()

@@ -16,9 +16,6 @@ public class FocusOnPlayer : MonoBehaviour
 
     void Start()
     {
-        if (GetLocalPlayerObject)
-            GameManager.Instance.LocalPlayerLoaded += OnLocalPlayerLoaded;
-
         if (startDisabled)
             gameObject.SetActive(false);
 
@@ -33,11 +30,6 @@ public class FocusOnPlayer : MonoBehaviour
         transform.position = m_target.transform.position + offset;
     }
 
-    private void OnLocalPlayerLoaded(Player p)
-    {
-        m_loaded = true;
-        SetTarget();
-    }
 
     private void SetTarget()
     {

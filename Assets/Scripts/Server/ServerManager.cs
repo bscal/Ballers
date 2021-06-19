@@ -1,6 +1,7 @@
 using MLAPI;
 using MLAPI.Connection;
 using MLAPI.Messaging;
+using MLAPI.SceneManagement;
 using MLAPI.Spawning;
 using System;
 using System.Collections;
@@ -10,25 +11,24 @@ using System.Text;
 using UnityEngine;
 using static UnityEngine.Application;
 
-public enum StartupState
-{
-    NONE,
-    SETUP,
-    LOADING,
-    ENTER_GAME,
-    PREGAME,
-    STARTED
-}
-
 public class ServerManager : NetworkBehaviour
 {
+    public int STATE_NONE       = 0;
+    public int STATE_SETUP      = 1;
+    public int STATE_JOINING    = 2;
+    public int STATE_ENTERING   = 3;
+    public int STATE_LOADING    = 4;
+    public int STATE_PREGAME    = 5;
+    public int STATE_INPROGRESS = 6;
+    public int STATE_PAUSED     = 7;
+
     public static ServerManager Instance { get; private set; }
 
-    const string PATH = "./ballers_server.log";
-
+    private const string LOG_PATH = "./ballers_server.log";
     public const float SYNC_TIME = 1.0f;
 
-    public static bool isDedicatedServer;
+    // I prefer this to be a static readonly, but unity wont allow this call in constuctors or fields.
+    public static bool IS_DEDICATED_SERVER => Application.isBatchMode;
 
     public event Action AllPlayersLoaded;
 
@@ -52,14 +52,13 @@ public class ServerManager : NetworkBehaviour
     [NonSerialized]
     public readonly List<Player> playersList = new List<Player>();
 
-    private StartupState m_startupState = StartupState.NONE;
+    private int m_startupState;
     private float m_syncCounter;
     private FileStream m_file;
 
     private void Awake()
     {
         Instance = this;
-        isDedicatedServer = Application.isBatchMode;
     }
 
     private void Start()
@@ -69,18 +68,18 @@ public class ServerManager : NetworkBehaviour
         NetworkManager.Singleton.OnServerStarted += OnServerStarted;
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
         NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
-        if (Application.isBatchMode)
+        if (IS_DEDICATED_SERVER)
         {
             
-            if (File.Exists(PATH))
+            if (File.Exists(LOG_PATH))
             {
-                m_file = File.OpenWrite(PATH);
+                m_file = File.OpenWrite(LOG_PATH);
                 m_file.SetLength(0);
                 m_file.Flush();
             }
             else
             {
-                m_file = File.Create(PATH);
+                m_file = File.Create(LOG_PATH);
             }
             m_file.Close();
             Application.logMessageReceivedThreaded += OnLogMessageCallback;
@@ -88,43 +87,49 @@ public class ServerManager : NetworkBehaviour
         
     }
 
-    private void OnApplicationQuit()
-    {
-    }
-
     private void Update()
     {
         if (IsServer)
         {
-            if (m_startupState == StartupState.NONE)
+            if (m_startupState == STATE_NONE)
                 return;
 
-            if (m_startupState == StartupState.LOADING && HaveAllPlayersLoaded())
+            if (m_startupState == STATE_JOINING && HaveAllPlayersJoined())
             {
-                print("loaded");
-                m_startupState = StartupState.ENTER_GAME;
+                print("joined");
+                m_startupState = STATE_ENTERING;
 
                 CreateAI();
-                LeanTween.delayedCall(1.0f, () => LoadAllPlayers());
+                LeanTween.delayedCall(1.0f, () => {
+                    NetworkSceneManager.SwitchScene("Match");
+                });
             }
-
-            if (m_startupState == StartupState.ENTER_GAME && HaveAllPlayersEntered())
+            if (m_startupState == STATE_ENTERING && HaveAllPlayersEntered())
             {
-                print("entering");
-                m_startupState = StartupState.PREGAME;
+                print("entered");
+                m_startupState = STATE_LOADING;
 
-                AllPlayersEnteredGame();
+                foreach (var pair in playerObjects)
+                {
+                    Player p = pair.Value.GetComponent<Player>();
+                    //p.EnterGameServerSetup()
+                    p.EnterGameClientRpc(p.props);
+                }
             }
-
-            if (m_startupState == StartupState.PREGAME && AllPlayersReady())
+            if (m_startupState == STATE_LOADING && HaveAllPlayersLoaded())
             {
-                print("starting");
-                m_startupState = StartupState.STARTED;
-
+                print("loaded");
+                m_startupState = STATE_PREGAME;
+                StartCoroutine(GameManager.Instance.BeginStart());
+            }
+            if (m_startupState == STATE_PREGAME && GameManager.Instance.isReady && AllPlayersReady())
+            {
+                print("pregame");
+                m_startupState = STATE_INPROGRESS;
                 GameManager.Instance.BeginPregame();
             }
 
-            if (ballersClient != null)
+        if (ballersClient != null)
             {
                 m_syncCounter += Time.deltaTime;
                 if (m_syncCounter > SYNC_TIME)
@@ -138,7 +143,7 @@ public class ServerManager : NetworkBehaviour
 
     private void OnLogMessageCallback(string condition, string stackTrace, UnityEngine.LogType type)
     {
-        using FileStream fs = File.Open(PATH, FileMode.Append);
+        using FileStream fs = File.Open(LOG_PATH, FileMode.Append);
         string formattedSting = $"[{DateTime.Now.ToString("HH:mm:ss.ff")}][{type}]: {condition}\n";
         byte[] data = Encoding.UTF8.GetBytes(formattedSting);
         fs.Write(data, 0, data.Length);
@@ -162,14 +167,14 @@ public class ServerManager : NetworkBehaviour
         return (IsServer) ? players[id] : null;
     }
 
-    public StartupState GetStartupState()
+    public int GetStartupState()
     {
         return m_startupState;
     }
 
     private void OnServerStarted()
     {
-        if (isDedicatedServer)
+        if (IS_DEDICATED_SERVER)
         {
             Match.ResetDefaults();
             Match.InitMatch(new MatchSettings(BallersGamemode.SP_BOTS, 5, 4, 60.0 * 12.0, 24.0));
@@ -184,7 +189,7 @@ public class ServerManager : NetworkBehaviour
 
         m_setup.SetServerManagerInstance(this);
 
-        m_startupState = StartupState.LOADING;
+        m_startupState = STATE_JOINING;
     }
 
     private void OnClientConnected(ulong id)
@@ -196,7 +201,7 @@ public class ServerManager : NetworkBehaviour
         {
             ServerPlayer sp = new ServerPlayer(id);
             sp.status = ServerPlayerStatus.CONNECTED;
-            sp.state = ServerPlayerState.WAITING_FOR_IDS;
+            sp.hasJoined = true;
             players.Add(id, sp);
 
             GameObject playerObject = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
@@ -212,7 +217,9 @@ public class ServerManager : NetworkBehaviour
         if (players.TryGetValue(id, out ServerPlayer player))
         {
             player.status = ServerPlayerStatus.DISCONNECTED;
-            player.state = ServerPlayerState.NONE;
+            player.hasJoined = false;
+            player.hasLoaded = false;
+            player.isReady = false;
             players.Remove(id);
         }
     }
@@ -227,14 +234,14 @@ public class ServerManager : NetworkBehaviour
         //}
     }
 
-    private bool HaveAllPlayersLoaded()
+    private bool HaveAllPlayersJoined()
     {
-        if (players.Count < Match.PlayersNeeded)
+        if (playersList.Count < Match.PlayersNeeded)
             return false;
 
         foreach (ServerPlayer sp in players.Values)
         {
-            if (!sp.IsFullyLoaded())
+            if (!sp.hasJoined)
             {
                 return false;
             }
@@ -243,12 +250,11 @@ public class ServerManager : NetworkBehaviour
         return true;
     }
 
-
     private bool HaveAllPlayersEntered()
     {
         foreach (ServerPlayer sp in players.Values)
         {
-            if (sp.state != ServerPlayerState.ENTERED_GAME)
+            if (!sp.hasEnteredGame)
             {
                 return false;
             }
@@ -256,11 +262,38 @@ public class ServerManager : NetworkBehaviour
         return true;
     }
 
+    private bool HaveAllPlayersLoaded()
+    {
+        foreach (ServerPlayer sp in players.Values)
+        {
+            if (!sp.hasLoaded)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void PlayerLoaded(ulong ownerClientId)
+    {
+        players[ownerClientId].hasLoaded = true;
+    }
+
+    public void PlayerReadyUp(ulong ownerClientId)
+    {
+        players[ownerClientId].isReady = true;
+    }
+
+    public void PlayerEnteredGame(ulong ownerClientId)
+    {
+        players[ownerClientId].hasEnteredGame = true;
+    }
+
     public bool AllPlayersReady()
     {
         foreach (ServerPlayer sp in players.Values)
         {
-            if (!sp.IsReady())
+            if (!sp.isReady)
             {
                 return false;
             }
@@ -322,20 +355,6 @@ public class ServerManager : NetworkBehaviour
             return Instance.bluePrefab;
         else
             return Instance.redPrefab;
-    }
-
-    public void PlayerSceneChanged(ulong ownerClientId, ulong networkObjectId)
-    {
-        players[ownerClientId].state = ServerPlayerState.ENTERED_GAME;
-    }
-
-    private void AllPlayersEnteredGame()
-    {
-        foreach (var pairs in playerObjects)
-        {
-            Player p = pairs.Value.GetComponent<Player>();
-            p.EnterGameClientRpc(p.props);
-        }
     }
 }
 

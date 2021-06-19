@@ -47,6 +47,11 @@ public class Player : NetworkBehaviour
     [Header("Player Collider")]
     public BoxCollider playerCollider;
 
+    [Header("Player Componenets")]
+    public PlayerAnimHandler animHandler;
+    public PlayerControls playerControls;
+    public ClientNetworkHandler clientNetwork;
+    public bool clientControlsEnabled;
 
     public int OtherTeam { get { return FlipTeamID(props.teamID); } }
     /// <summary>
@@ -93,17 +98,13 @@ public class Player : NetworkBehaviour
     public Vector3 rightPos = Vector3.zero;
     public Vector3 leftPos = Vector3.zero;
 
-    private void Awake()
-    {
-        NetworkSceneManager.OnSceneSwitched += OnSceneSwitched;
-    }
-
     private void Start()
     {
         // Initialize Player values
         m_playerCircle = GetComponentInChildren<SpriteRenderer>();
         m_center = transform.Find("Center").gameObject;
         m_movement = GetComponent<Movement>();
+
         props.isRightHanded = true;
     }
 
@@ -114,7 +115,6 @@ public class Player : NetworkBehaviour
         if (IsOwner && !props.isAI)
         {
             ClientPlayer.Instance.localPlayer = this;
-
             RequestIdsClient();
         }
 
@@ -149,24 +149,6 @@ public class Player : NetworkBehaviour
         m_target = GameManager.Instance.baskets[GameManager.Instance.Possession].gameObject.transform.position;
     }
 
-    protected void PlayerEnteredGame()
-    {
-        GameManager.Instance.GameStartedClient += OnGameStarted;
-
-        GameObject prefab = ServerManager.PrefabFromTeamID(props.teamID);
-        print($"Client {OwnerClientId} | {NetworkObjectId} model = {prefab.name}");
-        Instantiate(prefab, gameObject.transform);
-        InitilizeModel();
-        hasEnteredGame = true;
-
-        m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
-        if (IsOwner)
-        {
-            m_shotmeter = gameObject.AddComponent<ShotMeter>();
-            m_roundShotMeter = GameObject.Find("HUD/Canvas/RoundShotMeter").GetComponent<RoundShotMeter>();
-        }
-    }
-
 
     protected void OnGameStarted()
     {
@@ -196,33 +178,28 @@ public class Player : NetworkBehaviour
         }
     }
 
-    protected void OnSceneSwitched()
-    {
-        if (IsOwner)
-            SceneChangeServerRpc();
-    }
-
     [ClientRpc]
     public void EnterGameClientRpc(PlayerProperties props, ClientRpcParams clientRpcParams = default)
     {
-        if (!IsHost && IsClient)
+        this.props = props;
+        GameManager.GetPlayers().Add(this);
+        GameManager.GetPlayerByNetworkID(NetworkObjectId).props = props;
+        GameManager.Instance.GameStartedClient += OnGameStarted;
+        GameObject prefab = ServerManager.PrefabFromTeamID(props.teamID);
+        print($"Client {OwnerClientId} | {NetworkObjectId} model = {prefab.name}");
+        Instantiate(prefab, gameObject.transform);
+        InitilizeModel();
+        hasEnteredGame = true;
+        m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
+        if (IsOwner && !this.props.isAI)
         {
-            this.props = props;
-            GameManager.GetPlayers().Add(this);
-            GameManager.GetPlayerByNetworkID(NetworkObjectId).props = props;
-
-            PlayerEnteredGame();
+            m_shotmeter = gameObject.AddComponent<ShotMeter>();
+            m_roundShotMeter = GameObject.Find("HUD/Canvas/RoundShotMeter").GetComponent<RoundShotMeter>();
+            ClientPlayer.Instance.localBallersClient.EnteredGame();
+            clientNetwork.PlayerLoadedServerRpc();
+            // TODO temp forced ready up
+            clientNetwork.PlayerReadyUpServerRpc();
         }
-
-        if (IsOwner)
-            ClientLoadedServerRpc();
-    }
-
-    [ServerRpc]
-    public void SceneChangeServerRpc(ServerRpcParams serverRpcParams = default)
-    {
-        PlayerEnteredGame();
-        ServerManager.Instance.PlayerSceneChanged(OwnerClientId, NetworkObjectId);
     }
 
     public static Transform FindTransformInChild(Transform transform, string objectName)
@@ -553,15 +530,6 @@ public class Player : NetworkBehaviour
         this.hasReadyUp = isReady;
     }
 
-    [ServerRpc]
-    public void ClientLoadedServerRpc(ServerRpcParams serverRpcParams = default)
-    {
-        ServerPlayer sp = ServerManager.Instance.players[serverRpcParams.Receive.SenderClientId];
-        if (sp != null)
-        {
-            sp.state = ServerPlayerState.READY;
-        }
-    }
 
     [ServerRpc]
     public void SendIdsServerRpc(ulong steamId, int cid, ServerRpcParams serverRpcParams = default)
@@ -573,10 +541,6 @@ public class Player : NetworkBehaviour
             id = clientId;
             sp.steamId = steamId;
             sp.cid = cid;
-
-            //Match.SetupPlayer(clientId, steamId, cid);
-
-            sp.state = ServerPlayerState.IDLE;
         }
     }
 

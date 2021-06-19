@@ -47,7 +47,6 @@ public class BallController : NetworkBehaviour
     public event Action<BallState> BallStateChange;
     public event Action<int> PossessionChange;
     public event Action<ulong, ulong> BallHandlerChange;
-    public event Action<Player, Player, float, PassType> PassBall;
     public event Action<Player, PassType> CatchBall;
     public event Action<Player, float> TouchedBall;
 
@@ -123,7 +122,22 @@ public class BallController : NetworkBehaviour
             // TODO debug
             m_body.AddForce(new Vector3(1, 1, 1), ForceMode.Impulse);
         }
+        if (IsClient)
+        {
+            print(GameManager.Instance);
+            GameManager.Instance.ball = gameObject;
+            GameManager.Instance.ballController = this;
+        }
     }
+
+    [ClientRpc]
+    public void LateNetworkStartClientRpc()
+    {
+        
+        GameManager.Instance.ball = gameObject;
+        GameManager.Instance.ballController = this;
+    }
+
     private void Reset()
     {
         shotInAction = false;
@@ -421,55 +435,31 @@ public class BallController : NetworkBehaviour
 
     // =================================== Passing ===================================
 
-    public void TryPassBall(Player passer, int playerSlot, PassType type)
-    {
-        if (!passer.HasBall) return;
-        if (passer.props.slot == playerSlot) return; //TODO fake pass? here because i have not decides on how to handle this
-
-
-        Player target = Match.matchTeams[passer.props.teamID].GetPlayerBySlot(playerSlot);
-        TryPassBall(passer, target, type);
-    }
-
-    public void TryPassBall(ulong passerPid, ulong targetPid, PassType type)
-    {
-
-        PassBallServerRpc(passerPid, targetPid, type);
-    }
-
     [ServerRpc]
     public void PassBallServerRpc(ulong passerPid, ulong targetPid, PassType type)
     {
-        Player passer = GameManager.GetPlayerByNetworkID(passerPid);
-        Player target = GameManager.GetPlayerByNetworkID(targetPid);
-        TryPassBall(passer, target, type);
+        PassBall(GameManager.GetPlayerByNetworkID(passerPid), GameManager.GetPlayerByNetworkID(targetPid), type);
     }
 
-
-    public void TryPassBall(Player passer, Player target, PassType type)
+    public void PassBall(Player passer, Player target, PassType type)
     {
-        if (!IsServer) return;
-
-        // Set the ball to NO_PLAYER because ball is in air
-        ChangeBallHandler(NO_PLAYER);
-        // Trigger shot meter for passer
-        if (!passer.props.isAI)
+        if (IsServer && passer.HasBall)
         {
-            //passer.InvokeClientRpcOnClient(passer.TriggerRoundShotMeter, passer.OwnerClientId, 1.0f, 1.0f);
-            passer.ServerCheckRSM(passer.OwnerClientId, passer.NetworkObjectId, pass_speed, 1.0f, (netID, score) => {
-                m_passScore = score;
-                print("Pass Score: " + score);
-            });
+            passer.clientNetwork.PassBallSuccessClientRPC();
+            // Set the ball to NO_PLAYER because ball is in air
+            ChangeBallHandler(NO_PLAYER);
+            // Trigger shot meter for passer
+            if (!passer.props.isAI)
+            {
+                //passer.InvokeClientRpcOnClient(passer.TriggerRoundShotMeter, passer.OwnerClientId, 1.0f, 1.0f);
+                passer.ServerCheckRSM(passer.OwnerClientId, passer.NetworkObjectId, pass_speed, 1.0f, (netID, score) => {
+                    m_passScore = score;
+                    print("Pass Score: " + score);
+                });
+            }
+            Vector3 endPosition = GetPassPosition(target, 1);
+            StartCoroutine(PassDelay(passer, target, endPosition, pass_speed, type));
         }
-        PassBall?.Invoke(passer, target, m_passScore, type);
-        Vector3 endPosition = GetPassPosition(target, 1);
-        StartCoroutine(PassDelay(passer, target, endPosition, pass_speed, type));
-    }
-
-    [ClientRpc]
-    public void PassBallClientRpc(ulong targetPid, Vector3 pos, PassType type, ClientRpcParams cParams = default)
-    {
-        StartCoroutine(AutoCatchPass(GameManager.GetPlayerByNetworkID(targetPid), pos, type));
     }
 
     private IEnumerator PassDelay(Player passer, Player target, Vector3 endPosition, float speed, PassType type)
@@ -489,7 +479,8 @@ public class BallController : NetworkBehaviour
         State = BallState.PASS;
 
         // Tell the client they are getting the balled passed to them.
-        PassBallClientRpc(target.NetworkObjectId, endPosition, type, target.rpcParams);
+        target.clientNetwork.RecievePassClientRpc(target.NetworkObjectId, endPosition, type, target.rpcParams);
+        StartCoroutine(AutoCatchPass(target, endPosition, type));
 
         Debug.Log(string.Format("Pass {0} -> {1} | Type: {2}", passer, target, type));
 
@@ -687,7 +678,7 @@ public class BallController : NetworkBehaviour
         if (target == m_currentPlayer) return;
         if (m_currentPlayer.props.isAI && m_currentPlayer.IsOnOffense() && m_currentPlayer.SameTeam(target))
         {
-            TryPassBall(m_currentPlayer, target, PassType.CHESS);
+            PassBall(m_currentPlayer, target, PassType.CHESS);
         }
     }
 

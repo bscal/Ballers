@@ -11,9 +11,13 @@ public class PlayerControls : NetworkBehaviour
     private const float timeToCountAsHeldDown = 0.3f;
     private float pressTimer = 0;
 
+    [SerializeField]
     private Player m_player;
-    private Animator m_animator;
+    [SerializeField]
+    private ClientNetworkHandler networkHandler;
+    [SerializeField]
     private PlayerAnimHandler m_animHandler;
+    private Animator m_animator;
     private GameObject m_menu;
 
     private float m_shootCooldown = 0;
@@ -51,9 +55,7 @@ public class PlayerControls : NetworkBehaviour
 
     void Start()
     {
-        m_player = GetComponent<Player>();
         m_animator = GetComponentInChildren<Animator>();
-        m_animHandler = GetComponent<PlayerAnimHandler>();
         m_menu = GameObject.Find("Menu Panel");
         //StartCoroutine(ShotInput());
     }
@@ -121,7 +123,7 @@ public class PlayerControls : NetworkBehaviour
                 {
                     type = PassType.LOB;
                 }
-                GameManager.Instance.ballController.TryPassBall(m_player, passCode, type);
+                networkHandler.TryPassBall(m_player, passCode, type);
             }
         }
 

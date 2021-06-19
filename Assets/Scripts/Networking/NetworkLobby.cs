@@ -18,7 +18,7 @@ public class NetworkLobby : MonoBehaviour
         NetworkManager.Singleton.OnClientDisconnectCallback += OnDisconnected;
         NetworkManager.Singleton.OnServerStarted += OnServerReady;
 
-        if (ServerManager.isDedicatedServer)
+        if (ServerManager.IS_DEDICATED_SERVER)
         {
             LeanTween.delayedCall(1.0f, () => {
                 Debug.Log("Headless detected starting server in 5 seconds...");

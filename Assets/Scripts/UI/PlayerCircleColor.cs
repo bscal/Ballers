@@ -12,7 +12,7 @@ public class PlayerCircleColor : MonoBehaviour
 
     private void Start()
     {
-        if (ServerManager.isDedicatedServer)
+        if (ServerManager.IS_DEDICATED_SERVER)
             Destroy(this);
     }
 

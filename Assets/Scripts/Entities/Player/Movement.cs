@@ -47,10 +47,12 @@ public class Movement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!m_player.IsOwner || !isMovementEnabled || m_player.props.isShooting || !m_player.hasEnteredGame) return;
-        HandleTargetDirection();
-        MovePlayer();
-        RotatePlayer();
+        if (m_player.IsOwner && isMovementEnabled && m_player.clientControlsEnabled)
+        {
+            HandleTargetDirection();
+            MovePlayer();
+            RotatePlayer();
+        }
     }
 
     private void HandleTargetDirection()

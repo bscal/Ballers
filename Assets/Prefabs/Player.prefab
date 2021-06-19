@@ -15455,6 +15455,9 @@ MonoBehaviour:
   m_innerCollider: {fileID: 9017073906844803023}
   m_outerCollider: {fileID: 1399444623876531351}
   playerCollider: {fileID: 5805129176901056585}
+  animHandler: {fileID: -258293390516097271}
+  playerControls: {fileID: 429915856476162270}
+  clientNetwork: {fileID: 2249988726101840498}
   m_targetTracker: {fileID: 7405135027028517589}
   rightPos: {x: 0, y: 0, z: 0}
   leftPos: {x: 0, y: 0, z: 0}
@@ -15529,6 +15532,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d99b38d3dd5bfe4282398ba133d626e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_player: {fileID: 7447245464667065532}
+  networkHandler: {fileID: 2249988726101840498}
+  m_animHandler: {fileID: -258293390516097271}
 --- !u!114 &5449942521669478251
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15590,7 +15596,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 7447245464667065532}
-  clientControls: {fileID: 429915856476162270}
+  playerControls: {fileID: 429915856476162270}
 --- !u!1001 &5637285327473977496
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -62,7 +62,7 @@ public class PlayerAnimHandler : MonoBehaviour
 
     private void Update()
     {
-        if ((m_override && m_animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f) || !m_player.hasEnteredGame)
+        if ((m_override && m_animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f) || !m_player.hasEnteredGame || !GameManager.Instance.isReady)
             return;
 
         m_override = false;

@@ -30,7 +30,7 @@ public class MatchSetup : MonoBehaviour
 
     internal void SetServerManagerInstance(ServerManager serverManager)
     {
-        serverManager.AllPlayersLoaded += OnAllPlayersLoaded;
+        //serverManager.AllPlayersLoaded += OnAllPlayersLoaded;
     }
 
     public void Setup(CSteamID hostSteamID)
@@ -40,9 +40,8 @@ public class MatchSetup : MonoBehaviour
 
         m_hasSetup = true;
         NetworkSceneManager.OnSceneSwitchStarted += OnSceneSwitchStarted;
-        NetworkSceneManager.OnSceneSwitched += OnSceneSwitched;
 
-        if (ServerManager.isDedicatedServer)
+        if (ServerManager.IS_DEDICATED_SERVER)
             return;
 
         if (!Match.HostServer)
@@ -63,10 +62,6 @@ public class MatchSetup : MonoBehaviour
         StartCoroutine(LoadGame(operation));
     }
 
-    private void OnSceneSwitched()
-    {
-        print("On Scene Switch Switched");
-    }
     private IEnumerator LoadGame(AsyncOperation operation)
     {
         GameObject canvas = Instantiate(loadingCanvas);

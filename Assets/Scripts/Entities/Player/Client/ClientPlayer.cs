@@ -1,5 +1,6 @@
 ﻿using MLAPI;
 using Steamworks;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -26,8 +27,6 @@ public class ClientPlayer : MonoBehaviour
     }
     public ulong SteamID { get; private set; }
 
-    public ServerPlayerState State { get; set; }
-
     // This is cached character data. Can be used server or client side.
     // Primarily for non essential or non gameplay tasks. ie. character selection menu
     public Dictionary<int, CharacterData> characterStats = new Dictionary<int, CharacterData>();
@@ -35,6 +34,7 @@ public class ClientPlayer : MonoBehaviour
 
     public Player localPlayer;
     public BallersClient localBallersClient;
+    public bool areLocalCamerasEnabled;
 
     //private GameSetup m_gameSetup;
     //private SteamP2PTransport.SteamP2PTransport m_transport;
@@ -108,5 +108,4 @@ public class ClientPlayer : MonoBehaviour
         yield return null;
         yield return BackendManager.FetchCharacterFromServer(SteamID, cid, FetchCharacterCallback);
     }
-
 }
