@@ -117,7 +117,6 @@ public class Player : NetworkBehaviour
             ClientPlayer.Instance.localPlayer = this;
             RequestIdsClient();
         }
-
         ServerManager.Instance.AddPlayer(NetworkObjectId, gameObject, this);
     }
 
@@ -176,6 +175,11 @@ public class Player : NetworkBehaviour
                 movement.playerAnim = m_animHandler;
             }
         }
+    }
+
+    public void EnterGameServerSetup()
+    {
+        m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
     }
 
     [ClientRpc]

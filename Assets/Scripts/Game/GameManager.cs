@@ -1,12 +1,9 @@
 using MLAPI;
 using MLAPI.Messaging;
-using MLAPI.SceneManagement;
-using MLAPI.Spawning;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 public enum TeamType
 {

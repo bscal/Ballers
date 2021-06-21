@@ -1,43 +1,38 @@
 using MLAPI;
-using MLAPI.Connection;
-using MLAPI.Messaging;
 using MLAPI.SceneManagement;
-using MLAPI.Spawning;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEngine;
-using static UnityEngine.Application;
 
 public class ServerManager : NetworkBehaviour
 {
-    public int STATE_NONE       = 0;
-    public int STATE_SETUP      = 1;
-    public int STATE_JOINING    = 2;
-    public int STATE_ENTERING   = 3;
-    public int STATE_LOADING    = 4;
-    public int STATE_PREGAME    = 5;
-    public int STATE_INPROGRESS = 6;
-    public int STATE_PAUSED     = 7;
-
-    public static ServerManager Instance { get; private set; }
+    public const int STATE_NONE       = 0;
+    public const int STATE_SETUP      = 1;
+    public const int STATE_JOINING    = 2;
+    public const int STATE_ENTERING   = 3;
+    public const int STATE_LOADING    = 4;
+    public const int STATE_PREGAME    = 5;
+    public const int STATE_INPROGRESS = 6;
+    public const int STATE_PAUSED     = 7;
 
     private const string LOG_PATH = "./ballers_server.log";
-    public const float SYNC_TIME = 1.0f;
+    private const float SYNC_TIME = 1.0f;
+
+    public static ServerManager Instance { get; private set; }
 
     // I prefer this to be a static readonly, but unity wont allow this call in constuctors or fields.
     public static bool IS_DEDICATED_SERVER => Application.isBatchMode;
 
-    public event Action AllPlayersLoaded;
-
+    [Header("Prefabs")]
     public GameObject playerPrefab;
     public GameObject aiPrefab;
 
     public GameObject redPrefab;
     public GameObject bluePrefab;
 
+    [Header("Network Scripts")]
     public NetworkLobby m_lobby;
     public MatchSetup m_setup;
 
@@ -45,6 +40,7 @@ public class ServerManager : NetworkBehaviour
     public GameObject clientPrefab;
     public BallersClient ballersClient;
 
+    // AI does not create a ServerPlayer object
     [NonSerialized]
     public readonly Dictionary<ulong, ServerPlayer> players = new Dictionary<ulong, ServerPlayer>();
     [NonSerialized]
@@ -93,8 +89,7 @@ public class ServerManager : NetworkBehaviour
         {
             if (m_startupState == STATE_NONE)
                 return;
-
-            if (m_startupState == STATE_JOINING && HaveAllPlayersJoined())
+            else if (m_startupState == STATE_JOINING && HaveAllPlayersJoined())
             {
                 print("joined");
                 m_startupState = STATE_ENTERING;
@@ -104,7 +99,7 @@ public class ServerManager : NetworkBehaviour
                     NetworkSceneManager.SwitchScene("Match");
                 });
             }
-            if (m_startupState == STATE_ENTERING && HaveAllPlayersEntered())
+            else if(m_startupState == STATE_ENTERING && HaveAllPlayersEntered())
             {
                 print("entered");
                 m_startupState = STATE_LOADING;
@@ -112,24 +107,24 @@ public class ServerManager : NetworkBehaviour
                 foreach (var pair in playerObjects)
                 {
                     Player p = pair.Value.GetComponent<Player>();
-                    //p.EnterGameServerSetup()
+                    p.EnterGameServerSetup();
                     p.EnterGameClientRpc(p.props);
                 }
             }
-            if (m_startupState == STATE_LOADING && HaveAllPlayersLoaded())
+            else if(m_startupState == STATE_LOADING && HaveAllPlayersLoaded())
             {
                 print("loaded");
                 m_startupState = STATE_PREGAME;
                 StartCoroutine(GameManager.Instance.BeginStart());
             }
-            if (m_startupState == STATE_PREGAME && GameManager.Instance.isReady && AllPlayersReady())
+            else if(m_startupState == STATE_PREGAME && GameManager.Instance.isReady && AllPlayersReady())
             {
                 print("pregame");
                 m_startupState = STATE_INPROGRESS;
                 GameManager.Instance.BeginPregame();
             }
 
-        if (ballersClient != null)
+            if (ballersClient != null)
             {
                 m_syncCounter += Time.deltaTime;
                 if (m_syncCounter > SYNC_TIME)
@@ -151,18 +146,13 @@ public class ServerManager : NetworkBehaviour
         fs.Write(stackData, 0, stackData.Length);
     }
 
-
-    public void LoadAllPlayers()
-    {
-        AllPlayersLoaded?.Invoke();
-    }
-
     public void SetupHost()
     {
+        // Host does not call OnClientConnect so I call it manually
         OnClientConnected(NetworkManager.Singleton.LocalClientId);
     }
 
-    public ServerPlayer GetPlayer(ulong id)
+    public ServerPlayer GetServerPlayer(ulong id)
     {
         return (IsServer) ? players[id] : null;
     }
@@ -224,29 +214,17 @@ public class ServerManager : NetworkBehaviour
         }
     }
 
-    private IEnumerator PlayersLoadedCoroutine(float timeout)
-    {
-        const float WAIT_TIME = 3f;
-        float timer = 0f;
-        //while (timeout > timer)
-        //{
-        yield return new WaitForSeconds(WAIT_TIME);
-        //}
-    }
-
     private bool HaveAllPlayersJoined()
     {
+        // Checks if we have the correct number of players and AI if necessary
         if (playersList.Count < Match.PlayersNeeded)
             return false;
 
         foreach (ServerPlayer sp in players.Values)
         {
             if (!sp.hasJoined)
-            {
                 return false;
-            }
         }
-        // All players have loaded
         return true;
     }
 
@@ -255,9 +233,7 @@ public class ServerManager : NetworkBehaviour
         foreach (ServerPlayer sp in players.Values)
         {
             if (!sp.hasEnteredGame)
-            {
                 return false;
-            }
         }
         return true;
     }
@@ -267,9 +243,7 @@ public class ServerManager : NetworkBehaviour
         foreach (ServerPlayer sp in players.Values)
         {
             if (!sp.hasLoaded)
-            {
                 return false;
-            }
         }
         return true;
     }
@@ -351,10 +325,7 @@ public class ServerManager : NetworkBehaviour
 
     public static GameObject PrefabFromTeamID(int teamID)
     {
-        if (teamID == 1)
-            return Instance.bluePrefab;
-        else
-            return Instance.redPrefab;
+        return (teamID == 1) ? Instance.bluePrefab : Instance.redPrefab;
     }
 }
 

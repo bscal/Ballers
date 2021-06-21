@@ -68,7 +68,7 @@ public class PlayerHandler : MonoBehaviour
         {
             if (!player.props.isAI)
             {
-                ServerPlayer sp = ServerManager.Instance.GetPlayer(player.props.steamID);
+                ServerPlayer sp = ServerManager.Instance.GetServerPlayer(player.props.steamID);
                 StartCoroutine(BackendManager.FetchCharacterFromServer(player.props.steamID, sp.cid, (cData, status) => {
                     if (status == BackendManager.STATUS_OK)
                     {
