@@ -12,6 +12,8 @@ public class ClientPlayer : MonoBehaviour
 {
     public static ClientPlayer Instance { get; private set; }
 
+    public event Action<Player, ClientNetworkHandler> Initilized;
+
     public int Cid { get { return (UserData != null) ? UserData.lastChar : 0; } }
     public UserData UserData { get; private set; }
     public CharacterData CharData
@@ -26,6 +28,12 @@ public class ClientPlayer : MonoBehaviour
         }
     }
     public ulong SteamID { get; private set; }
+
+    public void Initilize(Player player, ClientNetworkHandler networkHandler)
+    {
+        localPlayer = player;
+        Initilized.Invoke(player, networkHandler);
+    }
 
     // This is cached character data. Can be used server or client side.
     // Primarily for non essential or non gameplay tasks. ie. character selection menu

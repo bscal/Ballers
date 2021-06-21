@@ -91,15 +91,15 @@ public class PlayerControls : NetworkBehaviour
 
     private void CallForBall(InputAction.CallbackContext context)
     {
-        if (IsOwner && !m_player.HasBall && m_player.IsOnOffense())
+        if (m_player.CanDoAction() && m_player.IsOnOffense())
         {
-            m_player.CallForBall();
+            networkHandler.CallForBall();
         }
     }
 
     private void TryPassBall(InputAction.CallbackContext context)
     {
-        if (IsOwner)
+        if (m_player.CanDoAction())
         {
             int passCode = 0;
             if (context.action.name == "Pass_1")

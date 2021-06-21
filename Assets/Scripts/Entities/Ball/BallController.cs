@@ -34,6 +34,15 @@ public class BallController : NetworkBehaviour
 {
     // =================================== Constants ===================================
 
+    // TODO implement these. Trying to reduce enum usage
+    public const int PASS_INVALID       = -1;
+    public const int PASS_FAKE          = 0;
+    public const int PASS_CHESS         = 1;
+    public const int PASS_BOUNCE        = 2;
+    public const int PASS_LOB           = 3;
+    public const int PASS_ALLEY_OOP     = 4;
+    public const int PASS_BEHIND_BACK   = 5;
+
     public const ulong NO_PLAYER = ulong.MaxValue;
     public const ulong DUMMY_PLAYER = ulong.MaxValue - 1;
 
@@ -443,13 +452,13 @@ public class BallController : NetworkBehaviour
 
     public void PassBall(Player passer, Player target, PassType type)
     {
-        if (IsServer && passer.HasBall)
+        if (IsServer)
         {
             passer.clientNetwork.PassBallSuccessClientRPC();
             // Set the ball to NO_PLAYER because ball is in air
             ChangeBallHandler(NO_PLAYER);
             // Trigger shot meter for passer
-            if (!passer.props.isAI)
+            if (!passer.IsNpc)
             {
                 //passer.InvokeClientRpcOnClient(passer.TriggerRoundShotMeter, passer.OwnerClientId, 1.0f, 1.0f);
                 passer.ServerCheckRSM(passer.OwnerClientId, passer.NetworkObjectId, pass_speed, 1.0f, (netID, score) => {
@@ -675,8 +684,7 @@ public class BallController : NetworkBehaviour
     public void PlayerCallForBallServerRpc(ulong netID)
     {
         Player target = GameManager.GetPlayerByNetworkID(netID);
-        if (target == m_currentPlayer) return;
-        if (m_currentPlayer.props.isAI && m_currentPlayer.IsOnOffense() && m_currentPlayer.SameTeam(target))
+        if (target != m_currentPlayer && m_currentPlayer.IsNpc && m_currentPlayer.HasBall && m_currentPlayer.SameTeam(target))
         {
             PassBall(m_currentPlayer, target, PassType.CHESS);
         }

@@ -15,8 +15,6 @@ public enum ServerPlayerStatus
 /// </summary>
 public class ServerPlayer
 {
-
-
     public readonly ulong id;
     public int cid;
     public ulong steamId;

@@ -1,6 +1,7 @@
 using MLAPI;
 using MLAPI.Messaging;
 using MLAPI.SceneManagement;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,6 +11,7 @@ public class ClientNetworkHandler : NetworkBehaviour
 
     public Player player;
     public PlayerControls playerControls;
+
     protected ClientPlayer m_clientPlayer;
     protected BallController m_ballHandling;
 
@@ -41,6 +43,7 @@ public class ClientNetworkHandler : NetworkBehaviour
     protected void OnSceneSwitched()
     {
         print("On Scene Switched");
+        ClientPlayer.Instance.Initilize(player, this);
         if (IsLocalPlayer)
             SceneChangeServerRpc();
     }
@@ -63,12 +66,17 @@ public class ClientNetworkHandler : NetworkBehaviour
         ServerManager.Instance.PlayerReadyUp(OwnerClientId);
     }
 
+    public void CallForBall()
+    {
+        m_ballHandling.PlayerCallForBallServerRpc(NetworkObjectId);
+    }
+
     public void TryPassBall(Player passer, int playerSlot, PassType type)
     {
         if (IsOwner && passer.props.slot != playerSlot)
         {
             Player target = Match.matchTeams[passer.props.teamID].GetPlayerBySlot(playerSlot);
-            GameManager.Instance.ballController.PassBallServerRpc(passer.NetworkObjectId, target.NetworkObjectId, type);
+            m_ballHandling.PassBallServerRpc(passer.NetworkObjectId, target.NetworkObjectId, type);
         }
     }
 
@@ -82,6 +90,17 @@ public class ClientNetworkHandler : NetworkBehaviour
     public void RecievePassClientRpc(ulong targetPid, Vector3 pos, PassType type, ClientRpcParams cParams = default)
     {
         
+    }
+
+    public void SetReadyStatus()
+    {
+        SetReadyStatusServerRpc();
+    }
+
+    [ServerRpc]
+    private void SetReadyStatusServerRpc()
+    {
+        ServerManager.Instance.PlayerReadyUp(OwnerClientId);
     }
 
 }

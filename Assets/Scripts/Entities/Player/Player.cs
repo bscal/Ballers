@@ -1,6 +1,5 @@
 using MLAPI;
 using MLAPI.Messaging;
-using MLAPI.SceneManagement;
 using MLAPI.Serialization.Pooled;
 using System;
 using System.IO;
@@ -13,6 +12,7 @@ public class Player : NetworkBehaviour
     public event Action<ShotData, ShotBarData> Shoot;
     public event Action<float, float> Release;
     public event Action<float, float> StartRoundMeter;
+
     public event Action<float> StopRoundMeter;
 
     [Header("User Ids")]
@@ -104,7 +104,6 @@ public class Player : NetworkBehaviour
         m_playerCircle = GetComponentInChildren<SpriteRenderer>();
         m_center = transform.Find("Center").gameObject;
         m_movement = GetComponent<Movement>();
-
         props.isRightHanded = true;
     }
 
@@ -320,14 +319,6 @@ public class Player : NetworkBehaviour
 
     }
 
-    public void CallForBall()
-    {
-        if (IsOwner)
-        {
-            GameManager.Instance.ballController.PlayerCallForBallServerRpc(NetworkObjectId);
-        }
-    }
-
     [ClientRpc]
     public void TriggerRoundShotMeterClientRpc(float speed, float difficulty, ClientRpcParams clientRpcParams = default)
     {
@@ -511,30 +502,6 @@ public class Player : NetworkBehaviour
         return Mathf.Clamp(1 - teamid, 0, 1);
     }
 
-    public void ReadPlayerFromServer(Stream stream)
-    {
-        using (PooledNetworkReader reader = PooledNetworkReader.Get(stream))
-        {
-            // THIS CURRENT ISNT UPDATED BECAUSE LOOP NEVER SENDS
-            props.isInsideThree = reader.ReadBool();
-            props.isInbounds = reader.ReadBool();
-            //HasBall = reader.ReadBool();
-        }
-    }
-
-    public void SetReadyStatus(bool state)
-    {
-        hasReadyUp = state;
-        ServerReadyUpServerRpc(hasReadyUp);
-    }
-
-    [ServerRpc]
-    public void ServerReadyUpServerRpc(bool isReady)
-    {
-        this.hasReadyUp = isReady;
-    }
-
-
     [ServerRpc]
     public void SendIdsServerRpc(ulong steamId, int cid, ServerRpcParams serverRpcParams = default)
     {
@@ -561,5 +528,15 @@ public class Player : NetworkBehaviour
     public void ServerSendPlayerClientRpc(PlayerProperties props, ClientRpcParams clientRpcParams = default)
     {
         this.props = props;
+    }
+
+    public bool CanDoBallAction()
+    {
+        return IsOwner && clientControlsEnabled && HasBall;
+    }
+
+    public bool CanDoAction()
+    {
+        return IsOwner && clientControlsEnabled;
     }
 }

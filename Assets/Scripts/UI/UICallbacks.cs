@@ -1,23 +1,24 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class UICallbacks : MonoBehaviour
 {
-    // Start is called before the first frame update
+
+    private Player m_player;
+    private ClientNetworkHandler m_networkHandler;
+
     void Start()
     {
-        
+        ClientPlayer.Instance.Initilized += OnClientInitilized;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnClientInitilized(Player player, ClientNetworkHandler networkHandler)
     {
-        
+        m_player = player;
+        m_networkHandler = networkHandler;
     }
 
-    public static void PlayerReadyUp()
+    public void PlayerReadyUp()
     {
-        GameManager.GetPlayer().SetReadyStatus(true);
+        m_networkHandler.SetReadyStatus();
     }
 }
