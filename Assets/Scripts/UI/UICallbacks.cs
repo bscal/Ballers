@@ -19,6 +19,7 @@ public class UICallbacks : MonoBehaviour
 
     public void PlayerReadyUp()
     {
-        m_networkHandler.SetReadyStatus();
+        if (m_networkHandler)
+            m_networkHandler.SetReadyStatus();
     }
 }

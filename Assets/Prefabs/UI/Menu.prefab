@@ -783,6 +783,7 @@ GameObject:
   - component: {fileID: 6556809553552432296}
   - component: {fileID: 6556809553552432302}
   - component: {fileID: 6556809553552432303}
+  - component: {fileID: 5785642847483894120}
   m_Layer: 5
   m_Name: Menu
   m_TagString: Untagged
@@ -854,6 +855,18 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &5785642847483894120
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6556809553552432297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c490bc4601a4264cb9f8c6e3fe494f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6556809553563498615
 GameObject:
   m_ObjectHideFlags: 0
@@ -1140,7 +1153,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 5785642847483894120}
         m_TargetAssemblyTypeName: UICallbacks, Assembly-CSharp
         m_MethodName: PlayerReadyUp
         m_Mode: 1
