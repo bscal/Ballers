@@ -47,7 +47,11 @@ obj/
 *.svd
 .vs/
 
-
+# =========================
+# Rider files
+# =========================
+*.idea/
+UserSettings/
 
 # =========================
 # Operating System Files
