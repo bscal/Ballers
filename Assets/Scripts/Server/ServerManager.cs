@@ -89,7 +89,8 @@ public class ServerManager : NetworkBehaviour
         {
             if (m_startupState == STATE_NONE)
                 return;
-            else if (m_startupState == STATE_JOINING && HaveAllPlayersJoined())
+            
+            if (m_startupState == STATE_JOINING && HaveAllPlayersJoined())
             {
                 print("joined");
                 m_startupState = STATE_ENTERING;

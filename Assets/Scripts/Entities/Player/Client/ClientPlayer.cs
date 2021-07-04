@@ -32,7 +32,7 @@ public class ClientPlayer : MonoBehaviour
     public void Initilize(Player player, ClientNetworkHandler networkHandler)
     {
         localPlayer = player;
-        Initilized.Invoke(player, networkHandler);
+        Initilized?.Invoke(player, networkHandler);
     }
 
     // This is cached character data. Can be used server or client side.

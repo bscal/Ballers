@@ -133,7 +133,6 @@ public class BallController : NetworkBehaviour
         }
         if (IsClient)
         {
-            print(GameManager.Instance);
             GameManager.Instance.ball = gameObject;
             GameManager.Instance.ballController = this;
         }

@@ -48,10 +48,13 @@ public class Player : NetworkBehaviour
     public BoxCollider playerCollider;
 
     [Header("Player Componenets")]
-    public PlayerAnimHandler animHandler;
     public PlayerControls playerControls;
     public ClientNetworkHandler clientNetwork;
     public bool clientControlsEnabled;
+    
+    [Header("Hands")]
+    public GameObject m_rightHand;
+    public GameObject m_leftHand;
 
     public int OtherTeam { get { return FlipTeamID(props.teamID); } }
     /// <summary>
@@ -88,13 +91,13 @@ public class Player : NetworkBehaviour
     private GameObject m_center;
     private ShotMeter m_shotmeter;
     private RoundShotMeter m_roundShotMeter;
+    [SerializeField]
     private Animator m_animator;
+    [SerializeField]
     private PlayerAnimHandler m_animHandler;
     private Movement m_movement;
     private ShotManager m_shotManager;
     private SpriteRenderer m_playerCircle;
-    private GameObject m_rightHand;
-    private GameObject m_leftHand;
     public Vector3 rightPos = Vector3.zero;
     public Vector3 leftPos = Vector3.zero;
 
@@ -158,12 +161,12 @@ public class Player : NetworkBehaviour
     /// </summary>
     public void InitilizeModel()
     {
-        m_animator = GetComponentInChildren<Animator>();
-        m_animHandler = GetComponent<PlayerAnimHandler>();
-        m_animHandler.SetAnimator(m_animator);
+        //m_animator = GetComponentInChildren<Animator>();
+        //m_animHandler = GetComponent<PlayerAnimHandler>();
+        //m_animHandler.SetAnimator(m_animator);
 
-        m_rightHand = FindTransformInChild(transform, "RightBallPos").gameObject;
-        m_leftHand = FindTransformInChild(transform, "LeftBallPos").gameObject;
+        //m_rightHand = FindTransformInChild(transform, "RightBallPos").gameObject;
+        //m_leftHand = FindTransformInChild(transform, "LeftBallPos").gameObject;
 
         if (IsOwner)
         {
@@ -190,7 +193,7 @@ public class Player : NetworkBehaviour
         GameManager.Instance.GameStartedClient += OnGameStarted;
         GameObject prefab = ServerManager.PrefabFromTeamID(props.teamID);
         print($"Client {OwnerClientId} | {NetworkObjectId} model = {prefab.name}");
-        Instantiate(prefab, gameObject.transform);
+        //Instantiate(prefab, gameObject.transform);
         InitilizeModel();
         hasEnteredGame = true;
         m_shotManager = GameObject.Find("GameManager").GetComponent<ShotManager>();
@@ -363,7 +366,7 @@ public class Player : NetworkBehaviour
 
     public void Jump()
     {
-        m_animHandler.Play(AnimNames.REBOUND);
+        m_animHandler.Play(AnimNames.JUMP);
     }
 
     public void Block() { }

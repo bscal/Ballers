@@ -1,34 +1,32 @@
 ﻿using UnityEngine;
 using UnityEngine.Assertions;
 
-/// <summary>
-/// Any animations that starts with player@ is an animations that is duplicated and edited in unity.
-/// </summary>
 public static class AnimNames
 {
-    public const string IDLE = "player@idle";
-    public const string WALK = "player@walk";
-    public const string JOG = "player@jog";
-    public const string RUN = "player@run";
+    public static readonly int IDLE = Animator.StringToHash("Armature|idle");
+    public static readonly int WALK = Animator.StringToHash("Armature|walk");
+    public static readonly int JOG = Animator.StringToHash("Armature|jog");
+    public static readonly int SPRINT = Animator.StringToHash("Armature|sprint");
+    public static readonly int JUMP = Animator.StringToHash("Armature|jump");
 
-    public const string IDLE_DRIB = "player@idle_dribble";
-    public const string WALK_DRIB = "player@walk_dribble";
-    public const string JOG_DRIB = "player@jog_dribble";
-    public const string RUN_DRIB = "player@run_dribble";
+    public static readonly int IDLE_DRIBBLE = Animator.StringToHash("Armature|idle_dribble");
+    public static readonly int WALK_DRIBBLE = Animator.StringToHash("Armature|walk_dribble");
+    public static readonly int JOG_DRIBBLE = Animator.StringToHash("Armature|jog_dribble");
+    public static readonly int SPRINT_DRIBBLE = Animator.StringToHash("Armature|sprint_dribble");
 
-    public const string REG_PUMPFAKE = "player@reg_pumpfake";
-    public const string REG_JUMPSHOT = "player@reg_jumpshot";
+    public static readonly int REG_PUMPFAKE = Animator.StringToHash("Armature|reg_pumpfake");
+    public static readonly int REG_JUMPSHOT = Animator.StringToHash("Armature|reg_standing_shot");
 
-    public const string REBOUND = "player@rebound";
-    public const string STRAFE_RIGHT = "player@strafe_right";
-    public const string STRAFE_LEFT = "player@strafe_left";
-    public const string STRAFE_DRIBBLE_RIGHT = "player@strafe_dribble_right";
-    public const string STRAFE_DRIBBLE_LEFT = "player@strafe_dribble_left";
-    public const string BACKPEDDLE = "player@backpeddle";
-    public const string BACKPEDDLE_BALL = "player@backpeddle_dribble";
-    public const string TRIPLE_THREAT = "player@triple_threat";
-    public const string TRIPLE_THREAT_UP = "player@triple_threat_up";
-    public const string TRIPLE_THREAT_DOWN = "player@triple_threat_down";
+    public static readonly int ILDE_TRIPLE_THREAT = Animator.StringToHash("Armature|idle_triple_threat");
+    
+    public static readonly int STRAFE_DRIBBLE_RIGHT = Animator.StringToHash("Armature|strafe_right");
+    public static readonly int STRAFE_DRIBBLE_LEFT = Animator.StringToHash("Armature|strafe_left");
+    
+    //public const string REBOUND = "player@rebound";
+    //public const string STRAFE_RIGHT = "player@strafe_right";
+    //public const string STRAFE_LEFT = "player@strafe_left";
+    //public const string BACKPEDDLE = "player@backpeddle";
+    //public const string BACKPEDDLE_BALL = "player@backpeddle_dribble";
 
 
     // TODO
@@ -47,26 +45,25 @@ public static class AnimNames
 
 public class PlayerAnimHandler : MonoBehaviour
 {
-    private Player m_player;
-    private Animator m_animator;
+    [SerializeField]
+    public Player m_player;
+    [SerializeField]
+    public Animator m_animator;
 
-    private string m_curState = "";
-    private string m_newState;
+    private int m_curAnimHash = -1;
+    private int m_newAnimHash;
     private bool m_override = false;
-
-    void Awake()
-    {
-        m_player = GetComponent<Player>();
-        Assert.IsNotNull(m_player);
-    }
-
+    
     private void Update()
     {
-        if ((m_override && m_animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f) || !m_player.hasEnteredGame || !GameManager.Instance.isReady)
+        if (!m_player.clientControlsEnabled || !m_player.IsOwner)
+            return;
+
+        if (m_animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f)
             return;
 
         m_override = false;
-        m_newState = null;
+        m_newAnimHash = -1;
 
         if (m_player.props.isMoving)
         {
@@ -75,50 +72,47 @@ public class PlayerAnimHandler : MonoBehaviour
                 if (m_player.props.movingFoward)
                 {
                     if (m_player.props.isDribbling)
-                        TryNewState(AnimNames.JOG_DRIB);
+                        Play(AnimNames.JOG_DRIBBLE);
                     else
-                        TryNewState(AnimNames.JOG);
+                        Play(AnimNames.JOG);
                 }
                 else if (m_player.props.movingBack)
                 {
-                    if (m_player.props.isDribbling)
-                        TryNewState(AnimNames.BACKPEDDLE_BALL);
-                    else
-                        TryNewState(AnimNames.BACKPEDDLE);
+                    //if (m_player.props.isDribbling)
+                        //Play(AnimNames.BACKPEDDLE_BALL);
+                    //else
+                        //Play(AnimNames.BACKPEDDLE);
                 }
                 if (m_player.props.movingLeft)
                 {
                     if (m_player.props.isDribbling)
-                        TryNewState(AnimNames.STRAFE_DRIBBLE_LEFT);
+                        Play(AnimNames.STRAFE_DRIBBLE_LEFT);
                     else
-                        TryNewState(AnimNames.STRAFE_LEFT);
+                        Play(AnimNames.STRAFE_DRIBBLE_LEFT);
                 }
                 else if (m_player.props.movingRight)
                 {
                     if (m_player.props.isDribbling)
-                        TryNewState(AnimNames.STRAFE_DRIBBLE_RIGHT);
+                        Play(AnimNames.STRAFE_DRIBBLE_RIGHT);
                     else
-                        TryNewState(AnimNames.STRAFE_RIGHT);
+                        Play(AnimNames.STRAFE_DRIBBLE_RIGHT);
                 }
             }
             else
             {
                 if (m_player.props.isDribbling)
-                    TryNewState(AnimNames.RUN_DRIB);
+                    Play(AnimNames.SPRINT_DRIBBLE);
                 else
-                    TryNewState(AnimNames.RUN);
+                    Play(AnimNames.SPRINT);
             }
         }
 
         if (m_player.props.isDribbling)
-            TryNewState(AnimNames.IDLE_DRIB);
+            Play(AnimNames.IDLE_DRIBBLE);
         else if (m_player.HasBall)
-            TryNewState(AnimNames.TRIPLE_THREAT);
+            Play(AnimNames.ILDE_TRIPLE_THREAT);
         else
-            TryNewState(AnimNames.IDLE);
-
-
-        ApplyState(m_newState);
+            Play(AnimNames.IDLE);
     }
 
     public void SetAnimator(Animator animator)
@@ -126,29 +120,23 @@ public class PlayerAnimHandler : MonoBehaviour
         m_animator = animator;
     }
 
-    public void Play(string state)
+    public void Play(string animName)
     {
-        if (m_curState == state)
+        Play(Animator.StringToHash(animName));
+    }
+    
+    public void Play(int animHash)
+    {
+        if (m_curAnimHash == animHash)
             return;
 
         m_override = true;
-        m_newState = state;
-        ApplyState(state);
+        m_curAnimHash = animHash;
+        m_animator.Play(animHash);
     }
 
-    private bool TryNewState(string state)
+    public Animator GetAnimator()
     {
-        if (string.IsNullOrEmpty(m_newState))
-        {
-            m_newState = state;
-            return true;
-        }
-        return false;
-    }
-
-    private void ApplyState(string state)
-    {
-        m_curState = state;
-        m_animator.Play(state);
+        return m_animator;
     }
 }
