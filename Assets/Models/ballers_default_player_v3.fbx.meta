@@ -114,8 +114,8 @@ ModelImporter:
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
+      loopTime: 1
+      loopBlend: 1
       loopBlendOrientation: 0
       loopBlendPositionY: 0
       loopBlendPositionXZ: 0
@@ -397,7 +397,7 @@ ModelImporter:
       takeName: Armature|strafe
       internalID: 0
       firstFrame: 0
-      lastFrame: 20
+      lastFrame: 18
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -753,7 +753,7 @@ ModelImporter:
     - name: upper_leg.l
       parentName: root
       position: {x: -0.001966962, y: -0.000044703465, z: -0.00015885862}
-      rotation: {x: -0.025061091, y: 0.01704239, z: 0.9995389, w: -0.0018780967}
+      rotation: {x: -0.02506109, y: 0.017042393, z: 0.9995389, w: -0.0018779635}
       scale: {x: 1.0000046, y: 1.0000004, z: 1.0003132}
     - name: root.003
       parentName: upper_leg.l
@@ -783,7 +783,7 @@ ModelImporter:
     - name: upper_leg.r
       parentName: root
       position: {x: 0.001966962, y: -0.000044703465, z: -0.00015885862}
-      rotation: {x: 0.025061177, y: 0.017041504, z: 0.9995389, w: 0.0018781174}
+      rotation: {x: 0.025061175, y: 0.017041506, z: 0.9995389, w: 0.0018779843}
       scale: {x: 1.0000046, y: 1.0000002, z: 1.0003132}
     - name: upper_leg.r.001
       parentName: upper_leg.r

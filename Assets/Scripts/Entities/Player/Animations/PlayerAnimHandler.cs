@@ -19,12 +19,12 @@ public static class AnimNames
 
     public static readonly int ILDE_TRIPLE_THREAT = Animator.StringToHash("Armature|idle_triple_threat");
     
+    public static readonly int STRAFE_RIGHT = Animator.StringToHash("Armature|strafe_right");
+    public static readonly int STRAFE_LEFT = Animator.StringToHash("Armature|strafe_left");
     public static readonly int STRAFE_DRIBBLE_RIGHT = Animator.StringToHash("Armature|strafe_right");
     public static readonly int STRAFE_DRIBBLE_LEFT = Animator.StringToHash("Armature|strafe_left");
     
     //public const string REBOUND = "player@rebound";
-    //public const string STRAFE_RIGHT = "player@strafe_right";
-    //public const string STRAFE_LEFT = "player@strafe_left";
     //public const string BACKPEDDLE = "player@backpeddle";
     //public const string BACKPEDDLE_BALL = "player@backpeddle_dribble";
 
@@ -86,16 +86,16 @@ public class PlayerAnimHandler : MonoBehaviour
                 if (m_player.props.movingLeft)
                 {
                     if (m_player.props.isDribbling)
-                        Play(AnimNames.STRAFE_DRIBBLE_LEFT);
+                        Play(AnimNames.STRAFE_LEFT);
                     else
-                        Play(AnimNames.STRAFE_DRIBBLE_LEFT);
+                        Play(AnimNames.STRAFE_LEFT);
                 }
                 else if (m_player.props.movingRight)
                 {
                     if (m_player.props.isDribbling)
-                        Play(AnimNames.STRAFE_DRIBBLE_RIGHT);
+                        Play(AnimNames.STRAFE_RIGHT);
                     else
-                        Play(AnimNames.STRAFE_DRIBBLE_RIGHT);
+                        Play(AnimNames.STRAFE_RIGHT);
                 }
             }
             else
