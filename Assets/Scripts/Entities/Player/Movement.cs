@@ -57,7 +57,12 @@ public class Movement : MonoBehaviour
 
     private void HandleTargetDirection()
     {
-        int possesion = GameManager.Instance.ballController.PossessionOrHome;
+        if (GameManager.Instance == null)
+            return;
+        if (GameManager.Instance.NetworkGameState.Value != GameManager.EGameState.STARTED)
+            return;
+
+        int possesion = GameManager.Instance.Possession;
         if (m_player.HasBall && possesion != -1)
         {
             m_targetDirection = GameManager.Instance.baskets[possesion].gameObject.transform.position - m_parent.transform.position;
@@ -68,7 +73,7 @@ public class Movement : MonoBehaviour
         }
         else
         {
-            m_targetDirection = GameManager.Instance.baskets[possesion].gameObject.transform.position - m_parent.transform.position;
+            m_targetDirection = GameManager.Instance.baskets[possesion == -1 ? 0 : possesion].gameObject.transform.position - m_parent.transform.position;
         }
     }
 

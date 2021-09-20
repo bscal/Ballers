@@ -92,7 +92,7 @@ public class BallController : NetworkBehaviour
 
     // =================================== Private ===================================
 
-    private Player m_currentPlayer;
+    private Player m_currentPlayer => GameManager.GetPlayerByNetworkID((PlayerWithBall == NO_PLAYER) ? 0 : PlayerWithBall);
     private GameObject m_ball;
     private Rigidbody m_body;
     private SphereCollider m_collider;
@@ -229,10 +229,11 @@ public class BallController : NetworkBehaviour
 
                 // Tells the ball which hand to be in.
                 // These should be ok to not be in FixedUpdate
-                if (m_currentPlayer.props.isBallInLeftHand)
-                    m_body.MovePosition(m_currentPlayer.leftPos);
-                else
-                    m_body.MovePosition(m_currentPlayer.rightPos);
+                /*                if (m_currentPlayer.props.isBallInLeftHand)
+                                    m_body.MovePosition(m_currentPlayer.leftPos);
+                                else
+                                    m_body.MovePosition(m_currentPlayer.rightPos);*/
+                m_body.MovePosition(GameManager.Instance.CurrentHand.Value);
             }
         }
     }
@@ -774,7 +775,6 @@ public class BallController : NetworkBehaviour
             }
             else
             {
-                m_currentPlayer = GameManager.GetPlayerByNetworkID(newNetworkID);
                 SetPlayerHandlerServer(m_currentPlayer.NetworkObjectId, true);
                 BallHandlerChange?.Invoke(PlayerLastPossesion, PlayerWithBall);
 

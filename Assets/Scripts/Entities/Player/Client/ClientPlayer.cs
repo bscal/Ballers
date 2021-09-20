@@ -53,6 +53,8 @@ public class ClientPlayer : MonoBehaviour
         if (SteamManager.Initialized)
             SteamID = SteamUser.GetSteamID().m_SteamID;
         gameObject.AddComponent(typeof(PlayerHandler));
+
+        CharData = new CharacterData();
     }
 
     void Start()

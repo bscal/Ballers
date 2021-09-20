@@ -15,6 +15,7 @@ Assets/Logs/
 Assets/Logs.meta
 bin/
 builds/
+*.log
 
 Assets/Plugins
 Assets/Plugins/Steamworks.NET

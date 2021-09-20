@@ -61,7 +61,7 @@ public class Player : NetworkBehaviour
     /// Returns true if Player is an AI or is a Dummy
     /// </summary>
     public bool IsNpc { get { return props.isAI || isDummy; } }
-    public bool HasBall { get { return NetworkObjectId == GameManager.Instance.ballController.PlayerWithBall; } }
+    public bool HasBall { get { return NetworkObjectId == GameManager.Instance.BallHandlerId.Value; } }
     public Vector3 RightHandPos { get { return m_rightHand.transform.position; } }
     public Vector3 LeftHandPos { get { return m_leftHand.transform.position; } }
     public Vector3 CurHandPos { get { return (props.isBallInLeftHand) ? LeftHandPos : RightHandPos; } }
@@ -134,6 +134,12 @@ public class Player : NetworkBehaviour
                 ServerSendPlayerClientRpc(props);
             }
         }
+
+        if (GameManager.Instance == null)
+            return;
+
+        if (GameManager.Instance.NetworkGameState.Value != GameManager.EGameState.STARTED)
+            return;
 
         if (isDummy || !hasEnteredGame || !GameManager.Instance.HasStarted) return;
 

@@ -51,19 +51,12 @@ public class PlayerAnimHandler : MonoBehaviour
     public Animator m_animator;
 
     private int m_curAnimHash = -1;
-    private int m_newAnimHash;
-    private bool m_override = false;
     
     private void Update()
     {
         if (!m_player.clientControlsEnabled || !m_player.IsOwner)
             return;
 
-        if (m_animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f)
-            return;
-
-        m_override = false;
-        m_newAnimHash = -1;
 
         if (m_player.props.isMoving)
         {
@@ -79,9 +72,9 @@ public class PlayerAnimHandler : MonoBehaviour
                 else if (m_player.props.movingBack)
                 {
                     //if (m_player.props.isDribbling)
-                        //Play(AnimNames.BACKPEDDLE_BALL);
+                    //Play(AnimNames.BACKPEDDLE_BALL);
                     //else
-                        //Play(AnimNames.BACKPEDDLE);
+                    //Play(AnimNames.BACKPEDDLE);
                 }
                 if (m_player.props.movingLeft)
                 {
@@ -106,13 +99,15 @@ public class PlayerAnimHandler : MonoBehaviour
                     Play(AnimNames.SPRINT);
             }
         }
-
-        if (m_player.props.isDribbling)
-            Play(AnimNames.IDLE_DRIBBLE);
-        else if (m_player.HasBall)
-            Play(AnimNames.ILDE_TRIPLE_THREAT);
         else
-            Play(AnimNames.IDLE);
+        {
+            if (m_player.props.isDribbling)
+                Play(AnimNames.IDLE_DRIBBLE);
+            else if (m_player.HasBall)
+                Play(AnimNames.ILDE_TRIPLE_THREAT);
+            else
+                Play(AnimNames.IDLE);
+        }
     }
 
     public void SetAnimator(Animator animator)
@@ -130,7 +125,6 @@ public class PlayerAnimHandler : MonoBehaviour
         if (m_curAnimHash == animHash)
             return;
 
-        m_override = true;
         m_curAnimHash = animHash;
         m_animator.Play(animHash);
     }

@@ -25,15 +25,19 @@ public class FocusCamera : MonoBehaviour
     void LateUpdate()
     {
         Player p = ClientPlayer.Instance.localPlayer;
-        if (p && p.clientControlsEnabled)
+        if (p && p.clientControlsEnabled && GameManager.Instance != null)
         {
-            if (m_lastPossession != GameManager.Instance.ballController.PossessionOrHome)
+            if (m_lastPossession != (int)GameManager.Instance.TeamWithPossession.Value)
             {
-                // Sets basket based on which team has possession of ball
-                basket = GameManager.Instance.baskets[GameManager.Instance.ballController.PossessionOrHome].gameObject;
                 // Does the camera need to rotate?
                 m_isRotating = true;
             }
+
+            int basketId = (int)GameManager.Instance.TeamWithPossession.Value;
+            if (basketId == -1)
+                basketId = 0;
+            
+            basket = GameManager.Instance.baskets[basketId].gameObject;
 
             if (m_isRotating)
             {
@@ -47,9 +51,9 @@ public class FocusCamera : MonoBehaviour
             Transform playerTransform = p.transform;
             // Handles settings of position and applying proper offset
             float dist = Vector3.Distance(basket.transform.position, playerTransform.position) * .4f;
-            target.Set(0, 10, (GameManager.Instance.ballController.PossessionOrHome == 0) ? -dist : dist);
+            target.Set(0, 10, (basketId == 0) ? -dist : dist);
             cam.transform.position = Vector3.Lerp(cam.transform.position, target, 1.5f * Time.deltaTime);
-            target = playerTransform.position + basket.transform.position + GameManager.Instance.ball.transform.position;
+            target = playerTransform.position + basket.transform.position + GameManager.Instance.BallPosition.Value;
         }
     }
 }

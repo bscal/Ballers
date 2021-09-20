@@ -39,7 +39,7 @@ public struct PlayerProperties : INetworkSerializable
         serializer.Serialize(ref isAI);
         serializer.Serialize(ref target);
         serializer.Serialize(ref isRightHanded);
-        serializer.Serialize(ref isMoving);
+        //serializer.Serialize(ref isMoving);
         serializer.Serialize(ref isSprinting);
         serializer.Serialize(ref isScreening);
         serializer.Serialize(ref isHardScreening);

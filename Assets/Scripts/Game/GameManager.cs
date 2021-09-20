@@ -1,5 +1,6 @@
 using MLAPI;
 using MLAPI.Messaging;
+using MLAPI.NetworkVariable;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,9 +29,25 @@ public class GameManager : NetworkBehaviour
     private readonly static List<BasicDummy> Dummies = new List<BasicDummy>();
     private readonly static List<AIPlayer> AIs = new List<AIPlayer>();
 
-    public Player BallHandler { get { return GetPlayerByNetworkID(ballController.PlayerWithBall); } }
-    public Basket CurrentBasket { get { return Instance.baskets[ballController.PossessionOrHome]; } }
-    public int Possession { get { return ballController.PossessionOrHome; } }
+    public enum EGameState
+    {
+        UNKNOWN,
+        STARTING,
+        STARTED,
+        PAUSED,
+        SHUTING_DOWN,
+        SHUT_DOWN
+    }
+
+    public NetworkVariable<ulong> BallHandlerId = new NetworkVariable<ulong>(new NetworkVariableSettings {WritePermission = NetworkVariablePermission.ServerOnly }, 0);
+    public NetworkVariable<TeamType> TeamWithPossession = new NetworkVariable<TeamType>(new NetworkVariableSettings { WritePermission = NetworkVariablePermission.ServerOnly }, TeamType.HOME);
+    public NetworkVariable<EGameState> NetworkGameState = new NetworkVariable<EGameState>(new NetworkVariableSettings { WritePermission = NetworkVariablePermission.ServerOnly }, EGameState.UNKNOWN);
+    public NetworkVariableVector3 BallPosition = new NetworkVariableVector3(new NetworkVariableSettings { WritePermission = NetworkVariablePermission.ServerOnly }, Vector3.zero);
+    public NetworkVariableVector3 CurrentHand = new NetworkVariableVector3(new NetworkVariableSettings { WritePermission = NetworkVariablePermission.Everyone, SendTickrate = 0 }, Vector3.zero);
+
+    public Player BallHandler { get { return GetPlayerByNetworkID(BallHandlerId.Value); } }
+    public Basket CurrentBasket { get { return Instance.baskets[Possession]; } }
+    public int Possession { get { return (int)TeamWithPossession.Value == -1 ? 0 : (int)TeamWithPossession.Value; } }
     public MatchTeam TeamHome { get { return Match.matchTeams[0]; } }
     public MatchTeam TeamAway { get { return Match.matchTeams[1]; } }
     public bool HasStarted => Match.HasGameStarted;
@@ -113,6 +130,7 @@ public class GameManager : NetworkBehaviour
     {
         isReady = true;
         FullStartClientRpc();
+        NetworkGameState.Value = EGameState.STARTED;
     }
 
     [ClientRpc]
@@ -124,7 +142,27 @@ public class GameManager : NetworkBehaviour
 
     void Update()
     {
+        if (IsServer)
+        {
+            NetworkGameState.SetDirty(true);
+            BallPosition.Value = ball.transform.position;
+            if (BallHandlerId.Value != ballController.PlayerWithBall)
+            {
+                BallHandlerId.Value = ballController.PlayerWithBall;
+            }
 
+            if ((int)TeamWithPossession.Value != ballController.Possession)
+            {
+                TeamWithPossession.Value = (TeamType)ballController.Possession;
+            }
+        }
+
+        if (IsClient && ClientPlayer.Instance.localPlayer.NetworkObjectId == BallHandlerId.Value)
+        {
+            Player player = ClientPlayer.Instance.localPlayer;
+            CurrentHand.Value = (player.props.isBallInLeftHand) ? player.LeftHandPos : player.RightHandPos;
+            CurrentHand.SetDirty(true);
+        }
     }
 
     public void BeginPregame()
@@ -403,17 +441,5 @@ public class GameManager : NetworkBehaviour
         Match.HasGameStarted = state.HasStarted;
         ballController.PlayerWithBall = state.PlayerWithBall;
         ballController.Possession = state.TeamWithPossession;
-    }
-
-
-    [ClientRpc]
-    public void ClientSyncTeamSlotsClientRpc()
-    {
-        //using (PooledNetworkReader reader = PooledNetworkReader.Get(stream))
-        //{
-        //    int teamid = reader.ReadInt32Packed();
-        //    int count = reader.ReadInt32Packed();
-        //    teams[teamid].ReadSyncTeamSlots(reader, count);
-        //}
     }
 }
